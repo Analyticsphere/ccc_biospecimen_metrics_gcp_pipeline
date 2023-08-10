@@ -27,11 +27,11 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
                googleCloudStorageR data.table reshape listr ggplot2 \
                RColorBrewer stringr janitor expss magrittr arsenal rio \
                finalfit sqldf gmodels glue webshot2 cowplot crosstable \
-               magrittr gmodels magick summarytools gargle tools 
+               magrittr gmodels magick gargle tools 
               
 
 # These libraries might not be available from install2.R so use CRAN
-RUN R -e "install.packages(c('gt'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages(c('gt','summarytools'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
 
 # When I try to use kable extra with a normal installation from CRAN or install2.r
 # I get the error:
