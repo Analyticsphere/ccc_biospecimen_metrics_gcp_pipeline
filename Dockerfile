@@ -27,7 +27,7 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
                googleCloudStorageR data.table reshape listr ggplot2 \
                RColorBrewer stringr janitor expss magrittr arsenal rio \
                finalfit sqldf gmodels glue webshot2 cowplot crosstable \
-               magrittr gmodels summarytools gargle tools 
+               magrittr gmodels magick summarytools gargle tools 
               
 
 # These libraries might not be available from install2.R so use CRAN
