@@ -31,7 +31,7 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
               
 
 # These libraries might not be available from install2.R so use CRAN
-RUN R -e "install.packages(c('gt','summarytools'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
+RUN R -e "install.packages(c('gt'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
 
 # When I try to use kable extra with a normal installation from CRAN or install2.r
 # I get the error:
@@ -42,6 +42,7 @@ RUN R -e "install.packages(c('gt','summarytools'), dependencies=TRUE, repos='htt
 # The solution is to install a patched version from github
 # https://github.com/haozhu233/kableExtra/issues/750
 RUN R -e "devtools::install_github('kupietz/kableExtra')"
+RUN R -e "devtools::install_github('dcomtois/summarytools')"
 
 # Copy R code to directory in instance
 COPY ["./ccc_biospecimen_metrics_api.R", "./ccc_biospecimen_metrics_api.R"]
