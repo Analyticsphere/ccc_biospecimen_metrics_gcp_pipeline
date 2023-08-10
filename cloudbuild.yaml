@@ -5,7 +5,6 @@ steps:
  # Build the container image
  - name: 'gcr.io/cloud-builders/docker'
    args: ['build','-t', 'gcr.io/nih-nci-dceg-connect-prod-6d04/ccc-biospecimen-metrics:$COMMIT_SHA', '.']
-   dir: 'prod'
    timeout: 1200s
    
  # Push the container image to Container Registry
