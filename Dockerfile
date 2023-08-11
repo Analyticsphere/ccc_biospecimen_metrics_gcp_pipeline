@@ -10,6 +10,7 @@ ENV PATH="$PATH:/root/bin:/usr/local/lib"
 # Reference: https://github.com/csdaw/rmarkdown-tinytex/blob/master/Dockerfile
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+    libmagick++-dev \ 
     wget \
     graphviz \ 
     imagemagick \
@@ -17,8 +18,7 @@ RUN apt-get update \
     /rocker_scripts/install_pandoc.sh && \
     install2.r rmarkdown 
 
-# This is required to use summary tools
-RUN sudo apt install libmagick++-dev
+
 
 # Install tinytex
 # RUN Rscript -e 'tinytex::install_tinytex()'
