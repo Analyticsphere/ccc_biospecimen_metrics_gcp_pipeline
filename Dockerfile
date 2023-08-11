@@ -10,7 +10,6 @@ ENV PATH="$PATH:/root/bin:/usr/local/lib"
 # Reference: https://github.com/csdaw/rmarkdown-tinytex/blob/master/Dockerfile
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    tcl \
     libmagick++-dev \ 
     wget \
     graphviz \ 
@@ -24,6 +23,9 @@ RUN apt-get update \
 # Install tinytex
 # RUN Rscript -e 'tinytex::install_tinytex()'
 RUN Rscript -e 'tinytex::install_tinytex(repository = "illinois")'
+
+# Needed for summarytools namespace
+RUN Rscript -e 'install.packages("tcltk")'
 
 # Install R libraries
 RUN install2.r --error plumber gridExtra bigrquery dplyr \
