@@ -1183,7 +1183,7 @@ bldcol_research_HF2$BloodCompletion[3] <- paste0(bldcol_research_HF2$BloodComple
 bldcol_research_HF2$Partial <- list("0 (0%)", "0 (0%)","0 (0%)", 0)
 bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)", 0)
 
-View(bldcol_research_HF2)
+# View(bldcol_research_HF2) # You can't use this on GCP!!!
 
 bldcol_research_HF2 <- bldcol_research_HF2[, c(5,1,6,7, 2)]
           
