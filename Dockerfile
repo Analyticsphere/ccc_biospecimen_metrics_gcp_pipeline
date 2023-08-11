@@ -10,6 +10,7 @@ ENV PATH="$PATH:/root/bin:/usr/local/lib"
 # Reference: https://github.com/csdaw/rmarkdown-tinytex/blob/master/Dockerfile
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+    tcl \
     libmagick++-dev \ 
     wget \
     graphviz \ 
