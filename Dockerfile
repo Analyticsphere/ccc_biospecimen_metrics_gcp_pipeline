@@ -17,6 +17,9 @@ RUN apt-get update \
     /rocker_scripts/install_pandoc.sh && \
     install2.r rmarkdown 
 
+# This is required to use summary tools
+RUN sudo apt install libmagick++-dev
+
 # Install tinytex
 # RUN Rscript -e 'tinytex::install_tinytex()'
 RUN Rscript -e 'tinytex::install_tinytex(repository = "illinois")'
