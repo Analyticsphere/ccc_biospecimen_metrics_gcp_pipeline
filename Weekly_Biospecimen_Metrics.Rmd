@@ -3918,6 +3918,7 @@ research.survey.hybrid<-research.survey.hybrid %>% mutate(#weekday = weekdays(ym
                                                       d_951355211==145191545 ~ "Ingalls Harvey",
                                                       d_951355211==489380324 ~ "River East",
                                                       d_951355211==120264574 ~ "South Loop",
+                                                      d_951355211==834825425 ~ "HP Research Clinic",
                                                       d_951355211==736183094 ~ "HFH K-13 Research Clinic",
                                                       d_951355211==886364332 ~ "HFH Cancer Pavilion Research Clinic",
                                                       d_951355211==706927479 ~ "HFH Livonia Research Clinic",
@@ -3943,7 +3944,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
    #research.vt_plH= visit_wk_site %>%  filter( Site=="Henry Ford Health System")
  research.vt_plotH <- ggplot(visit_wk_site.hybrid, aes(x=as.Date(visit.wkdate), y=n, color=Setting )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
-   scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
+   scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 3. Weekly Biospecimen Collections at Henry Ford") +
@@ -3961,7 +3962,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
  edited_fig3_1 <-  visit_wk_site.hybrid %>%  filter(Site_location!="Hybrid")
   research.vt_plotH <- ggplot(edited_fig3_1, aes(x=as.Date(visit.wkdate), y=n, color=Site_location )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
-   scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
+   scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 3.1 Weekly Biospecimen Collections at \n Henry Ford Locations") +
@@ -4037,7 +4038,8 @@ research.surveyVW <- research.survey %>%  select(Site, Connect_ID, visit.wk,visi
                                                       d_951355211==261931804 ~ "Minocqua",
                                                       d_951355211==665277300 ~ "Merrill",
                                                       d_951355211==589224449 ~ "Sioux Falls Imagenetics",
-                                                      d_951355211==467088902 ~ "Fargo South University") )
+                                                      d_951355211==467088902 ~ "Fargo South University",
+                                                      d_951355211==834825425 ~ "HP Research Clinic") )
  
 visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.wkdate) %>% group_by(Site_location, Site,visit.wk,visit.wkdate) %>% tally()
 
@@ -4048,10 +4050,11 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
 #- SANFORD = 589224449, 467088902
  
  
- research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
- research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+   research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
+ research.vt_plUC <- research.vt_plUC %>% group_by(visit.wkdate) %>% mutate(total_collections = sum(n))
+ research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(visit.wkdate), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
-   scale_y_continuous(name="# Number Collections", limits=c(0,40), breaks=seq(0,40,5)) +
+   scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 4. Weekly Biospecimen Collections at \n University of Chicago Medicine") +
@@ -4063,12 +4066,11 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
          axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
          plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
  print(research.vt_plotUC)
- 
- 
+
  research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
  research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
-   scale_y_continuous(name="# Number Collections", limits=c(0,40), breaks=seq(0,40,5)) +
+   scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 4.1 Weekly Biospecimen Collections at \n University of Chicago Medicine Locations") +
@@ -4086,26 +4088,12 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  
  
  
- research.vt_plMF= visit_wk_site_edited %>%  filter( Site=="Marshfield Clinic Health System")
- research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
-   geom_line() + geom_point(width = 0.2) +
-   scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
-   scale_fill_brewer(palette="Dark2") +
-   ggtitle(label="Fig 5. Weekly Biospecimen Collections at \n Marshfield Clinic Health System") +
-   #theme_ipsum() +
-   theme(panel.background = element_blank(),
-         #legend.title = element_text(size=7),
-         axis.line = element_line(size=0.2),
-         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
-         axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
-         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
- print(research.vt_plotMF)
- 
   research.vt_plMF= visit_wk_site_edited %>%  filter( Site=="Marshfield Clinic Health System")
- research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(visit.wkdate), y=n,fill=Site, color=Site)) +   #research.vt <-    ,fill=Site, color=Site
+ research.vt_plMF <- research.vt_plMF %>% group_by(visit.wkdate) %>% mutate(total_collections = sum(n))
+ 
+ research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(visit.wkdate), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
-   scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
+   scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 5. Weekly Biospecimen Collections at \n Marshfield Clinic Health System") +
@@ -4117,6 +4105,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
          axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
          plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
  print(research.vt_plotMF)
+
  
  
   research.vt_plMF= visit_wk_site_edited %>%  filter( Site=="Marshfield Clinic Health System")
@@ -4148,7 +4137,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
 research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
+  scale_y_continuous(name="# Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 6. Weekly Biospecimen Collections at Sanford Health") +
@@ -4165,7 +4154,7 @@ print(research.vt_plotSH)
 research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
 research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
+  scale_y_continuous(name="# Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 6.1 Weekly Biospecimen Collections at Sanford Health Locations") +
@@ -4374,10 +4363,7 @@ box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_Mod
                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
 box1 <- box1[, c(1:8, 10:21)]
 #View(box1)
-write.csv(box1,paste("Formatted_prod_flatBoxes_JP_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
-
-
-
+write.csv(box1,paste("C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/Formatted_prod_flatBoxes_JP_",currentDate,".csv",sep=""),row.names = F,na="")
 
 
 
@@ -4471,7 +4457,7 @@ biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:16
 
 biospe1_fin= subset(biospe1_final, select=-c(BioClin_DBBloodRRL_v1r0, BioClin_DBBloodRRLDt_v1r0, BioClin_DBUrineRRLDt_v1r0))
 
-write.csv(biospe1_fin,paste("Connect_prod_Biospe_Formats_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+write.csv(biospe1_fin,paste("C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/Connect_prod_Biospe_Formats",currentDate,".csv",sep="_"),row.names = F,na="")
 
 
 
@@ -4522,7 +4508,7 @@ for (i in 1:length(yes_no)){
   recrbio1 <-   cbind(recrbio1,subset(check,select=varname))
 }
 
-write.csv(recrbio1,paste("Connect_prod_recr_veriBiospe_Formats_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+write.csv(recrbio1,paste("C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/Connect_prod_recr_veriBiospe_Formats_",currentDate,".csv",sep=""),row.names = F,na="")
 
 
 
@@ -4632,7 +4618,7 @@ coordination=coord_csv %>%  select(RcrtV_VerificationTm_V1R0, BioRec_CollectFina
 #View(coordination)
 
 
-write.csv(coordination,paste("Biospecimen_Coordinating_Table_One_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+write.csv(coordination,paste("C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/Biospecimen_Coordinating_Table_One",currentDate,".csv",sep="_"),row.names = F,na="")
 
 
 
@@ -4663,7 +4649,7 @@ box_table2 <- box_table2[!duplicated(box_table2$BioPack_TrackScan1_v1r0), ]
 box_table2 <- box_table2 %>%  select(BioShip_ShipTime_v1r0, BioPack_TrackScan1_v1r0, BioSpm_Setting_v1r0, BioShip_LogSite_v1r0, BioShip_LocalID_v1r0, Boxes_Recvd_in_Good_Condition, BioCol_0008_Assigned, BioCol_0009_Assigned)  %>%  group_by(BioShip_LocalID_v1r0)
 #View(box_table2)
 
-write.csv(box_table2,paste("Biospecimen_Coordinating_Table_Two_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+write.csv(box_table2,paste("C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/Biospecimen_Coordinating_Table_Two",currentDate,".csv",sep="_"),row.names = F,na="")
 
 
 
