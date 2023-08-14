@@ -4385,7 +4385,8 @@ factor_cid <-function(var,data){
 bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
 biospe2 <- bq_table_download(bio_tb2,bigint="integer64")
 
-biospe2$d_646899796 <- biospe2$d_646899796_integer
+biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
+biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
 
 cnames <- names(biospe2)
 for (i in 1: length(cnames)){
