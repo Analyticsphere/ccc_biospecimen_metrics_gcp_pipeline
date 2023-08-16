@@ -393,12 +393,12 @@ biosettings[4,c(1:4)] <- c("0", "Home",  "0", "0")
 biosettings[1,4] <- "0"
 biosettings <- biosettings[order(biosettings$Setting),c(2,1,3,4)] 
 colnames(biosettings)[2:4] <- gsub("n_","",colnames(biosettings)[2:4])
-#View(biosettings)
+
 
 bioset <- biosettings
 
 
-#View(bioset)
+
 
 a5<- round(as.numeric(as.character(bioset[1,2]))/ as.numeric(as.character(bioset[4,2])), digits=3)*100
 b5 <- round(as.numeric(as.character(bioset[1,3]))/ as.numeric(as.character(bioset[4,3])), digits=3)*100
@@ -426,7 +426,6 @@ bioset[4,3] <- paste0(bioset[4,3], " (100%)")
 bioset[4,4] <- paste0(bioset[4,4], " (100%)")
 
 
-#View(biocol)
 
 
 
@@ -451,12 +450,12 @@ biosettings5_1[4,c(1:4)] <- c("0", "Home",  "0", "0")
 biosettings5_1[1,4] <- "0"
 biosettings5_1 <- biosettings5_1[order(biosettings5_1$Setting),c(2,1,3,4)]
 colnames(biosettings5_1)[2:4] <- gsub("n_","",colnames(biosettings5_1)[2:4])
-#View(biosettings5_1)
+
 
 bioset5_1 <- biosettings5_1
 
 
-#View(bioset5_1)
+
 
 a5<- round(as.numeric(as.character(bioset5_1[1,2]))/ as.numeric(as.character(bioset5_1[4,2])), digits=3)*100
 b5 <- round(as.numeric(as.character(bioset5_1[1,3]))/ as.numeric(as.character(bioset5_1[4,3])), digits=3)*100
@@ -482,15 +481,6 @@ bioset5_1[3,4]  <- paste0(bioset5_1[3,4], " (", i5, "%)")
 bioset5_1[4,2] <- paste0(bioset5_1[4,2] , " (100%)")
 bioset5_1[4,3] <- paste0(bioset5_1[4,3], " (100%)")
 bioset5_1[4,4] <- paste0(bioset5_1[4,4], " (100%)")
-
-
-#View(bioset5_1)
-
-
-
-
-
-
 
 
 
@@ -964,7 +954,7 @@ bldcol_research_HF2$BloodCompletion[3] <- paste0(bldcol_research_HF2$BloodComple
 bldcol_research_HF2$Partial <- list("0 (0%)", "0 (0%)","0 (0%)", 0)
 bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)", 0)
 
-View(bldcol_research_HF2)
+
 
 bldcol_research_HF2 <- bldcol_research_HF2[, c(5,1,6,7, 2)]
           
@@ -1558,7 +1548,7 @@ notcol_combo2 <- array(pct_n(clinic.ctable$t,clinic.ctable$prop.col), dim=c(5,12
   notcol_combo2$Site[is.na(notcol_combo2$Site)] <- replace_na("Total")  
   notcol_combo2 <- notcol_combo2[, c(13, 1:11)]
   #notcol_combo2[5,1] <- "Total"
-#View(notcol_combo2)   
+ 
  
 
 
@@ -2592,7 +2582,7 @@ Table29_bld_draw <- blood_placed %>% dplyr::select(KP_Site, bld_placed)  %>% tbl
   bold_labels() %>%
   #italicize_levels() %>% 
   modify_header() %>%
-  modify_caption("Table 27. Clinical Blood Draw Order Status Among Verified Participants") %>%
+  modify_caption("Table 29. Clinical Blood Draw Order Status Among Verified Participants") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
