@@ -19,16 +19,23 @@ function() {
   }
 
 #* Runs report
+#* @param usetestboxfolder:bool Whether or not to use a test box folder
 #* @get /run-ccc-biospecimen-metrics
 #* @post /run-ccc-biospecimen-metrics
-function() {
+function(usetestboxfolder = FALSE) {
     # Define parameters
+    if (usetestboxfolder) {
+      boxfolder <- "221458210866" # Test folder
+    } else {
+      boxfolder <- "204235111776" # PROD folder for Report PDF
+    }
+    Sys.setenv(USE_TEST_BOX_FOLDER = as.integer(usetestboxfolder))
+    
     rmd_file_name    <- "Weekly_Biospecimen_Metrics.Rmd"
-    report_file_name <- paste("Weekly_Biospecimen_Metrics_", 
-                              Sys.Date()-1,
-                              "_boxfolder_204235111776", 
-                              ".pdf", 
-                              sep="")
+    report_file_name <- glue("Weekly_Biospecimen_Metrics_", 
+                              {Sys.Date()-1},
+                              "_boxfolder_{boxfolder}", 
+                              ".pdf")
     bucket           <- "gs://ccc_weekly_metrics_report"
 
     # Authenticate to BigQuery
@@ -47,7 +54,11 @@ function() {
     # Loop through CSV and PDF files, write them to GCP Cloud Storage, and print their names
     filelist <- list.files(pattern = "*.csv$|*.pdf$")
     uploaded_files <- lapply(filelist, function(x) {
-      gcs_upload(x, bucket = bucket, name = x)
+      gcs_upload(x, 
+                 bucket = bucket, 
+                 name = x, 
+                 predefinedAcl = 'bucketLevel', 
+                 mime_type = "text/csv")
       print(paste("Uploaded file:", x))
       x  # Return the file name for further processing if needed
     })

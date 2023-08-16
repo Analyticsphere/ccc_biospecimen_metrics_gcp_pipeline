@@ -67,7 +67,23 @@ currentDate <- Sys.Date()
 
 bq_auth()
 
+### Set Box folders for output CSV files #######################################
+use_test_box_folder <- TRUE # Local user sets this (Jake or Kelsey)
 
+# Over-ride if using plumber api on GCP (USER DOESN'T TOUCH THIS!)
+# Check if the environment variable exists and is not empty
+if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
+    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
+  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
+}
+
+if (use_test_box_folder) {
+  boxfolder <- 221458210866 # test box folder
+} else {
+  boxfolder <- 221280601453 # destination of CSV files (not pdf)
+}
+
+################################################################################
 ```
 
 ```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
@@ -4374,7 +4390,9 @@ box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_Mod
                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
 box1 <- box1[, c(1:8, 10:21)]
 #View(box1)
-write.csv(box1,paste("Formatted_prod_flatBoxes_JP_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+
+
+write.csv(box1,glue("Formatted_prod_flatBoxes_JP_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
@@ -4471,7 +4489,8 @@ biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:16
 
 biospe1_fin= subset(biospe1_final, select=-c(BioClin_DBBloodRRL_v1r0, BioClin_DBBloodRRLDt_v1r0, BioClin_DBUrineRRLDt_v1r0))
 
-write.csv(biospe1_fin,paste("Connect_prod_Biospe_Formats_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+#write.csv(box_table2,glue("Biospecimen_Coordinating_Table_Two_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+write.csv(biospe1_fin,glue("Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
@@ -4522,7 +4541,7 @@ for (i in 1:length(yes_no)){
   recrbio1 <-   cbind(recrbio1,subset(check,select=varname))
 }
 
-write.csv(recrbio1,paste("Connect_prod_recr_veriBiospe_Formats_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+write.csv(recrbio1,glue("Connect_prod_recr_veriBiospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
@@ -4631,8 +4650,7 @@ coordination=coord_csv %>%  select(RcrtV_VerificationTm_V1R0, BioRec_CollectFina
 #coordination=coord_csv[, c(7, 8, 36,11, 387, 389, 390, 391, 392)]
 #View(coordination)
 
-
-write.csv(coordination,paste("Biospecimen_Coordinating_Table_One_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+write.csv(coordination,glue("Biospecimen_Coordinating_Table_One_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
@@ -4663,7 +4681,7 @@ box_table2 <- box_table2[!duplicated(box_table2$BioPack_TrackScan1_v1r0), ]
 box_table2 <- box_table2 %>%  select(BioShip_ShipTime_v1r0, BioPack_TrackScan1_v1r0, BioSpm_Setting_v1r0, BioShip_LogSite_v1r0, BioShip_LocalID_v1r0, Boxes_Recvd_in_Good_Condition, BioCol_0008_Assigned, BioCol_0009_Assigned)  %>%  group_by(BioShip_LocalID_v1r0)
 #View(box_table2)
 
-write.csv(box_table2,paste("Biospecimen_Coordinating_Table_Two_",currentDate,"_boxfolder_221280601453",".csv",sep=""),row.names = F,na="")
+write.csv(box_table2,glue("Biospecimen_Coordinating_Table_Two_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
