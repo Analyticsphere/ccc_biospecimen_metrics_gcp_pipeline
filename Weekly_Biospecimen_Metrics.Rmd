@@ -68,6 +68,19 @@ currentDate <- Sys.Date()
 bq_auth()
 
 
+
+##### Making sure personal C drives aren't referenced if this code is being used by others
+
+
+#Change to FALSE if referencing this code
+write_to_local_drive = T #F
+#local_drive="C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/"    
+
+
+### This function below is put before any write.csv functions, and "filename" is updated. It determines wheteher the file will be created locally or not.
+#filename=
+local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/", "")
+
 ```
 
 ```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
@@ -589,8 +602,7 @@ table4_redoneR <- table4_redone__R %>% dplyr::select('Specimens Collected', Site
     col = Site,
     digits=c(0,1),
     percent = "col",
-    # label=list(Site="",
-    #            biocol.appoint = ""),
+    label=list(Site=" "),
     missing="ifany",
     margin_text="Total")
 
@@ -623,8 +635,7 @@ table4_redoneC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Si
     col = Site,
     digits=c(0,1),
     percent = "col",
-    # label=list(Site="",
-    #            biocol.appoint = ""),
+    label=list(Site=" "),
     missing="ifany",
     margin_text="Total")
 
@@ -952,64 +963,6 @@ bldcol_research_HF2$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldc
 bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)", 0)
          
 bldcol_research_HF2 <- bldcol_research_HF2[,c(7:10,3)]
-
-
-
-
-
-
-
-table7_3 <- recrver1 %>%  select(Connect_ID, d_173836415_d_266600170_d_185243482)
-left7 <- left_join(biospe, table7_3, by="Connect_ID")
-
-biospe7= left7  %>% mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "HF Wyandotte Hospital",
-                                       d_173836415_d_266600170_d_185243482==1060010063 ~ "HF Macomb Medical Pavilion",
-                                       d_173836415_d_266600170_d_185243482==1040010047 ~ "HF West Bloomfield Hospital"))
-tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>% 
-  filter(HF_Sites=="HF Wyandotte Hospital" | HF_Sites=="HF Macomb Medical Pavilion" |  HF_Sites=="HF West Bloomfield Hospital") %>% 
-  dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
-                   Urine_col_max= max(Urine_col,na.rm=TRUE),
-                   MW_col_max=max(MW_col,na.rm=TRUE),
-                   d_973670172_d_593843561_max=max(d_973670172_d_593843561,na.rm=TRUE),
-                   d_143615646_d_593843561_max = max(d_143615646_d_593843561,na.rm=TRUE),
-                   d_410912345_max=max(d_410912345,na.rm=TRUE),
-                   collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE),
-                   schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505)),na.rm=TRUE))
-table(tube_col_HF2$d_650516960)
-#534621077 664882224 
-#     1421        10 
-tube_col_HF2$Connect_ID <- as.numeric(tube_col_HF2$`as.character(Connect_ID)`)
-#tube_col_HF2[duplicated(tube_col_HF2$Connect_ID),]$Connect_ID #only 1 2310991421
-tube_research_HF2 <- tube_col_HF2 %>% filter(d_650516960==664882224) %>%
-  mutate(bld.complt = ifelse(bldcol_max==5,"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-#tube_research_HF2$HF_Sites <- droplevels(tube_research_HF2$HF_Sites)
-table.bldcol_HF2 <- ctable(tube_research_HF2$HF_Sites,tube_research_HF2$bld.complt)
-bldcol_research_HF2 <- as.data.frame(cbind(table.bldcol_HF2$cross_table,table.bldcol_HF2$proportions))
-bldcol_research_HF2$HF_Sites <-trimws(rownames(bldcol_research_HF2))
-
-bldcol_research_HF2$BloodCompletion[1] <- paste0(bldcol_research_HF2$BloodCompletion[1], " (100%)")
-bldcol_research_HF2$BloodCompletion[2] <- paste0(bldcol_research_HF2$BloodCompletion[2], " (100%)")
-bldcol_research_HF2$BloodCompletion[3] <- paste0(bldcol_research_HF2$BloodCompletion[3], " (100%)")
-
-
-bldcol_research_HF2$BloodIncomplet[1] <- paste0(bldcol_research_HF2$BloodCompletion[1], " (100%)")
-bldcol_research_HF2$BloodIncomplet[2] <- paste0(bldcol_research_HF2$BloodCompletion[2], " (100%)")
-bldcol_research_HF2$BloodIncomplet[3] <- paste0(bldcol_research_HF2$BloodCompletion[3], " (100%)")
-
-
-bldcol_research_HF2$BloodCompletion[1] <- paste0(bldcol_research_HF2$BloodCompletion[1], " (100%)")
-bldcol_research_HF2$BloodCompletion[2] <- paste0(bldcol_research_HF2$BloodCompletion[2], " (100%)")
-bldcol_research_HF2$BloodCompletion[3] <- paste0(bldcol_research_HF2$BloodCompletion[3], " (100%)")
-
-bldcol_research_HF2$Partial <- list(paste0(), )
-bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)", 0)
-
-
-bldcol_research_HF2 <- bldcol_research_HF2[, c(7,1,8,9,3)]
-          
-
-
-
 
 
 
