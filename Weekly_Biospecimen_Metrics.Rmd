@@ -89,7 +89,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 billing <- "nih-nci-dceg-connect-prod-6d04" ##project and billing should be consistent
 bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null')  
-biospe <- bq_table_download(bio_tb,bigint="integer64")
+biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
@@ -285,8 +285,11 @@ This Weekly Metrics report contains tables and plots for the Connect Biospecimen
 
 
 
-```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
+```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+# \newpage
+# \FloatBarrier
+# # Tables
 
 ## Tables 1-4
 
@@ -596,7 +599,7 @@ site.sub$'Specimens Collected' <- factor(site.sub$'Specimens Collected',levels=c
 table4_redone__R <- site.sub %>% filter(Setting=="Research Collections") 
 table4_redone__R$Site <- droplevels(table4_redone__R$Site)
 table4_redone__R$'Specimens Collected' <- droplevels(table4_redone__R$'Specimens Collected')
-table4_redoneR <- table4_redone__R %>% dplyr::select('Specimens Collected', Site )  %>% 
+coll_completenessR <- table4_redone__R %>% dplyr::select('Specimens Collected', Site )  %>% 
   tbl_cross(
     row = 'Specimens Collected',
     col = Site,
@@ -606,11 +609,11 @@ table4_redoneR <- table4_redone__R %>% dplyr::select('Specimens Collected', Site
     missing="ifany",
     margin_text="Total")
 
-table4_redoneR <- table4_redoneR%>%
+coll_completenessR <- coll_completenessR %>%
   #bold_labels() %>%
   #italicize_levels() %>% 
   modify_header(stat_0 = "Total") %>%
-  modify_caption("Table 4a. Baseline Research Collection Completeness by Site") %>%
+  modify_caption("Table 5a. Baseline Research Collection Completeness by Site") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
@@ -629,7 +632,7 @@ site.sub$'Specimens Collected' <- factor(site.sub$'Specimens Collected',levels=c
 table4_redone__C <- site.sub %>% filter(Setting=="Clinical Collections")
 table4_redone__C$Site <- droplevels(table4_redone__C$Site)
 table4_redone__C$'Specimens Collected' <- droplevels(table4_redone__C$'Specimens Collected')
-table4_redoneC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Site )  %>% 
+coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Site )  %>% 
   tbl_cross(
     row = 'Specimens Collected',
     col = Site,
@@ -639,11 +642,11 @@ table4_redoneC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Si
     missing="ifany",
     margin_text="Total")
 
-table4_redoneC <- table4_redoneC%>%
+coll_completenessC <- coll_completenessC%>%
   #bold_labels() %>%
   #italicize_levels() %>% 
   modify_header(stat_0 = "Total") %>%
-  modify_caption("Table 4b. Baseline Clinical Collection Completeness by Site") %>%
+  modify_caption("Table 5b. Baseline Clinical Collection Completeness by Site") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
@@ -965,6 +968,12 @@ bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)", 0)
 bldcol_research_HF2 <- bldcol_research_HF2[,c(7:10,3)]
 
 
+          
+
+
+
+
+
 
 
   
@@ -1017,7 +1026,7 @@ tube_clinic$bldcol_tubes <- factor(tube_clinic$bldcol_max,levels=c(0:10))
 tube_clinic$bldcol_tubes <- droplevels(tube_clinic$bldcol_tubes)
 
 
-table7rd <- tube_clinic %>% 
+tube_completeness <- tube_clinic %>% 
   dplyr::select(bldcol_tubes, Site)  %>% 
   tbl_cross(
     col = bldcol_tubes, 
@@ -1029,79 +1038,62 @@ table7rd <- tube_clinic %>%
     digits=c(0,1),
     margin_text="Total") 
 #Table9_BldCli[["table_body"]]$stat_0 <- sapply(strsplit(Table9_BldCli[["table_body"]]$stat_0," "),"[",1) 
-table7rd <- table7rd %>%
+tube_completeness <- tube_completeness %>%
   #bold_labels() %>%
   #italicize_levels() %>% 
   modify_header() %>%
-  modify_caption("Table 7. Blood Completeness (Number of Blood Tubes Collected) for Participants with Baseline Clinical Collections") %>% ## used to be Table 8
+  modify_caption("Table 9. Blood Completeness (Number of Blood Tubes Collected) for Participants with Baseline Clinical Collections") %>% ## used to be Table 8
   as_kable_extra()
-table7rd
+tube_completeness
 
 
 
 
 
 
+## New table 4 8/22/23
+clin_col <- biospe %>% select(Connect_ID, d_650516960, d_410912345)
+bldurcl <- left_join(recrver1, clin_col, by="Connect_ID")
 
-##Table 9- renumbered--- named Table8_BldCli to Table_BldCli to match report
-    # table(recr_clin$Site) -- confirmed HF hybird is included in this 
-recr_clin <- recrver1 %>% dplyr::filter(d_173836415_d_266600170_d_592099155 == 664882224 | d_173836415_d_266600170_d_718172863  == 664882224) %>%
-   mutate(BL_BioClin_DBUrineRRL_v1r0=ifelse(d_173836415_d_266600170_d_210921343==104430631 | is.na(d_173836415_d_266600170_d_210921343), "No","Yes"),
-          BioClin_SiteUrineColl_v1r0=ifelse(d_173836415_d_266600170_d_786930107==104430631 | is.na(d_173836415_d_266600170_d_786930107), "No","Yes"),
-          BL_BioClin_DBBloodRRL_v1r0=ifelse(d_173836415_d_266600170_d_534041351==104430631 | is.na(d_173836415_d_266600170_d_534041351), "No","Yes"),
-          BioClin_SiteBloodColl_v1r0=ifelse(d_173836415_d_266600170_d_693370086==104430631 | is.na(d_173836415_d_266600170_d_693370086), "No","Yes")
-   )
-Table_BldCli <- recr_clin %>% 
-  dplyr::select(BL_BioClin_DBBloodRRL_v1r0, BioClin_SiteBloodColl_v1r0 )  %>% 
-  mutate(BL_BioClin_DBBloodRRL_v1r0= factor(BL_BioClin_DBBloodRRL_v1r0,levels=c("Yes","No")),
-         BioClin_SiteBloodColl_v1r0=factor(BioClin_SiteBloodColl_v1r0,levels=c("Yes","No"))) %>%
-  tbl_cross(
-    col = BL_BioClin_DBBloodRRL_v1r0,
-    row = BioClin_SiteBloodColl_v1r0,
-    percent = "cell",
-    #label=list(BL_BioClin_DBBloodRRL_v1r0~"Any Blood Collected (Data from Dashboard)", BioClin_SiteBloodColl_v1r0 ~ 'Any Blood Collected (Data Sent by KP)'),
-    label=list(BL_BioClin_DBBloodRRL_v1r0~"Any Blood Collected (Data from Dashboard)", BioClin_SiteBloodColl_v1r0 ~ 'Any Blood Collected (Data Sent by Site)'),  #on hold- HF should show up under clinical 
-    missing="ifany",
-    missing_text="0",
-    digits=c(0,1),
-    margin_text="Total") 
-Table_BldCli[["table_body"]]$stat_0 <- sapply(strsplit(Table_BldCli[["table_body"]]$stat_0," "),"[",1) 
-Table_BldCli <- Table_BldCli %>%
-  #bold_labels() %>%
-  #italicize_levels() %>% 
-  modify_header() %>%
-  #modify_caption("Table 11. Baseline Blood Collection Status in Data Sent from KP vs Connect Biospecimen Dashboard") %>%
-  modify_caption("Table 9. Baseline Blood Collection Status in Data Sent from Site vs Connect Biospecimen Dashboard") %>% #on hold- HF should show up under clinical 
-  as_kable_extra()
+bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %>%  
+  mutate(Data_System = case_when((d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909) & 
+                                     (d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909) ~ "Site Data & Biospecimen Dashboard",
+                                   d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909 ~ "Biospecimen Dashboard Only"),
+                                   #d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909 ~ "Site Data Only"), <- no one, will have to add
+                              Collection = ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood",
+                                                  ifelse(d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_786930107==353358909,"Urine", "")))
+                                                  #ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood", "")))
+                                                     #d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 ~ "Blood"))
+
+combined_table4 <- bldurcl %>% select(Data_System, Collection) %>%  group_by(Data_System) %>%  tally()
+combined_table4[3,c(1:2)] <- list("Site Data Only", 0)
+
+site_dash_blood<- table(bldurcl$d_173836415_d_266600170_d_534041351==353358909 & bldurcl$d_173836415_d_266600170_d_693370086==353358909)
+total_blood <- table(bldurcl$d_173836415_d_266600170_d_534041351==353358909 | bldurcl$d_173836415_d_266600170_d_693370086==353358909)
+dash_blood <- as.numeric(total_blood) - as.numeric(site_dash_blood)
+
+dash_bloodP <- paste0(dash_blood, " (", 100*round(dash_blood/total_blood,digits=2), "%)")
+site_dash_bloodP <- paste0(site_dash_blood, " (", 100*round(site_dash_blood/total_blood,digits=2), "%)")
+total_bloodP <- paste0(total_blood, " (100%)")
 
 
+site_dash_urine<- table(bldurcl$d_173836415_d_266600170_d_210921343==353358909 & bldurcl$d_173836415_d_266600170_d_786930107==353358909)
+total_urine <- table(bldurcl$d_173836415_d_266600170_d_210921343==353358909 | bldurcl$d_173836415_d_266600170_d_786930107==353358909)
+dash_urine <- as.numeric(total_urine) - as.numeric(site_dash_urine)
+
+dash_urineP <- paste0(dash_urine, " (", 100*round(dash_urine/total_urine,digits=2), "%)")
+site_dash_urineP <- paste0(site_dash_urine, " (", 100*round(site_dash_urine/total_urine,digits=2), "%)")
+total_bloodP <- paste0(urine, " (100%)")
 
 
+combined_table4[,2] <- c(dash_bloodP, site_dash_bloodP, "0 (0%)")
+combined_table4[,3] <- c(dash_urineP, site_dash_urineP,  "0 (0%)")
+#combined_table4[,4] <- c(paste0(dash_blood+dash_urine," (" , 100*round((dash_blood+dash_urine)/(total_blood+total_urine), digits=2), "%)"), paste0(site_dash_blood+site_dash_urine," (" ,  100*round((site_dash_blood+site_dash_urine)/(total_blood+total_urine), digits=2), "%)"), "0 (0%)")
+combined_table4[4,] <- list('Total', paste0(site_dash_blood+dash_blood, "(100%)"), paste0(site_dash_urine+dash_urine, "(100%)")) #, paste0(total_blood+total_urine, "(100%)"))
+#combined_table4[4,] <- c('Total', paste(combined_table4[4,2],"(100%)"), paste(combined_table4[4,3],"(100%)"), paste(combined_table4[4,4],"(100%)"))
+combined4 <- combined_table4[c(1,3,2,4),]
+colnames(combined4) <- c("Data System", "Blood", "Urine")
 
-## Table 10- renumbered---- renamed Table9_UrineCli to Table_UrineCli
-        # table(recr_clin$Site) -- confirmed HF hybird is included in this 
-Table_UrineCli <- recr_clin %>% 
-  dplyr::select(BL_BioClin_DBUrineRRL_v1r0, BioClin_SiteUrineColl_v1r0 ) %>% 
-  mutate(BL_BioClin_DBUrineRRL_v1r0= factor(BL_BioClin_DBUrineRRL_v1r0,levels=c("Yes","No")),
-         BioClin_SiteUrineColl_v1r0= factor(BioClin_SiteUrineColl_v1r0,levels=c("Yes","No")))  %>% 
-  tbl_cross(
-    col = BL_BioClin_DBUrineRRL_v1r0,
-    row = BioClin_SiteUrineColl_v1r0,
-    percent = "cell",
-    digits= c(0,1),
-    #label=list(BL_BioClin_DBUrineRRL_v1r0~"Urine collected (Data from Dashboard)", BioClin_SiteUrineColl_v1r0 ~ 'Urine collected (Data Sent by KP)'),
-    label=list(BL_BioClin_DBUrineRRL_v1r0~"Urine collected (Data from Dashboard)", BioClin_SiteUrineColl_v1r0 ~ 'Urine collected (Data Sent by Site)'), #on hold- HF should show up under clinical 
-    missing="ifany",
-    missing_text="0",
-    margin_text="Total")  
-
-Table_UrineCli[["table_body"]]$stat_0 <- sapply(strsplit(Table_UrineCli[["table_body"]]$stat_0," "),"[",1) 
-Table_UrineCli <- Table_UrineCli%>%
-  #bold_labels() %>%
-  #italicize_levels() %>% 
-  modify_header() %>%
-  modify_caption("Table 10. Baseline Urine Collection Status in Data Sent From Site vs Connect Biospecimen Dashborad") %>% #on hold- HF should show up under clinical 
-  as_kable_extra()
 
 
 
@@ -2459,7 +2451,7 @@ clc_both_vt.site.CO<-ggplot(clc.both.wk_site.CO, aes(x=as_date(ymd(visit.wkdate)
   scale_y_continuous(name="# Number Collections") + #, minor_breaks=0) + #, limits=c(0,max(clc.both.wk_site.CO$visit.wk))) + #, limits=c(0,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
   scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="Fig 8. Weekly Biospecimen Collections \n at Kaiser Permanente Colorado") +
+  ggtitle(label="Fig 12. Weekly Biospecimen Collections \n at Kaiser Permanente Colorado") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -2479,7 +2471,7 @@ clc_both_vt.site.GA<-ggplot(clc.both.wk_site.GA, aes(x=as_date(ymd(visit.wkdate)
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
   scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="Fig 9. Weekly Biospecimen Collections \n at Kaiser Permanente Georgia") +
+  ggtitle(label="Fig 13. Weekly Biospecimen Collections \n at Kaiser Permanente Georgia") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -2499,7 +2491,7 @@ clc_both_vt.site.HI<-ggplot(clc.both.wk_site.HI, aes(x=as_date(ymd(visit.wkdate)
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
   scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="Fig 10. Weekly Biospecimen Collections \n at Kaiser Permanente Hawaii") +
+  ggtitle(label="Fig 14. Weekly Biospecimen Collections \n at Kaiser Permanente Hawaii") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -2519,7 +2511,7 @@ clc_both_vt.site.NW<-ggplot(clc.both.wk_site.NW, aes(x=as_date(ymd(visit.wkdate)
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
   scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="Fig 11. Weekly Biospecimen Collections \n at Kaiser Permanente Northwest") +
+  ggtitle(label="Fig 15. Weekly Biospecimen Collections \n at Kaiser Permanente Northwest") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -2528,12 +2520,6 @@ clc_both_vt.site.NW<-ggplot(clc.both.wk_site.NW, aes(x=as_date(ymd(visit.wkdate)
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
 
 clc_both_vt.site.NW
-
-
-
-
-
-
 
 
 
@@ -2558,18 +2544,13 @@ blood_placed= blood_placed %>%   mutate(bld_placed= case_when(d_173836415_d_2666
 
 blood_placed_plot <- ggplot(blood_placed, aes(x=KP_Site, y=verif_bld, fill=bld_placed)) + #, label="Frequency of Status"
   geom_bar(position="stack",stat="identity") + 
-  ggtitle("Fig 1. Clinical Blood Draw Order Status \n of Verified Participants by Site") + 
+  ggtitle("Fig 5. Clinical Blood Draw Order Status \n of Verified Participants by Site") + 
   ylab("Number of Verified Participants") + xlab("Site") +
   theme(panel.background = element_blank(),
           legend.title = element_blank(),
           axis.line = element_line(size=0.2),
           axis.text.x = element_text(angle = 60,hjust = 1, size = 8, face = "bold"), 
           plot.title = element_text(hjust = 0.5,size = 12, face = "bold"))
-
-
-
-
-
 
 
 ## Table 27 (used to be 23)
@@ -2715,6 +2696,149 @@ timelag2
 
 ```
  
+
+```{r, eval=TRUE,echo=FALSE, warning=FALSE}
+
+### ADD TO REPORT
+
+#NEW FIGURE 3, NOW MOVED UP
+
+fig3_sub_all <- research.survey %>%  filter(Site=="University of Chicago Medicine")
+fig3_sub_all <- fig3_sub_all %>%  filter(!is.na(research.sv)) #d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909 & d_222161762<as.Date("2023-07-05") & 
+
+fig3_sub_all$Site<- droplevels(fig3_sub_all$Site)
+
+
+
+
+fig3_sub_1<- fig3_sub_all %>% mutate(not_submitted = case_when(research.sv!="Submitted"~1,
+                                                TRUE~0),
+                                    start.date = min(schedulecol.tm),
+                                    current.date=max(as.POSIXct(ymd_hms(schedulecol.tm))),
+                                    BioRec_CollectScheduled = ifelse(as.Date(ymd_hms(schedulecol.tm)) >= as.Date(as.POSIXct(ymd_hms(d_914594314))),1,0))
+                                    
+fig3_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig3_sub_1$collection.tm),fig3_sub_1$start.date, units="weeks")))
+fig3_sub_1$visit.wkdate <- fig3_sub_1$start.date + dweeks(fig3_sub_1$visit.wk)
+visit_wk_site3 <- fig3_sub_1 %>% arrange(Site,not_submitted,visit.wk,visit.wkdate) %>% group_by(Site,not_submitted,visit.wk,visit.wkdate) %>% tally()
+visit_wk_site3 <- visit_wk_site3 %>%  filter(not_submitted>0)
+
+##UC
+research.3 <- ggplot(visit_wk_site3, aes(x=as.Date(visit.wkdate), y=100*(not_submitted/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
+  geom_line(na.rm=T) + geom_point(width = 0.2) +
+  scale_y_continuous(name="Percent") + #, limits=c(0,30), breaks=seq(0,30,5)) +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
+  scale_fill_brewer(palette="Dark2") +
+  ggtitle(label="Figure 3: Weekly Percent of Biospecimen Surveys Not Submitted, \n University of Chicago Medicine") +
+  #theme_ipsum() +
+  theme(panel.background = element_blank(),
+        #legend.title = element_text(size=7),
+        #legend.position="right",
+        axis.line = element_line(size=0.2),
+        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
+        axis.title.y = element_text(size = 14, face = "bold",color="black"),
+        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) + 
+  labs(caption = "Note: Biospecimen Surveys with a completion status of “Started” and “Not Started” are considered 'Not Submitted'.") +
+  theme(plot.caption = element_text(hjust=0))
+        #guides(fill=guide_legend(nrow=2,byrow=TRUE))
+
+
+
+
+```
+
+ 
+```{r, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
+### ADD TO REPORT
+
+#NEW FIGURE 4, NOW MOVED UP
+
+fig4_sub_all <- research.survey %>%  filter(Site=="Henry Ford Health System" | Site=="Sanford Health" | Site=="University of Chicago Medicine")
+fig4_sub_all <- fig4_sub_all %>%  filter(d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909 & !is.na(checktmvisit)) # & d_222161762<as.Date("2023-07-05")
+
+fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
+
+
+
+
+fig4_sub_1<- fig4_sub_all %>% mutate(hours3 = case_when(checktmvisit=="0 hrs to 3 hrs"~1,
+                                                TRUE~0),
+                                    start.date = min(schedulecol.tm),
+                                    current.date=max(as.POSIXct(ymd_hms(schedulecol.tm))),
+                                    BioRec_CollectScheduled = ifelse(as.Date(ymd_hms(schedulecol.tm)) >= as.Date(as.POSIXct(ymd_hms(d_914594314))),1,0))
+                                    
+fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
+fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
+visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
+visit_wk_site4__1 <- visit_wk_site4 %>%  filter(hours3>0)
+
+##HF
+visit_wk_site4_1 <- visit_wk_site4__1 %>%  filter(Site=="Henry Ford Health System")
+research.4_1 <- ggplot(visit_wk_site4_1, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
+  geom_line() + geom_point(width = 0.2) +
+  scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
+  scale_fill_brewer(palette="Dark2") +
+  ggtitle(label="Figure 4.1 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Henry Ford Health System") +
+  #theme_ipsum() +
+  theme(panel.background = element_blank(),
+        #legend.title = element_text(size=7),
+        #legend.position="right",
+        axis.line = element_line(size=0.2),
+        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
+        axis.title.y = element_text(size = 14, face = "bold",color="black"),
+        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
+        #guides(fill=guide_legend(nrow=2,byrow=TRUE))
+
+
+
+
+
+##Sanford
+visit_wk_site4_2 <- visit_wk_site4__1 %>%  filter(Site=="Sanford Health")
+research.4_2 <- ggplot(visit_wk_site4_2, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
+  geom_line() + geom_point(width = 0.2) +
+  scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
+  scale_fill_brewer(palette="Dark2") +
+  ggtitle(label="Figure 4.2  Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Sanford Health") +
+  #theme_ipsum() +
+  theme(panel.background = element_blank(),
+        #legend.title = element_text(size=7),
+        #legend.position="right",
+        axis.line = element_line(size=0.2),
+        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
+        axis.title.y = element_text(size = 14, face = "bold",color="black"),
+        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
+        #guides(fill=guide_legend(nrow=2,byrow=TRUE))
+
+
+
+
+
+##UC
+visit_wk_site4_3 <- visit_wk_site4__1 %>%  filter(Site=="University of Chicago Medicine")
+research.4_3 <- ggplot(visit_wk_site4_3, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
+  geom_line() + geom_point(width = 0.2) +
+  scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
+  scale_fill_brewer(palette="Dark2") +
+  ggtitle(label="Figure 4.3 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, University of Chicago Medicine") +
+  #theme_ipsum() +
+  theme(panel.background = element_blank(),
+        #legend.title = element_text(size=7),
+        #legend.position="right",
+        axis.line = element_line(size=0.2),
+        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
+        axis.title.y = element_text(size = 14, face = "bold",color="black"),
+        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
+        #guides(fill=guide_legend(nrow=2,byrow=TRUE))
+
+
+
+
+```
+ 
+ 
  
  
 
@@ -2740,8 +2864,12 @@ add_footnote(tab5_1, "Note: Some cells are not applicable. Blood and Urine Sampl
 
 
 
-table4_redoneR %>% kable_styling(latex_options = "scale_down")
-table4_redoneC %>% kable_styling(latex_options = "scale_down")
+Bld_urn_cli = knitr::kable(combined4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down") 
+add_footnote(Bld_urn_cli, "Note: Data sent by sites experience an availablility delay of up to 48 hours behind data from the Biospecimen Dashboard.", notation = "none")
+
+
+coll_completenessR %>% kable_styling(latex_options = "scale_down")
+coll_completenessC %>% kable_styling(latex_options = "scale_down")
 
 
 ```
@@ -2752,37 +2880,32 @@ table4_redoneC %>% kable_styling(latex_options = "scale_down")
 
 ```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
-knitr::kable(bldcol_research1, col.names=c("Site","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 5. Blood Completeness for Participants with Baseline Research Collections', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(bldcol_research1, col.names=c("Site","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 6. Blood Completeness for Participants with Baseline Research Collections', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
 
-knitr::kable(bldcol_research_UC1, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 5.1 Blood Completeness among University of Chicago Baseline Research Collections by Collection Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(bldcol_research_UC1, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.1 Blood Completeness among University of Chicago Baseline Research Collections by Collection Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
 
-knitr::kable(bldcol_research_HF1, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 5.2 Blood Completeness among Henry Ford Baseline Research Collections by Collection Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(bldcol_research_HF1, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.2 Blood Completeness among Henry Ford Baseline Research Collections by Collection Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
 
-knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 5.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
 
-knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 6. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  ## used to be Table 13
+knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  ## used to be Table 13
 
 
 
 #Switched order of 9 and 10, so now 10 is first 
-tab10_2= table7rd %>% kable_styling(latex_options = "scale_down")
+tab10_2= tube_completeness %>% kable_styling(latex_options = "scale_down")
 add_footnote(tab10_2, "Note: The expected number of blood collection tubes varies by site and is as follows: KPHI-9; KPGA-7; KPNW-9; KPCO-8, HFH-5", notation = "none") 
 
 
-tab8=knitr::kable(notcol_combo2[,c(1:12)],caption='Table 8. Blood Tubes Collected by Tube Type at Clinical Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down") %>% landscape()
+tab8=knitr::kable(notcol_combo2[,c(1:12)],caption='Table 10. Blood Tubes Collected by Tube Type at Clinical Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down") %>% landscape()
 add_footnote(tab8, "Note: Expected number of collection tubes for each Kaiser Permanente site is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD", notation = "none") 
 
 
 
-
-tab9=Table_BldCli
-add_footnote(tab9, "Note: Data sent by KP lag up to 48 hours behind data from dashboard", notation = "none") 
-tab10=Table_UrineCli
-add_footnote(tab10, "Note: Data sent by KP lag up to 48 hours behind data from dashboard", notation = "none") 
 
 knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No Deviations", "Total Tubes Collected"), caption='Table 11. Frequency of Tubes with Any Deviation by Site',row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE )
 ```
@@ -2820,9 +2943,16 @@ knitr::kable(discard.site, caption='Table 14. Number of Tubes Discarded by Type 
 
 
 Table15_combined %>% kable_styling(latex_options = "scale_down")
+```
+
+\newpage
+\FloatBarrier
+```{r, echo=FALSE, eval=TRUE}
+research.3
+```
 
 
-
+```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 Table16_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -2832,10 +2962,19 @@ tbl19a <- Table17_combinedB  %>% kable_styling(latex_options = "scale_down")
 add_footnote(tbl19a,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none") 
 tbl19b <- Table17_combinedA  %>% kable_styling(latex_options = "scale_down")
 add_footnote(tbl19b,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none") 
+```
 
+\newpage
+\FloatBarrier
+```{r, echo=FALSE, eval=TRUE}
+research.4_1
+research.4_2
+research.4_3
+```
 
-
-
+\newpage
+\FloatBarrier
+```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 Table18_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -2899,8 +3038,8 @@ Table_bld_draw
 \newpage
 \FloatBarrier
 
-# Plots
-```{r, eval=TRUE,echo=FALSE, fig.cap='Figure 1'}
+
+```{r, eval=TRUE,echo=FALSE}
 # fig.height = 5, fig.width = 5, 
 blood_placed_plot
 
@@ -2936,7 +3075,7 @@ research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(visit.wkdate), y=n)) + #,fi
   scale_y_continuous(name="# Number of Collections") + #, limits=c(0,30), breaks=seq(0,30,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Fig 2. Weekly Biospecimen Collections, All Sites") +
+  ggtitle(label="Fig 6. Weekly Biospecimen Collections, All Sites") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -2955,6 +3094,7 @@ research.vt1
 
 
 ```
+
 
 
 ```{r, eval=TRUE,echo=FALSE}
@@ -3011,7 +3151,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
    scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
-   ggtitle(label="Fig 3. Weekly Biospecimen Collections at Henry Ford") +
+   ggtitle(label="Fig 7. Weekly Biospecimen Collections at Henry Ford") +
    #theme_ipsum() +
    theme(panel.background = element_blank(),
          #legend.title = element_text(size=7),
@@ -3029,7 +3169,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
    scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
-   ggtitle(label="Fig 3.1 Weekly Biospecimen Collections at \n Henry Ford Locations") +
+   ggtitle(label="Fig 7.1 Weekly Biospecimen Collections at \n Henry Ford Locations") +
    #theme_ipsum() +
    theme(panel.background = element_blank(),
          #legend.title = element_text(size=7),
@@ -3076,6 +3216,9 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
 #- MARSHFIELD = 692275326, 813701399, 698283667, 691714762, 487512085, 983848564, 261931804, 665277300
 #- SANFORD = 589224449, 467088902
  
+
+
+
  
    research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
  research.vt_plUC <- research.vt_plUC %>% group_by(visit.wkdate) %>% mutate(total_collections = sum(n))
@@ -3084,7 +3227,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
    scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
-   ggtitle(label="Fig 4. Weekly Biospecimen Collections at \n University of Chicago Medicine") +
+   ggtitle(label="Fig 8. Weekly Biospecimen Collections at \n University of Chicago Medicine") +
    #theme_ipsum() +
    theme(panel.background = element_blank(),
          #legend.title = element_text(size=7),
@@ -3100,7 +3243,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
    scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
-   ggtitle(label="Fig 4.1 Weekly Biospecimen Collections at \n University of Chicago Medicine Locations") +
+   ggtitle(label="Fig 8.1 Weekly Biospecimen Collections at \n University of Chicago Medicine Locations") +
    #theme_ipsum() +
    theme(panel.background = element_blank(),
          #legend.title = element_text(size=7),
@@ -3123,7 +3266,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
    scale_y_continuous(name="# Number Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
-   ggtitle(label="Fig 5. Weekly Biospecimen Collections at \n Marshfield Clinic Health System") +
+   ggtitle(label="Fig 9. Weekly Biospecimen Collections at \n Marshfield Clinic Health System") +
    #theme_ipsum() +
    theme(panel.background = element_blank(),
          #legend.title = element_text(size=7),
@@ -3141,7 +3284,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
    scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
    scale_fill_brewer(palette="Dark2") +
-   ggtitle(label="Fig 5.1 Weekly Biospecimen Collections at \n Marshfield Clinic Health System Locations") +
+   ggtitle(label="Fig 9.1 Weekly Biospecimen Collections at \n Marshfield Clinic Health System Locations") +
    #theme_ipsum() +
    theme(panel.background = element_blank(),
          #legend.title = element_text(size=7),
@@ -3167,7 +3310,7 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n)
   scale_y_continuous(name="# Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Fig 6. Weekly Biospecimen Collections at Sanford Health") +
+  ggtitle(label="Fig 10. Weekly Biospecimen Collections at Sanford Health") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -3184,7 +3327,7 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n,
   scale_y_continuous(name="# Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Fig 6.1 Weekly Biospecimen Collections at Sanford Health Locations") +
+  ggtitle(label="Fig 10.1 Weekly Biospecimen Collections at Sanford Health Locations") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -3205,7 +3348,7 @@ research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(visit.wkdate), y=n)
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,30), breaks=seq(0,30,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks")  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Fig 7. Weekly Biospecimen Collections at HealthPartners") +
+  ggtitle(label="Fig 11. Weekly Biospecimen Collections at HealthPartners") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -3246,6 +3389,7 @@ clc_both_vt.site.HI
 clc_both_vt.site.NW
 
 ```
+
 
 
 
@@ -3401,7 +3545,7 @@ factor_cid <-function(var,data){
 
 
 bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
-biospe2 <- bq_table_download(bio_tb2,bigint="integer64")
+biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
 
 biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
 biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
@@ -3551,7 +3695,7 @@ coord$BioClin_BldOrderPlacdDt_v1r0 = ifelse(!is.na(coord$d_173836415_d_266600170
 
 SMMet= bq_project_query(project,'SELECT Connect_ID, d_254109640, d_827220437 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP`
 where Connect_ID is not null')
-BL_Coll <- bq_table_download(SMMet,bigint = "integer64")
+BL_Coll <- bq_table_download(SMMet,bigint = "integer64",n_max = Inf, page_size = 1000)
 BL_Coll$Connect_ID <- as.numeric(BL_Coll$Connect_ID)
 
 coord_csv= left_join(coord, BL_Coll, by="Connect_ID")
