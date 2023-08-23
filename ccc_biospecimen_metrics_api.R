@@ -1,69 +1,97 @@
-# File:       ccc_biospecimen_metrics_api.R
-# Decription: This script generates a plumber api that runs/renders Kelsey/Jings's
+# File:       ccc_module_metrics_api.R
+# Decription: This script generates a plumber api that runs/renders Kelsey's 
 #             Rmarkdown file.
 # Author:     Jake Peters
 # Date:       October 2022
-# Updated:    August 2023
 
 library(plumber)
 library(rmarkdown)
 library(googleCloudStorageR)
 library(gargle)
 library(tools)
+library(config)
 
 #* heartbeat...for testing purposes only. Not required to run analysis.
 #* @get /
 #* @post /
-function() {
-  return("alive")
-  }
+function(){return("alive")}
 
-#* Runs report
-#* @param usetestboxfolder:bool Whether or not to use a test box folder
-#* @get /run-ccc-biospecimen-metrics
-#* @post /run-ccc-biospecimen-metrics
-function(usetestboxfolder = FALSE) {
-    # Define parameters
-    if (usetestboxfolder) {
-      boxfolder <- "221458210866" # Test folder
+#* Runs Kelsey's markdown file
+#* @param report:string Which report to run 
+#* @param testing:boolean Whether we're testing or not
+#* @get /run-biospecimen-metrics
+#* @post /run-biospecimen-metrics
+function(report, testing=FALSE){
+    testing <- as.logical(testing)
+    report  <- as.character(report)
+    
+    # Determines which config from config.yml to use
+    Sys.setenv(R_CONFIG_ACTIVE = report) 
+    
+    # Set parameters using arguments and config.yml file
+    configuration    <- config::get(config=report)
+    rmd_file_name    <- configuration$rmd_file_name
+    report_file_name <- configuration$report_file_name
+    bucket           <- configuration$bucket
+    print(paste0("bucket: ", bucket))
+    if (testing) {
+      box_folders <- configuration$test_box_folders
+      Sys.setenv(USE_TEST_BOX_FOLDER = as.integer(box_folders[1]))
     } else {
-      boxfolder <- "204235111776" # PROD folder for Report PDF
+      box_folders <- configuration$box_folders
     }
-    Sys.setenv(USE_TEST_BOX_FOLDER = as.integer(usetestboxfolder))
     
-    rmd_file_name    <- "Weekly_Biospecimen_Metrics.Rmd"
-    report_file_name <- glue("Weekly_Biospecimen_Metrics_", 
-                              {Sys.Date()-1},
-                              "_boxfolder_{boxfolder}", 
-                              ".pdf")
-    bucket           <- "gs://ccc_weekly_metrics_report"
-
-    # Authenticate to BigQuery
-    print("Authenticating to BigQuery...")
-    bigrquery::bq_auth()
-    print("...authentication to BigQuery successful!")
+    # Create "_boxfolder_123456789012" tag
+    box_str <- ""
+    for (folder in box_folders) {
+      box_str <- paste0(box_str, "_boxfolder_", folder)
+    }
+    print(paste0("box_str: ", box_str))
     
-    # Render the RMD file
-    rmarkdown::render(rmd_file_name, output_file = report_file_name)
-
+    # Add time stamp and box folder tag to to report name
+    report_fid <- paste0(file_path_sans_ext(report_file_name), 
+                         format(Sys.time(), "_%m_%d_%Y"), box_str,
+                         ".", file_ext(report_file_name))
+    Sys.setenv(REPORT_FID = report_fid)
+               
+    # Select document type given the extension of the report file name
+    output_format <- switch(file_ext(report_file_name),  
+                            "pdf"  = "pdf_document",
+                            "html" = "html_document") 
+    if (is.null(output_format)) { 
+      stop("Report file extension is invalid. Script did not execute.")}
+    
+    # Render the rmarkdown file
+    rmarkdown::render(rmd_file_name, 
+                      output_format = output_format,
+                      output_file = report_fid, 
+                      clean = TRUE)
+    
+    # Retrieve variables relevant to gcs upload 
+    # They do not persist after rmarkdown::render for some reports, including mod1_stats
+    bucket     <- config::get(value="bucket")
+    report_fid <- Sys.getenv("REPORT_FID")
+    
     # Authenticate with Google Storage and write report file to bucket
     scope <- c("https://www.googleapis.com/auth/cloud-platform")
-    token <- token_fetch(scopes = scope)
-    gcs_auth(token = token)
-
+    token <- token_fetch(scopes=scope)
+    gcs_auth(token=token)
+    gcs_global_bucket(bucket)
+    # gcs_upload(report_fid, name=report_fid) 
+    
     # Loop through CSV and PDF files, write them to GCP Cloud Storage, and print their names
     filelist <- list.files(pattern = "*.csv$|*.pdf$")
     uploaded_files <- lapply(filelist, function(x) {
       gcs_upload(x, 
                  bucket = bucket, 
                  name = x, 
-                 predefinedAcl = 'bucketLevel', 
-                 mime_type = "text/csv")
+                 predefinedAcl = 'bucketLevel')
       print(paste("Uploaded file:", x))
       x  # Return the file name for further processing if needed
     })
     
-    # Return a string for API testing purposes, including the uploaded file names
-    ret_str <- paste("All done. Check", bucket, "for output files:", paste(uploaded_files, collapse = ", "))
-    return(ret_str)
+    # Return a string for for API testing purposes
+    ret_str <- paste("All done. Check", bucket, "for", report_fid)
+    print(ret_str)
+    return(ret_str) 
 }
