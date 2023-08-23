@@ -1207,7 +1207,7 @@ for (i in 1:length(tube.ls)){
   tmp <- as.data.frame(biospe[,which(colnames(biospe) %in% c(id,tube,deviation))] )
   tmp <- tmp[which(!is.na(tmp[,(colnames(tmp) == id)])),]
   
-    dev_long <- melt(tmp,
+    dev_long <- data.table::melt(tmp,
                    id.vars=c(id,tube), 
                    measure.vars=deviation,
                    variable.name="dev_type",
