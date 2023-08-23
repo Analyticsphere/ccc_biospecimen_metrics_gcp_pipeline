@@ -54,7 +54,7 @@ weekly_biospecimen_metrics:
   box_folders:
     - "204235111776" 
   gcp_info:
-    cloud_scheduler: ccc-biospecimen-metrics
+    cloud_scheduler: ccc-weekly-biospecimen-metrics
     frequency: "0 11 * * 1" # every Monday at 11 AM"
 
 biospecimen_qc_metrics:
@@ -63,25 +63,25 @@ biospecimen_qc_metrics:
   box_folders:
     - "221297686961" 
   gcp_info:
-    cloud_scheduler: ""
+    cloud_scheduler: ccc-biospecimen-qc-metrics
     frequency: "30 11 * * 1" # every Monday at 11:30 AM"
     
 bu_clinical_survey_stats:
-  rmd_file_name: "BU Clinical Survey Summary Statistics.Rmd""
-  report_file_name: BU_Clinical_Survey_Summary_Statistics.Rmd
+  rmd_file_name: "BU Clinical Survey Summary Statistics.Rmd"
+  report_file_name: BU_Clinical_Survey_Summary_Statistics.pdf
   box_folders:
     - "208060008158"
   gcp_info:
-    cloud_scheduler: ""
+    cloud_scheduler: ccc-bu-clinical-biospecimen-survey-stats
     frequency: "0 12 * * 1" # every Monday at 12 PM"
     
 bum_research_survey_stats:
   rmd_file_name: "BUM Research Summary Statistics.Rmd"
-  report_file_name: BUM_Research_Summary_Statistics.Rmd
+  report_file_name: BUM_Research_Summary_Statistics.pdf
   box_folders:
     - "208060008158"
   gcp_info:
-    cloud_scheduler: ""
+    cloud_scheduler: ccc-bum-research-biospecimen-survey-stats
     frequency: "30 12 * * 1" # every Monday at 12:30 PM"
 ```
 
