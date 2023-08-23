@@ -67,6 +67,21 @@ currentDate <- Sys.Date()
 
 bq_auth()
 
+### Set Box folders for output CSV files #######################################
+use_test_box_folder <- TRUE # Local user sets this (Jake or Kelsey)
+
+# Over-ride if using plumber api on GCP (USER DOESN'T TOUCH THIS!)
+# Check if the environment variable exists and is not empty
+if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
+    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
+  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
+}
+
+if (use_test_box_folder) {
+  boxfolder <- 221458210866 # test box folder
+} else {
+  boxfolder <- 221280601453 # destination of CSV files (not pdf)
+}
 
 
 ##### Making sure personal C drives aren't referenced if this code is being used by others
@@ -3525,7 +3540,8 @@ box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_Mod
                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
 box1 <- box1[, c(1:8, 10:21)]
 
-write.csv(box1,paste(local_drive, "Formatted_prod_flatBoxes_JP_",currentDate,".csv",sep=""),row.names = F,na="")
+write.csv(box1,glue("{local_drive}Formatted_prod_flatBoxes_JP_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+# write.csv(box1,paste(local_drive, "Formatted_prod_flatBoxes_JP_",currentDate,".csv",sep=""),row.names = F,na="")
 
 
 
@@ -3620,7 +3636,9 @@ biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:16
 
 biospe1_fin= subset(biospe1_final, select=-c(BioClin_DBBloodRRL_v1r0, BioClin_DBBloodRRLDt_v1r0, BioClin_DBUrineRRLDt_v1r0))
 
-write.csv(biospe1_fin,paste(local_drive, "Connect_prod_Biospe_Formats",currentDate,".csv",sep="_"),row.names = F,na="")
+
+# write.csv(biospe1_fin,paste(local_drive, "Connect_prod_Biospe_Formats",currentDate,".csv",sep="_"),row.names = F,na="")
+write.csv(biospe1_fin,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
@@ -3671,7 +3689,9 @@ for (i in 1:length(yes_no)){
   recrbio1 <-   cbind(recrbio1,subset(check,select=varname))
 }
 
-write.csv(recrbio1,paste(local_drive, "Connect_prod_recr_veriBiospe_Formats_",currentDate,".csv",sep=""),row.names = F,na="")
+
+# write.csv(recrbio1,paste(local_drive, "Connect_prod_recr_veriBiospe_Formats_",currentDate,".csv",sep=""),row.names = F,na="")
+write.csv(recrbio1,glue("{local_drive}Connect_prod_recr_veriBiospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
@@ -3775,9 +3795,8 @@ dim(coord_csv)
 coordination=coord_csv %>%  select(RcrtV_VerificationTm_V1R0, BioRec_CollectFinalTime_v1r0, BioClin_BldOrderPlacdDt_v1r0, BioSpm_Setting_v1r0, RcrtES_Site_v1r0, BioSpm_Location_v1r0, BioRec_CollectFinal, SMMet_BLSamplesColl_v1r0, Partial_Blood_Coll_Research, No_Blood_Coll_Research,All_Blood_Coll_Research, BioClin_BldOrderPlaced, BioFin_BaseBloodCol_v1r0, BioFin_BaseUrineCol_v1r0, BioFin_BaseMouthCol_v1r0)
 #coordination=coord_csv[, c(7, 8, 36,11, 387, 389, 390, 391, 392)]
 
-
-
-write.csv(coordination,paste(local_drive, "Biospecimen_Coordinating_Table_One",currentDate,".csv",sep="_"),row.names = F,na="")
+# write.csv(coordination,paste(local_drive, "Biospecimen_Coordinating_Table_One",currentDate,".csv",sep="_"),row.names = F,na="")
+write.csv(coordination,glue("{local_drive}Biospecimen_Coordinating_Table_One_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 
@@ -3807,8 +3826,9 @@ box_table2 <- box_table2[!duplicated(box_table2$BioPack_TrackScan1_v1r0), ]
 #coordination2 <- coordination2[c(1:5), c(23:24)]
 box_table2 <- box_table2 %>%  select(BioShip_ShipTime_v1r0, BioPack_TrackScan1_v1r0, BioSpm_Setting_v1r0, BioShip_LogSite_v1r0, BioShip_LocalID_v1r0, Boxes_Recvd_in_Good_Condition, BioCol_0008_Assigned, BioCol_0009_Assigned)  %>%  group_by(BioShip_LocalID_v1r0)
 
+# write.csv(box_table2,paste(local_drive, "Biospecimen_Coordinating_Table_Two",currentDate,".csv",sep="_"),row.names = F,na="")
+write.csv(box_table2,glue("{local_drive}Biospecimen_Coordinating_Table_Two_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
-write.csv(box_table2,paste(local_drive, "Biospecimen_Coordinating_Table_Two",currentDate,".csv",sep="_"),row.names = F,na="")
 
 
 
