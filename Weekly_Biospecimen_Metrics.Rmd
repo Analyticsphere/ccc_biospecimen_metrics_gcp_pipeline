@@ -7,6 +7,7 @@ header-includes:
     \usepackage[labelformat=empty]{caption}
     \usepackage{placeins}
     \usepackage{booktabs}
+    \usepackage{pdflscape}
 
 
 output:
