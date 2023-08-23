@@ -51,8 +51,8 @@ D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_
 where Connect_ID IS NOT NULL"
 specimenBUM <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null"
 
-biospec_table <- bq_project_query(project, biospec)
-parts_table <- bq_project_query(project, parts)
+biospec_table <- bq_project_query(project, biospec, n_max = Inf, page_size = 1000)
+parts_table <- bq_project_query(project, parts, n_max = Inf, page_size = 1000)
 specimenBUM_table <- bq_project_query(project, specimenBUM)
 
 biospec_data <- bq_table_download(biospec_table, bigint = "integer64")

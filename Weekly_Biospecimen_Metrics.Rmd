@@ -78,7 +78,7 @@ if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
 }
 
 if (use_test_box_folder) {
-  boxfolder <- 221458210866 # test box folder
+  boxfolder <- 222593912729 # test box folder
 } else {
   boxfolder <- 221280601453 # destination of CSV files (not pdf)
 }
@@ -88,7 +88,7 @@ if (use_test_box_folder) {
 
 
 #Change to FALSE if referencing this code
-write_to_local_drive = T #F
+write_to_local_drive = F #F
 #local_drive="C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/"    
 
 
@@ -127,7 +127,7 @@ dd<-rbindlist(dictionary,fill=TRUE,use.names=TRUE,idcol="CID") #THIS TABLE HAS R
 box_CID <- as.data.frame(as.numeric(sapply((strsplit(colnames(box_wl_flat),"d_")),tail,1)))
 box_CID$variable <- colnames(box_wl_flat)
 colnames(box_CID)[1] <-"CID"
-box_CID_dd <- merge(box_CID, dd,by="CID",all.x=TRUE)
+box_CID_dd <- base::merge(box_CID, dd,by="CID",all.x=TRUE)
 #to convert the numeric variables
 numbers_only <- function(x) !grepl("\\D", x)
  cnames <- names(box_wl_flat)
@@ -171,7 +171,7 @@ urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/mast
 y <- read.csv(urlfile)
 recrvar_nd <- recrvar[which(grepl("d_",recrvar$column_name)),c("column_name","field_path")]
 recrvar_nd$last.CID <- ifelse(grepl("d_",recrvar_nd$column_name),substring(sapply(strsplit(recrvar_nd$column_name,"d_"),tail,1),1,9),NA)
-recrvar_nd_label <- merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
+recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
 recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|collection",recrvar_nd_label$Variable.Label)),] #49
 query <- recrvar.bio$column_name
 select <- paste(recrvar.bio$column_name,collapse=",")
@@ -202,7 +202,7 @@ for (i in 1: length(cnames)){
 recrver_CID <- as.data.frame(sapply((strsplit(colnames(recrver),"d_")),tail,1))
 colnames(recrver_CID)[1] <- "CID"
 recrver_CID$variable <- names(recr.bio)
-recrver_ver1 <- merge(dd,recrver_CID,by="CID")
+recrver_ver1 <- base::merge(dd,recrver_CID,by="CID")
 recrver1 <- expss::apply_labels(recrver,
                         d_512820379 = "Recruitment type",#RcrtSI_RecruitType_v1r0
                         d_512820379=c(	"Not active"=180583933,  
@@ -281,7 +281,7 @@ biospe_var$cid2 <- sapply(strsplit(colnames(biospe),"_"), "[", 4)
 biospe_var$cid3 <- sapply(strsplit(colnames(biospe),"_"), "[", 6)
 biospe_var$cid_tail <- sapply(strsplit(colnames(biospe),"_"), tail,1)
 biospe_CID <- dd[which(dd$CID %in% CID),]
-biospe_dd<- merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="CID", all.x=TRUE)
+biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="CID", all.x=TRUE)
 tubes <- dd[grepl(" Tube ",dd$`Variable Label`),]
 urine <- dd[grepl("Urine",dd$`Variable Label`),]
 mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
@@ -321,7 +321,7 @@ recrver1$Site<- droplevels(recrver1$Site)
 
 bio.appoint <- biospe %>% arrange(Connect_ID, d_410912345) %>% group_by(Connect_ID) %>% summarise(d_410912345=mean(d_410912345,na.rm=TRUE)) #to remove the multiple collections by Connect_ID
  
-biocol.tb <- merge(recrver1[,c("Connect_ID","Site","BiospeCollection","d_878865966","d_684635302","d_167958071")],bio.appoint,by.x="Connect_ID",by.y="Connect_ID",all.x=TRUE )
+biocol.tb <- base::merge(recrver1[,c("Connect_ID","Site","BiospeCollection","d_878865966","d_684635302","d_167958071")],bio.appoint,by.x="Connect_ID",by.y="Connect_ID",all.x=TRUE )
  
 table1 <- biocol.tb %>% filter(recrver1$d_821247024==197316935) %>%
   mutate(#appointment = ifelse((d_410912345!= 353358909 | is.na(d_410912345)), 104430631, 353358909),
@@ -1118,7 +1118,7 @@ colnames(combined4) <- c("Data System", "Blood", "Urine")
 #Table 13 
 #Participants who checked in for a baseline biospecimen visit but did not give any samples
 dd[grepl("BioChk",dd$`Variable Name`),]
-recr_bio <- merge(recrver1,tube_col,by="Connect_ID")
+recr_bio <- base::merge(recrver1,tube_col,by="Connect_ID")
 bio_checkin_resh <- recr_bio  %>% filter(!is.na(d_331584571_d_266600170_d_840048338) & d_650516960==534621077) %>% select(BiospeCollection ) %>% tbl_summary()
 table(bio_checkin_resh$BiospeCollection)
 #Table 12 Number (and percent) of tubes with any deviation by site
@@ -1179,7 +1179,7 @@ tube_nodev <- as.data.frame(aggregate( biospe$tube_nodev,                # Speci
                                      FUN = sum))
 
   #changed Table17 to Deviation_Freq to match report
-Deviation_Freq <- merge(tube_dev,tube_nodev,by="row.names")
+Deviation_Freq <- base::merge(tube_dev,tube_nodev,by="row.names")
 Deviation_Freq <- Deviation_Freq[,c(2,3,5)]
 Deviation_Freq$Total <- Deviation_Freq[,2]+Deviation_Freq[,3]
 Deviation_Freq$dev_n_pct <- ifelse(Deviation_Freq[,2] >0, paste0(format(Deviation_Freq[,2],big.mark=",")," (", round(100*Deviation_Freq[,2]/Deviation_Freq$Total, 1)," %)"), "0 (0 %)")
@@ -1368,7 +1368,7 @@ notcol.ls <- sapply(strsplit(notcol_tubes, "_d"),"[[",1)
    dev_tube1$tube_dev <- paste(dev_tube1$tube_type,"Deviation", dev_tube1$deviationnotes,sep=" ")
    dev_tube1$tubeID <- substr(dev_tube1$dev_type,1,11)
   dev <- collection_long %>% filter(tube_deviation==353358909) 
-  dev_tube2 <- merge(dev,dev_tube1[,c("dev_type","TubeID","tubeID","deviationnotes","tube_dev")],by.x=c("TubeID","tubeID"), by.y=c("TubeID","tubeID")) ##to get the deviation notes
+  dev_tube2 <- base::merge(dev,dev_tube1[,c("dev_type","TubeID","tubeID","deviationnotes","tube_dev")],by.x=c("TubeID","tubeID"), by.y=c("TubeID","tubeID")) ##to get the deviation notes
 
 
 #This is referencred directly in table 12  
@@ -1573,7 +1573,7 @@ notcol_combo2 <- array(pct_n(clinic.ctable$t,clinic.ctable$prop.col), dim=c(5,12
 ##Table X: Reason not collected by tube type and by site for research collections only
   a<- collection_long[which(collection_long$tubecol==104430631),]
   b <- notcol_tube[which(notcol_tube$tubecol == 104430631),]
-  notcol_notes <- merge(a, b[,c("tubeID","d_820476880","tube_notcol")], by=c("tubeID","d_820476880"),all.x=TRUE)
+  notcol_notes <- base::merge(a, b[,c("tubeID","d_820476880","tube_notcol")], by=c("tubeID","d_820476880"),all.x=TRUE)
 notcol_notes <- notcol_notes %>% 
   mutate(notcol.notes = case_when(tubecol == 104430631 & tube_notcol==181769837 ~ "Other",
                                   tubecol == 104430631 & tube_notcol==234139565 ~ "Short Draw",
@@ -1670,7 +1670,7 @@ research.notcolnotes_tube
 
 
 ## Was Table16---- now deleted
-#notcol_notes<- merge(collection_long,notcol_tube,by="tubeID")
+#notcol_notes<- base::merge(collection_long,notcol_tube,by="tubeID")
 research.notcolnotes <- research.notcol %>% select(notcol.notes,Site, tube_type) %>% crosstable(c(Site, tube_type),by=notcol.notes,showNA="ifany", total="row",margin=c("row", "col"),
            percent_digits=1, percent_pattern="{n} ({p_col})") %>% as_flextable() #%>% as_flex_table()  
 clinicnotes.notcol <- notcol_notes %>% filter(biocol_Setting=="Clinical" & tubecol==104430631 & notcol_notes$biospecimen!="Mouthwash"  )%>%    mutate(Site=droplevels(Site),
@@ -1748,7 +1748,7 @@ recrvar.bio[which(grepl("Survey", recrvar.bio$Primary.Source)),c("field_path","P
 
 
 ##Table 17
-recr.biospe <- merge(recr.bio,tube_col,by="Connect_ID")
+recr.biospe <- base::merge(recr.bio,tube_col,by="Connect_ID")
 recr.biospe <- recr.biospe %>%
   mutate(research.sv = case_when(d_265193023 == 231311385 ~ "Submitted",
                                  d_265193023 == 615768760 ~ "Started",
@@ -3423,7 +3423,7 @@ box_CID$variable <- colnames(box_wl_flat)
 colnames(box_CID)[1] <-"CID"
 box_CID$CID <- ifelse(is.na(box_CID$CID), 0, box_CID$CID)
 
-box_CID_dd <- merge(box_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+box_CID_dd <- base::merge(box_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 box_CID_dd$Variable.Name <- ifelse(is.na(box_CID_dd$Variable.Name), box_CID_dd$variable,box_CID_dd$Variable.Name)
 box_CID_dd$category<- ifelse(is.na(box_CID_dd$conceptId.4), 0,ifelse(!is.na(box_CID_dd$conceptId.4) &  box_CID_dd$conceptId.4 !=104430631, 2, 1))
@@ -3579,7 +3579,7 @@ for (i in 1: length(cnames)){
 biospe2_CID <- as.data.frame(sapply((strsplit(colnames(biospe2),"d_")),tail,1))
 colnames(biospe2_CID)[1] <- "CID"
 biospe2_CID$variable <- names(biospe2)
-biospe2_CID_dd <- merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
                                                                !is.na(conceptId.4) & conceptId.4 !=104430631 ~ 2,
@@ -3658,7 +3658,7 @@ write.csv(biospe1_fin,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDat
 recrver_CID <- as.data.frame(sapply((strsplit(colnames(recrver),"d_")),tail,1))
 colnames(recrver_CID)[1] <- "CID"
 recrver_CID$variable <- names(recr.bio)
-recrvar_CID_dd <- merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+recrvar_CID_dd <- base::merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 recrvar_CID_dd <- recrvar_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
                                                                  !is.na(conceptId.4) & conceptId.4 !=104430631 ~ 2,

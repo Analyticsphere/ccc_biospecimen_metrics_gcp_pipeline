@@ -28,8 +28,8 @@ biospecimen_qc_metrics:
     frequency: "30 11 * * 1" # every Monday at 11:30 AM"
     
 bu_clinical_survey_stats:
-  rmd_file_name: "BU Clinical Survey Summary Statistics.Rmd""
-  report_file_name: BU_Clinical_Survey_Summary_Statistics.Rmd
+  rmd_file_name: "BU Clinical Survey Summary Statistics.Rmd"
+  report_file_name: BU_Clinical_Survey_Summary_Statistics.pdf
   box_folders:
     - "208060008158"
   gcp_info:
@@ -38,7 +38,7 @@ bu_clinical_survey_stats:
     
 bum_research_survey_stats:
   rmd_file_name: "BUM Research Summary Statistics.Rmd"
-  report_file_name: BUM_Research_Summary_Statistics.Rmd
+  report_file_name: BUM_Research_Summary_Statistics.pdf
   box_folders:
     - "208060008158"
   gcp_info:

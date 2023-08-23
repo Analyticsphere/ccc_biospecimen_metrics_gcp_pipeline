@@ -63,8 +63,8 @@ biospec_table <- bq_project_query(project, biospec)
 parts_table <- bq_project_query(project, parts)
 specimenBU_table <- bq_project_query(project, specimenBU)
 
-biospec_data <- bq_table_download(biospec_table, bigint = "integer64")
-parts_data <- bq_table_download(parts_table, bigint = "integer64")
+biospec_data <- bq_table_download(biospec_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+parts_data <- bq_table_download(parts_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 specimenBU_data <- bq_table_download(specimenBU_table, bigint = "integer64")
 
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID) 

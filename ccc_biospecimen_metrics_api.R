@@ -1,8 +1,8 @@
-# File:       ccc_biospecimen_metrics_api.R
-# Decription: This script generates a plumber api that runs/renders Kelsey's 
-#             Rmarkdown file.
-# Author:     Jake Peters
-# Date:       October 2022
+# File:        ccc_biospecimen_metrics_api.R
+# Description: This script generates a plumber api that runs/renders Kelsey's 
+#              Rmarkdown file.
+# Author:      Jake Peters
+# Date:        October 2022
 
 library(plumber)
 library(rmarkdown)
@@ -36,7 +36,7 @@ function(report, testing=FALSE){
     print(paste0("bucket: ", bucket))
     if (testing) {
       box_folders <- configuration$test_box_folders
-      Sys.setenv(USE_TEST_BOX_FOLDER = as.integer(box_folders[1]))
+      Sys.setenv(USE_TEST_BOX_FOLDER = as.logical(testing))
     } else {
       box_folders <- configuration$box_folders
     }
