@@ -2754,7 +2754,7 @@ research.3 <- ggplot(visit_wk_site3, aes(x=as.Date(visit.wkdate), y=100*(not_sub
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
         axis.title.y = element_text(size = 14, face = "bold",color="black"),
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) + 
-  labs(caption = "Note: Biospecimen Surveys with a completion status of “Started” and “Not Started” are considered 'Not Submitted'.") +
+  labs(caption = "Note: Biospecimen Surveys with a completion status of 'Started' and 'Not Started' are considered 'Not Submitted'.") +
   theme(plot.caption = element_text(hjust=0))
         #guides(fill=guide_legend(nrow=2,byrow=TRUE))
 
