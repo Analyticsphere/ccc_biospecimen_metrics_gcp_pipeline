@@ -32,8 +32,27 @@ library(gt)
 library(expss)
 library(knitr)
 library(kableExtra)
+library(glue)
 bq_auth()
 2
+
+### Set Box folders for output CSV files #######################################
+use_test_box_folder <- TRUE # Local user sets this (Jake or Kelsey)
+
+# Over-ride if using plumber api on GCP (USER DOESN'T TOUCH THIS!)
+# Check if the environment variable exists and is not empty
+if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
+    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
+  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
+}
+
+if (use_test_box_folder) {
+  boxfolder <- 222593912729 # test box folder
+} else {
+  boxfolder <- 221297686961 # destination of CSV files (not pdf)
+}
+################################################################################
+
 
 project <- "nih-nci-dceg-connect-prod-6d04"
 
@@ -54,10 +73,12 @@ parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 parts_table <- bq_project_query(project, parts)
-parts_data <- bq_table_download(parts_table, bigint = "integer64")
+
+parts_data <- bq_table_download(parts_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
 bio_table <- bq_project_query(project, bio)
-bio_data <- bq_table_download(bio_table, bigint = "integer64",n_max = Inf, page_size = 1000)
+bio_data <- bq_table_download(bio_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
 
 bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
@@ -98,7 +119,9 @@ bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartne
 
 
 #Change to FALSE if referencing this code for Box outputs
-write_to_local_drive = T #F
+
+write_to_local_drive = F #F
+
 
 
 ### This function below determines whether the file will be created locally or not.
@@ -859,10 +882,12 @@ parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL"
 
 parts_table <- bq_project_query(project, parts)
-parts_data <- bq_table_download(parts_table, bigint = "integer64")
+
+parts_data <- bq_table_download(parts_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
 bio_table <- bq_project_query(project, bio)
-bio_data <- bq_table_download(bio_table, bigint = "integer64",n_max = Inf, page_size = 1000)
+bio_data <- bq_table_download(bio_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
 
 bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
@@ -917,7 +942,9 @@ qc1_blood <- qc1_blood %>% select(Site, Connect_ID, d_173836415_d_266600170_d_34
 colnames(qc1_blood) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID", "Collection Date/Time")
 #knitr::kable(qc1_blood)
 
-write.csv(qc1_blood,paste(local_drive, "Mismatched_Blood_Accession_IDs",currentDate,".csv",sep="_"),row.names = F,na="")
+
+write.csv(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
 
 ```
 
@@ -946,7 +973,8 @@ qc1_urine <- qc1_urine %>% select(Site, Connect_ID, d_173836415_d_266600170_d_19
 colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID", "Collection Date/Time")
 #knitr::kable(qc1_urine)
 
-write.csv(qc1_urine,paste(local_drive, "Mismatched_Urine_Accession_IDs",currentDate,".csv",sep="_"),row.names = F,na="")
+write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
 
 
 ```
@@ -968,7 +996,9 @@ INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Conn
 
 
 dup_table <- bq_project_query(project, dup)
-dup_data <- bq_table_download(dup_table, bigint = "integer64")
+
+dup_data <- bq_table_download(dup_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
 dup_data$Connect_ID <- as.numeric(dup_data$Connect_ID)
 
 
@@ -997,7 +1027,8 @@ dup_list <- bio_dup %>%  select(Site, Connect_ID, d_820476880, d_556788178, Fina
 colnames(dup_list) <- c("Site", "Connect ID", "Collection ID", "Collection Date/Time", "Collection Finalized")
 #knitr::kable(dup_list)
 
-write.csv(dup_list,paste(local_drive, "Duplicate_Baseline_Biospecimen_Collections",currentDate,".csv",sep="_"),row.names = F,na="")
+write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
 
 ```
 
