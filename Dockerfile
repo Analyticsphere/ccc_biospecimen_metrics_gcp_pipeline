@@ -20,7 +20,16 @@ RUN apt-get update \
     /rocker_scripts/install_pandoc.sh && \
     install2.r rmarkdown 
 
-### Install tcltk
+### Install tcltk which is needed for summarytools library
+# I added this when I got this error in GCP Cloud Run:
+# ! package or namespace load failed for 'summarytools':
+# .onLoad failed in loadNamespace() for 'tcltk', details:
+# call: dyn.load(file, DLLpath = DLLpath, ...)
+# error: unable to load shared object '/usr/local/lib/R/library/tcltk/libs/tcltk.so':
+# libtcl8.6.so: cannot open shared object file: No such file or directory
+# Backtrace:
+# 1. └─base::library(summarytools)
+
 RUN apt-get update \
   && apt-get install -y \
     tcl-dev \
