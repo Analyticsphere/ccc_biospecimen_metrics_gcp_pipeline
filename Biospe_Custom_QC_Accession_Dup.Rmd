@@ -53,6 +53,7 @@ if (use_test_box_folder) {
 }
 ################################################################################
 
+
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 # bio <- "SELECT  Connect_ID, d_232343615_d_593843561, d_143615646_d_593843561, d_223999569_d_593843561,  d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_650516960, d_678166505,  d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, d_143615646_d_883732523, d_299553921_d_883732523, d_454453939_d_883732523, d_652357376_d_883732523, d_703954371_d_883732523, d_838567176_d_883732523, d_973670172_d_883732523, d_143615646_d_593843561, d_223999569_d_593843561, d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_915838974, d_646899796, 
@@ -72,10 +73,12 @@ parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 parts_table <- bq_project_query(project, parts)
+
 parts_data <- bq_table_download(parts_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
 bio_table <- bq_project_query(project, bio)
 bio_data <- bq_table_download(bio_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
 
 bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
@@ -116,7 +119,9 @@ bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartne
 
 
 #Change to FALSE if referencing this code for Box outputs
+
 write_to_local_drive = F #F
+
 
 
 ### This function below determines whether the file will be created locally or not.
@@ -877,10 +882,12 @@ parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL"
 
 parts_table <- bq_project_query(project, parts)
+
 parts_data <- bq_table_download(parts_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
 bio_table <- bq_project_query(project, bio)
 bio_data <- bq_table_download(bio_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
 
 bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
@@ -935,7 +942,9 @@ qc1_blood <- qc1_blood %>% select(Site, Connect_ID, d_173836415_d_266600170_d_34
 colnames(qc1_blood) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID", "Collection Date/Time")
 #knitr::kable(qc1_blood)
 
+
 write.csv(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
 
 ```
 
@@ -967,6 +976,7 @@ colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Acc
 write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
+
 ```
 
 
@@ -986,7 +996,9 @@ INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Conn
 
 
 dup_table <- bq_project_query(project, dup)
+
 dup_data <- bq_table_download(dup_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
 dup_data$Connect_ID <- as.numeric(dup_data$Connect_ID)
 
 
@@ -1016,6 +1028,7 @@ colnames(dup_list) <- c("Site", "Connect ID", "Collection ID", "Collection Date/
 #knitr::kable(dup_list)
 
 write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
 
 ```
 

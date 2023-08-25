@@ -6,7 +6,6 @@ header-includes:
     \usepackage{booktabs}
 
 
-
 output:
   pdf_document:
     extra_dependencies: ["float"]
@@ -26,8 +25,6 @@ output:
 
 #old.packages()
 #update.packages()
-#install.packages("rlang")
-#install.packages("bigrquery")
 library(rlang)
 library(bigrquery)
 library(dplyr)
@@ -132,7 +129,9 @@ BU_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", 
 gt_functBU <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM)
+
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
+
   
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -155,7 +154,9 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 menstrual_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BU_tib$D_522008539==536341288)
+
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
+
   
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -179,7 +180,9 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 covid_once_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(as.numeric(BU_tib$D_860011428)>=1 | BU_tib$D_494226443=="353358909")
+
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
+
   
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -202,7 +205,9 @@ covid_once_funct <- function(CID, Title){
 covid_twice_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(as.numeric(BU_tib$D_860011428)>=2)
+
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
+
   
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -225,7 +230,9 @@ covid_twice_funct <- function(CID, Title){
 covid_thrice_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(as.numeric(BU_tib$D_860011428)>=3)
+
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
+
   
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -251,7 +258,9 @@ one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
   dt_select <- BU_tib %>%  filter(!!CID_SYM_P==Previous_Answer) %>%  select(Connect_ID, !!CID_SYM) 
+
   gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
   
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -278,7 +287,9 @@ two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_C
   CID_SYM_P <- rlang::ensym(Previous_CID)
   CID_SYM_P2 <- rlang::ensym(Previous_CID2)
   dt_select2 <- BU_tib %>%  filter(!!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>%  select(Connect_ID, !!CID_SYM) 
+
   gt2_yn <- dt_select2  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
   
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -935,7 +946,9 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV5
   dt_select2 <- BU_tib %>%  filter((as.numeric(D_860011428)>=1| D_494226443=="353358909") & D_366980310_1_1!="353358909") %>%  select(Connect_ID, D_498462481_1_1) 
+
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_498462481_1_1) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(D_498462481_1_1, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
   
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -1443,7 +1456,9 @@ covid_twice_funct(D_366980310_2_2, "Table 32: Test Positive the Second Time Havi
 #covid_once_funct(D_498462481_2_2, "COV5_2: HealchCare Provider Confirm Diagnosis the Second Time Having COVID-19")
 
   dt_select2 <- BU_tib %>%  filter((as.numeric(D_860011428)>=1 | D_494226443=="353358909") & D_366980310_2_2!="353358909") %>%  select(Connect_ID, D_498462481_2_2) 
+
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_498462481_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(D_498462481_2_2, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
   
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -2122,6 +2137,7 @@ dt_select2 <- BU_tib %>%  filter(D_694503437_1_1=="353358909" | D_694503437_2_2=
   select(Connect_ID, D_110872086_D_110872086) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_110872086_D_110872086) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
     dplyr::mutate(answer=dplyr::recode(D_110872086_D_110872086, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
   
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -2596,6 +2612,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 BU %>%  select(D_424718457_D_157417942) %>% filter(!is.na(D_424718457_D_157417942)) %>% gt() %>% cols_label(D_424718457_D_157417942= md("**Table 94: Experienced What Other Symptom Since 2020**"))
 
 
+
 #COV238B
 one_skip_funct(D_368715875, "Table 95: Still Experiencing Said Other Symptom", D_424718457_D_424718457, "707601969")
 
@@ -2937,6 +2954,7 @@ one_skip_funct(D_589004291, "Table 109: Length of Time Experiencing Other Sympto
   select(Connect_ID, D_890156588_V2) 
 gt2_yn <- COV25  %>% dplyr::group_by(D_890156588_V2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_890156588_V2, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
    
    gt2_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -3034,6 +3052,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$D_877074400_V2>=1) %>%  #BU_tib$D_890156588
   select(Connect_ID, D_220055064_1_1_D_220055064_1_1) 
    cov28_1_yn <- COV28_1  %>% dplyr::group_by(D_220055064_1_1_D_220055064_1_1) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_1_1_D_220055064_1_1, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
    
    cov28_1_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -3058,6 +3077,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$D_877074400_V2>=1) %>%  #BU_tib$D_890156588
   select(Connect_ID, D_220055064_2_2_D_220055064_2_2) 
    cov28_2_yn <- COV28_2  %>% dplyr::group_by(D_220055064_2_2_D_220055064_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_2_2_D_220055064_2_2, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
    
    cov28_2_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -3082,6 +3102,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$D_877074400_V2>=1) %>%  #BU_tib$D_890156588
   select(Connect_ID, D_220055064_3_3_D_220055064_3_3) 
    cov28_3_yn <- COV28_3  %>% dplyr::group_by(D_220055064_3_3_D_220055064_3_3) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_3_3_D_220055064_3_3, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
    
    cov28_3_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -3106,6 +3127,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$D_877074400_V2>=1) %>%  #BU_tib$D_890156588
   select(Connect_ID, D_220055064_4_4_D_220055064_4_4) 
    cov28_4_yn <- COV28_4  %>% dplyr::group_by(D_220055064_4_4_D_220055064_4_4) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_4_4_D_220055064_4_4, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
    
    cov28_4_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -3130,6 +3152,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$D_877074400_V2>=1) %>%  #BU_tib$D_890156588
   select(Connect_ID, D_220055064_5_5_D_220055064_5_5) 
    cov28_5_yn <- COV28_5  %>% dplyr::group_by(D_220055064_5_5_D_220055064_5_5) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_5_5_D_220055064_5_5, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
+
    
    cov28_5_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -3237,6 +3260,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$D_877074400_V2>=1) %>%  #BU_tib$D_890156588
 <!--   CID_SYM <- rlang::ensym(CID) -->
 <!--   dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) -->
 <!--   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage) -->
+
 
 <!--   gt_yn %>%  gt(rowname_col = "row_lab")  %>%   -->
 <!--   fmt_number(columns = "percentage", decimals = 1) %>%  -->
