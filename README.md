@@ -73,7 +73,7 @@ bu_clinical_survey_stats:
     - "208060008158"
   gcp_info:
     cloud_scheduler: ccc-bu-clinical-biospecimen-survey-stats
-    frequency: "0 12 * * 1" # every Monday at 12 PM"
+    frequency: "30 11 1 * *" # first of the Month at 11:30 AM"
     
 bum_research_survey_stats:
   rmd_file_name: "BUM Research Summary Statistics.Rmd"
@@ -82,7 +82,7 @@ bum_research_survey_stats:
     - "208060008158"
   gcp_info:
     cloud_scheduler: ccc-bum-research-biospecimen-survey-stats
-    frequency: "30 12 * * 1" # every Monday at 12:30 PM"
+    frequency: "0 12 1 * *"# first of the Month at 12 PM"
 ```
 
 ## Running the API with Google Cloud Run and Cloud Scheduler
