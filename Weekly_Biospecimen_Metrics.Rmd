@@ -2924,9 +2924,6 @@ coll_completenessR %>% kable_styling(latex_options = "scale_down")
 coll_completenessC %>% kable_styling(latex_options = "scale_down")
 
 
-Bld_urn_cli = knitr::kable(combined4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down") 
-add_footnote(Bld_urn_cli, "Note: Data sent by sites experience an availablility delay of up to 48 hours behind data from the Biospecimen Dashboard.", notation = "none")
-
 
 
 ```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
@@ -2953,7 +2950,6 @@ fig1_UC_inc <- fig1_UC %>%  filter(Site=="University of Chicago Medicine")
 
 ```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
-knitr::kable(bldcol_research1, col.names=c("Site","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 6. Blood Completeness for Participants with Baseline Research Collections', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
 
 help_fig1 <- fig1_UC_inc %>%  select(visit.wkdate, bld.complt) %>%  mutate(incomp_blood = case_when(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood" ~1,
@@ -3084,7 +3080,30 @@ knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No
 ```
 
 
+```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
+ 
+
+ 
+
+ 
+
+research.notcolnotes_site
+research.notcolnotes_tube
+
+ 
+
+ 
+
+knitr::kable(discard.site, caption='Table 13. Number of Tubes Discarded by Type and by Site', row.names=FALSE,  col.names=c("Site",  "SS Tube1", "SS Tube2", "SS Tube5", "Heparin Tube1", "Heparin Tube2", "EDTA Tubes", "ACD Tubes", "Urine Tubes", "Total Tubes"), align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+#col.names=c("Site",  "SS Tube1", "SS Tube2", "SS Tube5", "Heparin Tubes", "EDTA Tubes", "ACD Tubes", "Urine Tubes", "Total Tubes"), align=c("l","c","c","c","c","c","c","c","c"),
+
+ 
+
+ 
+
+Table15_combined %>% kable_styling(latex_options = "scale_down")
+```
 
 
 \newpage
