@@ -24,8 +24,7 @@ output:
 
 #old.packages()
 #update.packages()
-#install.packages("rlang")
-#install.packages("bigrquery")
+
 library(rlang)
 library(bigrquery)
 library(dplyr)
@@ -63,7 +62,7 @@ biospec_table <- bq_project_query(project, biospec)
 parts_table <- bq_project_query(project, parts)
 specimenBU_table <- bq_project_query(project, specimenBU)
 
-biospec_data <- bq_table_download(biospec_table, bigint = "integer64")
+biospec_data <- bq_table_download(biospec_table, bigint = "integer64",n_max = Inf, page_size = 1000)
 parts_data <- bq_table_download(parts_table, bigint = "integer64")
 specimenBU_data <- bq_table_download(specimenBU_table, bigint = "integer64")
 
@@ -2590,8 +2589,8 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23B8A
 #gt_functBU(D_424718457_D_424718457, "Experienced any Other Symptom Since 2020")
-
-BU %>%  select(D_424718457_D_157417942) %>% filter(!is.na(D_424718457_D_157417942)) %>% gt() %>% cols_label(D_424718457_D_157417942= md("**Table 94: Experienced What Other Symptom Since 2020**"))
+  cat("Table 94: Experienced What Other Symptom Since 2020")
+list(unique(BU$D_424718457_D_157417942))
 
 
 #COV238B

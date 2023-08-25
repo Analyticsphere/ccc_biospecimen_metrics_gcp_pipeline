@@ -57,7 +57,7 @@ parts_table <- bq_project_query(project, parts)
 parts_data <- bq_table_download(parts_table, bigint = "integer64")
 
 bio_table <- bq_project_query(project, bio)
-bio_data <- bq_table_download(bio_table, bigint = "integer64")
+bio_data <- bq_table_download(bio_table, bigint = "integer64",n_max = Inf, page_size = 1000)
 
 bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
@@ -862,7 +862,7 @@ parts_table <- bq_project_query(project, parts)
 parts_data <- bq_table_download(parts_table, bigint = "integer64")
 
 bio_table <- bq_project_query(project, bio)
-bio_data <- bq_table_download(bio_table, bigint = "integer64")
+bio_data <- bq_table_download(bio_table, bigint = "integer64",n_max = Inf, page_size = 1000)
 
 bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
