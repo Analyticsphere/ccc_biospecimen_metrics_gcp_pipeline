@@ -37,14 +37,16 @@ bq_auth()
 2
 
 ### Set Box folders for output CSV files #######################################
-use_test_box_folder <- TRUE # Local user sets this (Jake or Kelsey)
+use_test_box_folder <- FALSE # Local user sets this (Jake or Kelsey)
+
+# TODO: Fix conditional box folder configuration.
 
 # Over-ride if using plumber api on GCP (USER DOESN'T TOUCH THIS!)
 # Check if the environment variable exists and is not empty
-if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
-    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
-  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
-}
+#if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
+#    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
+#  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
+#}
 
 if (use_test_box_folder) {
   boxfolder <- 222593912729 # test box folder
