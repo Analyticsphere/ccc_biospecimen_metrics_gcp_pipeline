@@ -56,6 +56,7 @@ if (use_test_box_folder) {
 ################################################################################
 
 
+>>>>>>> origin/main
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 # bio <- "SELECT  Connect_ID, d_232343615_d_593843561, d_143615646_d_593843561, d_223999569_d_593843561,  d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_650516960, d_678166505,  d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, d_143615646_d_883732523, d_299553921_d_883732523, d_454453939_d_883732523, d_652357376_d_883732523, d_703954371_d_883732523, d_838567176_d_883732523, d_973670172_d_883732523, d_143615646_d_593843561, d_223999569_d_593843561, d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_915838974, d_646899796, 
@@ -975,8 +976,8 @@ qc1_urine <- qc1_urine %>% select(Site, Connect_ID, d_173836415_d_266600170_d_19
 colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID", "Collection Date/Time")
 #knitr::kable(qc1_urine)
 
-write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
+write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 ```
@@ -999,7 +1000,9 @@ INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Conn
 
 dup_table <- bq_project_query(project, dup)
 
+
 dup_data <- bq_table_download(dup_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
 
 dup_data$Connect_ID <- as.numeric(dup_data$Connect_ID)
 
@@ -1029,7 +1032,9 @@ dup_list <- bio_dup %>%  select(Site, Connect_ID, d_820476880, d_556788178, Fina
 colnames(dup_list) <- c("Site", "Connect ID", "Collection ID", "Collection Date/Time", "Collection Finalized")
 #knitr::kable(dup_list)
 
+
 write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
 
 
 ```

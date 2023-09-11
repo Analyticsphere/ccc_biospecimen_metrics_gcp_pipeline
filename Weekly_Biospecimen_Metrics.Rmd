@@ -90,7 +90,6 @@ if (use_test_box_folder) {
 
 
 #Change to FALSE if referencing this code
-
 write_to_local_drive = F #F
 
 #local_drive="C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/"    
@@ -1184,6 +1183,7 @@ tube_nodev <- as.data.frame(aggregate( biospe$tube_nodev,                # Speci
   #changed Table17 to Deviation_Freq to match report
 
 Deviation_Freq <- base::merge(tube_dev,tube_nodev,by="row.names")
+
 Deviation_Freq <- Deviation_Freq[,c(2,3,5)]
 Deviation_Freq$Total <- Deviation_Freq[,2]+Deviation_Freq[,3]
 Deviation_Freq$dev_n_pct <- ifelse(Deviation_Freq[,2] >0, paste0(format(Deviation_Freq[,2],big.mark=",")," (", round(100*Deviation_Freq[,2]/Deviation_Freq$Total, 1)," %)"), "0 (0 %)")
@@ -1649,7 +1649,6 @@ research.notcolnotes_site <- research.notcol %>% select(notcol.notes,Site) %>%
                    missing_text="0 ( 0 %)")%>%
      modify_header() %>%
      modify_caption("Table 12a. Reason Not Collected for Tubes Not Collected at Research Collection Visits by Site") %>% 
-
   as_kable_extra() %>% kable_styling(latex_options = "scale_down")
 research.notcolnotes_site
 
@@ -1835,7 +1834,6 @@ Table15_combined <- test17 %>% dplyr::select(Site, research.sv )  %>% tbl_cross(
   #italicize_levels() %>%
   modify_header() %>%
   modify_caption("Table 14. Baseline Research Biospecimen Survey Status by Site") %>%
-
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
@@ -2025,7 +2023,6 @@ Table18_combined <- test18a_B %>% dplyr::select(Site, checktmvisit )  %>% tbl_cr
   #italicize_levels() %>% 
   modify_header() %>%
   modify_caption("17. Baseline Clinical Biospecimen Survey Complete Time from Collection Time") %>% #on hold: check that HF shows up
-
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
@@ -2083,26 +2080,6 @@ Table21R_After = test21ra %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
-
-##New Table 20- length of time for clinical survey completion (8/16/23 request) before and after covid : start 534669573, finish 764863765
-test22c <- recrver1 %>%  filter(d_253883960==231311385 & !is.na(d_764863765) & !is.na(d_534669573)) 
-test22c <-  test22c %>% mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_764863765)),as.POSIXct(ymd_hms(d_534669573)),units="mins")))
-test22cb <-  test22c %>%  filter(d_764863765<as.Date("2023-07-05"))
-test22ca <-  test22c %>%  filter(d_764863765>as.Date("2023-07-05"))
-
-
-Table22C_Before = test22cb %>% group_by(Site) %>% 
-  dplyr::summarize('Number of Collection Visits'=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   SD=sd(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Perc.95= quantile(ctime, 0.95),
-                   Max = max(ctime))
-
 
 
 Table22C_After = test22ca %>% group_by(Site) %>% 
@@ -2784,7 +2761,6 @@ research.3 <- ggplot(visit_wk_site3, aes(x=as.Date(visit.wkdate), y=100*(not_sub
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
         #legend.position="right",
-
         axis.line = element_line(size=0.2),
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
         axis.title.y = element_text(size = 14, face = "bold",color="black"),
@@ -2925,6 +2901,12 @@ coll_completenessC %>% kable_styling(latex_options = "scale_down")
 
 
 
+```
+
+
+
+
+
 
 ```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
@@ -2948,23 +2930,18 @@ fig1_UC <- left_join(research.survey, Inc_bld_UC, by="Connect_ID")
 fig1_UC_inc <- fig1_UC %>%  filter(Site=="University of Chicago Medicine")
 
 
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
-
-
-
 help_fig1 <- fig1_UC_inc %>%  select(visit.wkdate, bld.complt) %>%  mutate(incomp_blood = case_when(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood" ~1,
                                                             TRUE ~ 0))
 
 help_fig1 <- help_fig1 %>% mutate(all_blood=case_when(incomp_blood==1 | incomp_blood==0 ~1,
                                                             TRUE ~ 0))
 
-
 help2_1_fig1 <- help_fig1 %>%  group_by(visit.wkdate, incomp_blood, all_blood) #%>%  tally() 
 
 help2_1_fig1_inc <- help2_1_fig1 %>%  select(visit.wkdate, incomp_blood, all_blood) %>%  group_by(visit.wkdate)
 
-
 final_fig1_table <- help2_1_fig1_inc %>%  group_by(visit.wkdate) %>%  summarize(incomplete=sum(incomp_blood), all_collections=sum(all_blood), percent=(incomplete/all_collections))
+
 
 
 research.1_1 <- ggplot(final_fig1_table, aes(x=as.Date(visit.wkdate), y=(100*round(percent, digits=1)))) + #, color=UC_Sites) + #,fill=Site, color=Site)) +
@@ -2988,7 +2965,6 @@ research.1_1 <- ggplot(final_fig1_table, aes(x=as.Date(visit.wkdate), y=(100*rou
 research.1_1
 ```
 
-
 ```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
 
@@ -3009,10 +2985,8 @@ fig2_HF_inc <- fig2_HF %>%  filter(Site=="Henry Ford Health System")
 help_fig2 <- fig2_HF_inc %>%  select(visit.wkdate,bld.complt) %>%  mutate(incomp_blood = case_when(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood" ~1,
                                                             TRUE ~ 0))
 
-
 help_fig2 <- help_fig2 %>% mutate(all_blood=case_when(incomp_blood==1 | incomp_blood==0 ~1,
                                                             TRUE ~ 0))
-
 
 help2_1_fig2 <- help_fig2 %>%  group_by(visit.wkdate, incomp_blood, all_blood) #%>%  tally() 
 
@@ -3026,7 +3000,6 @@ final_fig2_table <- help2_1_fig2_inc %>%  group_by(visit.wkdate) %>%  summarize(
 #final_fig2_table %>%  gt() #<- just needed to see how it looked
 
 #write.csv(final_fig2_table,"C:/Users/dowlingk2/Desktop/Figure2 Table.csv",row.names = F,na="") #<- just needed to send to domonique to verify
-
 
 
 
@@ -3052,6 +3025,7 @@ research.1_2 <- ggplot(final_fig2_table, aes(x=as.Date(visit.wkdate), y=(100*rou
 research.1_2
 
 
+
 ```
 
 
@@ -3060,7 +3034,9 @@ research.1_2
 
 knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
+
 knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  ## used to be Table 13
+
 
 
 
@@ -3082,28 +3058,22 @@ knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No
 
 ```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
- 
-
- 
-
- 
 
 research.notcolnotes_site
 research.notcolnotes_tube
 
- 
 
- 
 
 knitr::kable(discard.site, caption='Table 13. Number of Tubes Discarded by Type and by Site', row.names=FALSE,  col.names=c("Site",  "SS Tube1", "SS Tube2", "SS Tube5", "Heparin Tube1", "Heparin Tube2", "EDTA Tubes", "ACD Tubes", "Urine Tubes", "Total Tubes"), align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 #col.names=c("Site",  "SS Tube1", "SS Tube2", "SS Tube5", "Heparin Tubes", "EDTA Tubes", "ACD Tubes", "Urine Tubes", "Total Tubes"), align=c("l","c","c","c","c","c","c","c","c"),
 
- 
 
- 
+
 
 Table15_combined %>% kable_styling(latex_options = "scale_down")
+
 ```
+
 
 
 \newpage
@@ -3114,10 +3084,8 @@ research.3
 
 
 
-
 ```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 Table16_combined  %>% kable_styling(latex_options = "scale_down")
-
 
 
 tbl19a <- Table17_combinedB  %>% kable_styling(latex_options = "scale_down")
@@ -3126,8 +3094,11 @@ tbl19b <- Table17_combinedA  %>% kable_styling(latex_options = "scale_down")
 add_footnote(tbl19b,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none") 
 ```
 
+
+
 \newpage
 \FloatBarrier
+
 ```{r, echo=FALSE, eval=TRUE}
 research.4_1
 research.4_2
@@ -3140,9 +3111,9 @@ research.4_3
 Table18_combined  %>% kable_styling(latex_options = "scale_down")
 
 
+
 tab21_rb=knitr::kable(Table21R_Before,caption='Table 18a. Research Biospecimen Survey Completion Length (in Minutes) by Site (Pre-COVID-19 Questions Removal)',row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
 add_footnote(tab21_rb,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023. Research biospecimen surveys with a negative completion time have been excluded.",notation = "none")
-
 
 tab21_ra=knitr::kable(Table21R_After,caption='Table 18b. Research Biospecimen Survey Completion Length (in Minutes) by Site (Post-COVID-19 Questions Removal)',row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
 add_footnote(tab21_ra,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023. ", notation = "none")
@@ -3152,7 +3123,6 @@ tab21_cb=knitr::kable(Table22C_Before,caption='Table 19a. Clinical Biospecimen S
 add_footnote(tab21_cb,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none")
 tab21_ca=knitr::kable(Table22C_After,caption='Table 19b. Clinical Biospecimen Survey Completion Length (in Minutes) by Site (Post-COVID-19 Questions Removal)',row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
 add_footnote(tab21_ca,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none")
-
 
 
 
@@ -3175,7 +3145,6 @@ BSL_A <- knitr::kable(verif_BSL_colctA,caption='Table 22a. Time (in Days) from V
 add_footnote(BSL_A,"Note: Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
 
 BSL_B <-knitr::kable(verif_BSL_colctB,caption='Table 22b. Time (in Days) from Verification to Baseline Clinical  Collection for Participants Verified on or After 02/01/2023',row.names=FALSE,  align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>%  kable_styling(latex_options = "scale_down")
-
 add_footnote(BSL_B,"Note: Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
 
 
@@ -3186,7 +3155,6 @@ add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment
 
 
 tabl27 <- knitr::kable(verif_draw_order,caption='Table 24. Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% 
-
   kable_styling(latex_options = "scale_down")
 add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023.", notation="none")
 
@@ -3265,7 +3233,7 @@ research.vt1
 
 
 ```{r, eval=TRUE,echo=FALSE}
-
+ 
  #Hybird version
 VW_biospe <- biospe %>%  select(d_951355211, Connect_ID)
 VW_biospe$Connect_ID <- as.character(VW_biospe$Connect_ID)
