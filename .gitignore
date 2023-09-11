@@ -7,3 +7,7 @@
 *.pdf
 *.tex
 *.log
+test_large_gcs_upload.R
+ccc_biospecimen_metrics_api_b.R
+.DS_Store
+README.html

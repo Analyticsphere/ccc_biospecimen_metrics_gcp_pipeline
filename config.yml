@@ -1,0 +1,47 @@
+default:
+  report_maintainer: Kelsey Dowling
+  pipeline_maintainer: Jake Peters
+  consumer: Dominique Hopkins
+  bucket: ccc_weekly_metrics_report
+  test_box_folders: 
+    - "222593912729"
+  gcp_info:
+    cloud_build_trigger: ccc-biospecimen-metrics
+    cloud_run: ccc-biospecimen-metrics
+
+weekly_biospecimen_metrics:
+  rmd_file_name: Weekly_Biospecimen_Metrics.Rmd
+  report_file_name: Weekly_Biospecimen_Metrics.pdf
+  box_folders:
+    - "204235111776" 
+  gcp_info:
+    cloud_scheduler: ccc-weekly-biospecimen-metrics
+    frequency: "0 11 * * 1" # every Monday at 11 AM"
+
+biospecimen_qc_metrics:
+  rmd_file_name: Biospe_Custom_QC_Accession_Dup.Rmd
+  report_file_name: Biospe_Custom_QC_Accession_Dup.pdf
+  box_folders:
+    - "221297686961" 
+  gcp_info:
+    cloud_scheduler: ccc-biospecimen-qc-metrics
+    frequency: "30 11 * * 1" # every Monday at 11:30 AM"
+    
+bu_clinical_survey_stats:
+  rmd_file_name: "BU Clinical Survey Summary Statistics.Rmd"
+  report_file_name: BU_Clinical_Survey_Summary_Statistics.pdf
+  box_folders:
+    - "208060008158"
+  gcp_info:
+    cloud_scheduler: ccc-bu-clinical-biospecimen-survey-stats
+    frequency: "30 11 1 * *" # first of the Month at 11:30 AM"
+    
+bum_research_survey_stats:
+  rmd_file_name: "BUM Research Summary Statistics.Rmd"
+  report_file_name: BUM_Research_Summary_Statistics.pdf
+  box_folders:
+    - "208060008158"
+  gcp_info:
+    cloud_scheduler: ccc-bum-research-biospecimen-survey-stats
+    frequency: "0 12 1 * *"# first of the Month at 12 PM"
+    

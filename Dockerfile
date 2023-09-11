@@ -48,7 +48,7 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
                googleCloudStorageR data.table reshape listr ggplot2 \
                RColorBrewer stringr janitor expss magrittr arsenal rio \
                finalfit sqldf gmodels glue webshot2 cowplot crosstable \
-               magrittr gmodels magick gargle tools summarytools
+               magrittr gmodels magick gargle tools expss config
               
 
 # These libraries might not be available from install2.R so use CRAN
@@ -68,6 +68,10 @@ RUN R -e "devtools::install_github('dcomtois/summarytools')"
 # Copy R code to directory in instance
 COPY ["./ccc_biospecimen_metrics_api.R", "./ccc_biospecimen_metrics_api.R"]
 COPY ["./Weekly_Biospecimen_Metrics.Rmd", "./Weekly_Biospecimen_Metrics.Rmd"]
+COPY ["./Biospe_Custom_QC_Accession_Dup.Rmd", "./Biospe_Custom_QC_Accession_Dup.Rmd"]
+COPY ["./BU Clinical Survey Summary Statistics.Rmd", "./BU Clinical Survey Summary Statistics.Rmd"]
+COPY ["./BUM Research Summary Statistics.Rmd", "./BUM Research Summary Statistics.Rmd"]
+COPY ["./config.yml", "./config.yml"]
 
 # Run R code
 ENTRYPOINT ["R", "-e","pr <- plumber::plumb('ccc_biospecimen_metrics_api.R'); pr$run(host='0.0.0.0', port=as.numeric(Sys.getenv('PORT')))"]
