@@ -9,8 +9,7 @@ header-includes:
 output:
   pdf_document:
     extra_dependencies: ["float"]
-    toc: true
-    toc_depth: 2
+    toc: false
     keep_tex: yes
     fig_width: 7
     fig_height: 5
@@ -56,7 +55,7 @@ if (use_test_box_folder) {
 ################################################################################
 
 
->>>>>>> origin/main
+
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 # bio <- "SELECT  Connect_ID, d_232343615_d_593843561, d_143615646_d_593843561, d_223999569_d_593843561,  d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_650516960, d_678166505,  d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, d_143615646_d_883732523, d_299553921_d_883732523, d_454453939_d_883732523, d_652357376_d_883732523, d_703954371_d_883732523, d_838567176_d_883732523, d_973670172_d_883732523, d_143615646_d_593843561, d_223999569_d_593843561, d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_915838974, d_646899796, 
@@ -707,16 +706,31 @@ knitr::kable(qc13_tube7)
 
 
 
-
-
 \FloatBarrier
 
-### BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0
+
+## BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0
+
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
-bioqc1 <- bioqc %>%  filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796_integer)) %>%  mutate(BioClin_DBBloodID_v1r0=paste0("L", d_646899796_integer))
+bioqc1 <- bioqc %>%  filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796_integer))
 
-polyblood <- bioqc1 %>%  filter(!(BioClin_DBBloodID_v1r0 %in% as.list(d_173836415_d_266600170_d_543608829))) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>%  sort_by(Site)
+# bioqc1$str1 <- bioqc1$d_173836415_d_266600170_d_543608829
+# 
+# bioqc1 %>%  group_by(Connect_ID) %>%  mutate(PolyBloodID = unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) )
+
+str1 <- bioqc1$d_173836415_d_266600170_d_543608829
+PolyBloodID <- unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) 
+
+ 
+
+
+bioqc1 <- bioqc1 %>%  #filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796_integer)) %>%  
+mutate(BioClin_DBBloodID_v1r0=paste0("L", d_646899796_integer))
+
+#polyblood <- bioqc1 %>%  filter(!(BioClin_DBBloodID_v1r0 %in% as.list(d_173836415_d_266600170_d_543608829))) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>%
+
+polyblood <- bioqc1 %>%  filter(!(bioqc1$BioClin_DBBloodID_v1r0 %in% PolyBloodID)) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>% sort_by(Site)
 colnames(polyblood) <- c("Site", "Connect ID", "BioClin_DBBloodID_v1r0", "BioClin_PolyBloodID_v1r0")
 knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
 
@@ -724,21 +738,27 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
 ```
 
 \FloatBarrier
+## BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0
 
-### BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
-bioqc1 <- bioqc1 %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120_integer)) %>%  mutate(BioClin_DBUrineID_v1r0=paste0("L", d_928693120_integer))
+bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120_integer))
 
-bioqc1$BioClin_PolyUrineID_v1r0 <- str_sub(bioqc1$d_173836415_d_266600170_d_110349197, 2, -2)
+str2 <- bioqc2$d_173836415_d_266600170_d_110349197
+PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ",")) 
 
-polyurine <- bioqc1 %>%  filter(!(BioClin_DBUrineID_v1r0 %in% as.list(BioClin_PolyUrineID_v1r0))) %>%  
-  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, BioClin_PolyUrineID_v1r0) %>%  sort_by(Site)
+ 
+
+bioqc2 <- bioqc2 %>%  
+mutate(BioClin_DBUrineID_v1r0=paste0("L", d_928693120_integer))
+
+
+polyurine <- bioqc2 %>%  filter(!(bioqc2$BioClin_DBUrineID_v1r0 %in% PolyUrineID)) %>%  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, d_173836415_d_266600170_d_110349197) %>% sort_by(Site)
 colnames(polyurine) <- c("Site", "Connect ID", "BioClin_DBUrineID_v1r0", "BioClin_PolyUrineID_v1r0")
 knitr::kable(polyurine) %>% kable_styling(latex_options = "scale_down")
 
-```
 
+```
 
 
 
