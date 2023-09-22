@@ -2945,9 +2945,11 @@ help_fig1 <- fig1_UC_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter
           no_blood=case_when(bld.complt=="NoBlood"~1,
                              TRUE ~0))
 
+
 help_fig1 <- help_fig1 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !is.na(no_blood) ~ 1, TRUE ~ 0)) #all participants per week
   #all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
   
+
 
 help2_1_fig1 <- help_fig1 %>%  group_by(visit.wkdate,  partial_blood, no_blood, all_blood) #%>%  tally() 
 
@@ -2955,6 +2957,7 @@ help2_1_fig1 <- help2_1_fig1 %>%  mutate(incomp_blood = case_when( (partial_bloo
                                                                   TRUE ~ 0))
 
 help2_1_fig1_inc <- help2_1_fig1 %>%  select(visit.wkdate,  partial_blood, no_blood, all_blood, incomp_blood) %>%  group_by(visit.wkdate)
+
 
 final_fig1_table <- help2_1_fig1_inc %>%  group_by(visit.wkdate) %>%  summarize( incomplete=sum(incomp_blood),
   partial=sum(partial_blood), none_blood=sum(no_blood), all_collections=sum(all_blood),  All_Incomplete=100*(incomplete/all_collections),
@@ -3004,6 +3007,7 @@ fig2_HF <- left_join(research.survey, Inc_bld_HF, by="Connect_ID")
 
  fig2_HF_inc <- fig2_HF %>%  filter(Site=="Henry Ford Health System")
 
+
 help_fig2 <- fig2_HF_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
   mutate(#incomp_blood = case_when(bld.complt=="BloodIncomplet"~"Partial Blood",
                                   #bld.complt=="NoBlood" ~"No Blood"))
@@ -3011,6 +3015,7 @@ help_fig2 <- fig2_HF_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter
                              TRUE ~0),
           no_blood=case_when(bld.complt=="NoBlood"~1,
                              TRUE ~0))
+
 
 help_fig2 <- help_fig2 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !is.na(no_blood) ~ 1, TRUE ~ 0)) #all participants per week
   #all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
@@ -3026,6 +3031,7 @@ help2_1_fig2_inc <- help2_1_fig2 %>%  select(visit.wkdate,  partial_blood, no_bl
 final_fig2_table <- help2_1_fig2_inc %>%  group_by(visit.wkdate) %>%  summarize( incomplete=sum(incomp_blood),
   partial=sum(partial_blood), none_blood=sum(no_blood), all_collections=sum(all_blood),  All_Incomplete=100*(incomplete/all_collections),
   Partial__Blood=100*(partial/all_collections),  No__Blood=100*(none_blood/all_collections))
+
 
 
 
