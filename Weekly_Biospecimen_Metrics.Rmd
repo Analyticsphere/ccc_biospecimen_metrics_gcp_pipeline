@@ -13,8 +13,7 @@ header-includes:
 output:
   pdf_document:
     extra_dependencies: ["float"]
-    toc: true
-    toc_depth: 2
+    toc: false
     keep_tex: yes
     fig_width: 7
     fig_height: 5
@@ -297,7 +296,7 @@ mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified by health provider site. This information pertains to verified participants as of the date above and collections that are final.
  
 
-
+\newpage
 # Tables
 
 

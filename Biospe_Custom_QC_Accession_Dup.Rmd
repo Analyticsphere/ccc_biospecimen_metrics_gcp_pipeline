@@ -706,10 +706,10 @@ knitr::kable(qc13_tube7)
 
 
 
-\FloatBarrier
 
 
 ## BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0
+\FloatBarrier
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -737,8 +737,9 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
 
 ```
 
-\FloatBarrier
+
 ## BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0
+\FloatBarrier
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
