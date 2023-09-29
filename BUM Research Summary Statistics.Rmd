@@ -178,7 +178,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 covid_once_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(as.numeric(BUM_tib$D_860011428)>=1 | BUM_tib$D_494226443=="353358909")
+  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05") & (as.numeric(BUM_tib$D_860011428)>=1 | BUM_tib$D_494226443=="353358909"))
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
   gt_yn %>%  gt()  %>%  
@@ -201,7 +201,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 covid_twice_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(as.numeric(BUM_tib$D_860011428)>=2)
+  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05") & as.numeric(BUM_tib$D_860011428)>=2)
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
   gt_yn %>%  gt()  %>%  
@@ -224,7 +224,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 covid_thrice_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(as.numeric(BUM_tib$D_860011428)>=3)
+  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05")& as.numeric(BUM_tib$D_860011428)>=3)
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
   gt_yn %>%  gt()  %>%  
@@ -1601,10 +1601,14 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 # COVID-19
 ```{r, warning=FALSE, echo=FALSE,  message=FALSE}
 
+#covid was removed from this survey on July 5th, so filtering for only those that completed this survey prior to that point
+covid_section <- BUM_tib %>% filter(d_222161762<as.Date("2023-07-05"))
+covid_sect <- BUM_tib %>% filter(d_222161762<as.Date("2023-07-05"))
+
 
 #COV1
 #gt_functBUM(D_494226443, "Table 18: Ever Have COVID-19")
-  which_COV1= BUM_tib %>%   
+  which_COV1= covid_section  %>%   
                     mutate(answer= case_when(D_494226443==104430631 ~ "No",
                                              D_494226443==353358909 ~ "Yes",
                                              D_494226443==178420302 ~ "Do Not Know",
@@ -1638,7 +1642,7 @@ hist_funct(D_860011428, "Plot 2: Times Having COVID-19", "Times", "Frequency")
 
 ## First Time Having COVID 
 #COV3
-had_covid=BUM %>%  filter(as.numeric(D_860011428)>=1 | D_494226443=="353358909")
+had_covid=covid_sect %>%  filter(as.numeric(D_860011428)>=1 | D_494226443=="353358909")
 COV3_1Mo= had_covid %>% filter(!is.na(D_980800222_1_1_D_173502329_1_1)) %>%  
   mutate(descr= ifelse(D_980800222_1_1_D_173502329_1_1=="01", "1",
                                       ifelse(D_980800222_1_1_D_173502329_1_1=="1", "1",
@@ -1683,7 +1687,7 @@ grid.arrange(COV3_1M, COV3_1Y, nrow=2)
 #COV4
 #covid_once_funct(D_366980310_1_1, "Table 19: Test Positive the First Time Having COVID-19")
 
-  which_COV4= BUM_tib %>%  filter(as.numeric(D_860011428)>=1) %>%  
+  which_COV4= covid_section  %>%  filter(as.numeric(D_860011428)>=1) %>%  
                     mutate(answer= case_when(D_366980310_1_1==104430631 ~ "No",
                                              D_366980310_1_1==353358909 ~ "Yes",
                                              D_366980310_1_1==178420302 ~ "Do Not Know",
@@ -1712,7 +1716,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   
 
 #COV5
-  dt_select2 <- BUM_tib %>%  filter((as.numeric(D_860011428)>=1| D_494226443=="353358909") & D_366980310_1_1!="353358909") %>%  select(Connect_ID, D_498462481_1_1) 
+  dt_select2 <- covid_section  %>%  filter((as.numeric(D_860011428)>=1| D_494226443=="353358909") & D_366980310_1_1!="353358909") %>%  select(Connect_ID, D_498462481_1_1) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_498462481_1_1) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(D_498462481_1_1, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   
   gt2_yn %>%  gt()  %>%  
@@ -1740,7 +1744,7 @@ covid_once_funct(D_694503437_1_1, "Table 53: Had Any Symptoms the First Time Hav
 ##one_skip_funct(D_451163824_1_1, "Table 22: Worst Symptoms Interfere with Daily Activities the First Time Having COVID-19", D_694503437_1_1, "353358909")
 
 
-which_COV7= BUM_tib %>%  filter(D_694503437_1_1=="353358909") %>%  
+which_COV7= covid_section  %>%  filter(D_694503437_1_1=="353358909") %>%  
                     mutate(answer= case_when(D_451163824_1_1==111520945 ~ "Not at all",
                                              D_451163824_1_1==548628123 ~ "A little bit",
                                              D_451163824_1_1==567908725 ~ "Somewhat",
@@ -2030,7 +2034,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV9
 #one_skip_funct(D_928530823_1_1, "Table 24: Experience Septic Shock the First Time Having COVID-19", D_694503437_1_1, "353358909")
-  which_COV9= BUM_tib %>%  filter(D_694503437_1_1=="353358909") %>%  
+  which_COV9= covid_section  %>%  filter(D_694503437_1_1=="353358909") %>%  
                     mutate(answer= case_when(D_928530823_1_1==104430631 ~ "No",
                                              D_928530823_1_1==353358909 ~ "Yes",
                                              D_928530823_1_1==178420302 ~ "Do Not Know",
@@ -2059,7 +2063,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV10
 #one_skip_funct(D_108733102_1_1, "Tabe 25: Diagnosed with Pneumonia the First Time Having COVID-19", D_694503437_1_1, "353358909")
-  which_COV10= BUM_tib %>%  filter(D_694503437_1_1=="353358909") %>%  
+  which_COV10= covid_section  %>%  filter(D_694503437_1_1=="353358909") %>%  
                     mutate(answer= case_when(D_108733102_1_1==104430631 ~ "No",
                                              D_108733102_1_1==353358909 ~ "Yes",
                                              D_108733102_1_1==178420302 ~ "Do Not Know",
@@ -2089,7 +2093,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV11
 #one_skip_funct(D_389465772_1_1, "Table 26: Diagnosed with Bood Clots the First Time Having COVID-19", D_694503437_1_1, "353358909")
-    which_COV11= BUM_tib %>%  filter(D_694503437_1_1=="353358909") %>%  
+    which_COV11= covid_section  %>%  filter(D_694503437_1_1=="353358909") %>%  
                     mutate(answer= case_when(D_389465772_1_1==104430631 ~ "No",
                                              D_389465772_1_1==353358909 ~ "Yes",
                                              D_389465772_1_1==178420302 ~ "Do Not Know",
@@ -2118,7 +2122,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV12
 #one_skip_funct(D_775313030_1_1, "Table 27: Overnight Hospital Stay the First Time Having COVID-19", D_694503437_1_1, "353358909")
-    which_COV12= BUM_tib %>%  filter(D_694503437_1_1=="353358909") %>%  
+    which_COV12= covid_section  %>%  filter(D_694503437_1_1=="353358909") %>%  
                     mutate(answer= case_when(D_775313030_1_1==104430631 ~ "No",
                                              D_775313030_1_1==353358909 ~ "Yes",
                                              D_775313030_1_1==178420302 ~ "Do Not Know",
@@ -2176,7 +2180,7 @@ hist_funct(D_169509213_1_1, "Plot 9: Days Treated with Dialysis the First Time H
 
 
 ## Second Time Having COVID
-had_covid2= BUM %>%  filter(as.numeric(D_860011428)>=2)
+had_covid2= covid_sect %>%  filter(as.numeric(D_860011428)>=2)
 #COV3_2
 COV3_2Mo= had_covid2 %>% filter(as.numeric(D_860011428)>=2 & !is.na(D_980800222_2_2_D_173502329_2_2)) %>%  mutate(descr= ifelse(D_980800222_2_2_D_173502329_2_2=="01", "1",
                                       ifelse(D_980800222_2_2_D_173502329_2_2=="1", "1",
@@ -2220,7 +2224,7 @@ grid.arrange(COV3_2M, COV3_2Y, nrow=2)
 #COV4_2--BUM_tib$D_860011428)>=2
 #covid_twice_funct(D_366980310_2_2, "Table 32: Test Positive the Second Time Having COVID-19")
   
-  which_COV4= BUM_tib %>%  filter(as.numeric(D_860011428)>=2) %>%  
+  which_COV4= covid_section  %>%  filter(as.numeric(D_860011428)>=2) %>%  
                     mutate(answer= case_when(D_366980310_2_2==104430631 ~ "No",
                                              D_366980310_2_2==353358909 ~ "Yes",
                                              D_366980310_2_2==178420302 ~ "Do Not Know",
@@ -2251,7 +2255,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 #COV5
 #covid_once_funct(D_498462481_2_2, "COV5_2: HealchCare Provider Confirm Diagnosis the Second Time Having COVID-19")
 
-  dt_select2 <- BUM_tib %>%  filter((as.numeric(D_860011428)>=1 | D_494226443=="353358909") & D_366980310_2_2!="353358909") %>%  select(Connect_ID, D_498462481_2_2) 
+  dt_select2 <- covid_section  %>%  filter((as.numeric(D_860011428)>=1 | D_494226443=="353358909") & D_366980310_2_2!="353358909") %>%  select(Connect_ID, D_498462481_2_2) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_498462481_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(D_498462481_2_2, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   
   gt2_yn %>%  gt()  %>%  
@@ -2277,7 +2281,7 @@ covid_twice_funct(D_694503437_2_2, "Table 66: Had Any Symptoms the Second Time H
 
 #COV7
 ##one_skip_funct(D_451163824_2_2, "Table 35: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19", D_694503437_2_2, "353358909")
-which_COV7= BUM_tib %>%  filter(D_694503437_2_2=="353358909") %>%  
+which_COV7= covid_section  %>%  filter(D_694503437_2_2=="353358909") %>%  
                     mutate(answer= case_when(D_451163824_2_2==111520945 ~ "Not at all",
                                              D_451163824_2_2==548628123 ~ "A little bit",
                                              D_451163824_2_2==567908725 ~ "Somewhat",
@@ -2927,7 +2931,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 
 #COV19C6A
-dt_select2 <- BUM_tib %>%  filter(D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909") %>% 
+dt_select2 <- covid_section  %>%  filter(D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909") %>% 
   select(Connect_ID, D_110872086_D_110872086) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_110872086_D_110872086) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
     dplyr::mutate(answer=dplyr::recode(D_110872086_D_110872086, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -2957,7 +2961,7 @@ one_skip_funct(D_591826144, "Table 94: Still Experiencing the Other Symptoms Sin
 #GRID 
 #COV20A1
 two_skip_funct(D_114280729_D_374567479, "Table 95: Length of Time Lost of Taste or Smell Experienced", D_847578001_D_488415137, "724612102", D_847578001_D_488415137, "178780048")
-# which_COV7= BUM_tib %>%  filter(D_847578001_D_488415137=="724612102" & D_847578001_D_488415137=="178780048") %>%  
+# which_COV7= covid_section  %>%  filter(D_847578001_D_488415137=="724612102" & D_847578001_D_488415137=="178780048") %>%  
 #                     mutate(answer= case_when(D_114280729_D_374567479==111520945 ~ "Not at all",
 #                                              D_114280729_D_374567479==548628123 ~ "A little bit",
 #                                              D_114280729_D_374567479==567908725 ~ "Somewhat",
@@ -3046,7 +3050,7 @@ grid.arrange(COV22_Months, COV22_Days, nrow=2)
 
 #GRID  COV23A1
 #COV23A1
-   which_COV23A1= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+   which_COV23A1= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_813989715_D_874168085==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_874168085==931688701 ~ "Yes, I am experiencing this now",
                                               D_813989715_D_874168085==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3076,7 +3080,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23A2
      
-which_COV23A2= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23A2= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_813989715_D_283112988==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_283112988==931688701 ~ "Yes, I am experiencing this now",
                                               D_813989715_D_283112988==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3105,7 +3109,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23A3
 
-which_COV23A3= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23A3= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_813989715_D_580629349==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_580629349==931688701 ~ "Yes, I am experiencing this now",
                                               D_813989715_D_580629349==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3134,7 +3138,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23A4
    
-which_COV23A4= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23A4= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_813989715_D_151327643==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_151327643==931688701 ~ "Yes, I am experiencing this now",
                                               D_813989715_D_151327643==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3163,7 +3167,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23A5
    
-which_COV23A5= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23A5= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_813989715_D_440872808==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_440872808==931688701 ~ "Yes, I am experiencing this now",
                                               D_813989715_D_440872808==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3192,7 +3196,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23A6
    
-which_COV23A6= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23A6= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_813989715_D_874223830==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_874223830==931688701 ~ "Yes, I am experiencing this now",
                                               D_813989715_D_874223830==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3224,7 +3228,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 #GRID  COV23B1
 #COV23B1
    
-which_COV23B1= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23B1= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_857165713_D_847529903==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_847529903==931688701 ~ "Yes, I am experiencing this now",
                                               D_857165713_D_847529903==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3253,7 +3257,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23B2
    
-which_COV23B2= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23B2= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_857165713_D_219358831==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_219358831==931688701 ~ "Yes, I am experiencing this now",
                                               D_857165713_D_219358831==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3282,7 +3286,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23B3
    
-which_COV23B3= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23B3= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_857165713_D_636367178==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_636367178==931688701 ~ "Yes, I am experiencing this now",
                                               D_857165713_D_636367178==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3311,7 +3315,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23B4
    
-which_COV23B4= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23B4= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_857165713_D_243443780==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_243443780==931688701 ~ "Yes, I am experiencing this now",
                                               D_857165713_D_243443780==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3340,7 +3344,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23B5
    
-which_COV23B5= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23B5= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_857165713_D_357462273==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_357462273==931688701 ~ "Yes, I am experiencing this now",
                                               D_857165713_D_357462273==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3369,7 +3373,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23B6
    
-which_COV23B6= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23B6= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_857165713_D_638380747==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_638380747==931688701 ~ "Yes, I am experiencing this now",
                                               D_857165713_D_638380747==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3398,7 +3402,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 #COV23B7
    
-which_COV23B7= BUM_tib %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
+which_COV23B7= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_857165713_D_187399900==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_187399900==931688701 ~ "Yes, I am experiencing this now",
                                               D_857165713_D_187399900==586272115 ~ "Yes, in the past, but I am not experiencing it now",
@@ -3431,7 +3435,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 #COV23B8A
 #gt_functBUM(D_424718457_D_424718457, "Experienced any Other Symptom Since 2020")
 
-BUM %>%  select(D_424718457_D_157417942) %>% filter(!is.na(D_424718457_D_157417942)) %>% gt() %>% cols_label(D_424718457_D_157417942= md("**Table 126: Experienced What Other Symptom Since 2020**"))
+covid_sect %>%  select(D_424718457_D_157417942) %>% filter(!is.na(D_424718457_D_157417942)) %>% gt() %>% cols_label(D_424718457_D_157417942= md("**Table 126: Experienced What Other Symptom Since 2020**"))
 
 
 #COV238B
@@ -3765,7 +3769,7 @@ dt_COV24A11_summary %>%  gt() %>%
 
 
 #COV25    V1 was seen by everyone before 12/2 v2 prod push 
-COV25 <- BUM_tib %>%  filter(BUM_tib$d_822499427<as.Date("2022-12-2") & BUM_tib$d_222161762<as.Date("2022-12-2")) %>%  
+COV25 <- covid_section  %>%  filter(d_822499427<as.Date("2022-12-2") & d_222161762<as.Date("2022-12-2")) %>%  
   select(Connect_ID, D_890156588) 
 gt2_yn <- COV25  %>% dplyr::group_by(D_890156588) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_890156588, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -3790,7 +3794,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
    
 #COV25 V2   ---- this variable pushed to prod on 12/2/22
-   COV25 <- BUM_tib %>%  filter(BUM_tib$d_822499427>as.Date("2022-12-1")) %>%  
+   COV25 <- covid_section  %>%  filter(d_822499427>as.Date("2022-12-1")) %>%  
   select(Connect_ID, D_890156588_V2) 
 gt2_yn <- COV25  %>% dplyr::group_by(D_890156588_V2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_890156588_V2, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -3830,7 +3834,7 @@ COV27Y_1_V1_1=hist_funct( D_715581797_1_1_D_652923023_1, "Plot 22 (V1): Year of 
 COV27Y_1_V1_1_1=hist_funct( D_715581797_1_1_D_652923023_1_1, "Plot 22.2 (V1 Doubled _1): Year of First COVID vaccine", "Year", "Frequency")
 grid.arrange(COV27Y_1_V1_1, COV27Y_1_V1_1_1, nrow=2)
   #V2
-BUM_tib1 <- BUM_tib %>%  filter(!is.na(D_715581797_V2_2_2))
+BUM_tib1 <- covid_section  %>%  filter(!is.na(D_715581797_V2_2_2))
 BUM_tib1$date1 <- as.Date(paste(BUM_tib1$D_715581797_V2_1_1,"-01",sep=""))
 
 BU_Time1 <- BUM_tib1  %>% dplyr::group_by(date1) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(date1, n)
@@ -3849,7 +3853,7 @@ COV27Y_2_V1_2_2=hist_funct( D_715581797_2_2_D_652923023_2_2, "Plot 25.2 (V1 Doub
 grid.arrange(COV27Y_2_V1_2, COV27Y_2_V1_2_2, nrow=2)
 
   #V2
-BUM_tib2 <- BUM_tib %>%  filter(!is.na(D_715581797_V2_2_2))
+BUM_tib2 <- covid_section  %>%  filter(!is.na(D_715581797_V2_2_2))
 BUM_tib2$date2 <- as.Date(paste(BUM_tib2$D_715581797_V2_2_2,"-01",sep=""))
 
 BU_Time2 <- BUM_tib2  %>% dplyr::group_by(date2) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(date2, n)
@@ -3868,7 +3872,7 @@ COV27Y_3_V1_3=hist_funct( D_715581797_3_3_D_652923023_3, "Plot 28 (V1): Year of 
 COV27Y_3_V1_3_3=hist_funct( D_715581797_3_3_D_652923023_3_3, "Plot 28.1 (V1 Doubled _1): Year of Third COVID vaccine", "Year", "Frequency")
 grid.arrange(COV27Y_3_V1_3, COV27Y_3_V1_3_3, nrow=2)
   #V2
-BUM_tib3 <- BUM_tib %>%  filter(!is.na(D_715581797_V2_3_3))
+BUM_tib3 <- covid_section  %>%  filter(!is.na(D_715581797_V2_3_3))
 BUM_tib3$date3 <- as.Date(paste(BUM_tib3$D_715581797_V2_3_3,"-01",sep=""))
 
 BU_Time3 <- BUM_tib3  %>% dplyr::group_by(date3) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(date3, n)
@@ -3885,7 +3889,7 @@ COV27Y_4_V1_4=hist_funct( D_715581797_4_4_D_652923023_4, "Plot 31 (V1): Year of 
 COV27Y_4_V1_4_4=hist_funct( D_715581797_4_4_D_652923023_4_4, "Plot 31.1 (V1 Doubled _1): Year of Fourth COVID vaccine", "Year", "Frequency")
 grid.arrange(COV27Y_4_V1_4, COV27Y_4_V1_4_4, nrow=2)
   #V2
-BUM_tib4 <- BUM_tib %>%  filter(!is.na(D_715581797_V2_4_4))
+BUM_tib4 <- covid_section  %>%  filter(!is.na(D_715581797_V2_4_4))
 BUM_tib4$date4 <- as.Date(paste(BUM_tib4$D_715581797_V2_4_4,"-01",sep=""))
 
 BU_Time4 <- BUM_tib4  %>% dplyr::group_by(date4) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(date4, n)
@@ -3903,7 +3907,7 @@ COV27Y_5_V1_5=hist_funct( D_715581797_5_5_D_652923023_5, "Plot 34 (V1): Year of 
 COV27Y_5_V1_5_5=hist_funct( D_715581797_5_5_D_652923023_5_5, "Plot 34.1 (V1 Doubled _1): Year of Fifth COVID vaccine", "Year", "Frequency")
 grid.arrange(COV27Y_5_V1_5, COV27Y_5_V1_5_5, nrow=2)
   #V2
-BUM_tib5 <- BUM_tib %>%  filter(!is.na(D_715581797_V2_5_5))
+BUM_tib5 <- covid_section  %>%  filter(!is.na(D_715581797_V2_5_5))
 BUM_tib5$date5 <- as.Date(paste(BUM_tib5$D_715581797_V2_5_5,"-01",sep=""))
 
 BUM_Time5 <- BUM_tib5  %>% dplyr::group_by(date5) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(date5, n)
@@ -3917,7 +3921,7 @@ p5 + scale_x_date(date_labels = "%b %Y")
 
 #one_skip_funct(D_220055064_1_1_D_220055064_1_1, "COV28_1_1: Brand of First COVID-19 Vaccine", D_890156588, "353358909")
 
-COV28_1 <- BUM_tib %>%  filter(BUM_tib$D_890156588=="353358909" & (BUM_tib$D_877074400>=1|BUM_tib$D_877074400_V2>=1)) %>%  
+COV28_1 <- covid_section  %>%  filter(D_890156588=="353358909" & (D_877074400>=1|D_877074400_V2>=1)) %>%  
   select(Connect_ID, D_220055064_1_1_D_220055064_1_1) 
    cov28_1_yn <- COV28_1  %>% dplyr::group_by(D_220055064_1_1_D_220055064_1_1) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_1_1_D_220055064_1_1, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -3941,7 +3945,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 
 #one_skip_funct(D_220055064_2_2_D_220055064_2_2, "COV28_2_2: Brand of Second COVID-19 Vaccine", D_890156588, "353358909")
-   COV28_2 <- BUM_tib %>%  filter(BUM_tib$D_890156588=="353358909" & (BUM_tib$D_877074400>=2|BUM_tib$D_877074400_V2>=2)) %>%  
+   COV28_2 <- covid_section  %>%  filter(D_890156588=="353358909" & (D_877074400>=2|D_877074400_V2>=2)) %>%  
   select(Connect_ID, D_220055064_2_2_D_220055064_2_2) 
    cov28_2_yn <- COV28_2  %>% dplyr::group_by(D_220055064_2_2_D_220055064_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_2_2_D_220055064_2_2, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -3965,7 +3969,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    
    
 #one_skip_funct(D_220055064_3_3_D_220055064_3_3, "COV28_3_3: Brand of Third COVID-19 Vaccine", D_890156588, "353358909")
-      COV28_3 <- BUM_tib %>%  filter(BUM_tib$D_890156588=="353358909" & (BUM_tib$D_877074400>=3|BUM_tib$D_877074400_V2>=3)) %>%  
+      COV28_3 <- covid_section  %>%  filter(D_890156588=="353358909" & (D_877074400>=3|D_877074400_V2>=3)) %>%  
   select(Connect_ID, D_220055064_3_3_D_220055064_3_3) 
    cov28_3_yn <- COV28_3  %>% dplyr::group_by(D_220055064_3_3_D_220055064_3_3) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_3_3_D_220055064_3_3, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -3989,7 +3993,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    
    
 #one_skip_funct(D_220055064_4_4_D_220055064_4_4, "COV28_4_4: Brand of Fourth COVID-19 Vaccine", D_890156588, "353358909")
-      COV28_4 <- BUM_tib %>%  filter(BUM_tib$D_890156588=="353358909" & (BUM_tib$D_877074400>=4|BUM_tib$D_877074400_V2>=4)) %>%  
+      COV28_4 <- covid_section  %>%  filter(D_890156588=="353358909" & (D_877074400>=4|D_877074400_V2>=4)) %>%  
   select(Connect_ID, D_220055064_4_4_D_220055064_4_4) 
    cov28_4_yn <- COV28_4  %>% dplyr::group_by(D_220055064_4_4_D_220055064_4_4) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_4_4_D_220055064_4_4, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -4013,7 +4017,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    
    
 #one_skip_funct(D_220055064_5_5_D_220055064_5_5, "COV28_5_5: Brand of Fifth COVID-19 Vaccine", D_890156588, "353358909")
-      COV28_5 <- BUM_tib %>%  filter(BUM_tib$D_890156588=="353358909" & (BUM_tib$D_877074400>=5|BUM_tib$D_877074400_V2>=5)) %>%  
+      COV28_5 <- covid_section  %>%  filter(D_890156588=="353358909" & (D_877074400>=5|D_877074400_V2>=5)) %>%  
   select(Connect_ID, D_220055064_5_5_D_220055064_5_5) 
    cov28_5_yn <- COV28_5  %>% dplyr::group_by(D_220055064_5_5_D_220055064_5_5) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_5_5_D_220055064_5_5, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)

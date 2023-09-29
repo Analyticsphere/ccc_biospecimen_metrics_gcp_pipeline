@@ -13,8 +13,7 @@ header-includes:
 output:
   pdf_document:
     extra_dependencies: ["float"]
-    toc: true
-    toc_depth: 2
+    toc: false
     keep_tex: yes
     fig_width: 7
     fig_height: 5
@@ -297,7 +296,7 @@ mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified by health provider site. This information pertains to verified participants as of the date above and collections that are final.
  
 
-
+\newpage
 # Tables
 
 
@@ -2096,6 +2095,7 @@ Table21R_After = test21ra %>% group_by(Site) %>%
 
 
 
+
 ##New Table 20- length of time for clinical survey completion (8/16/23 request) before and after covid : start 534669573, finish 764863765
 test22c <- recrver1 %>%  filter(d_253883960==231311385 & !is.na(d_764863765) & !is.na(d_534669573)) 
 test22c <-  test22c %>% mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_764863765)),as.POSIXct(ymd_hms(d_534669573)),units="mins")))
@@ -2948,6 +2948,7 @@ help_fig1 <- fig1_UC_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter
 help_fig1 <- help_fig1 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !is.na(no_blood) ~ 1, TRUE ~ 0)) #all participants per week
   #all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
   
+
 help2_1_fig1 <- help_fig1 %>%  group_by(visit.wkdate,  partial_blood, no_blood, all_blood) #%>%  tally() 
 
 help2_1_fig1 <- help2_1_fig1 %>%  mutate(incomp_blood = case_when( (partial_blood==1 |no_blood==1) ~1,
@@ -3004,6 +3005,7 @@ fig2_HF <- left_join(research.survey, Inc_bld_HF, by="Connect_ID")
 
  fig2_HF_inc <- fig2_HF %>%  filter(Site=="Henry Ford Health System")
 
+
 help_fig2 <- fig2_HF_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
   mutate(#incomp_blood = case_when(bld.complt=="BloodIncomplet"~"Partial Blood",
                                   #bld.complt=="NoBlood" ~"No Blood"))
@@ -3011,6 +3013,7 @@ help_fig2 <- fig2_HF_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter
                              TRUE ~0),
           no_blood=case_when(bld.complt=="NoBlood"~1,
                              TRUE ~0))
+
 
 help_fig2 <- help_fig2 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !is.na(no_blood) ~ 1, TRUE ~ 0)) #all participants per week
   #all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
@@ -3026,6 +3029,7 @@ help2_1_fig2_inc <- help2_1_fig2 %>%  select(visit.wkdate,  partial_blood, no_bl
 final_fig2_table <- help2_1_fig2_inc %>%  group_by(visit.wkdate) %>%  summarize( incomplete=sum(incomp_blood),
   partial=sum(partial_blood), none_blood=sum(no_blood), all_collections=sum(all_blood),  All_Incomplete=100*(incomplete/all_collections),
   Partial__Blood=100*(partial/all_collections),  No__Blood=100*(none_blood/all_collections))
+
 
 
 research.1_2 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
