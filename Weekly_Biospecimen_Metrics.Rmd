@@ -2949,7 +2949,6 @@ help_fig1 <- help_fig1 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !i
   #all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
   
 
-
 help2_1_fig1 <- help_fig1 %>%  group_by(visit.wkdate,  partial_blood, no_blood, all_blood) #%>%  tally() 
 
 help2_1_fig1 <- help2_1_fig1 %>%  mutate(incomp_blood = case_when( (partial_blood==1 |no_blood==1) ~1,
@@ -3030,7 +3029,6 @@ help2_1_fig2_inc <- help2_1_fig2 %>%  select(visit.wkdate,  partial_blood, no_bl
 final_fig2_table <- help2_1_fig2_inc %>%  group_by(visit.wkdate) %>%  summarize( incomplete=sum(incomp_blood),
   partial=sum(partial_blood), none_blood=sum(no_blood), all_collections=sum(all_blood),  All_Incomplete=100*(incomplete/all_collections),
   Partial__Blood=100*(partial/all_collections),  No__Blood=100*(none_blood/all_collections))
-
 
 
 
@@ -3239,6 +3237,7 @@ add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment
 
 
 tabl27 <- knitr::kable(verif_draw_order,caption='Table 24. Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
+
 add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023.", notation="none")
 
 
