@@ -106,7 +106,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 billing <- "nih-nci-dceg-connect-prod-6d04" ##project and billing should be consistent
 bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null')  
-biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1000)
+biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 5000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
@@ -168,7 +168,7 @@ return(pct)
 }
 ##to select biospecimen data in recruitment 
 recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants_JP'")
-recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 1000)
+recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
 recrvar_nd <- recrvar[which(grepl("d_",recrvar$column_name)),c("column_name","field_path")]
@@ -180,7 +180,7 @@ query <- recrvar.bio$column_name
 select <- paste(recrvar.bio$column_name,collapse=",")
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
  
-recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
+recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 10000)
 ##below are the commone variables in the recruitment table on Biospecimen to apply for the analysis. In case any new variables popping up, i would like #to use the one above directly from the resources (master DD and recruitment table schema to get the most updated version on this biospecimen data
 # tb <- bq_project_query(project, query="SELECT d_512820379,d_512820379, d_821247024, d_914594314, d_822499427, d_222161762, Connect_ID, d_827220437, token,d_265193023, d_878865966, d_167958071, d_684635302, d_253883960, d_534669573, d_764863765, d_331584571_d_266600170_d_135591601,d_331584571_d_266600170_d_840048338,  d_331584571_d_266600170_d_343048998, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_185243482,
 # d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428,
@@ -2355,7 +2355,7 @@ verif_draw_order = verif_draw %>%group_by(Site) %>%
     ## ON OR AFTER 2/1/23
 parts24 <- "SELECT Connect_ID, state_d_667474224 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL"
 parts24_table <- bq_project_query(project, parts24)
-parts24_data <- bq_table_download(parts24_table, bigint="integer64",n_max = Inf, page_size = 1000)
+parts24_data <- bq_table_download(parts24_table, bigint="integer64",n_max = Inf, page_size = 10000)
 parts24_data$Connect_ID <- as.numeric(parts24_data$Connect_ID)
 tab24 <- left_join(recrver1, biospe, by="Connect_ID") %>% left_join(parts24_data, by="Connect_ID")
 
@@ -2641,7 +2641,7 @@ where d_878865966='353358909' and d_173836415_d_266600170_d_769615780 is not nul
 
 avg_table_cc <- bq_project_query(project, avg_ccc)
 
-avg <- bq_table_download(avg_table_cc, bigint="integer64",n_max = Inf, page_size = 1000)
+avg <- bq_table_download(avg_table_cc, bigint="integer64",n_max = Inf, page_size = 10000)
 
 
 avg_coll <- avg %>%  filter(d_173836415_d_266600170_d_982213346>=as.Date("2023-02-01") & (d_827220437==125001209 |  d_827220437==327912200 | 
@@ -2685,8 +2685,8 @@ TSofcollection <-  "SELECT Connect_ID, d_678166505, d_650516960 FROM `nih-nci-dc
 timestamps_cc <- bq_project_query(project, timestamps)
 TSofcollection_cc <- bq_project_query(project, TSofcollection)
 
-compTS <- bq_table_download(timestamps_cc, bigint="integer64",n_max = Inf, page_size = 1000)
-collTS <- bq_table_download(TSofcollection_cc, bigint="integer64",n_max = Inf, page_size = 1000)
+compTS <- bq_table_download(timestamps_cc, bigint="integer64",n_max = Inf, page_size = 10000)
+collTS <- bq_table_download(TSofcollection_cc, bigint="integer64",n_max = Inf, page_size = 5000)
 
 biosurvTS <- left_join(compTS, collTS, by="Connect_ID")
 
@@ -3795,7 +3795,7 @@ factor_cid <-function(var,data){
 
 
 bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
-biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
+biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 5000)
 
 #biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
 #biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
@@ -4062,7 +4062,7 @@ coord$BioClin_BldOrderPlacdDt_v1r0 = ifelse(!is.na(coord$d_173836415_d_266600170
 
 SMMet= bq_project_query(project,'SELECT Connect_ID, d_254109640, d_827220437 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP`
 where Connect_ID is not null')
-BL_Coll <- bq_table_download(SMMet,bigint = "integer64",n_max = Inf, page_size = 1000)
+BL_Coll <- bq_table_download(SMMet,bigint = "integer64",n_max = Inf, page_size = 10000)
 BL_Coll$Connect_ID <- as.numeric(BL_Coll$Connect_ID)
 
 coord_csv= left_join(coord, BL_Coll, by="Connect_ID")
