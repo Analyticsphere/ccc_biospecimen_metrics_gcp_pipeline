@@ -106,7 +106,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 billing <- "nih-nci-dceg-connect-prod-6d04" ##project and billing should be consistent
 bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null')  
-biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 5000)
+biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
@@ -952,7 +952,7 @@ left7 <- left_join(biospe, table7_3, by="Connect_ID")
 
 biospe7= left7  %>%
   #something odd going odd with the values
-  filter(as.numeric(d_173836415_d_266600170_d_185243482)>72 & !is.na(d_173836415_d_266600170_d_185243482)) %>%
+  filter(as.numeric(d_173836415_d_266600170_d_185243482)>72 & d_173836415_d_266600170_d_185243482!=1040010046 & !is.na(d_173836415_d_266600170_d_185243482)) %>%
   mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "Wyandotte Hospital",
                                        d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 ~ "Macomb Medical Pavilion",
                                        d_173836415_d_266600170_d_185243482==1040010047 ~ "West Bloomfield Hospital",
@@ -962,7 +962,7 @@ biospe7= left7  %>%
                                        d_173836415_d_266600170_d_185243482==1010240013 ~ "Plymouth",
                                        d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)",
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
-                             d_173836415_d_266600170_d_185243482==1040010046 ~ "Unknown",
+                             #d_173836415_d_266600170_d_185243482==1040010046 ~ "Unknown",
                                        d_173836415_d_266600170_d_185243482==1010010193 ~ "Main - K1"))  
 #biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)
 
@@ -993,7 +993,7 @@ bldcol_research_HF2$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldc
     # FOR NOW THERE ARE NO NO-BLOOD COLLECTIONS
 #bldcol_research_HF2$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,3],big.mark=","),"(", round(100*bldcol_research_HF2[,7],1),"%)",sep=" "), format(bldcol_research_HF2[,3],big.mark="," ))
 #if(!is.na(bldcol_research_HF2$NoBlood)){print("Table 5.3 needs to be fixed. 'No Blood' has now been added")} #For now this column doesn't exist
-bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
+bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
 
 
 bldcol_research_HF2 <- bldcol_research_HF2[, c(7:10,3)] # RIGHT NOW THERE IS AN NA LOCATION FOR SOME REASON
@@ -2686,7 +2686,7 @@ timestamps_cc <- bq_project_query(project, timestamps)
 TSofcollection_cc <- bq_project_query(project, TSofcollection)
 
 compTS <- bq_table_download(timestamps_cc, bigint="integer64",n_max = Inf, page_size = 10000)
-collTS <- bq_table_download(TSofcollection_cc, bigint="integer64",n_max = Inf, page_size = 5000)
+collTS <- bq_table_download(TSofcollection_cc, bigint="integer64",n_max = Inf, page_size = 1000)
 
 biosurvTS <- left_join(compTS, collTS, by="Connect_ID")
 
@@ -3795,7 +3795,7 @@ factor_cid <-function(var,data){
 
 
 bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
-biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 5000)
+biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
 
 #biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
 #biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
