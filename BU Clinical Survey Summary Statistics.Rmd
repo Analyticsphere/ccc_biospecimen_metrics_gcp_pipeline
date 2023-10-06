@@ -344,11 +344,12 @@ dt_SYMPTDAY= BU_tib %>%  mutate(multb2 = ifelse(D_470484596_D_756774083==1, 1, 0
 
 
                                                           
-which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1) ~ "Cough, Diarrhea, Nasal Congestion, and Sick to Stomach or Vomiting",
+which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "All Symptoms Listed",
+                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1) ~ "Cough, Diarrhea, Nasal Congestion, and Sick to Stomach or Vomiting",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Cough, Diarrhea, Nasal Congestion, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Cough, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Cough, Diarrhea, Sick to Stomach or Vomiting, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
+                                                        (D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1)~ "Cough, Diarrhea, Nasal Congestion",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1)~ "Cough, Diarrhea, Sick to Stomach or Vomiting",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1)~ "Cough, Nasal Congestion, Sick to Stomach or Vomiting",
@@ -357,6 +358,8 @@ which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Cough, Nasal Congestion, and Fever",
                                                         (D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, and Fever",
                                                         (D_470484596_D_811126581==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Sick to Your Stomach or Vomitting, Nasal Congestion, and Fever",
+                                                        (D_470484596_D_756774083==1 & D_470484596_D_811126581==1  & D_470484596_D_406943303==1)~ "Cough,Sick to Stomach or Vomiting, and Fever",
+                                                        (D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Sick to Your Stomach or Vomitting, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1)~ "Cough, Nasal Congestion",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1)~ "Cough, Diarrhea",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_811126581==1)~ "Cough and Sick to Stomach or Vomiting",
@@ -372,7 +375,7 @@ which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083
                                                         D_470484596_D_955154600==1 ~ "Nasal Congestion",
                                                         D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting",
                                                         D_470484596_D_406943303==1 ~ "Fever",
-                                                        D_470484596_D_214414872==1 ~ "None of these",
+                                                        D_470484596_D_214414872==1 ~ "None of these", #THIS 2144 NOT IN DD BUT IN FLAT&RAW TABLES, possibly meant to be 535003378?
                                                         TRUE   ~ "Skipped this question"))
 
 

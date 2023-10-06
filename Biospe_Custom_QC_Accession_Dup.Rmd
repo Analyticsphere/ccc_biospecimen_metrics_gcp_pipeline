@@ -1071,7 +1071,38 @@ write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections
 
 
 
+```{r, include=FALSE}
 
+#Add to Jake's rule list
+
+#STRECK Tube 1_ID  // d_505347689_d_825582494 // crossValid1 equal to or less than char() // 14 // d_505347689_d_593843561 //	353358909
+
+# STRECK Tube 1- Tube Collected	    d_505347689_d_593843561	valid	353358909, 104430631		
+# STRECK Tube 1- Deviation	          d_505347689_d_678857215	NA or crossValid1	353358909, 104430631		
+# STRECK Tube 1- Discard Flag	      d_505347689_d_762124027	NA or crossValid1	353358909, 104430631	d_505347689_d_248868659_d_472864016	353358909
+# STRECK Tube 1- Deviation Hemolyzed	d_505347689_d_248868659_d_242307474	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Mislabeled Resolved	d_505347689_d_248868659_d_283900611	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Outside Contaminated	d_505347689_d_248868659_d_313097539	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Other	d_505347689_d_248868659_d_453343022	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Broken	d_505347689_d_248868659_d_472864016	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Temperature Too Low	d_505347689_d_248868659_d_550088682	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Mislabeled Discard	d_505347689_d_248868659_d_684617815	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Temperature Too High	d_505347689_d_248868659_d_690540566	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Low Volume-(tube/container partially filled but still usable)	d_505347689_d_248868659_d_728366619	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Leaked/Spilled	d_505347689_d_248868659_d_757246707	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Tube Size	d_505347689_d_248868659_d_777486216	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Discard	d_505347689_d_248868659_d_810960823	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+# STRECK Tube 1- Deviation Not Found	d_505347689_d_248868659_d_982885431	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
+
+# remove and update from Jake's rule list
+  #NA?
+
+#add to my rule list 
+qc14_tube8 <- bioqc %>%  filter(d_505347689_d_593843561==104430631 & d_650516960== 534621077 & is.na(d_505347689_d_883732523)) %>% 
+    select(Site, Connect_ID, d_505347689_d_883732523) %>%  sort_by(Site)
+colnames(qc14_tube8) <- c("Site", "Connect ID", "STRECK Tube 1- Reason Tube Not Collected")
+
+```
 
 
 
