@@ -3953,7 +3953,7 @@ recrver_CID$variable <- names(recr.bio)
 
 
 
-recrvar_CID_dd <- merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+recrvar_CID_dd <- base::merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 recrvar_CID_dd <-recrvar_CID_dd[!duplicated(recrvar_CID_dd[,c("CID","variable")]),]
 
