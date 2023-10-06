@@ -297,7 +297,7 @@ mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified by health provider site. This information pertains to verified participants as of the date above and collections that are final.
  
 
-
+\newpage
 # Tables
 \FloatBarrier
 
@@ -1108,9 +1108,6 @@ bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %
 
 newtable_4 <- bldurcl %>% select(Data_System) %>%  group_by(Data_System) %>%  tally()
 newtable4 <- rbind(newtable_4, c("Total", colSums(newtable_4[,2])))
-
-
-
 site_dash_blood<- sum((bldurcl$d_173836415_d_266600170_d_534041351==353358909 & bldurcl$d_173836415_d_266600170_d_693370086==353358909), na.rm = T)
 total_blood <- sum((bldurcl$d_173836415_d_266600170_d_534041351==353358909 | bldurcl$d_173836415_d_266600170_d_693370086==353358909), na.rm = T)
 dash_blood <- sum((bldurcl$d_173836415_d_266600170_d_534041351==353358909 & is.na(bldurcl$d_173836415_d_266600170_d_693370086)), na.rm = T)
@@ -1131,8 +1128,6 @@ dash_urineP <- paste0(dash_urine, " (", 100*round(dash_urine/total_urine,digits=
 site_dash_urineP <- paste0(site_dash_urine, " (", 100*round(site_dash_urine/total_urine,digits=2), "%)")
 site_urineP <- paste0(site_urine, " (", 100*round(site_urine/total_urine,digits=2), "%)")
 total_urineP <- paste0(total_urine, " (100%)")
-
-
 newtable4[,2] <- c(dash_bloodP, site_dash_bloodP, site_bloodP, total_bloodP)
 newtable4[,3] <- c(dash_urineP, site_dash_urineP,  site_urineP, total_urineP)
 #newtable4[4,] <- list('Total', total_bloodP, total_urineP)

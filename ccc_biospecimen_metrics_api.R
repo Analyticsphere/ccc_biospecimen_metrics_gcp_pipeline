@@ -34,9 +34,11 @@ function(report, testing=FALSE){
     report_file_name <- configuration$report_file_name
     bucket           <- configuration$bucket
     print(paste0("bucket: ", bucket))
+
+    # Deal with testing boolean parameter
+    Sys.setenv(USE_TEST_BOX_FOLDER = as.logical(testing))
     if (testing) {
       box_folders <- configuration$test_box_folders
-      Sys.setenv(USE_TEST_BOX_FOLDER = as.logical(testing))
     } else {
       box_folders <- configuration$box_folders
     }
