@@ -962,7 +962,8 @@ biospe7= left7  %>%
                                        d_173836415_d_266600170_d_185243482==1010240013 ~ "Plymouth",
                                        d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)",
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
-                                       d_173836415_d_266600170_d_185243482==1010010193 ~ "Main - K1"))
+                             d_173836415_d_266600170_d_185243482==1040010046 ~ "Unknown",
+                                       d_173836415_d_266600170_d_185243482==1010010193 ~ "Main - K1"))  
 #biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)
 
 tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>%
@@ -992,7 +993,7 @@ bldcol_research_HF2$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldc
     # FOR NOW THERE ARE NO NO-BLOOD COLLECTIONS
 #bldcol_research_HF2$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,3],big.mark=","),"(", round(100*bldcol_research_HF2[,7],1),"%)",sep=" "), format(bldcol_research_HF2[,3],big.mark="," ))
 #if(!is.na(bldcol_research_HF2$NoBlood)){print("Table 5.3 needs to be fixed. 'No Blood' has now been added")} #For now this column doesn't exist
-bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
+bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
 
 
 bldcol_research_HF2 <- bldcol_research_HF2[, c(7:10,3)] # RIGHT NOW THERE IS AN NA LOCATION FOR SOME REASON
@@ -1085,17 +1086,26 @@ tube_completeness
 clin_col <- biospe %>% select(Connect_ID, d_650516960, d_410912345)
 bldurcl <- left_join(recrver1, clin_col, by="Connect_ID")
 
+# bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %>%
+#   mutate(Data_System = case_when((d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909) &
+#                                    (is.na(d_173836415_d_266600170_d_786930107) | is.na(d_173836415_d_266600170_d_693370086))~ "Biospecimen Dashboard Only",
+#                                    (d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909) &
+#            (is.na(d_173836415_d_266600170_d_210921343) | is.na(d_173836415_d_266600170_d_534041351))~ "Site Data Only",
+#            (d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909) &
+#                                      (d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909) ~ "Site Data & Biospecimen Dashboard"))
+#                               # Collection = ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood",
+#                               #                     ifelse(d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_786930107==353358909,"Urine", "")))
+#                                                   #ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood", "")))
+#                                                      #d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 ~ "Blood"))
+
 bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %>%
-  mutate(Data_System = case_when((d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909) &
-                                   (is.na(d_173836415_d_266600170_d_786930107) | is.na(d_173836415_d_266600170_d_693370086))~ "Biospecimen Dashboard Only",
-                                   (d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909) &
-           (is.na(d_173836415_d_266600170_d_210921343) | is.na(d_173836415_d_266600170_d_534041351))~ "Site Data Only",
-           (d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909) &
-                                     (d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909) ~ "Site Data & Biospecimen Dashboard"))
-                              # Collection = ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood",
-                              #                     ifelse(d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_786930107==353358909,"Urine", "")))
-                                                  #ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood", "")))
-                                                     #d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 ~ "Blood"))
+  mutate(Data_System = case_when((d_173836415_d_266600170_d_534041351==353358909 & is.na(d_173836415_d_266600170_d_693370086)) |
+                                   (d_173836415_d_266600170_d_210921343==353358909 & is.na(d_173836415_d_266600170_d_786930107))~ "Biospecimen Dashboard Only",
+                                   (is.na(d_173836415_d_266600170_d_534041351) & d_173836415_d_266600170_d_693370086==353358909) |
+           (is.na(d_173836415_d_266600170_d_210921343) & d_173836415_d_266600170_d_786930107==353358909)~ "Site Data Only",
+           (d_173836415_d_266600170_d_534041351==353358909 & d_173836415_d_266600170_d_693370086==353358909) |
+                                     (d_173836415_d_266600170_d_210921343==353358909 & d_173836415_d_266600170_d_786930107==353358909) ~ "Site Data & Biospecimen Dashboard"))
+
 newtable_4 <- bldurcl %>% select(Data_System) %>%  group_by(Data_System) %>%  tally()
 newtable4 <- rbind(newtable_4, c("Total", colSums(newtable_4[,2])))
 
@@ -1924,7 +1934,7 @@ test18 <- clinic.survey %>%
   mutate(clinical.sv = case_when(d_253883960 == 231311385 ~ "Submitted",
                                  d_253883960 == 615768760 ~ "Started",
                                  d_253883960 == 972455046 ~ "Not Started"))
-test18a <- test18 %>%  filter(Site=="Kaiser Permanente Colorado" |  Site=="Kaiser Permanente Georgia" | Site=="Kaiser Permanente Hawaii" | Site=="Kaiser Permanente Northwest" | Site=="Henry Ford Health System") # add or Site=="Henry Ford Health System" on hold
+test18a <- test18 %>%  filter(Site=="Kaiser Permanente Colorado" |  Site=="Kaiser Permanente Georgia" | Site=="Kaiser Permanente Hawaii" | Site=="Kaiser Permanente Northwest" | Site=="Henry Ford Health System") 
 test18a$Site<- droplevels(test18a$Site)
 
 Table16_combined <- test18a %>% dplyr::select(Site, clinical.sv )  %>% tbl_cross(
@@ -2575,7 +2585,7 @@ blood_placed= blood_placed %>%   mutate(bld_placed= case_when(d_173836415_d_2666
                                                               d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                                               d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
                                                               d_827220437==452412599 ~ "Kaiser Permanente Northwest",
-                                                              d_827220437==548392715 ~ "Henry Ford Health System"), #on hold until hybrid
+                                                              d_827220437==548392715 ~ "Henry Ford Health System"), 
                                verif_bld= case_when(d_821247024==197316935 ~ 1,
                                                     TRUE ~ 0))
 

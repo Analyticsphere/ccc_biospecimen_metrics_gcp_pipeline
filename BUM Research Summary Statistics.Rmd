@@ -50,7 +50,7 @@ parts <- "SELECT Connect_ID, token, D_512820379, D_471593703, state_d_934298480,
 D_335767902, D_982402227, D_919254129, D_699625233, D_564964481, D_795827569, D_544150384,
 D_371067537, D_430551721, D_821247024, D_914594314,  state_d_725929722, d_822499427, d_222161762,
 D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, d_331584571_d_266600170_d_840048338 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where Connect_ID IS NOT NULL"
+where Connect_ID IS NOT NULL and (D_512820379='486306141' OR D_512820379='854703046') and d_331584571_d_266600170_d_840048338 is not null and d_331584571_d_266600170_d_343048998 is not null and d_265193023='231311385'"
 specimenBUM <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null"
 
 
@@ -73,43 +73,17 @@ bisp= left_join(biospec_data, parts_data, by="Connect_ID") %>%  left_join(specim
 #dim(bisp)
 
 
-
-```
-
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
-#Has a recruitment flag
-bisp <- bisp %>% filter(D_512820379==486306141 | D_512820379==854703046)
-#cat("Has a recruitment flag:", dim(bisp)[[1]])
-
-#User consent submitted -- already included in verified?
-#bisp <- bisp %>% filter(D_919254129==353358909)
-#cat("User consent submitted:", dim(bisp)[[1]])
-
-#User profile submitted -- already included in verified?
-#bisp <- bisp %>% filter(D_699625233==353358909)
-#cat("User profile submitted:", dim(bisp)[[1]])
-
-#Verified by site
-bisp <- bisp %>% filter(D_821247024==197316935)
-#cat("Verified by site:", dim(bisp)[[1]])
-
-#Check in time not null
-BUM <- bisp %>% filter(!is.na(d_331584571_d_266600170_d_840048338))
-
-#Check out time not null
-BUM <- bisp %>% filter(!is.na(d_331584571_d_266600170_d_343048998))
-
-#BUM completed
-BUM <- bisp %>% filter(d_265193023==231311385)
-cat("Blood Urine Mouthwash Survey Completed:", dim(BUM)[[1]])
+cat("Blood Urine Mouthwash Survey Completed:", dim(bisp)[[1]])
 #dim(BUM)
 
-BUM_tib <- as_tibble(BUM)
+BUM_tib <- as_tibble(bisp)
 #dim(BUM_tib)
 
 knitr::opts_chunk$set(comment = NA)
 
 ```
+
+
 
 ```{r, include=FALSE}
 ##FUNCTIONS
@@ -302,7 +276,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 #Histogram Function
 hist_funct <- function(CID,Title, Xlab, Ylab) {
   CID_SYM <- rlang::ensym(CID)
-  BUM %>% mutate(!!CID_SYM:=as.numeric(!!CID_SYM)) %>%
+  bisp %>% mutate(!!CID_SYM:=as.numeric(!!CID_SYM)) %>%
     filter(!is.na(!!CID_SYM)) %>% ggplot(aes(x=!!CID_SYM))+
      xlab(Xlab) + ylab(Ylab) + geom_histogram()+  ggtitle(Title)+
     geom_histogram(color="black")+ scale_y_continuous(breaks=pretty_breaks()) +
@@ -395,11 +369,12 @@ dt_SYMPTDAY= BUM_tib %>%  mutate(multb2 = ifelse(D_470484596_D_756774083==1, 1, 
 
 
                                                           
-which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1) ~ "Cough, Diarrhea, Nasal Congestion, and Sick to Stomach or Vomiting",
+which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "All Symptoms Listed",
+                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1) ~ "Cough, Diarrhea, Nasal Congestion, and Sick to Stomach or Vomiting",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Cough, Diarrhea, Nasal Congestion, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Cough, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Cough, Diarrhea, Sick to Stomach or Vomiting, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
+                                                        (D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1)~ "Cough, Diarrhea, Nasal Congestion",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1)~ "Cough, Diarrhea, Sick to Stomach or Vomiting",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1)~ "Cough, Nasal Congestion, Sick to Stomach or Vomiting",
@@ -408,6 +383,8 @@ which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Cough, Nasal Congestion, and Fever",
                                                         (D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, and Fever",
                                                         (D_470484596_D_811126581==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Sick to Your Stomach or Vomitting, Nasal Congestion, and Fever",
+                                                        (D_470484596_D_756774083==1 & D_470484596_D_811126581==1  & D_470484596_D_406943303==1)~ "Cough,Sick to Stomach or Vomiting, and Fever",
+                                                        (D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Sick to Your Stomach or Vomitting, and Fever",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_955154600==1)~ "Cough, Nasal Congestion",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_235386560==1)~ "Cough, Diarrhea",
                                                         (D_470484596_D_756774083==1 & D_470484596_D_811126581==1)~ "Cough and Sick to Stomach or Vomiting",
@@ -423,7 +400,7 @@ which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083
                                                         D_470484596_D_955154600==1 ~ "Nasal Congestion",
                                                         D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting",
                                                         D_470484596_D_406943303==1 ~ "Fever",
-                                                        D_470484596_D_214414872==1 ~ "None of these",
+                                                        D_470484596_D_214414872==1 | D_470484596_D_535003378==1  ~ "None of these", ## THIS 2144 NOT IN DD BUT IN FLAT&RAW TABLES
                                                         TRUE   ~ "Skipped this question"))
 
 
@@ -590,19 +567,19 @@ MW_time1 %>%  gt()  %>%
 
 
 #EATDRINKTIME
-EATDRINKTIME_V1=BUM %>% filter(!is.na(D_191057574) & (D_867307558== "952212668"| D_867307558=="330461666")) %>% ggplot(aes(x=D_191057574))+ ylab("Count") + 
+EATDRINKTIME_V1=bisp %>% filter(!is.na(D_191057574) & (D_867307558== "952212668"| D_867307558=="330461666")) %>% ggplot(aes(x=D_191057574))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("EATDRINKTIME(V1): Time Food or Beverage Last Consumed") +theme(axis.text.x = element_text(angle = 90))
 
-EATDRINKTIME_V2=BUM %>% filter(!is.na(D_191057574_V2) & (D_867307558== "952212668"| D_867307558=="330461666")) %>% ggplot(aes(x=D_191057574_V2))+ ylab("Count") + 
+EATDRINKTIME_V2=bisp %>% filter(!is.na(D_191057574_V2) & (D_867307558== "952212668"| D_867307558=="330461666")) %>% ggplot(aes(x=D_191057574_V2))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("EATDRINKTIME(V2): Time Food or Beverage Last Consumed") +theme(axis.text.x = element_text(angle = 90))
 #grid.arrange(EATDRINKTIME_V1, EATDRINKTIME_V2, nrow=2)
 
 
 #SLEEPTIME
-SLEEPTIME_V1=BUM %>% filter(!is.na(D_299417266)) %>% ggplot(aes(x=D_299417266))+ ylab("Count") + 
+SLEEPTIME_V1=bisp %>% filter(!is.na(D_299417266)) %>% ggplot(aes(x=D_299417266))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("SLEEPTIME(V1): Bedtime the Night Before Donation") +theme(axis.text.x = element_text(angle = 90))
 
-SLEEPTIME_V2=BUM %>% filter(!is.na(D_299417266_V2)) %>% ggplot(aes(x=D_299417266_V2))+ ylab("Count") + 
+SLEEPTIME_V2=bisp %>% filter(!is.na(D_299417266_V2)) %>% ggplot(aes(x=D_299417266_V2))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("SLEEPTIME(V2): Bedtime the Night Before Donation") +theme(axis.text.x = element_text(angle = 90))
 #grid.arrange(SLEEPTIME_V1, SLEEPTIME_V2, nrow=2)
 
@@ -632,10 +609,10 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 
 
 #WAKETIME
-WAKETIME_V1=BUM %>% filter(!is.na(D_689861450)) %>% ggplot(aes(x=D_689861450))+ ylab("Count") + 
+WAKETIME_V1=bisp %>% filter(!is.na(D_689861450)) %>% ggplot(aes(x=D_689861450))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("WAKETIME(V1): Wake-up Time the Day of Donation") +theme(axis.text.x = element_text(angle = 90))
 
-WAKETIME_V2=BUM %>% filter(!is.na(D_689861450_V2)) %>% ggplot(aes(x=D_689861450_V2))+ ylab("Count") + 
+WAKETIME_V2=bisp %>% filter(!is.na(D_689861450_V2)) %>% ggplot(aes(x=D_689861450_V2))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("WAKETIME(V2): Wake-up Time the Day of Donation") +theme(axis.text.x = element_text(angle = 90))
 #grid.arrange(WAKETIME_V1, WAKETIME_V2, nrow=2)
 
