@@ -22,7 +22,7 @@ output:
 
 
 
-```{r, include=FALSE}
+```{r libraries, include=FALSE}
 
 #old.packages()
 #update.packages()
@@ -47,7 +47,7 @@ options(tinytex.verbose = TRUE)
 bq_auth()
 ```
 
-```{r, include=FALSE}
+```{r merge, include=FALSE}
 project = "nih-nci-dceg-connect-prod-6d04"
 billing= "nih-nci-dceg-connect-prod-6d04"
 biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.clinicalBioSurvey_v1_JP`    where Connect_ID is not null"
@@ -76,9 +76,7 @@ specimenBU_data$Connect_ID <- as.numeric(specimenBU_data$Connect_ID)
 bisp= left_join(biospec_data, parts_data, by="Connect_ID")  %>%  left_join(specimenBU_data, by="Connect_ID") 
 #dim(bisp)
 
-```
 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
 #Has a recruitment flag
 bisp <- bisp %>% filter(D_512820379==486306141 | D_512820379==854703046)
 #cat("Has a recruitment flag:", dim(bisp)[[1]])
@@ -111,7 +109,7 @@ knitr::opts_chunk$set(comment = NA)
 ```
 
 
-```{r, include=FALSE}
+```{r functions, include=FALSE}
 ##FUNCTIONS
 
 BU_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Intersex or Other", "654207589"="Male",
@@ -308,7 +306,7 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
 
 \newpage
 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r Tables1_3, warning=FALSE, echo=FALSE,  message=FALSE}
 
 
 #NOTE: NO PARTICIAPNT STARTED THIS SURVEY BEFORE 11/30/22 SO NO VERSION 1 VARIABLES HAVE DATA, ONLY VERSION 2
@@ -443,7 +441,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 
 
-```{r, include=FALSE, warning=FALSE}
+```{r merge2, include=FALSE, warning=FALSE}
 avgP_ccc <-  "SELECT  Connect_ID, d_173836415_d_266600170_d_448660695, d_265193023, d_827220437 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
 where d_265193023='231311385' and d_173836415_d_266600170_d_448660695 is not null "
 avgB_ccc <-  "SELECT Connect_ID, D_191057574, D_191057574_V2, D_867307558 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_v1_JP` 
@@ -530,7 +528,7 @@ MW_time1 %>%  gt()  %>%
 
 \FloatBarrier
 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r RemovedTables, warning=FALSE, echo=FALSE,  message=FALSE}
 
 #EATDRINKTIME
 EATDRINKTIME_V1=BU %>% filter(!is.na(D_191057574) & (D_867307558== "952212668"| D_867307558=="330461666")) %>% ggplot(aes(x=D_191057574))+ ylab("Count") + 
@@ -612,7 +610,7 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 \newpage
 
 # Medications
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r Meds, warning=FALSE, echo=FALSE,  message=FALSE}
 #gt_functBU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
 
 #gt_functBU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
@@ -696,7 +694,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 \newpage
 
 # Reproductive Health 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r ReproductiveHealth, warning=FALSE, echo=FALSE,  message=FALSE}
 
 #MENSTPRD
 #menstrual_funct(D_380603392, "MENSTPRD: Had Menstrual Period in the Last 12 Months")
@@ -812,7 +810,7 @@ one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the 
 \newpage
 
 # COVID-19
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r COVID, warning=FALSE, echo=FALSE,  message=FALSE}
 
 
 #NOTE: NO PARTICIAPNT STARTED THIS SURVEY BEFORE 11/30/22 SO NO VERSION 1 VARIABLES HAVE DATA, ONLY VERSION 2
