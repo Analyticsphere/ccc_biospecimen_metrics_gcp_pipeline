@@ -3715,8 +3715,8 @@ biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","
 biospe2_CID_dd <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
 
 biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
-                                                                 !is.na(conceptId.4) & conceptId.4 !=104430631 ~ 2,
-                                                                 is.na(conceptId.4) ~0),
+                                                                 !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
+                                                                 is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
@@ -3733,6 +3733,8 @@ biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 
                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
+
+
 
 biospe2_CID_dd$new.varname <- ifelse(is.na(biospe2_CID_dd$label.1st), biospe2_CID_dd$Variable.Name,paste(biospe2_CID_dd$label.1st,biospe2_CID_dd$Variable.Name,sep="_"))
 biospe2_CID_dd$variable[is.na(biospe2_CID_dd$new.varname)]
