@@ -100,7 +100,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 
 ```
 
-```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r BQPull, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ##import data to R
 
 project <- "nih-nci-dceg-connect-prod-6d04"
@@ -174,11 +174,13 @@ y <- read.csv(urlfile)
 recrvar_nd <- recrvar[which(grepl("d_",recrvar$column_name)),c("column_name","field_path")]
 recrvar_nd$last.CID <- ifelse(grepl("d_",recrvar_nd$column_name),substring(sapply(strsplit(recrvar_nd$column_name,"d_"),tail,1),1,9),NA)
 recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
-recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|collection",recrvar_nd_label$Variable.Label)),] #49
+recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|Blood|Urine|Mouthwash|collection",recrvar_nd_label$Variable.Label)),] #49 updated due to the changes of the master DD
 recrvar.bio <- recrvar.bio[!duplicated(recrvar.bio[,c("last.CID","column_name")]),] #53 updated 10/05/2023 due to the updated dictionary
 query <- recrvar.bio$column_name
 select <- paste(recrvar.bio$column_name,collapse=",")
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
+#tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
+
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
  
 recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 10000)
 ##below are the commone variables in the recruitment table on Biospecimen to apply for the analysis. In case any new variables popping up, i would like #to use the one above directly from the resources (master DD and recruitment table schema to get the most updated version on this biospecimen data
@@ -304,7 +306,7 @@ This Weekly Metrics report contains tables and plots for the Connect Biospecimen
 
 
 
-```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Tables1_2, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 # \newpage
 # \FloatBarrier
 # # Tables
@@ -397,7 +399,7 @@ biospe.bld <- table2
 
 
 
-```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Table3, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 
 
@@ -508,18 +510,10 @@ bioset5_1[4,4] <- paste0(bioset5_1[4,4], " (100%)")
 
 
 
+```
 
 
-
-
-
-
-
-
-
-
-
-
+```{r RemovedTable6, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ###Table 6 Baseline biospecimen collection status among verified participants research collection
 levels(recrver1$BioFin_BaseBloodCol_v1r0)
 
@@ -584,11 +578,11 @@ site.sub[(ds+1),3] <- "-"
 
 }
 
+```
 
 
 
-
-
+```{r Table5a5b, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ##Updated table 4 (a and b) Now includes all sites but is split by collection setting
 b6 <- biospe %>%  select(Connect_ID, d_650516960, d_410912345)
 
@@ -666,6 +660,7 @@ coll_completenessC <- coll_completenessC%>%
   modify_header(stat_0 = "Total") %>%
   modify_caption("Table 5b. Baseline Clinical Collection Completeness by Site") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
+```
 
 
 
@@ -673,8 +668,7 @@ coll_completenessC <- coll_completenessC%>%
 
 
 
-
-
+```{r Table6, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ##Fig 1(table6)
 recrver1 <- recrver1 %>% mutate(BiospmCols_v1r0 = 
                                   case_when((recrver1$d_684635302 == 353358909 & recrver1$d_878865966 == 353358909 & recrver1$d_167958071 == 353358909) ~ "All blood, urine and mouthwash",
@@ -867,12 +861,12 @@ bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research))
          
 bldcol_research1 <- bldcol_research[c(1:5,10),c(9:12,4)] #c(9:12,4)
 
+```
 
 
 
 
-
-
+```{r Table7s, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ### Table 7.1- specifically for U-Chicago 
 biospe= biospe  %>% mutate(UC_Sites= case_when(d_951355211==777644826 ~ "UC-DCAM",
                                        d_951355211==145191545 ~ "Ingalls Harvey",
@@ -941,10 +935,10 @@ bldcol_research_HF$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldco
 bldcol_research_HF$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF)),  paste(format(bldcol_research_HF[,3],big.mark=","),"(", round(100*bldcol_research_HF[,7],1),"%)",sep=" "), format(bldcol_research_HF[,3],big.mark="," ))
          
 bldcol_research_HF1 <- bldcol_research_HF[,c(9:12,4)]
+```
 
 
-
-
+```{r Table7.3, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 ### Table 7.3- specifically for Henry Ford--CLINICAL SITES--- need to wait until there's more data
 table7_3 <- recrver1 %>%  select(Connect_ID, d_173836415_d_266600170_d_185243482)
@@ -993,21 +987,15 @@ bldcol_research_HF2$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldc
     # FOR NOW THERE ARE NO NO-BLOOD COLLECTIONS
 #bldcol_research_HF2$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,3],big.mark=","),"(", round(100*bldcol_research_HF2[,7],1),"%)",sep=" "), format(bldcol_research_HF2[,3],big.mark="," ))
 #if(!is.na(bldcol_research_HF2$NoBlood)){print("Table 5.3 needs to be fixed. 'No Blood' has now been added")} #For now this column doesn't exist
-bldcol_research_HF2$None <- list("0 (0%)", "0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
+bldcol_research_HF2$None <- list("0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
 
 
 bldcol_research_HF2 <- bldcol_research_HF2[, c(7:10,3)] # RIGHT NOW THERE IS AN NA LOCATION FOR SOME REASON
+```
 
 
 
-
-
-
-
-
-
-
-  
+```{r Table9, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ### Table 8- renumbered
 pct_n <- function(x,y){ paste0(x,"( ", round(100*y,2), " %)")}
 n_pct_table <- function(x,y){
@@ -1076,12 +1064,12 @@ tube_completeness <- tube_completeness %>%
   modify_caption("Table 9. Blood Completeness (Number of Blood Tubes Collected) for Participants with Baseline Clinical Collections") %>% ## used to be Table 8
   as_kable_extra()
 tube_completeness
+```
 
 
 
 
-
-
+```{r Table4, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 # ## New table 4 8/22/23
 clin_col <- biospe %>% select(Connect_ID, d_650516960, d_410912345)
 bldurcl <- left_join(recrver1, clin_col, by="Connect_ID")
@@ -1132,11 +1120,11 @@ newtable4[,2] <- c(dash_bloodP, site_dash_bloodP, site_bloodP, total_bloodP)
 newtable4[,3] <- c(dash_urineP, site_dash_urineP,  site_urineP, total_urineP)
 #newtable4[4,] <- list('Total', total_bloodP, total_urineP)
 colnames(newtable4) <- c(md("Data System"), md("Blood"), md("Urine"))
+```
 
 
 
-
-
+```{r Table11, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 #Table 13 
 #Participants who checked in for a baseline biospecimen visit but did not give any samples
@@ -1215,9 +1203,9 @@ Deviation_Freq[10,c(1:6)] <- c("Total",total1, total2,format(sum(biospe$tubecol)
                         paste0(format(total2,big.mark=",")," (", round(100*sum(as.numeric(Deviation_Freq[1:9,3]))/sum(as.numeric(Deviation_Freq$Total), na.rm=T),1)," %)"))     
 Deviation_Freq <- Deviation_Freq %>% mutate(Site = ifelse(is.na(Group.1.x), "Total Tubes Collected",  as.character(Group.1.x))) ###to replace NA in the factor variable
 
+```
 
-
-
+```{r Deviations, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 #Table 14. Number of deviations by biospecimen type and by tube type 
 #keep this table for CCC version but remove from version that we are sharing with the sites
 dev_tube <- NULL
@@ -1413,18 +1401,12 @@ for(site in unique(dev_tube2$Site)){
   total <- as.numeric(nrow(dev_tube2[which(dev_tube2$Site==site),]))
   dev_count.site[[site]] <- site.sub
 }
+```
   
   
   
   
-  
-
- 
- 
-
-### Table 6
-  ##Table19Number of tube tubes not collected at research collection visits
-  ###as Stephanie commended for the order "Order columns to match draw order:"SST1, SST2, Heprarin, EDTA, ACD, Urine, Mouthwash "
+```{r Table8, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
   
   research.coltube<- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 104430631) %>%     
     mutate(Site=droplevels(Site),
@@ -1523,19 +1505,13 @@ nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
   #notcol_combo8_1[6,c(1:8)] <- as.character(apply(count,2,sum))
 notcol_combo8_1[6,c(1:6)] <- as.character(apply(count8_1,2,sum))
   notcol_combo8_1$Site[is.na(notcol_combo8_1$Site)] <- replace_na("Total")
-
-  
-  
-  
-  
-  
-  
+```
 
 
 
 
-  
-  ### Table 9-- previously 14
+```{r Table10, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
 Tb.research.coltube <- research.coltube %>% select(tube_type,Site) %>% 
   tbl_cross(  col = tube_type,
                   row = Site,
@@ -1551,10 +1527,7 @@ Tb.research.coltube <- research.coltube %>% select(tube_type,Site) %>%
 
 ## Number of tube tubes not collected at clinical collections
 
-  clinic.coltube<- collection_long %>% 
-  filter((Site=="Kaiser Permanente Colorado" | Site=="Kaiser Permanente Georgia" | Site=="Kaiser Permanente Northwest" | Site=="Kaiser Permanente Hawaii" | Site=="Henry Ford Health System") & tubecol == 353358909) %>%  ###changed to filter = yes, removed biocol_Setting == "Clinical", changed to KP + HP,  remove | Site=="HealthPartners"
-    #filter(biocol_Setting == "Clinical" & tubecol == 353358909) %>%  ## ON HOLD- HYBIRD HF needs to be included, so clinical setting should include it 
-    #filter((Site=="Kaiser Permanente Colorado" | Site=="Kaiser Permanente Georgia" | Site=="Kaiser Permanente Northwest" | Site=="Kaiser Permanente Hawaii" | Site=="Henry Ford Health System") & tubecol == 353358909) %>%
+  clinic.coltube<- collection_long %>% filter(biocol_Setting=="Clinical" & tubecol == 353358909) %>%
     mutate(Site=droplevels(Site),
            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5", "Heparin Tube1","Heparin Tube2","EDTA Tube1","EDTA Tube2","EDTA Tube3","ACD Tube1","Urine Tube1" )))
   
@@ -1584,16 +1557,11 @@ notcol_combo2 <- array(pct_n(clinic.ctable$t,clinic.ctable$prop.col), dim=c(5,12
   #notcol_combo2[5,1] <- "Total"
   notcol_combo2 <- notcol_combo2[,c(1:12)]
   
- 
+```
 
 
 
-  
-  
-  
-  
-  
-  
+```{r Table12a12b, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
   
 ## Table 15  
 ##Table X: Reason not collected by tube type and by site for research collections only
@@ -1687,13 +1655,10 @@ research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type)
      modify_caption("Table 12b. Reason Not Collected for Tubes Not Collected at Research Collection Visits by Tube Type") %>%
      as_kable_extra() %>% kable_styling(latex_options = "scale_down")
 research.notcolnotes_tube
+```
 
 
-
-
-
-
-
+```{r Table13, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 ## Was Table16---- now deleted
 #notcol_notes<- base::merge(collection_long,notcol_tube,by="tubeID")
@@ -1730,10 +1695,10 @@ discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>%
 discard.site <- n_pct_table(discard.tb$Site,discard.tb$tube_type)
 discard.site <- (discard.site[, c(10, 1:9)])
 
+```
 
 
-
-
+```{r Table14, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 ###back to the recruitment table
 biospe.tm <- recrvar.bio$column_name[which(grepl("Date|time|Time", recrvar.bio$Variable.Label))]
@@ -1858,11 +1823,11 @@ Table15_combined <- test17 %>% dplyr::select(Site, research.sv )  %>% tbl_cross(
   modify_caption("Table 14. Baseline Research Biospecimen Survey Status by Site") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
+```
 
 
 
-
-
+```{r Table15, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 #Table 18                        
 #Total number and percent of clinical biospecimen survey status
@@ -1929,7 +1894,7 @@ test18 <- clinic.survey %>%
   mutate(clinical.sv = case_when(d_253883960 == 231311385 ~ "Submitted",
                                  d_253883960 == 615768760 ~ "Started",
                                  d_253883960 == 972455046 ~ "Not Started"))
-test18a <- test18 %>%  filter(Site=="Kaiser Permanente Colorado" |  Site=="Kaiser Permanente Georgia" | Site=="Kaiser Permanente Hawaii" | Site=="Kaiser Permanente Northwest" | Site=="Henry Ford Health System") 
+test18a <- test18 %>%  filter(d_650516960==664882224) 
 test18a$Site<- droplevels(test18a$Site)
 
 Table16_combined <- test18a %>% dplyr::select(Site, clinical.sv )  %>% tbl_cross(
@@ -1946,12 +1911,12 @@ Table16_combined <- test18a %>% dplyr::select(Site, clinical.sv )  %>% tbl_cross
   modify_header() %>%
   modify_caption("Table 15. Baseline Clinical Biospecimen Survey Status by Site") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
+```
 
 
 
 
-
-
+```{r Table16a16b, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 
 ## Table 19
@@ -2011,9 +1976,12 @@ Table17_combinedA <- test17_a %>% dplyr::select(Site, checktmvisit )  %>% tbl_cr
     modify_caption("16b. Baseline Research Biospecimen Survey Completion Time from Visit Check-In Time (Post-COVID-19 Questions Removal)") %>%
     as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
+```
 
 
 
+
+```{r Table17, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 #Table 20
 
     ## added requirement: BioClin_AnyBldUrineRec_v1r0 is not null instead of survey completed
@@ -2047,13 +2015,12 @@ Table18_combined <- test18a_B %>% dplyr::select(Site, checktmvisit )  %>% tbl_cr
   modify_caption("17. Baseline Clinical Biospecimen Survey Complete Time from Collection Time") %>% #on hold: check that HF shows up
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
+```
 
 
 
 
-
-
-
+```{r Table18a18b, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 time.clcsv_checkinCO <- as.data.frame.matrix(tab1(clinic.surveyCO$checktmvisit)$output.table) #[which(clinic.surveyCO$d_253883960==231311385),]
 time.clcsv_checkinCO <-time.clcsv_checkinCO %>% 
   mutate(cumulative.Freq = ifelse(trimws(rownames(time.clcsv_checkinCO))!="Total", cumsum(time.clcsv_checkinCO$Frequency),time.clcsv_checkinCO$Frequency))
@@ -2073,7 +2040,6 @@ time.clcsv_checkinNW <-time.clcsv_checkinNW %>%
 
 
 
-#New Table 19- length of time for research survey completion (8/16/23 request) before and after covid
 test21r <- recrver1 %>%  filter(d_265193023==231311385 & !is.na(d_222161762) & !is.na(d_822499427)) 
 test21r <-  test21r %>% mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_822499427)),units="mins")))
 test21rb <-  test21r %>%  filter(d_222161762<as.Date("2023-07-05") & ctime>0)
@@ -2102,11 +2068,10 @@ Table21R_After = test21ra %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
+```
 
 
-
-
-##New Table 20- length of time for clinical survey completion (8/16/23 request) before and after covid : start 534669573, finish 764863765
+```{r Table19a19b20, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 test22c <- recrver1 %>%  filter(d_253883960==231311385 & !is.na(d_764863765) & !is.na(d_534669573)) 
 test22c <-  test22c %>% mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_764863765)),as.POSIXct(ymd_hms(d_534669573)),units="mins")))
 test22cb <-  test22c %>%  filter(d_764863765<as.Date("2023-07-05"))
@@ -2159,13 +2124,16 @@ research.vt.length = research.vt.length %>%group_by(Site) %>% #biochk_outlier,
                    Max = max(time,na.rm = TRUE))
 
 
+```
 
+
+```{r Table21a21b, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ##New Table 22
 
 
 ########################
 
-tab22 <- left_join(recrver1, biospe, by="Connect_ID")
+tab22 <- left_join(recrver1, biospe, by=c("Connect_ID", "Site"))
 
 baseline_colct <- tab22 %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) & d_650516960==534621077) # new-- research only
 
@@ -2173,16 +2141,6 @@ baseline_colct <- tab22 %>%  filter(d_331584571== 266600170 & !is.na(d_914594314
 baseline_colctC <- baseline_colct %>%  filter(d_914594314<as.Date("2022-08-01"))
 
 BSL_colctC <- baseline_colctC %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
-                                     Site = case_when(#d_827220437.x==125001209 ~ "Kaiser Permanente Colorado",
-                                                  #d_827220437.x==327912200 ~ "Kaiser Permanente Georgia",
-                                                  #d_827220437.x==300267574 ~ "Kaiser Permanente Hawaii",
-                                                  #d_827220437.x==452412599 ~ "Kaiser Permanente Northwest",
-                                                  d_827220437.x==548392715 ~ "Henry Ford",
-                                                  d_827220437.x==531629870 ~ "HealthPartners",
-                                                  d_827220437.x==303349821 ~ "Marshfield",
-                                                  d_827220437.x==657167265 ~ "Sanford",
-                                                  d_827220437.x==809703864 ~ "University of Chicago",
-                                                  d_827220437.x==517700004 ~ "NCI"),
                                  "Number of Participants" = n(),
                                  'Number of Baseline Collections' = case_when(!is.na(d_556788178) ~ n()))
 
@@ -2205,17 +2163,7 @@ verif_BSL_colctC = BSL_colctC %>%group_by(Site) %>% #select("Number of Participa
 
 baseline_colctD <- baseline_colct %>%  filter(d_914594314>=as.Date("2022-08-01"))
 
-BSL_colctD <- baseline_colctD %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
-                                 Site = case_when(#d_827220437.x==125001209 ~ "Kaiser Permanente Colorado",
-                                                  #d_827220437.x==327912200 ~ "Kaiser Permanente Georgia",
-                                                  #d_827220437.x==300267574 ~ "Kaiser Permanente Hawaii",
-                                                  #d_827220437.x==452412599 ~ "Kaiser Permanente Northwest",
-                                                  d_827220437.x==548392715 ~ "Henry Ford",
-                                                   d_827220437.x==531629870 ~ "HealthPartners",
-                                                   d_827220437.x==303349821 ~ "Marshfield",
-                                                   d_827220437.x==657167265 ~ "Sanford",
-                                                   d_827220437.x==809703864 ~ "University of Chicago",
-                                                   d_827220437.x==517700004 ~ "NCI"))
+BSL_colctD <- baseline_colctD %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
 
 
 verif_BSL_colctD = BSL_colctD %>%group_by(Site) %>% 
@@ -2245,16 +2193,6 @@ baseline_colct <- tab22 %>%  filter(d_331584571== 266600170 & !is.na(d_914594314
 baseline_colctA <- baseline_colct %>%  filter(d_914594314<as.Date("2023-02-01"))
 
 BSL_colctA <- baseline_colctA %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
-                                     Site = case_when(d_827220437.x==125001209 ~ "Kaiser Permanente Colorado",
-                                                  d_827220437.x==327912200 ~ "Kaiser Permanente Georgia",
-                                                  d_827220437.x==300267574 ~ "Kaiser Permanente Hawaii",
-                                                  d_827220437.x==452412599 ~ "Kaiser Permanente Northwest",
-                                                  d_827220437.x==548392715 ~ "Henry Ford"),
-                                                  # d_827220437.x==531629870 ~ "HealthPartners",
-                                                  # d_827220437.x==303349821 ~ "Marshfield",
-                                                  # d_827220437.x==657167265 ~ "Sanford",
-                                                  # d_827220437.x==809703864 ~ "University of Chicago",
-                                                  # d_827220437.x==517700004 ~ "NCI"),
                                  "Number of Participants" = n(),
                                  'Number of Baseline Collections' = case_when(!is.na(d_556788178) ~ n()))
 
@@ -2276,17 +2214,7 @@ verif_BSL_colctA = BSL_colctA %>%group_by(Site) %>% #select("Number of Participa
 
 baseline_colctB <- baseline_colct %>%  filter(d_914594314>=as.Date("2023-02-01"))
 
-BSL_colctB <- baseline_colctB %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
-                                 Site = case_when(d_827220437.x==125001209 ~ "Kaiser Permanente Colorado",
-                                                  d_827220437.x==327912200 ~ "Kaiser Permanente Georgia",
-                                                  d_827220437.x==300267574 ~ "Kaiser Permanente Hawaii",
-                                                  d_827220437.x==452412599 ~ "Kaiser Permanente Northwest",
-                                                  d_827220437.x==548392715 ~ "Henry Ford"))
-                                                  # d_827220437.x==531629870 ~ "HealthPartners",
-                                                  # d_827220437.x==303349821 ~ "Marshfield",
-                                                  # d_827220437.x==657167265 ~ "Sanford",
-                                                  # d_827220437.x==809703864 ~ "University of Chicago",
-                                                  # d_827220437.x==517700004 ~ "NCI"))
+BSL_colctB <- baseline_colctB %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
 
 
 verif_BSL_colctB = BSL_colctB %>%group_by(Site) %>% 
@@ -2309,20 +2237,15 @@ verif_BSL_colctB = BSL_colctB %>%group_by(Site) %>%
 
 
 
-#New Table 25 
+#New Table 24
   #recrver1, d_914594314 , d_173836415_d_266600170_d_769615780, d_827220437     &        biospe,  biocol_Setting== "Clinical",
 
 
-ver_draw <- tab22 %>%  filter(biocol_Setting== "Clinical" & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2023-02-01"))
+ver_draw <- tab22 %>%  filter(biocol_Setting== "Clinical" & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2023-02-01")  & Site!='HealthPartners')
 
 
 
-verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
-                                 Site = case_when(d_827220437.x==125001209 ~ "Kaiser Permanente Colorado",
-                                                  d_827220437.x==327912200 ~ "Kaiser Permanente Georgia",
-                                                  d_827220437.x==300267574 ~ "Kaiser Permanente Hawaii",
-                                                  d_827220437.x==452412599 ~ "Kaiser Permanente Northwest",
-                                                  d_827220437.x==548392715 ~ "Henry Ford Health System")) #on hold- HF should have data from clinical 
+verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
 
 verif_draw_order = verif_draw %>%group_by(Site) %>% 
   dplyr::summarize('Number of Draw Orders Placed'=n(),
@@ -2352,7 +2275,7 @@ parts24 <- "SELECT Connect_ID, state_d_667474224 FROM `nih-nci-dceg-connect-prod
 parts24_table <- bq_project_query(project, parts24)
 parts24_data <- bq_table_download(parts24_table, bigint="integer64",n_max = Inf, page_size = 10000)
 parts24_data$Connect_ID <- as.numeric(parts24_data$Connect_ID)
-tab24 <- left_join(recrver1, biospe, by="Connect_ID") %>% left_join(parts24_data, by="Connect_ID")
+tab24 <- left_join(recrver1, biospe, by=c("Connect_ID", "Site")) %>% left_join(parts24_data, by="Connect_ID")
 
 baseline_24 <- tab24 %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) )
 
@@ -2404,7 +2327,7 @@ verif_baseline_Af <- verif_baseline_Af %>%  select(Site,  'Number of Baseline Co
  
  
  
-```{r, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Figures12_15, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 #Code for figures
 
 
@@ -2563,10 +2486,13 @@ clc_both_vt.site.NW<-ggplot(clc.both.wk_site.NW, aes(x=as_date(ymd(visit.wkdate)
 
 clc_both_vt.site.NW
 
+```
 
 
+```{r Table26, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
-#Fig 4
+
+#Fig 1 & Table 26
 
 recr_site_only <- recr.biospe %>%  select(d_650516960, Connect_ID)
 
@@ -2574,13 +2500,14 @@ blood_fig4 <- left_join(recr.bio, recr_site_only, by="Connect_ID")
 
 blood_placed= blood_fig4 %>%  filter(recr.bio$d_821247024==197316935  & (d_827220437==125001209 | d_827220437==327912200 |
                                                                         d_827220437==300267574 | d_827220437==452412599 | (d_650516960==664882224 & d_827220437==548392715)))
-blood_placed= blood_placed %>%   mutate(bld_placed= case_when(d_173836415_d_266600170_d_530173840==353358909 ~ "Blood Draw Order Placed",
-                               (d_173836415_d_266600170_d_530173840==104430631 | is.na(d_173836415_d_266600170_d_530173840))~ "No Blood Draw Order Placed"),
+blood_placed= blood_placed %>%  mutate(bld_placed= case_when(d_173836415_d_266600170_d_530173840==353358909 ~ "Blood Draw Order Placed",
+                                                             (d_173836415_d_266600170_d_530173840==104430631 | is.na(d_173836415_d_266600170_d_530173840))~ "No Blood Draw Order Placed"),
                                KP_Site= case_when(d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                                                              d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                                                              d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                              d_827220437==452412599 ~ "Kaiser Permanente Northwest",
-                                                              d_827220437==548392715 ~ "Henry Ford Health System"), 
+                                                  d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+                                                  d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+                                                  d_827220437==452412599 ~ "Kaiser Permanente Northwest",
+                                                  #d_827220437==657167265 ~ "Sanford Health",
+                                                  d_827220437==548392715 ~ "Henry Ford Health System"), 
                                verif_bld= case_when(d_821247024==197316935 ~ 1,
                                                     TRUE ~ 0))
 
@@ -2595,7 +2522,7 @@ blood_placed_plot <- ggplot(blood_placed, aes(x=KP_Site, y=verif_bld, fill=bld_p
           plot.title = element_text(hjust = 0.5,size = 12, face = "bold"))
 
 
-## Table 27 (used to be 23)
+
 Table_bld_draw <- blood_placed %>% dplyr::select(KP_Site, bld_placed)  %>% tbl_cross(
   row = KP_Site,
   col = bld_placed,
@@ -2614,43 +2541,15 @@ Table_bld_draw <- blood_placed %>% dplyr::select(KP_Site, bld_placed)  %>% tbl_c
 
 
 
-
-
-
-
-
-
-
-
-
 ``` 
  
  
  
-```{r, include=FALSE, echo=FALSE, warning=FALSE}
-
-#Table 26
-
-avg_ccc <-  "SELECT  d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_982213346, d_827220437 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where d_878865966='353358909' and d_173836415_d_266600170_d_769615780 is not null and d_173836415_d_266600170_d_982213346 is not null"
-
-avg_table_cc <- bq_project_query(project, avg_ccc)
-
-avg <- bq_table_download(avg_table_cc, bigint="integer64",n_max = Inf, page_size = 10000)
+```{r Table25, include=FALSE, echo=FALSE, warning=FALSE}
 
 
-avg_coll <- avg %>%  filter(d_173836415_d_266600170_d_982213346>=as.Date("2023-02-01") & (d_827220437==125001209 |  d_827220437==327912200 | 
-                                                                                                d_827220437==300267574 | d_827220437==452412599 | d_827220437==548392715))
-#avg$Site<- droplevels(avg$Site)
-
-
-avg_coll <- avg_coll %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days")),
-                                 Site = case_when(d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                                                  d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                                                  d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                  d_827220437==452412599 ~ "Kaiser Permanente Northwest",
-                                                  d_827220437==548392715 ~ "Henry Ford Health System"))
-#research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk))
+avg_coll <- clinic.survey %>%  filter(d_173836415_d_266600170_d_982213346>=as.Date("2023-02-01")  & Site!='HealthPartners')
+avg_coll <- avg_coll %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days")))
 
 avg_draw_order = avg_coll %>%group_by(Site) %>% #biochk_outlier,
   dplyr::summarize('Number of Collection'=n(),
@@ -2667,7 +2566,7 @@ avg_draw_order = avg_coll %>%group_by(Site) %>% #biochk_outlier,
 
 
 
-```{r, include=FALSE, echo=FALSE, warning=FALSE}
+```{r TempTable, include=FALSE, echo=FALSE, warning=FALSE}
 
 
 
@@ -2742,7 +2641,7 @@ timelag2
 
 
  
-```{r, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
+```{r Figures4, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
 ### ADD TO REPORT
 
 #NEW FIGURE 4, NOW MOVED UP
@@ -2887,7 +2786,7 @@ research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(visit.wkdate), y=100*(ho
  
 
 
-```{r, eval=TRUE,echo=FALSE}
+```{r KnitrTables1_5, eval=TRUE,echo=FALSE}
 options(knitr.table.format = "latex")
 options(kableExtra.auto_format = FALSE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
@@ -2924,7 +2823,7 @@ coll_completenessC %>% kable_styling(latex_options = "scale_down")
 
 
 
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+```{r KnitrTables6_7.1,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
 knitr::kable(bldcol_research1, col.names=c("Site","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 6. Blood Completeness for Participants with Baseline Research Collections', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
@@ -2933,7 +2832,7 @@ knitr::kable(bldcol_research_UC1, col.names=c("Collection Location","All Blood T
 ```
 
 \FloatBarrier
-```{r, eval=TRUE,echo=FALSE, warning=FALSE}
+```{r Figure1, eval=TRUE,echo=FALSE, warning=FALSE}
 
 ### ADD TO REPORT
 
@@ -2999,14 +2898,14 @@ research.1_1 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
 research.1_1
 ```
 
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+```{r KnitrTables7.2,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
 
 knitr::kable(bldcol_research_HF1, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.2 Blood Completeness among Henry Ford Baseline Research Collections by Collection Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 ```
 
 \FloatBarrier
-```{r, eval=TRUE,echo=FALSE, warning=FALSE}
+```{r Figure2, eval=TRUE,echo=FALSE, warning=FALSE}
 #NEW FIGURE 2, NOW MOVED UP
 Inc_bld_HF <- tube_research_HF %>%  select(Connect_ID, HF_Sites, bld.complt)
 Inc_bld_HF$Connect_ID <- as.numeric(Inc_bld_HF$Connect_ID)
@@ -3073,12 +2972,12 @@ research.1_2
 
 
 
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
-knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
 
-knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  ## used to be Table 13
+knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  
 
 
 
@@ -3099,7 +2998,7 @@ knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No
 ```
 
 
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+```{r KnitrTables12_14,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
 
 research.notcolnotes_site
@@ -3121,7 +3020,7 @@ Table15_combined %>% kable_styling(latex_options = "scale_down")
 
 \newpage
 \FloatBarrier
-```{r, echo=FALSE, eval=TRUE, warning=FALSE}
+```{r Figure3, echo=FALSE, eval=TRUE, warning=FALSE}
 
 
 
@@ -3176,7 +3075,7 @@ research.3
 
 
 
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+```{r KnitrTables15_16,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 Table16_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -3191,7 +3090,7 @@ add_footnote(tbl19b,"Note: The COVID-19 survey questions were separated from the
 \newpage
 \FloatBarrier
 
-```{r, echo=FALSE, eval=TRUE}
+```{r Figures1_3, echo=FALSE, eval=TRUE}
 research.4_1
 research.4_2
 research.4_3
@@ -3199,7 +3098,7 @@ research.4_3
 
 \newpage
 \FloatBarrier
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+```{r KnitrTables17_26,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 Table18_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -3266,7 +3165,7 @@ Table_bld_draw
 \FloatBarrier
 
 
-```{r, eval=TRUE,echo=FALSE}
+```{r Fig5, eval=TRUE,echo=FALSE}
 # fig.height = 5, fig.width = 5, 
 blood_placed_plot
 
@@ -3277,7 +3176,7 @@ blood_placed_plot
 
 
 
-```{r, eval=TRUE,echo=FALSE,fig.cap='Figure 2'}
+```{r Fig6, eval=TRUE,echo=FALSE,fig.cap='Figure 2'}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 #need sum of collections by week
 #table(visit_wk_site$visit.wkdate, visit_wk_site$n)
@@ -3324,7 +3223,7 @@ research.vt1
 
 
 
-```{r, eval=TRUE,echo=FALSE}
+```{r Figures7_9, eval=TRUE,echo=FALSE}
  
  #Hybird version
 VW_biospe <- biospe %>%  select(d_951355211, Connect_ID)
@@ -3525,7 +3424,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
 
 
 
-```{r, eval=TRUE,echo=FALSE}
+```{r Figures10_11, eval=TRUE,echo=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 
 
@@ -3604,7 +3503,7 @@ print(research.vt_plotHP)
 # clc.urine.vt
 ```
 
-```{r, eval=TRUE,echo=FALSE}
+```{r Fig12_16, eval=TRUE,echo=FALSE}
 #fig.height = 5, fig.width = 5, 
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 #clc_urine_vt.site
@@ -3620,7 +3519,7 @@ clc_both_vt.site.NW
 \newpage
 \FloatBarrier
 
-```{r,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+```{r DeviationTable,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
 #knitr::kable(dev_count[, 3:4], col.names=c("Deviation", "Number"), caption='Table 12. Biospecimen Deviations Reported by Site', row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
@@ -3792,8 +3691,8 @@ factor_cid <-function(var,data){
 bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
 biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
 
-#biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
-#biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
+biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
+biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
 
 cnames <- names(biospe2)
 for (i in 1: length(cnames)){
@@ -3816,8 +3715,8 @@ biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","
 biospe2_CID_dd <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
 
 biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
-                                                                 !is.na(conceptId.4) & conceptId.4 !=104430631 ~ 2,
-                                                                 is.na(conceptId.4) ~0),
+                                                                 !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
+                                                                 is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
@@ -3834,6 +3733,8 @@ biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 
                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
+
+
 
 biospe2_CID_dd$new.varname <- ifelse(is.na(biospe2_CID_dd$label.1st), biospe2_CID_dd$Variable.Name,paste(biospe2_CID_dd$label.1st,biospe2_CID_dd$Variable.Name,sep="_"))
 biospe2_CID_dd$variable[is.na(biospe2_CID_dd$new.varname)]

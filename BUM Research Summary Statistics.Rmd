@@ -23,7 +23,7 @@ output:
 ---
 
 
-```{r, include=FALSE}
+```{r libraries, include=FALSE}
 library(bigrquery)
 library(dplyr)
 library(ggplot2)
@@ -42,7 +42,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 bq_auth()
 ```
 
-```{r, include=FALSE}
+```{r merge, include=FALSE}
 project = "nih-nci-dceg-connect-prod-6d04"
 billing= "nih-nci-dceg-connect-prod-6d04"
 biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_v1_JP`  where Connect_ID is not null"
@@ -85,7 +85,7 @@ knitr::opts_chunk$set(comment = NA)
 
 
 
-```{r, include=FALSE}
+```{r functions, include=FALSE}
 ##FUNCTIONS
 
 BUM_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Intersex or Other", "654207589"="Male",
@@ -93,7 +93,8 @@ BUM_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know",
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
                  "548628123"="A little bit", "567908725"="Somewhat", "760969884"="Quite a bit", "464631026"="Very Much", "707601969"="Yes, another",
                  "232063618"="Less than 1 month", "948148236"="Between 1 and 3 months", "692824372"="More than 3 months", "224099497"="Yes, mostly",
-                 "770236544"="No, I never experienced this", "931688701"="Yes, I am experiencing this now", "586272115"="Yes, in the past, but I am not experiencing it now",
+                 "770236544"="No, I never experienced this", "931688701"="Yes, I am experiencing this now", 
+                 "586272115"="Yes, in the past, but I am not experiencing it now", "503154121"="Novavax" ,
                  "661871565"="Moderna", "657978450"="Pfizer", "411943417"="Johnson & Johnson", "113838601"="AstraZeneca", "807835037"="Other", 
                  "670680466"="Excellent", "927477599"="Very Good", "719933364"="Good", "131550264"="Fair", "138752522"="Poor", "648960871"="Never",
                  "693256778"="Less than Once Per Week", "735330419"="1-2 Times per Week", "138332277"="3-5 Times per Week", "858624942"="Once per Day", 
@@ -288,7 +289,7 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
 
 
 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE, include=FALSE}
+```{r intro, warning=FALSE, echo=FALSE,  message=FALSE, include=FALSE}
 
 
 ### All required questions:
@@ -312,7 +313,7 @@ BUM_tib %>%  select(Connect_ID, d_265193023, d_822499427, d_222161762) %>%  filt
 
 \newpage
 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r Tables1_3, warning=FALSE, echo=FALSE,  message=FALSE}
 
 
 
@@ -465,7 +466,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 ```
 
 
-```{r, include=FALSE, warning=FALSE}
+```{r merge2, include=FALSE, warning=FALSE}
 
 library(stringr)
 library(lubridate)
@@ -562,7 +563,7 @@ MW_time1 %>%  gt()  %>%
 \FloatBarrier
 
 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r RemovedGraphs, warning=FALSE, echo=FALSE,  message=FALSE}
 
 
 
@@ -645,7 +646,7 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 \newpage
 
 # Medications
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r Meds, warning=FALSE, echo=FALSE,  message=FALSE}
 #gt_functBUM(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
 
 #gt_functBUM(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
@@ -729,7 +730,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 \pagebreak
 
 # Reproductive Health 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r ReproductiveHealth, warning=FALSE, echo=FALSE,  message=FALSE}
 
 
 #MENSTPRD
@@ -847,7 +848,7 @@ one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the 
 \newpage
 
 # Mouthwash Data Collection 
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r Mouthwash, warning=FALSE, echo=FALSE,  message=FALSE}
 
 
 #ORALHLTH
@@ -1576,7 +1577,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 \newpage
 \pagebreak
 # COVID-19
-```{r, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r COVID, warning=FALSE, echo=FALSE,  message=FALSE}
 
 #covid was removed from this survey on July 5th, so filtering for only those that completed this survey prior to that point
 covid_section <- BUM_tib %>% filter(d_222161762<as.Date("2023-07-05"))
