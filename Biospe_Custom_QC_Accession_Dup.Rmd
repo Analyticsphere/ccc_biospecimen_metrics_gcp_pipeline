@@ -581,7 +581,6 @@ knitr::kable(qc12)
 
 
 
-
 ### IF BioClin_SiteBloodColl_v1r0 = 1, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
 ```{r HPExcluded1, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -1259,6 +1258,7 @@ write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections
 # 
 # colnames(qc13_tube8) <- c("Site", "Connect ID", "STRECK Tube 1- Date Received")
 # knitr::kable(qc13_tube8)
+
 
 ```
 
