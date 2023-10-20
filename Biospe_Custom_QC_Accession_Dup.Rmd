@@ -581,7 +581,6 @@ knitr::kable(qc12)
 
 
 
-
 ### IF BioClin_SiteBloodColl_v1r0 = 1, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
 ```{r HPExcluded1, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -667,28 +666,15 @@ knitr::kable(UrineDtTmVs_noHP)
 
 
 
-### Tube Date Received - If BioClin_DBBloodRRLDt_v1r0 occured more than 4 days ago, (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
-```{r BioBPTL_DateRec, echo=FALSE, warning=FALSE, message=FALSE}
+### Tube Date Received Clinical - If BioClin_DBBloodRRLDt_v1r0 occured more than 4 days ago, (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
+```{r BioBPTL_DateRecClinical, echo=FALSE, warning=FALSE, message=FALSE}
 
 
  ###########chnage to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
 
-# qc13_tube1 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & is.na(d_143615646_d_926457119)) %>% 
-#   select(Site, Connect_ID, d_143615646_d_926457119)
-# 
-# qc13_tube1 %>%  gt() %>%  
-#   tab_header(title = md("MW Tube 1- Date Received - Site Shipment")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_143615646_d_926457119 = md("**Value**"))
-
-
-
 
 qc13_tube2 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119)) %>% 
   select(Site, Connect_ID, d_299553921_d_926457119) %>%  sort_by(Site)
-
-# qc13_tube2 %>%  gt() %>%  
-#   tab_header(title = md("Serum Separator Tube 1- Date Received - Site Shipment")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_299553921_d_926457119 = md("**Value**"))
 
 colnames(qc13_tube2) <- c("Site", "Connect ID", "Serum Separator Tube 1- Date Received")
 knitr::kable(qc13_tube2)
@@ -699,46 +685,22 @@ knitr::kable(qc13_tube2)
 qc13_tube3 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119)) %>% 
   select(Site, Connect_ID, d_454453939_d_926457119) %>%  sort_by(Site)
 
-# qc13_tube3 %>%  gt() %>%  
-#   tab_header(title = md("EDTA Tube 1-- Date Received - Site Shipment")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_454453939_d_926457119 = md("**Value**"))
-
 colnames(qc13_tube3) <- c("Site", "Connect ID", "EDTA Tube 1- Date Received")
 knitr::kable(qc13_tube3)
 
 
 
+qc13_tube4 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_652357376_d_593843561==353358909 & d_652357376_d_762124027==104430631 & is.na(d_652357376_d_926457119) & d_827220437==548392715 & d_650516960==664882224) %>% # | d_827220437==657167265 once Sanford is hybrid
+  select(Site, Connect_ID, d_652357376_d_926457119) %>%  sort_by(Site)
 
-# qc13_tube4 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & is.na(d_652357376_d_926457119) & d_650516960==664882224) %>% 
-#   select(Site, Connect_ID, d_652357376_d_926457119) %>%  sort_by(Site)
-# 
-# # qc13_tube4 %>%  gt() %>%  
-# #   tab_header(title = md("ACD Tube 1- Date Received - Site Shipment")) %>% 
-# #   cols_label(Connect_ID = md("**Connect ID**"), d_652357376_d_926457119 = md("**Value**"))
-# 
-# colnames(qc13_tube4) <- c("Site", "Connect ID", "ACD Tube 1- Date Received") ------- THIS ONE IS NO LONGER NEEDED
-# knitr::kable(qc13_tube4)
+colnames(qc13_tube4) <- c("Site", "Connect ID", "ACD Tube 1- Date Received")
+knitr::kable(qc13_tube4)
 
 
-# qc13_tube6nw <- qc13_tube4 %>%  filter(Site=="Kaiser Permanente Northwest") 
-# qc13_tube6hi <- qc13_tube4  %>%  filter(Site=="Kaiser Permanente Hawaii") 
-# qc13_tube6co <- qc13_tube4  %>%  filter(Site=="Kaiser Permanente Colorado") 
-# qc13_tube6ga <- qc13_tube4  %>%  filter(Site=="Kaiser Permanente Georgia")
-# qc13_tube6nw[, 2]
-# qc13_tube6hi[, 2]
-# qc13_tube6ga[, 2]
-# qc13_tube6co[, 2]
-# 
-# write.csv(qc13_tube4, "KP Date Received Site Shipment")
-# write_xlsx(df, "C:\\Users\\Ron\\Desktop\\Test\\people.xlsx")
 
 
 qc13_tube5 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_703954371_d_593843561==353358909 & d_703954371_d_762124027==104430631 & is.na(d_703954371_d_926457119)) %>% 
   select(Site, Connect_ID, d_703954371_d_926457119) %>%  sort_by(Site)
-
-# qc13_tube5 %>%  gt() %>%  
-#   tab_header(title = md("Serum Separator Tube 2- Date Received - Site Shipment")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_703954371_d_926457119 = md("**Value**"))
 
 colnames(qc13_tube5) <- c("Site", "Connect ID", "Serum Separator Tube 2- Date Received")
 knitr::kable(qc13_tube5)
@@ -749,10 +711,6 @@ knitr::kable(qc13_tube5)
 qc13_tube6 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_838567176_d_593843561==353358909 & d_838567176_d_762124027==104430631 &  is.na(d_838567176_d_926457119)) %>% 
   select(Site, Connect_ID, d_838567176_d_926457119) %>%  sort_by(Site)
 
-# qc13_tube6 %>%  gt() %>%  
-#   tab_header(title = md("Heparin Tube 1- Date Received - Site Shipment")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_838567176_d_926457119 = md("**Value**"))
-
 colnames(qc13_tube6) <- c("Site", "Connect ID", "Heparin Tube 1- Date Received")
 knitr::kable(qc13_tube6)
 
@@ -760,10 +718,6 @@ knitr::kable(qc13_tube6)
 
 qc13_tube8 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_958646668_d_593843561==353358909 & d_958646668_d_762124027==104430631 &  is.na(d_958646668_d_926457119)) %>% 
   select(Site, Connect_ID, d_958646668_d_926457119) %>%  sort_by(Site)
-
-# qc13_tube6 %>%  gt() %>%  
-#   tab_header(title = md("Heparin Tube 1- Date Received - Site Shipment")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_958646668_d_926457119 = md("**Value**"))
 
 colnames(qc13_tube8) <- c("Site", "Connect ID", "Heparin Tube 2- Date Received")
 knitr::kable(qc13_tube8)
@@ -774,18 +728,113 @@ knitr::kable(qc13_tube8)
 qc13_tube7 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119)) %>% 
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  sort_by(Site)
 
-# qc13_tube7 %>%  gt() %>%  
-#   tab_header(title = md("Urine Tube 1-- Date Received - Site Shipment")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_973670172_d_926457119 = md("**Value**"))
-
 colnames(qc13_tube7) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
 knitr::kable(qc13_tube7)
+
+
+
+# qc13_tube8 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & d_505347689_d_593843561==353358909 & d_505347689_d_762124027==104430631 & is.na(d_505347689_d_926457119)) %>% 
+#   select(Site, Connect_ID, d_505347689_d_926457119) %>%  sort_by(Site)
+# 
+# 
+# colnames(qc13_tube8) <- c("Site", "Connect ID", "STRECK Tube- Date Received")
+# knitr::kable(qc13_tube8)
 
 
 
 
 ```
 
+
+
+### Tube Date Received Research - If (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
+```{r BioBPTL_DateRecResearch, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+ ###########chnage to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
+
+bioqcR <- bioqc %>%  filter(d_650516960==534621077)
+
+qc13_Rtube1 <- bioqcR %>%  filter( d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119)) %>%
+  select(Site, Connect_ID, d_143615646_d_926457119)%>%  sort_by(Site)
+
+colnames(qc13_Rtube1) <- c("Site", "Connect ID", "Mouthwash Tube- Date Received")
+knitr::kable(qc13_Rtube1)
+
+
+
+
+qc13_Rtube2 <- bioqcR %>%  filter(d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119)) %>% 
+  select(Site, Connect_ID, d_299553921_d_926457119) %>%  sort_by(Site)
+
+colnames(qc13_Rtube2) <- c("Site", "Connect ID", "Serum Separator Tube 1- Date Received")
+knitr::kable(qc13_Rtube2)
+
+
+
+
+qc13_Rtube3 <- bioqcR %>%  filter(d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119)) %>% 
+  select(Site, Connect_ID, d_454453939_d_926457119) %>%  sort_by(Site)
+
+colnames(qc13_Rtube3) <- c("Site", "Connect ID", "EDTA Tube 1- Date Received")
+knitr::kable(qc13_Rtube3)
+
+
+
+qc13_Rtube4 <- bioqcR %>%  filter(d_652357376_d_593843561==353358909 & d_652357376_d_762124027==104430631 & is.na(d_652357376_d_926457119)) %>% # | d_827220437==657167265 once Sanford is hybrid
+  select(Site, Connect_ID, d_652357376_d_926457119) %>%  sort_by(Site)
+
+colnames(qc13_Rtube4) <- c("Site", "Connect ID", "ACD Tube 1- Date Received")
+knitr::kable(qc13_Rtube4)
+
+
+
+
+qc13_Rtube5 <- bioqcR %>%  filter(d_703954371_d_593843561==353358909 & d_703954371_d_762124027==104430631 & is.na(d_703954371_d_926457119)) %>% 
+  select(Site, Connect_ID, d_703954371_d_926457119) %>%  sort_by(Site)
+
+colnames(qc13_Rtube5) <- c("Site", "Connect ID", "Serum Separator Tube 2- Date Received")
+knitr::kable(qc13_Rtube5)
+
+
+
+
+qc13_Rtube6 <- bioqcR %>%  filter(d_838567176_d_593843561==353358909 & d_838567176_d_762124027==104430631 &  is.na(d_838567176_d_926457119)) %>% 
+  select(Site, Connect_ID, d_838567176_d_926457119) %>%  sort_by(Site)
+
+colnames(qc13_Rtube6) <- c("Site", "Connect ID", "Heparin Tube 1- Date Received")
+knitr::kable(qc13_Rtube6)
+
+
+
+qc13_Rtube8 <- bioqcR %>%  filter(d_958646668_d_593843561==353358909 & d_958646668_d_762124027==104430631 &  is.na(d_958646668_d_926457119)) %>% 
+  select(Site, Connect_ID, d_958646668_d_926457119) %>%  sort_by(Site)
+
+colnames(qc13_Rtube8) <- c("Site", "Connect ID", "Heparin Tube 2- Date Received")
+knitr::kable(qc13_Rtube8)
+
+
+
+
+qc13_Rtube7 <- bioqcR %>%  filter( d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119)) %>% 
+  select(Site, Connect_ID, d_973670172_d_926457119) %>%  sort_by(Site)
+
+colnames(qc13_Rtube7) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
+knitr::kable(qc13_Rtube7)
+
+
+
+# qc13_Rtube8 <- bioqcR %>%  filter( d_505347689_d_593843561==353358909 & d_505347689_d_762124027==104430631 & is.na(d_505347689_d_926457119)) %>% 
+#   select(Site, Connect_ID, d_505347689_d_926457119) %>%  sort_by(Site)
+# 
+# 
+# colnames(qc13_Rtube8) <- c("Site", "Connect ID", "STRECK Tube- Date Received")
+# knitr::kable(qc13_Rtube8)
+
+
+
+
+```
 
 
 
@@ -1179,12 +1228,37 @@ write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections
 # STRECK Tube 1- Deviation Discard	d_505347689_d_248868659_d_810960823	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
 # STRECK Tube 1- Deviation Not Found	d_505347689_d_248868659_d_982885431	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
 
+
+#STRECK Tube 1 Collected BS	d_878865966	crossValid2	353358909	d_505347689_d_593843561	353358909	d_331584571	266600170							If the visit type is Baseline and any blood tube is collected, then the baseline blood is maked as collected																																																			
+
+#STEK Tube HF Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 548392715					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes	
+#EVENTUALLY: STEK Tube Sanford Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 657167265					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
+
+#EVENTUALLY: STEK Tube HP Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 531629870					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
+
+
+
+#EVENTUALLY: ACD Tube Sanford Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_652357376_d_593843561	353358909	d_650516960	664882224	d_652357376_d_762124027	104430631		 d_827220437 657167265				If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
+#EVENTUALLY: ACD Tube HP Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_652357376_d_593843561	353358909	d_650516960	664882224	d_652357376_d_762124027	104430631		 d_827220437 531629870				If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
+
+
 # remove and update from Jake's rule list
   #NA?
 
+
+
 #add to my rule list 
+
 #qc14_tube8 <- bioqc %>%  filter(d_505347689_d_593843561==104430631 & d_650516960== 534621077 & is.na(d_505347689_d_883732523)) %>%  select(Site, Connect_ID, d_505347689_d_883732523) %>%  sort_by(Site)
 #colnames(qc14_tube8) <- c("Site", "Connect ID", "STRECK Tube 1- Reason Tube Not Collected")
+
+# qc13_tube8 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_505347689_d_593843561==353358909 & d_505347689_d_762124027==104430631 & is.na(d_505347689_d_926457119) & d_827220437==548392715 & d_650516960==664882224) %>% # | d_827220437==657167265 once Sanford is hybrid
+#   select(Site, Connect_ID, d_505347689_d_926457119) %>%  sort_by(Site)
+# 
+# 
+# colnames(qc13_tube8) <- c("Site", "Connect ID", "STRECK Tube 1- Date Received")
+# knitr::kable(qc13_tube8)
+
 
 ```
 

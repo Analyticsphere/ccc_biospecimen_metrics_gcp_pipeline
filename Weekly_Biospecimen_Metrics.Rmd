@@ -946,18 +946,19 @@ left7 <- left_join(biospe, table7_3, by="Connect_ID")
 
 biospe7= left7  %>%
   #something odd going odd with the values
-  filter(as.numeric(d_173836415_d_266600170_d_185243482)>72 & d_173836415_d_266600170_d_185243482!=1040010046 & !is.na(d_173836415_d_266600170_d_185243482)) %>%
+  filter(as.numeric(d_173836415_d_266600170_d_185243482)>72  & !is.na(d_173836415_d_266600170_d_185243482)) %>%
   mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "Wyandotte Hospital",
                                        d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 ~ "Macomb Medical Pavilion",
-                                       d_173836415_d_266600170_d_185243482==1040010047 ~ "West Bloomfield Hospital",
+                                       d_173836415_d_266600170_d_185243482==1040010047 | d_173836415_d_266600170_d_185243482==1040010046 ~ "West Bloomfield Hospital",
                                        d_173836415_d_266600170_d_185243482==1011410008 ~ "Royal Oak",
                                        d_173836415_d_266600170_d_185243482==1010180040 ~ "Fairlane (Dearborn)",
                                        d_173836415_d_266600170_d_185243482==1010120026 ~ "Novi",
                                        d_173836415_d_266600170_d_185243482==1010240013 ~ "Plymouth",
-                                       d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)",
+                                       d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)", 
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
-                             #d_173836415_d_266600170_d_185243482==1040010046 ~ "Unknown",
-                                       d_173836415_d_266600170_d_185243482==1010010193 ~ "Main - K1"))  
+                             d_173836415_d_266600170_d_185243482==1010240013 ~ "Livonia",
+                             d_173836415_d_266600170_d_185243482==1010320019 ~ "Sterling Heights",
+                                       d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_185243482==1010010114 ~ "Main - K1"))    
 #biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)
 
 tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>%
@@ -987,10 +988,10 @@ bldcol_research_HF2$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldc
     # FOR NOW THERE ARE NO NO-BLOOD COLLECTIONS
 #bldcol_research_HF2$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,3],big.mark=","),"(", round(100*bldcol_research_HF2[,7],1),"%)",sep=" "), format(bldcol_research_HF2[,3],big.mark="," ))
 #if(!is.na(bldcol_research_HF2$NoBlood)){print("Table 5.3 needs to be fixed. 'No Blood' has now been added")} #For now this column doesn't exist
-bldcol_research_HF2$None <- list("0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
+#bldcol_research_HF2$None <- list("0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
+#bldcol_research_HF2$None <- list( list("0 (0%)")*(nrow-1) ,  0)
 
-
-bldcol_research_HF2 <- bldcol_research_HF2[, c(7:10,3)] # RIGHT NOW THERE IS AN NA LOCATION FOR SOME REASON
+bldcol_research_HF2 <- bldcol_research_HF2[, c(7:9,3)]
 ```
 
 
@@ -1095,7 +1096,8 @@ bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %
                                      (d_173836415_d_266600170_d_210921343==353358909 & d_173836415_d_266600170_d_786930107==353358909) ~ "Site Data & Biospecimen Dashboard"))
 
 newtable_4 <- bldurcl %>% select(Data_System) %>%  group_by(Data_System) %>%  tally()
-newtable4 <- rbind(newtable_4, c("Total", colSums(newtable_4[,2])))
+#newtable4 <- rbind(newtable_4, c("Total", colSums(newtable_4[,2])))
+
 site_dash_blood<- sum((bldurcl$d_173836415_d_266600170_d_534041351==353358909 & bldurcl$d_173836415_d_266600170_d_693370086==353358909), na.rm = T)
 total_blood <- sum((bldurcl$d_173836415_d_266600170_d_534041351==353358909 | bldurcl$d_173836415_d_266600170_d_693370086==353358909), na.rm = T)
 dash_blood <- sum((bldurcl$d_173836415_d_266600170_d_534041351==353358909 & is.na(bldurcl$d_173836415_d_266600170_d_693370086)), na.rm = T)
@@ -1116,10 +1118,14 @@ dash_urineP <- paste0(dash_urine, " (", 100*round(dash_urine/total_urine,digits=
 site_dash_urineP <- paste0(site_dash_urine, " (", 100*round(site_dash_urine/total_urine,digits=2), "%)")
 site_urineP <- paste0(site_urine, " (", 100*round(site_urine/total_urine,digits=2), "%)")
 total_urineP <- paste0(total_urine, " (100%)")
-newtable4[,2] <- c(dash_bloodP, site_dash_bloodP, site_bloodP, total_bloodP)
-newtable4[,3] <- c(dash_urineP, site_dash_urineP,  site_urineP, total_urineP)
-#newtable4[4,] <- list('Total', total_bloodP, total_urineP)
-colnames(newtable4) <- c(md("Data System"), md("Blood"), md("Urine"))
+
+newtable_4[,2] <- c(dash_bloodP, site_dash_bloodP, site_bloodP) #, total_bloodP)
+newtable_4[,3] <- c(dash_urineP, site_dash_urineP,  site_urineP)#, total_urineP)
+#newtable4 <- rbind(newtable_4, c("Total", colSums(newtable_4[,2])))
+newtable_4[4,] <- list('Total', total_bloodP, total_urineP)
+colnames(newtable_4) <- c(md("Data System"), md("Blood"), md("Urine"))
+
+
 ```
 
 
@@ -1458,53 +1464,53 @@ notcol_combo[6,c(1:6)] <- as.character(apply(count2,2,sum))
   
   
 
-## Table 8.1 ON HOLD , will hybrid be a setting added to the DD?
-      # for now just filtering by site=HF, as its the only hybrid site right now
-
-  research.coltube8_1<- collection_long %>% filter(biocol_Setting == "Clinical" & Site == "Henry Ford Health System" & tubecol == 104430631) %>%
-    mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","Urine Tube1","MW Tube1" )))
-
-
-    research.coltube8_1.bld.only<- collection_long %>% filter(biocol_Setting == "Clinical" & Site == "Henry Ford Health System" & tubecol == 104430631) %>%
-    mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2", "SS Tube3", "SS Tube4","Heparin Tube1", "Heparin Tube2","EDTA Tube1", "EDTA Tube2", "EDTA Tube3"))) #,"ACD Tube1"
-    research.coltube8_1.bld.only<- research.coltube8_1.bld.only %>%  mutate(tube_type=droplevels(tube_type))
-
-
-
-ctable <-  CrossTable(research.coltube8_1.bld.only$Site, research.coltube8_1.bld.only$tube_type)
-
-
-nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
-
-  pct_n <- function(x,y){ paste0(x,"( ", round(100*y,1), " %)")}
-      count <- as.data.frame.matrix(ctable$t) # to convert the S3 table into the same dimention table via as.data.frame.matrix
-      perc <- as.data.frame.matrix(ctable$prop.col)
-
-
-   pct_n2 <- function(x,y){ paste0(x,"( ", round(100*y,1), " %)")}
-      count8_1 <- as.data.frame.matrix(ctable$t) # to convert the S3 table into the same dimention table via as.data.frame.matrix
-      perc2 <- as.data.frame.matrix(ctable$prop.col)
-
-
-  #notcol_combo8_1 = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,7))
-  notcol_combo8_1 = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,6))
-
-  notcol_combo8_1 <- as.data.frame(notcol_combo8_1)
-  colnames(notcol_combo8_1) <- colnames(count8_1)
-  #notcol_combo8_1 <- notcol_combo8_1[, c(1:5)] # I added to get rid of MW and Urine, to fix total column
-
-  count8_1$Total.NotCol <- apply(count8_1,1,sum)
-  total <- sum(count8_1)
-  #notcol_combo8_1$Total.Notcol <- paste0(apply(count[c(1:5),c(1:7)],1,sum), "( ", round(100*apply(count8_1[c(1:5),c(1:7)],1,sum)/total,2), " %)")
-  notcol_combo8_1$Total.Notcol <- paste0(count8_1$Total.NotCol, "( ", round(100*count8_1$Total.NotCol/sum(count8_1$Total.NotCol),2), " %)")
-
-  notcol_combo8_1$Site <- rownames(count8_1)
-
-  #notcol_combo8_1[6,c(1:8)] <- as.character(apply(count,2,sum))
-notcol_combo8_1[6,c(1:6)] <- as.character(apply(count8_1,2,sum))
-  notcol_combo8_1$Site[is.na(notcol_combo8_1$Site)] <- replace_na("Total")
+# ## Table 8.1 ON HOLD , will hybrid be a setting added to the DD?
+#       # for now just filtering by site=HF, as its the only hybrid site right now
+# 
+#   research.coltube8_1<- collection_long %>% filter(biocol_Setting == "Clinical" & Site == "Henry Ford Health System" & tubecol == 104430631) %>%
+#     mutate(Site=droplevels(Site),
+#            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","Urine Tube1","MW Tube1" )))
+# 
+# 
+#     research.coltube8_1.bld.only<- collection_long %>% filter(biocol_Setting == "Clinical" & Site == "Henry Ford Health System" & tubecol == 104430631) %>%
+#     mutate(Site=droplevels(Site),
+#            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2", "SS Tube3", "SS Tube4","Heparin Tube1", "Heparin Tube2","EDTA Tube1", "EDTA Tube2", "EDTA Tube3"))) #,"ACD Tube1"
+#     research.coltube8_1.bld.only<- research.coltube8_1.bld.only %>%  mutate(tube_type=droplevels(tube_type))
+# 
+# 
+# 
+# ctable <-  CrossTable(research.coltube8_1.bld.only$Site, research.coltube8_1.bld.only$tube_type)
+# 
+# 
+# nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
+# 
+#   pct_n <- function(x,y){ paste0(x,"( ", round(100*y,1), " %)")}
+#       count <- as.data.frame.matrix(ctable$t) # to convert the S3 table into the same dimention table via as.data.frame.matrix
+#       perc <- as.data.frame.matrix(ctable$prop.col)
+# 
+# 
+#    pct_n2 <- function(x,y){ paste0(x,"( ", round(100*y,1), " %)")}
+#       count8_1 <- as.data.frame.matrix(ctable$t) # to convert the S3 table into the same dimention table via as.data.frame.matrix
+#       perc2 <- as.data.frame.matrix(ctable$prop.col)
+# 
+# 
+#   #notcol_combo8_1 = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,7))
+#   notcol_combo8_1 = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,6))
+# 
+#   notcol_combo8_1 <- as.data.frame(notcol_combo8_1)
+#   colnames(notcol_combo8_1) <- colnames(count8_1)
+#   #notcol_combo8_1 <- notcol_combo8_1[, c(1:5)] # I added to get rid of MW and Urine, to fix total column
+# 
+#   count8_1$Total.NotCol <- apply(count8_1,1,sum)
+#   total <- sum(count8_1)
+#   #notcol_combo8_1$Total.Notcol <- paste0(apply(count[c(1:5),c(1:7)],1,sum), "( ", round(100*apply(count8_1[c(1:5),c(1:7)],1,sum)/total,2), " %)")
+#   notcol_combo8_1$Total.Notcol <- paste0(count8_1$Total.NotCol, "( ", round(100*count8_1$Total.NotCol/sum(count8_1$Total.NotCol),2), " %)")
+# 
+#   notcol_combo8_1$Site <- rownames(count8_1)
+# 
+#   #notcol_combo8_1[6,c(1:8)] <- as.character(apply(count,2,sum))
+# notcol_combo8_1[6,c(1:6)] <- as.character(apply(count8_1,2,sum))
+#   notcol_combo8_1$Site[is.na(notcol_combo8_1$Site)] <- replace_na("Total")
 ```
 
 
@@ -2786,7 +2792,7 @@ research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(visit.wkdate), y=100*(ho
  
 
 
-```{r KnitrTables1_5, eval=TRUE,echo=FALSE}
+```{r KnitrTables1_5, eval=TRUE,echo=FALSE, ,results='asis'}
 options(knitr.table.format = "latex")
 options(kableExtra.auto_format = FALSE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
@@ -2807,7 +2813,7 @@ add_footnote(tab5_1, "Note: Some cells are not applicable. Blood and Urine Sampl
 
 
 
-Bld_urn_cli = knitr::kable(newtable4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down") 
+Bld_urn_cli = knitr::kable(newtable_4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", font_size = 7) 
 add_footnote(Bld_urn_cli, "Note: Data sent by sites experience an availablility delay of up to 48 hours behind data from the Biospecimen Dashboard. Note: Data sent by sites experience an availability delay of up to 48 hours behind data from the Biospecimen Dashboard. 'Site Data Only' is assumed to have a value of '0(0%)' when not listed in this table.", notation = "none")
 
 
@@ -2974,7 +2980,7 @@ research.1_2
 
 ```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
-knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","No Blood Tubes Collected","Total"), caption='Table 7.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","Total"), caption='Table 7.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") #"No Blood Tubes Collected",
 
 
 knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  
@@ -2988,7 +2994,7 @@ tab10_2= tube_completeness %>% kable_styling(latex_options = "scale_down")
 add_footnote(tab10_2, "Note: The expected number of blood collection tubes varies by site and is as follows: KPHI-9; KPGA-7; KPNW-9; KPCO-8, HFH-5", notation = "none") 
 
 
-tab8=knitr::kable(notcol_combo2,caption='Table 10. Blood Tubes Collected by Tube Type at Clinical Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down") %>% landscape()
+tab8=knitr::kable(notcol_combo2,caption='Table 10. Blood Tubes Collected by Tube Type at Clinical Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% column_spec(column = 2:ncol(notcol_combo2),width = "4cm")  %>% column_spec(column = 1:ncol(notcol_combo2),width = "5cm") %>%  landscape()
 add_footnote(tab8, "Note: Expected number of collection tubes for each Kaiser Permanente site is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD", notation = "none") 
 
 
