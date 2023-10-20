@@ -956,10 +956,10 @@ biospe7= left7  %>%
                                        d_173836415_d_266600170_d_185243482==1010240013 ~ "Plymouth",
                                        d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)", 
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
-                             d_173836415_d_266600170_d_185243482==1010240013 ~ "Livonia",
+                             d_173836415_d_266600170_d_185243482==1011660013 ~ "Livonia",
                              d_173836415_d_266600170_d_185243482==1010320019 ~ "Sterling Heights",
                                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_185243482==1010010114 ~ "Main - K1"))    
-#biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)
+#biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)    #Error in UseMethod("droplevels") :  no applicable method for 'droplevels' applied to an object of class "character"
 
 tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>%
   #filter(HF_Sites=="HF Wyandotte Hospital" | HF_Sites=="HF Macomb Medical Pavilion" |  HF_Sites=="HF West Bloomfield Hospital") %>%
