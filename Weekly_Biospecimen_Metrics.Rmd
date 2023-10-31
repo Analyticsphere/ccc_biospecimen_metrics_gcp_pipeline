@@ -2420,7 +2420,7 @@ clc_both_vt.site.CO<-ggplot(clc.both.wk_site.CO, aes(x=as_date(ymd(visit.wkdate)
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, minor_breaks=0) + #, limits=c(0,max(clc.both.wk_site.CO$visit.wk))) + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 12. Weekly Biospecimen Collections \n at Kaiser Permanente Colorado") +
   #theme_ipsum() +
@@ -2440,7 +2440,7 @@ clc_both_vt.site.GA<-ggplot(clc.both.wk_site.GA, aes(x=as_date(ymd(visit.wkdate)
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 13. Weekly Biospecimen Collections \n at Kaiser Permanente Georgia") +
   #theme_ipsum() +
@@ -2460,7 +2460,7 @@ clc_both_vt.site.HI<-ggplot(clc.both.wk_site.HI, aes(x=as_date(ymd(visit.wkdate)
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 14. Weekly Biospecimen Collections \n at Kaiser Permanente Hawaii") +
   #theme_ipsum() +
@@ -2480,7 +2480,7 @@ clc_both_vt.site.NW<-ggplot(clc.both.wk_site.NW, aes(x=as_date(ymd(visit.wkdate)
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 15. Weekly Biospecimen Collections \n at Kaiser Permanente Northwest") +
   #theme_ipsum() +
@@ -2695,7 +2695,7 @@ visit_wk_site4__1 <- visit_wk_site4 %>%  filter(hours3>0)
 research.4_1 <- ggplot(visit_wk_site4__1, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.1 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Henry Ford Health System") +
   #theme_ipsum() +
@@ -2733,7 +2733,7 @@ visit_wk_site4__2 <- visit_wk_site4 %>%  filter(hours3>0)
 research.4_2 <- ggplot(visit_wk_site4__2, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.2  Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Sanford Health") +
   #theme_ipsum() +
@@ -2771,7 +2771,7 @@ visit_wk_site4__3 <- visit_wk_site4 %>%  filter(hours3>0)
 research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.3 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, University of Chicago Medicine") +
   #theme_ipsum() +
@@ -2884,7 +2884,7 @@ research.1_1 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
   geom_line(data=final_fig1_table, aes(x=as.Date(visit.wkdate), y=No__Blood, colour="No__Blood"), na.rm=T) +
   geom_point(width = 0.2) +
   scale_y_continuous(name="Percent", limits=c(0,100),expand = c(0, 0), breaks=seq(0,100,25)) +  
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   scale_color_manual(name = "Incompletion Level", values = c("All_Incomplete"="darkred","Partial__Blood" = "blue", "No__Blood" = "darkgreen"), labels = c("Total","Partial Blood", "No Blood")) +
   #scale_fill_discrete(name = "Incompletion Level", labels = c("Partial Blood", "No Blood")) +
@@ -2953,7 +2953,7 @@ research.1_2 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
   geom_line(data=final_fig2_table, aes(x=as.Date(visit.wkdate), y=No__Blood, colour="No__Blood"), na.rm=T) +
   geom_point(width = 0.2) +
   scale_y_continuous(name="Percent", limits=c(0,100),expand = c(0, 0), breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)) ,expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())) ,expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   scale_color_manual(name = "Incompletion Level", values = c("All_Incomplete"="darkred","Partial__Blood" = "blue", "No__Blood" = "darkgreen"), labels = c("Total","Partial Blood", "No Blood")) +
   #scale_fill_discrete(name = "Incompletion Level", labels = c("Partial Blood", "No Blood")) +
@@ -3057,7 +3057,7 @@ figsub3_6 <- figsub3_5 %>%  mutate(percent_3= 100*(cum_notsub/cumtotal))
 research.3 <- ggplot(figsub3_5, aes(x=as.Date(visit.wkdate), y=100*(cum_notsub/cumtotal))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line(na.rm=T) + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",limits=c(0,100),expand=c(0,0)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 3. Weekly Cumulative Percent of Biospecimen Surveys \n Not Submitted, University of Chicago Medicine") +
   #theme_ipsum() +
@@ -3182,7 +3182,7 @@ blood_placed_plot
 
 
 
-```{r Fig6, eval=TRUE,echo=FALSE,fig.cap='Figure 2'}
+```{r Fig6, eval=TRUE,echo=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 #need sum of collections by week
 #table(visit_wk_site$visit.wkdate, visit_wk_site$n)
@@ -3205,7 +3205,8 @@ visit_wk_site1 <- fig2_1 %>% arrange(visit.wk,visit.wkdate) %>% group_by(visit.w
 research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number of Collections") + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0)) +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 6. Weekly Biospecimen Collections, All Sites") +
   #theme_ipsum() +
@@ -3218,12 +3219,8 @@ research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(visit.wkdate), y=n)) + #,fi
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +
         guides(fill=guide_legend(nrow=2,byrow=TRUE))
 
+
 research.vt1
-
-
-
-
-
 
 ```
 
@@ -3283,7 +3280,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
  research.vt_plotH <- ggplot(visit_wk_site.hybrid, aes(x=as.Date(visit.wkdate), y=n, color=Setting )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 7. Weekly Biospecimen Collections at Henry Ford") +
    #theme_ipsum() +
@@ -3301,7 +3298,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
   research.vt_plotH <- ggplot(edited_fig3_1, aes(x=as.Date(visit.wkdate), y=n, color=Site_location )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 7.1 Weekly Biospecimen Collections at \n Henry Ford Locations") +
    #theme_ipsum() +
@@ -3356,7 +3353,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(visit.wkdate), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 8. Weekly Biospecimen Collections at \n University of Chicago Medicine") +
    #theme_ipsum() +
@@ -3372,7 +3369,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 8.1 Weekly Biospecimen Collections at \n University of Chicago Medicine Locations") +
    #theme_ipsum() +
@@ -3395,7 +3392,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(visit.wkdate), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 9. Weekly Biospecimen Collections at \n Marshfield Clinic Health System") +
    #theme_ipsum() +
@@ -3413,7 +3410,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 9.1 Weekly Biospecimen Collections at \n Marshfield Clinic Health System Locations") +
    #theme_ipsum() +
@@ -3439,7 +3436,7 @@ research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
 research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 10. Weekly Biospecimen Collections at Sanford Health") +
   #theme_ipsum() +
@@ -3456,7 +3453,7 @@ research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
 research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 10.1 Weekly Biospecimen Collections at Sanford Health Locations") +
   #theme_ipsum() +
@@ -3477,7 +3474,7 @@ research.vt_plHP= visit_wk_site_edited %>%  filter( Site=="HealthPartners")
 research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 11. Weekly Biospecimen Collections at HealthPartners") +
   #theme_ipsum() +
