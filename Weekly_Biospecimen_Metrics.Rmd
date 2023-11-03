@@ -271,6 +271,14 @@ recrver1$Site <-factor(recrver1$d_827220437,levels=c("HealthPartners", "Henry Fo
                              "National Cancer Institute","Other"))
 recrver1<- recrver1 %>% mutate(BldCollection = ifelse(recrver1$BioFin_BaseBloodCol_v1r0 == 353358909, "YES", "No"))
 
+##to update the censoring time based on Kelsey's request to be consistent with the weekly log: from Monday to Sunday
+veristart.date = as.Date(min(as.POSIXct(recr.bio$d_914594314),na.rm=TRUE))
+veristart.date + days(5)
+#[1] "2021-08-01"
+recrver1$verified.week <- ceiling(as.numeric(difftime(as.Date(ymd_hms(recrver1$d_914594314)),as.Date(veristart.date-days(2)),units="days"))/7)
+recrver1$verified.Sunday.date <- veristart.date + days(5)+ dweeks(recrver1$verified.week-1)
+
+
 
 ##to check the duplicate collection by verified participants Connect_ID
 biospe[duplicated(biospe$Connect_ID),c("Connect_ID","d_820476880","d_410912345","d_387108065")]
@@ -835,14 +843,17 @@ biospe[duplicated(biospe$Connect_ID),]$Connect_ID
 
 ### Table 5
 tube_col <- biospe  %>% group_by(as.character(Connect_ID),Site,d_650516960) %>% 
-  dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
-                   Urine_col_max= max(Urine_col,na.rm=TRUE),
-                   MW_col_max=max(MW_col,na.rm=TRUE),
-                   d_973670172_d_593843561_max=max(d_973670172_d_593843561,na.rm=TRUE),
-                   d_143615646_d_593843561_max = max(d_143615646_d_593843561,na.rm=TRUE),
-                   d_410912345_max=max(d_410912345,na.rm=TRUE),
-                   collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE),
-                   schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505)),na.rm=TRUE))
+  dplyr::summarise(bldcol_max = max(bldcol),
+                   Urine_col_max= max(Urine_col),
+                   MW_col_max=max(MW_col),
+                   d_973670172_d_593843561_max=max(d_973670172_d_593843561),
+                   d_143615646_d_593843561_max = max(d_143615646_d_593843561),
+                   d_410912345_max=max(d_410912345),
+                   collection.tm =max(as.POSIXct(ymd_hms(d_556788178))),
+                   schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505))))
+
+
+
 table(tube_col$d_650516960)
 #534621077 664882224 
 #     1421        10 
@@ -1744,8 +1755,29 @@ recrvar.bio[which(grepl("Survey", recrvar.bio$Primary.Source)),c("field_path","P
 
 
 
-##Table 17
-recr.biospe <- base::merge(recr.bio,tube_col,by="Connect_ID")
+#Table 17
+#recr.bio
+
+Test_res_plots <- recr.bio %>%  select(Connect_ID, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_448660695)
+Test_res_plots$Connect_ID <- as.numeric(Test_res_plots$Connect_ID)
+tube_col$Connect_ID <- as.numeric(tube_col$Connect_ID)
+tube_col_plots <- left_join(tube_col, Test_res_plots, by="Connect_ID")
+#head(tube_col_plots)
+
+# tube_col_plots <- tube_col_plots %>%
+#   mutate(bldcol.time = case_when(bldcol_max >0 ~ pmin(as.POSIXct(d_173836415_d_266600170_d_561681068),na.rm=TRUE)),
+#          urine.time = case_when(Urine_col_max >0 ~ pmin(as.POSIXct(d_173836415_d_266600170_d_847159717),na.rm=TRUE)),
+#          mw.time = case_when(MW_col_max >0 ~ pmin(as.POSIXct(d_173836415_d_266600170_d_448660695),na.rm=TRUE)),
+#          BUM.time = pmin(as.POSIXct(bldcol.time),as.POSIXct(urine.time),as.POSIXct(mw.time), na.rm = TRUE)) ## matches up exactly with operations code but causes issues with plots 6 & 7
+tube_col_plots$BUM.time <- tube_col$collection.tm
+
+tube_col_plots$col.Sunday.week <- ceiling(as.numeric(difftime(tube_col_plots$BUM.time,as.Date(veristart.date-days(2)),units="days"))/7)
+#tube_col$col.Sunday.week <-  ceiling(as.numeric(difftime(as.Date(ymd_hms(tube_col$collection.tm)),as.Date(veristart.date-days(2)),units="days"))/7)
+tube_col_plots$col.Sunday.date <- veristart.date + days(5) + dweeks(tube_col_plots$col.Sunday.week-1) 
+tube_col_plots$col.Monday.date <- tube_col_plots$col.Sunday.date-days(6)
+ 
+
+recr.biospe <- base::merge(recr.bio,tube_col_plots,by="Connect_ID")
 recr.biospe <- recr.biospe %>%
   mutate(research.sv = case_when(d_265193023 == 231311385 ~ "Submitted",
                                  d_265193023 == 615768760 ~ "Started",
@@ -2360,67 +2392,111 @@ research.survey<- research.survey %>% mutate(#weekday = weekdays(ymd_hms(collect
                                     BioRec_CollectScheduled = ifelse(as.Date(ymd_hms(schedulecol.tm)) >= as.Date(as.POSIXct(ymd_hms(d_914594314))),1,0))
                                     
                                     
-research.survey$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(research.survey$collection.tm),research.survey$start.date, units="weeks")))
-research.survey$visit.wkdate <- research.survey$start.date + dweeks(research.survey$visit.wk)
+# research.survey$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(research.survey$collection.tm),research.survey$start.date, units="weeks")))
+# research.survey$visit.wkdate <- research.survey$start.date + dweeks(research.survey$visit.wk)
+# 
+#the visit.wkdate by the collection time has been defined at the tube_col by the collect.tm censoring by the week defined and started from the verified start date.
+
+#   #+scale_x_date(limit=c(as.Date("2022-06-10"),as.Date("2023-10-16"))) + scale_y_continuous(breaks = seq(0, 30, by = 3))
+# ###clnical blood collections
+# clc.bldtm <- c("d_173836415_d_266600170_d_769615780","d_173836415_d_266600170_d_822274939","d_173836415_d_266600170_d_398645039","d_173836415_d_266600170_d_982213346","d_173836415_d_266600170_d_740582332")
+# clc.urinetm <- c("d_173836415_d_266600170_d_139245758","d_173836415_d_266600170_d_224596428","d_173836415_d_266600170_d_541311218","d_173836415_d_266600170_d_939818935","d_173836415_d_266600170_d_740582332")
+# clc.blood.vt <- clinic.survey[which(clinic.survey$Site!="HealthPartners"),c("Connect_ID","Site","bldcol_max","collection.tm",clc.bldtm)]
+# clc.blood.vt$bld.startdate <- min(as.POSIXct(ymd_hms(clc.blood.vt$d_173836415_d_266600170_d_982213346)),na.rm=TRUE)
+# clc.blood.vt$bld.receiveddate <- as.POSIXct(ymd_hms(clc.blood.vt$d_173836415_d_266600170_d_398645039))
+# clc.blood.vt$visit.wk <- ceiling(as.numeric(difftime(clc.blood.vt$bld.receiveddate,clc.blood.vt$bld.startdate, units="weeks")))
+# clc.blood.vt$visit.wkdate <- as_date(clc.blood.vt$bld.startdate + dweeks(clc.blood.vt$visit.wk))
+# 
+# #to update the censoring date of blood collection consistent with the weekly log from Monday to Sunday
+# clc.blood.vt$Bld.Sunday.week <- ceiling(as.numeric(difftime(clc.blood.vt$bld.receiveddate,as.Date(veristart.date-days(2)),units="days"))/7)
+# clc.blood.vt$Bld.Sunday.date <- veristart.date + days(5) + dweeks(clc.blood.vt$Bld.Sunday.week -1)
+# 
+# # 
+# # clc.blood.wk_site <- clc.blood.vt %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
+# # clc_bld_vt.site<-ggplot(clc.blood.wk_site, aes(x=as_date(ymd(visit.wkdate)), y=n,fill=Site, color=Site)) +
+# #   geom_line() + 
+# #   geom_point(width = 0.2) +
+# #   scale_y_continuous(name="# Number Collections")+ #, limits=c(0,5) 
+# #   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
+# #   scale_fill_brewer(palette="Dark2") + 
+# #   ggtitle(label="TESTING--Fig 3. Number of biospecimen collection visits over time by site") +
+# #   #theme_ipsum() +
+# #   theme(panel.background = element_blank(),
+# #         legend.title = element_text(size=7),
+# #         axis.line = element_line(size=0.2),
+# #         axis.text.x = element_text(angle=60, hjust = 1,size = 8, face = "bold"),                                                            
+# #         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
+# #update the code Oct. 31, 2023
+# clc.blood.wk_site <- clc.blood.vt %>% arrange(Site,Bld.Sunday.week,Bld.Sunday.date) %>% group_by(Site,Bld.Sunday.week,Bld.Sunday.date) %>% tally()
+# clc_bld_vt.site<-ggplot(clc.blood.wk_site, aes(x=as_date(ymd(Bld.Sunday.date)), y=n,fill=Site, color=Site)) +
+#     geom_line() + 
+#     geom_point(width = 0.2) +
+#     scale_y_continuous(name="# Number Collections") +
+#     scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
+#     scale_fill_brewer(palette="Dark2") + 
+#     ggtitle(label="TESTING--Fig 3. Number of biospecimen collection visits over time by site") +
+#     #theme_ipsum() +
+#     theme(panel.background = element_blank(),
+#           legend.title = element_text(size=7),
+#           axis.line = element_line(size=0.2),
+#           axis.text.x = element_text(angle=60, hjust = 1,size = 8, face = "bold"),                                                            
+#           plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
 
 
 
 
 
-
-  #+scale_x_date(limit=c(as.Date("2022-06-10"),as.Date("2023-10-16"))) + scale_y_continuous(breaks = seq(0, 30, by = 3))
-###clnical blood collections
-clc.bldtm <- c("d_173836415_d_266600170_d_769615780","d_173836415_d_266600170_d_822274939","d_173836415_d_266600170_d_398645039","d_173836415_d_266600170_d_982213346","d_173836415_d_266600170_d_740582332")
-clc.urinetm <- c("d_173836415_d_266600170_d_139245758","d_173836415_d_266600170_d_224596428","d_173836415_d_266600170_d_541311218","d_173836415_d_266600170_d_939818935","d_173836415_d_266600170_d_740582332")
-clc.blood.vt <- clinic.survey[which(clinic.survey$Site!="HealthPartners"),c("Connect_ID","Site","bldcol_max","collection.tm",clc.bldtm)]
-clc.blood.vt$bld.startdate <- min(as.POSIXct(ymd_hms(clc.blood.vt$d_173836415_d_266600170_d_982213346)),na.rm=TRUE)
-clc.blood.vt$bld.receiveddate <- as.POSIXct(ymd_hms(clc.blood.vt$d_173836415_d_266600170_d_398645039))
-clc.blood.vt$visit.wk <- ceiling(as.numeric(difftime(clc.blood.vt$bld.receiveddate,clc.blood.vt$bld.startdate, units="weeks")))
-clc.blood.vt$visit.wkdate <- as_date(clc.blood.vt$bld.startdate + dweeks(clc.blood.vt$visit.wk))
-clc.blood.wk_site <- clc.blood.vt %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
-clc_bld_vt.site<-ggplot(clc.blood.wk_site, aes(x=as_date(ymd(visit.wkdate)), y=n,fill=Site, color=Site)) +
-  geom_line() + 
-  geom_point(width = 0.2) +
-  scale_y_continuous(name="# Number Collections", limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
-  scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="TESTING--Fig 3. Number of biospecimen collection visits over time by site") +
-  #theme_ipsum() +
-  theme(panel.background = element_blank(),
-        legend.title = element_text(size=7),
-        axis.line = element_line(size=0.2),
-        axis.text.x = element_text(angle=60, hjust = 1,size = 8, face = "bold"),                                                            
-        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
-
-
-
-
-
-
-
-
+clinic.survey_specs <- clinic.survey %>%   filter(d_878865966 == 353358909| d_167958071 == 353358909) ## must add
 
 clc.bothtm <- c("d_173836415_d_266600170_d_139245758","d_173836415_d_266600170_d_224596428","d_173836415_d_266600170_d_541311218","d_173836415_d_266600170_d_939818935","d_173836415_d_266600170_d_769615780","d_173836415_d_266600170_d_822274939","d_173836415_d_266600170_d_398645039","d_173836415_d_266600170_d_982213346")
-clc.both.vt <- clinic.survey[which(clinic.survey$Site!="HealthPartners"),c("Connect_ID","Site","bldcol_max","Urine_col_max","collection.tm",clc.bothtm)]  ## On Hold, remove != HealthPartners/add HF
+dd[grepl("139245758|224596428|541311218|939818935|769615780|822274939|398645039|982213346",dd$CID),]
+#          CID                               Variable Label                Variable Name
+# 1: 139245758           Date/time Clinical Urine Collected BioClin_ClinicalUrnTime_v1r0
+# 2: 224596428 Clinical Site Urine RRL Date / Time Received  BioClin_SiteUrineRRLDt_v1r0
+# 3: 398645039     Clinical DB blood RRL Date/Time Received    BioClin_DBBloodRRLDt_v1r0
+# 4: 541311218     Clinical DB urine RRL Date/Time received    BioClin_DBUrineRRLDt_v1r0
+# 5: 769615780                 Date/Time Blood Order Placed BioClin_BldOrderPlacdDt_v1r0
+# 6: 822274939 Clinical Site Blood RRL Date / Time Received  BioClin_SiteBloodRRLDt_v1r0
+# 7: 939818935                 Date/Time Urine Order Placed BioClin_UrnOrderPlacdDt_v1r0
+# 8: 982213346           Date/time Clinical Blood Collected   BioClin_ClinBloodTime_v1r0
+
+clc.both.vt <- clinic.survey_specs[which(clinic.survey_specs$Site!="HealthPartners"),c("Connect_ID","Site","bldcol_max","Urine_col_max","collection.tm",clc.bothtm)]  ## On Hold, remove != HealthPartners/add HF
 clc.both.vt$both.startdate <- min(ymd_hms(clc.both.vt$d_173836415_d_266600170_d_139245758), ymd_hms(clc.both.vt$d_173836415_d_266600170_d_982213346),na.rm=TRUE) #as.POSIXct()
-clc.both.vt$both.receiveddate <- as.POSIXct(ymd_hms(clc.both.vt$d_173836415_d_266600170_d_541311218), ymd_hms(clc.both.vt$d_173836415_d_266600170_d_398645039))  
-clc.both.vt$visit.wk <- ceiling(as.numeric(difftime(clc.both.vt$both.receiveddate,clc.both.vt$both.startdate, units="weeks")))
-clc.both.vt$visit.wkdate <- as_date(clc.both.vt$both.startdate + dweeks(clc.both.vt$visit.wk))
+#clc.both.vt$both.receiveddate <- as.POSIXct(ymd_hms(clc.both.vt$d_173836415_d_266600170_d_541311218), ymd_hms(clc.both.vt$d_173836415_d_266600170_d_398645039))
+#I will update this variable of "both.receiveddate" in the clinical collections                                 
+clc.both.vt <- clc.both.vt %>%
+  mutate(bldcol.time = case_when(bldcol_max >0 ~ pmin(as.POSIXct(d_173836415_d_266600170_d_982213346),as.POSIXct(d_173836415_d_266600170_d_398645039),as.POSIXct(d_173836415_d_266600170_d_822274939),na.rm=TRUE)),
+         urine.time = case_when(Urine_col_max >0 ~ pmin(as.POSIXct(d_173836415_d_266600170_d_139245758),as.POSIXct(d_173836415_d_266600170_d_541311218),as.POSIXct(d_173836415_d_266600170_d_224596428),na.rm=TRUE)),
+         BU.time =  pmin(as.POSIXct(bldcol.time),as.POSIXct(urine.time), na.rm = TRUE)) ## matches up exactly with operations code
+                                            
+#clc.both.vt$visit.wk <- ceiling(as.numeric(difftime(clc.both.vt$both.receiveddate,clc.both.vt$both.startdate, units="weeks")))
+#clc.both.vt$visit.wkdate <- as_date(clc.both.vt$both.startdate + dweeks(clc.both.vt$visit.wk))
 
-clc.both.vt.KP <- clc.both.vt %>%  filter(visit.wkdate >=as.Date("2023-01-30"))
+clc.both.vt$BU.Sunday.week <- ceiling(as.numeric(difftime(clc.both.vt$BU.time,as.Date(veristart.date-days(2)),units="days"))/7)
+#clc.both.vt$BU.Sunday.week <- ceiling(as.numeric(difftime(clc.both.vt$collection.tm,as.Date(veristart.date-days(2)),units="days"))/7)
+clc.both.vt$BU.Sunday.date <- veristart.date + days(5)+dweeks(clc.both.vt$BU.Sunday.week -1) #veristart is 7/27, but that's a tueaday. Add 5 days to make it Sunday, then subtract a week to make it the start of that previous week
+clc.both.vt$Monday.date.start <- clc.both.vt$BU.Sunday.date-days(6)
 
+#clc.both.vt.KP <- clc.both.vt %>%  filter(visit.wkdate >=as.Date("2023-01-30"))
+clc.both.vt.KP <- clc.both.vt %>% filter(Monday.date.start>=as.Date("2023-01-30") & BU.Sunday.date < Sys.Date())
 clc.both.vt.CO <- clc.both.vt.KP %>%  filter(clc.both.vt.KP$Site=="Kaiser Permanente Colorado")
 clc.both.vt.GA <- clc.both.vt.KP %>%  filter(clc.both.vt.KP$Site=="Kaiser Permanente Georgia")
 clc.both.vt.HI <- clc.both.vt.KP %>%  filter(clc.both.vt.KP$Site=="Kaiser Permanente Hawaii")
 clc.both.vt.NW <- clc.both.vt.KP %>%  filter(clc.both.vt.KP$Site=="Kaiser Permanente Northwest")
 
 
-clc.both.wk_site.CO <- clc.both.vt.CO %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
-clc_both_vt.site.CO<-ggplot(clc.both.wk_site.CO, aes(x=as_date(ymd(visit.wkdate)), y=n)) + #,fill=Site, color=Site)) +
-  geom_line() + 
+# clc.both.wk_site.CO <- clc.both.vt.CO %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
+# clc_both_vt.site.CO<-ggplot(clc.both.wk_site.CO, aes(x=as_date(ymd(visit.wkdate)), y=n)) + #,fill=Site, color=Site)) +
+ 
+#clc.both.wk_site.CO <- clc.both.vt.CO %>% arrange(Site,BU.Sunday.week,BU.Sunday.date) %>% group_by(Site,BU.Sunday.week,BU.Sunday.date) %>% tally()
+ clc.both.wk_site.CO <- clc.both.vt.CO %>% arrange(Site,BU.Sunday.week,Monday.date.start) %>% group_by(Site,BU.Sunday.week,Monday.date.start) %>% tally()
+ 
+ 
+ clc_both_vt.site.CO<- clc.both.wk_site.CO  %>% ggplot( aes(x=as_date(clc.both.wk_site.CO$Monday.date.start), y=n)) + 
+   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, minor_breaks=0) + #, limits=c(0,max(clc.both.wk_site.CO$visit.wk))) + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 12. Weekly Biospecimen Collections \n at Kaiser Permanente Colorado") +
   #theme_ipsum() +
@@ -2435,12 +2511,14 @@ clc_both_vt.site.CO
 
 
 
-clc.both.wk_site.GA <- clc.both.vt.GA %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
-clc_both_vt.site.GA<-ggplot(clc.both.wk_site.GA, aes(x=as_date(ymd(visit.wkdate)), y=n)) + #,fill=Site, color=Site)) +
+#clc.both.wk_site.GA <- clc.both.vt.GA %>% arrange(Site,BU.Sunday.week,BU.Sunday.date) %>% group_by(Site,BU.Sunday.week,BU.Sunday.date) %>% tally()
+clc.both.wk_site.GA <- clc.both.vt.GA %>% arrange(Site,BU.Sunday.week,Monday.date.start) %>% group_by(Site,BU.Sunday.week,Monday.date.start) %>% tally()
+
+clc_both_vt.site.GA<- clc.both.wk_site.GA  %>% ggplot( aes(x=as_date(clc.both.wk_site.GA$Monday.date.start), y=n)) + 
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 13. Weekly Biospecimen Collections \n at Kaiser Permanente Georgia") +
   #theme_ipsum() +
@@ -2455,12 +2533,14 @@ clc_both_vt.site.GA
 
 
 
-clc.both.wk_site.HI <- clc.both.vt.HI %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
-clc_both_vt.site.HI<-ggplot(clc.both.wk_site.HI, aes(x=as_date(ymd(visit.wkdate)), y=n)) + #,fill=Site, color=Site)) +
+#clc.both.wk_site.HI <- clc.both.vt.HI %>% arrange(Site,BU.Sunday.week,BU.Sunday.date) %>% group_by(Site,BU.Sunday.week,BU.Sunday.date) %>% tally()
+clc.both.wk_site.HI <- clc.both.vt.HI %>% arrange(Site,BU.Sunday.week,Monday.date.start) %>% group_by(Site,BU.Sunday.week,Monday.date.start) %>% tally()
+
+clc_both_vt.site.HI<- clc.both.wk_site.HI %>% ggplot( aes(x=as_date(clc.both.wk_site.HI$Monday.date.start), y=n)) +
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 14. Weekly Biospecimen Collections \n at Kaiser Permanente Hawaii") +
   #theme_ipsum() +
@@ -2475,12 +2555,14 @@ clc_both_vt.site.HI
 
 
 
-clc.both.wk_site.NW <- clc.both.vt.NW %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
-clc_both_vt.site.NW<-ggplot(clc.both.wk_site.NW, aes(x=as_date(ymd(visit.wkdate)), y=n)) + #,fill=Site, color=Site)) +
+#clc.both.wk_site.NW <- clc.both.vt.NW %>% arrange(Site,BU.Sunday.week,BU.Sunday.date) %>% group_by(Site,BU.Sunday.week,BU.Sunday.date) %>% tally()
+clc.both.wk_site.NW <- clc.both.vt.NW %>% arrange(Site,BU.Sunday.week,Monday.date.start) %>% group_by(Site,BU.Sunday.week,Monday.date.start) %>% tally()
+
+clc_both_vt.site.NW<- clc.both.wk_site.NW  %>% ggplot( aes(x=as_date(clc.both.wk_site.NW$Monday.date.start), y=n)) +
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Fig 15. Weekly Biospecimen Collections \n at Kaiser Permanente Northwest") +
   #theme_ipsum() +
@@ -2680,22 +2762,29 @@ fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
 
 
 
-fig4_sub_1<- fig4_sub_all %>% mutate(hours3 = case_when(checktmvisit=="0 hrs to 3 hrs"~1,
-                                                TRUE~0),
-                                     start.date = min(schedulecol.tm),
-                                     current.date=Sys.Date() - 7)
+# fig4_sub_1<- fig4_sub_all %>% mutate(hours3 = case_when(checktmvisit=="0 hrs to 3 hrs"~1,
+#                                                 TRUE~0),
+#                                      start.date = min(schedulecol.tm),
+#                                      current.date=Sys.Date() - 7)
                                     
-fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
-fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
-visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
-visit_wk_site4__1 <- visit_wk_site4 %>%  filter(hours3>0)
+#fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
+#fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
+# visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
+
+fig4_sub_1<- fig4_sub_all %>% mutate(hours3 = case_when(checktmvisit=="0 hrs to 3 hrs"~1,
+                                                TRUE~0))
+visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,col.Sunday.week,col.Monday.date) %>% group_by(Site,hours3,col.Sunday.week,col.Monday.date) %>% tally()
+
+visit_wk_site4__1 <- visit_wk_site4 %>%  filter(hours3>0 & col.Monday.date < Sys.Date())
+
+#min(fig4_sub_all$d_764863765)
 
 
 #visit_wk_site4_1 <- visit_wk_site4__1 %>%  filter(Site=="Henry Ford Health System")
-research.4_1 <- ggplot(visit_wk_site4__1, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
+research.4_1 <- ggplot(visit_wk_site4__1, aes(x=as.Date(col.Monday.date), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.1 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Henry Ford Health System") +
   #theme_ipsum() +
@@ -2724,16 +2813,19 @@ fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
 fig4_sub_1<- fig4_sub_all %>% mutate(hours3 = case_when(checktmvisit=="0 hrs to 3 hrs"~1,
                                                 TRUE~0))
                                     
-fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
-fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
-visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
-visit_wk_site4__2 <- visit_wk_site4 %>%  filter(hours3>0)
+# fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
+# fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
+# visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
+visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,col.Sunday.week,col.Monday.date) %>% group_by(Site,hours3,col.Sunday.week,col.Monday.date) %>% tally()
+
+visit_wk_site4__2 <- visit_wk_site4 %>%  filter(hours3>0 & col.Monday.date < Sys.Date())
 
 
-research.4_2 <- ggplot(visit_wk_site4__2, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
+
+research.4_2 <- ggplot(visit_wk_site4__2, aes(x=as.Date(col.Monday.date), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.2  Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Sanford Health") +
   #theme_ipsum() +
@@ -2762,16 +2854,20 @@ fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
 fig4_sub_1<- fig4_sub_all %>% mutate(hours3 = case_when(checktmvisit=="0 hrs to 3 hrs"~1,
                                                 TRUE~0))
                                     
-fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
-fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
-visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
-visit_wk_site4__3 <- visit_wk_site4 %>%  filter(hours3>0)
+# fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
+# fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
+# visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
+# visit_wk_site4__3 <- visit_wk_site4 %>%  filter(hours3>0)
+
+visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,col.Sunday.week,col.Monday.date) %>% group_by(Site,hours3,col.Sunday.week,col.Monday.date) %>% tally()
+
+visit_wk_site4__3 <- visit_wk_site4 %>%  filter(hours3>0 & col.Monday.date < Sys.Date())
 
 
-research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(visit.wkdate), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
+research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(col.Monday.date), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.3 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, University of Chicago Medicine") +
   #theme_ipsum() +
@@ -2851,40 +2947,43 @@ fig1_UC <- left_join(research.survey, Inc_bld_UC, by="Connect_ID")
 fig1_UC_inc <- fig1_UC %>%  filter(Site=="University of Chicago Medicine")
 
 
-help_fig1 <- fig1_UC_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
+help_fig1 <- fig1_UC_inc %>% select(col.Monday.date, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
   mutate(#incomp_blood = case_when(bld.complt=="BloodIncomplet"~"Partial Blood",
                                   #bld.complt=="NoBlood" ~"No Blood"))
           partial_blood= case_when(bld.complt=="BloodIncomplet"~1,
                              TRUE ~0),
           no_blood=case_when(bld.complt=="NoBlood"~1,
                              TRUE ~0))
+#tube_col$col.Sunday.week <-  ceiling(as.numeric(difftime(as.Date(ymd_hms(tube_col$collection.tm)),as.Date(veristart.date-days(2)),units="days"))/7)
+#tube_col$col.Monday.date <- veristart.date + dweek(tube_col$col.Sunday.week-1)
+
 
 
 help_fig1 <- help_fig1 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !is.na(no_blood) ~ 1, TRUE ~ 0)) #all participants per week
   #all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
   
 
-help2_1_fig1 <- help_fig1 %>%  group_by(visit.wkdate,  partial_blood, no_blood, all_blood) #%>%  tally() 
+help2_1_fig1 <- help_fig1 %>%  group_by(col.Monday.date,  partial_blood, no_blood, all_blood) #%>%  tally() 
 
 help2_1_fig1 <- help2_1_fig1 %>%  mutate(incomp_blood = case_when( (partial_blood==1 |no_blood==1) ~1,
                                                                   TRUE ~ 0))
 
-help2_1_fig1_inc <- help2_1_fig1 %>%  select(visit.wkdate,  partial_blood, no_blood, all_blood, incomp_blood) %>%  group_by(visit.wkdate)
+help2_1_fig1_inc <- help2_1_fig1 %>%  select(col.Monday.date,  partial_blood, no_blood, all_blood, incomp_blood) %>%  group_by(col.Monday.date)
 
 
-final_fig1_table <- help2_1_fig1_inc %>%  group_by(visit.wkdate) %>%  summarize( incomplete=sum(incomp_blood),
+final_fig1_table <- help2_1_fig1_inc %>%  group_by(col.Monday.date) %>%  dplyr::summarize( incomplete=sum(incomp_blood),
   partial=sum(partial_blood), none_blood=sum(no_blood), all_collections=sum(all_blood),  All_Incomplete=100*(incomplete/all_collections),
   Partial__Blood=100*(partial/all_collections),  No__Blood=100*(none_blood/all_collections))
 
 
 
 research.1_1 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
-  geom_line(data=final_fig1_table, aes(x=as.Date(visit.wkdate), y=All_Incomplete, colour="All_Incomplete"),na.rm=T) +
-  geom_line(data=final_fig1_table, aes(x=as.Date(visit.wkdate), y=Partial__Blood, colour="Partial__Blood"), na.rm=T) +
-  geom_line(data=final_fig1_table, aes(x=as.Date(visit.wkdate), y=No__Blood, colour="No__Blood"), na.rm=T) +
+  geom_line(data=final_fig1_table, aes(x=as.Date(col.Monday.date), y=All_Incomplete, colour="All_Incomplete"),na.rm=T) +
+  geom_line(data=final_fig1_table, aes(x=as.Date(col.Monday.date), y=Partial__Blood, colour="Partial__Blood"), na.rm=T) +
+  geom_line(data=final_fig1_table, aes(x=as.Date(col.Monday.date), y=No__Blood, colour="No__Blood"), na.rm=T) +
   geom_point(width = 0.2) +
   scale_y_continuous(name="Percent", limits=c(0,100),expand = c(0, 0), breaks=seq(0,100,25)) +  
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   scale_color_manual(name = "Incompletion Level", values = c("All_Incomplete"="darkred","Partial__Blood" = "blue", "No__Blood" = "darkgreen"), labels = c("Total","Partial Blood", "No Blood")) +
   #scale_fill_discrete(name = "Incompletion Level", labels = c("Partial Blood", "No Blood")) +
@@ -2921,7 +3020,7 @@ fig2_HF <- left_join(research.survey, Inc_bld_HF, by="Connect_ID")
  fig2_HF_inc <- fig2_HF %>%  filter(Site=="Henry Ford Health System")
 
 
-help_fig2 <- fig2_HF_inc %>% select(visit.wkdate, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
+help_fig2 <- fig2_HF_inc %>% select(col.Monday.date, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
   mutate(#incomp_blood = case_when(bld.complt=="BloodIncomplet"~"Partial Blood",
                                   #bld.complt=="NoBlood" ~"No Blood"))
           partial_blood= case_when(bld.complt=="BloodIncomplet"~1,
@@ -2934,26 +3033,26 @@ help_fig2 <- help_fig2 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !i
   #all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
   
 
-help2_1_fig2 <- help_fig2 %>%  group_by(visit.wkdate,  partial_blood, no_blood, all_blood) #%>%  tally() 
+help2_1_fig2 <- help_fig2 %>%  group_by(col.Monday.date,  partial_blood, no_blood, all_blood) #%>%  tally() 
 
 help2_1_fig2 <- help2_1_fig2 %>%  mutate(incomp_blood = case_when( (partial_blood==1 |no_blood==1) ~1,
                                                                   TRUE ~ 0))
 
-help2_1_fig2_inc <- help2_1_fig2 %>%  select(visit.wkdate,  partial_blood, no_blood, all_blood, incomp_blood) %>%  group_by(visit.wkdate)
+help2_1_fig2_inc <- help2_1_fig2 %>%  select(col.Monday.date,  partial_blood, no_blood, all_blood, incomp_blood) %>%  group_by(col.Monday.date)
 
-final_fig2_table <- help2_1_fig2_inc %>%  group_by(visit.wkdate) %>%  summarize( incomplete=sum(incomp_blood),
+final_fig2_table <- help2_1_fig2_inc %>%  group_by(col.Monday.date) %>% dplyr::summarize( incomplete=sum(incomp_blood),
   partial=sum(partial_blood), none_blood=sum(no_blood), all_collections=sum(all_blood),  All_Incomplete=100*(incomplete/all_collections),
   Partial__Blood=100*(partial/all_collections),  No__Blood=100*(none_blood/all_collections))
 
 
 
 research.1_2 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
-  geom_line(data=final_fig2_table, aes(x=as.Date(visit.wkdate), y=All_Incomplete, colour="All_Incomplete"),na.rm=T) +
-  geom_line(data=final_fig2_table, aes(x=as.Date(visit.wkdate), y=Partial__Blood, colour="Partial__Blood"), na.rm=T) +
-  geom_line(data=final_fig2_table, aes(x=as.Date(visit.wkdate), y=No__Blood, colour="No__Blood"), na.rm=T) +
+  geom_line(data=final_fig2_table, aes(x=as.Date(col.Monday.date), y=All_Incomplete, colour="All_Incomplete"),na.rm=T) +
+  geom_line(data=final_fig2_table, aes(x=as.Date(col.Monday.date), y=Partial__Blood, colour="Partial__Blood"), na.rm=T) +
+  geom_line(data=final_fig2_table, aes(x=as.Date(col.Monday.date), y=No__Blood, colour="No__Blood"), na.rm=T) +
   geom_point(width = 0.2) +
   scale_y_continuous(name="Percent", limits=c(0,100),expand = c(0, 0), breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)) ,expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())) ,expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   scale_color_manual(name = "Incompletion Level", values = c("All_Incomplete"="darkred","Partial__Blood" = "blue", "No__Blood" = "darkgreen"), labels = c("Total","Partial Blood", "No Blood")) +
   #scale_fill_discrete(name = "Incompletion Level", labels = c("Partial Blood", "No Blood")) +
@@ -3039,13 +3138,13 @@ fig3_sub <- fig3_sub %>%  filter(!is.na(research.sv))
 
 fig3_sub$Site<- droplevels(fig3_sub$Site)
 
-figsub3 <- fig3_sub %>% arrange(visit.wkdate,research.sv) %>% group_by(visit.wkdate,research.sv) %>% tally()
+figsub3 <- fig3_sub %>% arrange(col.Monday.date,research.sv) %>% group_by(col.Monday.date,research.sv) %>% tally()
 
-figsub3_2 <- figsub3 %>% group_by(visit.wkdate) %>% mutate(per_week_parts=sum(n))
+figsub3_2 <- figsub3 %>% group_by(col.Monday.date) %>% mutate(per_week_parts=sum(n))
 
-figsub3_3 <- figsub3_2 %>% group_by(visit.wkdate) %>% filter(research.sv!="Submitted" & research.sv!="Started") %>%  mutate(weekly_notsub=n)
+figsub3_3 <- figsub3_2 %>% group_by(col.Monday.date) %>% filter(research.sv!="Submitted" & research.sv!="Started") %>%  mutate(weekly_notsub=n)
 
-figsub3_4 <- figsub3_3 %>% group_by(visit.wkdate) %>%  filter(research.sv!="Submitted" & research.sv!="Started") %>%  select(visit.wkdate,research.sv,weekly_notsub, per_week_parts)
+figsub3_4 <- figsub3_3 %>% group_by(col.Monday.date) %>%  filter(research.sv!="Submitted" & research.sv!="Started") %>%  select(col.Monday.date,research.sv,weekly_notsub, per_week_parts)
 
 figsub3_5 <-figsub3_4 %>% ungroup() %>% mutate(cum_notsub= cumsum(weekly_notsub),
                                  cumtotal= cumsum(per_week_parts))
@@ -3054,10 +3153,10 @@ figsub3_5 <-figsub3_4 %>% ungroup() %>% mutate(cum_notsub= cumsum(weekly_notsub)
 figsub3_6 <- figsub3_5 %>%  mutate(percent_3= 100*(cum_notsub/cumtotal))
 
 
-research.3 <- ggplot(figsub3_5, aes(x=as.Date(visit.wkdate), y=100*(cum_notsub/cumtotal))) + #, color=Site)) + #,fill=Site, color=Site)) +
+research.3 <- ggplot(figsub3_5, aes(x=as.Date(col.Monday.date), y=100*(cum_notsub/cumtotal))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line(na.rm=T) + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",limits=c(0,100),expand=c(0,0)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 3. Weekly Cumulative Percent of Biospecimen Surveys \n Not Submitted, University of Chicago Medicine") +
   #theme_ipsum() +
@@ -3182,30 +3281,31 @@ blood_placed_plot
 
 
 
-```{r Fig6, eval=TRUE,echo=FALSE,fig.cap='Figure 2'}
+```{r Fig6, eval=TRUE,echo=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 #need sum of collections by week
 #table(visit_wk_site$visit.wkdate, visit_wk_site$n)
 #(d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909)
 
-fig2_all <- research.survey %>%  filter(d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909)
+fig2_all <- recr.biospe %>%  filter(d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909)
 
 fig2_1<- fig2_all %>% mutate(#weekday = weekdays(ymd_hms(collection.tm)),
                                     #chicago = ifelse(d_827220437.y == 809703864, "Chicago","non Chicago"),
-                                    start.date = min(schedulecol.tm),
-                                    current.date=max(as.POSIXct(ymd_hms(schedulecol.tm))),
+                                    #start.date = min(schedulecol.tm),
+                                    #current.date=max(as.POSIXct(ymd_hms(schedulecol.tm))),
                                     BioRec_CollectScheduled = ifelse(as.Date(ymd_hms(schedulecol.tm)) >= as.Date(as.POSIXct(ymd_hms(d_914594314))),1,0))
                                     
                                     
-fig2_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig2_1$collection.tm),fig2_1$start.date, units="weeks")))
-fig2_1$visit.wkdate <- fig2_1$start.date + dweeks(fig2_1$visit.wk)
-visit_wk_site1 <- fig2_1 %>% arrange(visit.wk,visit.wkdate) %>% group_by(visit.wk,visit.wkdate) %>% tally()
+# fig2_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig2_1$collection.tm),fig2_1$start.date, units="weeks")))
+# fig2_1$visit.wkdate <- fig2_1$start.date + dweeks(fig2_1$visit.wk)
+visit_wk_site1 <- fig2_1 %>% arrange(col.Sunday.week,col.Monday.date) %>% group_by(col.Sunday.week,col.Monday.date) %>% tally()
 
 
-research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=Site, color=Site)) +
+research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(col.Monday.date), y=n)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="# Number of Collections") + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_y_continuous(name="# Number of Collections",limits=c(0,100*round(max(visit_wk_site1$n/100,1)))) + #, limits=c(0,30), breaks=seq(0,30,5)) +
+  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0)) +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 6. Weekly Biospecimen Collections, All Sites") +
   #theme_ipsum() +
@@ -3218,12 +3318,8 @@ research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(visit.wkdate), y=n)) + #,fi
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +
         guides(fill=guide_legend(nrow=2,byrow=TRUE))
 
+
 research.vt1
-
-
-
-
-
 
 ```
 
@@ -3237,7 +3333,8 @@ VW_biospe$Connect_ID <- as.character(VW_biospe$Connect_ID)
 Hybrid_VWS <- left_join(recr.biospe, VW_biospe, by="Connect_ID")
 
 
-research.surveyVW <- research.survey %>%  select(Site, Connect_ID, visit.wk,visit.wkdate)
+#research.surveyVW <- research.survey %>%  select(Site, Connect_ID,visit.wk,visit.wkdate ) #updated to the defined censoring date
+research.surveyVW <- research.survey %>%  select(Site, Connect_ID, col.Sunday.week,col.Monday.date)
 research.surveyVW$Connect_ID <- as.character(research.surveyVW$Connect_ID)
 VWS <- left_join(research.surveyVW, VW_biospe, by="Connect_ID")
 
@@ -3270,20 +3367,28 @@ research.survey.hybrid<-research.survey.hybrid %>% mutate(#weekday = weekdays(ym
                                                       d_951355211==665277300 ~ "Merrill",
                                                       d_951355211==589224449 ~ "Sioux Falls Imagenetics",
                                                       d_951355211==467088902 ~ "Fargo South University",
+                                                      d_951355211==567969985 ~ "MF Pop-Up",
+                                                      d_951355211==319518299 ~ "UCM Pop-Up",
+                                                      d_951355211==940329442 ~ "Orland Park",
                                                       TRUE ~ "Hybrid"))
                                     
                                     
-research.survey.hybrid$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(research.survey.hybrid$collection.tm),research.survey.hybrid$start.date, units="weeks")))
-research.survey.hybrid$visit.wkdate <-research.survey.hybrid$start.date + dweeks(research.survey.hybrid$visit.wk)
-visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Setting,visit.wk,visit.wkdate) %>% group_by(Site,Site_location, Setting,visit.wk,visit.wkdate) %>% tally()
+# research.survey.hybrid$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(research.survey.hybrid$collection.tm),research.survey.hybrid$start.date, units="weeks")))
+# research.survey.hybrid$visit.wkdate <-research.survey.hybrid$start.date + dweeks(research.survey.hybrid$visit.wk)
+# visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Setting,visit.wk,visit.wkdate) %>% group_by(Site,Site_location, Setting,visit.wk,visit.wkdate) %>% tally()
+
+
+
+visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Setting,col.Sunday.week,col.Monday.date) %>% group_by(Site,Site_location, Setting,col.Sunday.week,col.Monday.date) %>% tally()
+
 
 
  
    #research.vt_plH= visit_wk_site %>%  filter( Site=="Henry Ford Health System")
- research.vt_plotH <- ggplot(visit_wk_site.hybrid, aes(x=as.Date(visit.wkdate), y=n, color=Setting )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+ research.vt_plotH <- ggplot(visit_wk_site.hybrid, aes(x=as.Date(col.Monday.date), y=n, color=Setting )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 7. Weekly Biospecimen Collections at Henry Ford") +
    #theme_ipsum() +
@@ -3298,10 +3403,10 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
  
 
  edited_fig3_1 <-  visit_wk_site.hybrid %>%  filter(Site_location!="Hybrid")
-  research.vt_plotH <- ggplot(edited_fig3_1, aes(x=as.Date(visit.wkdate), y=n, color=Site_location )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+  research.vt_plotH <- ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 7.1 Weekly Biospecimen Collections at \n Henry Ford Locations") +
    #theme_ipsum() +
@@ -3337,10 +3442,14 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
                                                       d_951355211==665277300 ~ "Merrill",
                                                       d_951355211==589224449 ~ "Sioux Falls Imagenetics",
                                                       d_951355211==467088902 ~ "Fargo South University",
-                                                      d_951355211==834825425 ~ "HP Research Clinic") )
+                                                      d_951355211==834825425 ~ "HP Research Clinic",
+                                                      d_951355211==567969985 ~ "MF Pop-Up",
+                                                      d_951355211==319518299 ~ "UCM Pop-Up",
+                                                      d_951355211==940329442 ~ "Orland Park") )
  
-visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.wkdate) %>% group_by(Site_location, Site,visit.wk,visit.wkdate) %>% tally()
+# visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.wkdate) %>% group_by(Site_location, Site,visit.wk,visit.wkdate) %>% tally() #updated with censoring date
 
+visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location,col.Sunday.week,col.Monday.date ) %>% group_by(Site_location, Site,col.Sunday.week,col.Monday.date) %>% tally()
 
 #- UCHICAGO = 777644826,145191545, 489380324, 120264574
 #- HENRY FORD = 736183094, 886364332, 706927479
@@ -3352,11 +3461,11 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
 
  
    research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
- research.vt_plUC <- research.vt_plUC %>% group_by(visit.wkdate) %>% mutate(total_collections = sum(n))
- research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(visit.wkdate), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+ research.vt_plUC <- research.vt_plUC %>% group_by(col.Monday.date) %>% mutate(total_collections = sum(n))
+ research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 8. Weekly Biospecimen Collections at \n University of Chicago Medicine") +
    #theme_ipsum() +
@@ -3369,10 +3478,10 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  print(research.vt_plotUC)
 
  research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
- research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+ research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 8.1 Weekly Biospecimen Collections at \n University of Chicago Medicine Locations") +
    #theme_ipsum() +
@@ -3390,12 +3499,12 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  
  
   research.vt_plMF= visit_wk_site_edited %>%  filter( Site=="Marshfield Clinic Health System")
- research.vt_plMF <- research.vt_plMF %>% group_by(visit.wkdate) %>% mutate(total_collections = sum(n))
+ research.vt_plMF <- research.vt_plMF %>% group_by(col.Monday.date) %>% mutate(total_collections = sum(n))
  
- research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(visit.wkdate), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+ research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(col.Monday.date), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 9. Weekly Biospecimen Collections at \n Marshfield Clinic Health System") +
    #theme_ipsum() +
@@ -3410,10 +3519,10 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site, Site_location, visit.wk,visit.
  
  
   research.vt_plMF= visit_wk_site_edited %>%  filter( Site=="Marshfield Clinic Health System")
- research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+ research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Fig 9.1 Weekly Biospecimen Collections at \n Marshfield Clinic Health System Locations") +
    #theme_ipsum() +
@@ -3436,10 +3545,10 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 
 research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
-research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 10. Weekly Biospecimen Collections at Sanford Health") +
   #theme_ipsum() +
@@ -3453,10 +3562,10 @@ print(research.vt_plotSH)
 
 
 research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
-research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(visit.wkdate), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 10.1 Weekly Biospecimen Collections at Sanford Health Locations") +
   #theme_ipsum() +
@@ -3474,10 +3583,10 @@ print(research.vt_plotSH)
 
 
 research.vt_plHP= visit_wk_site_edited %>%  filter( Site=="HealthPartners")
-research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(visit.wkdate), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(col.Monday.date), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date() - 7)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Fig 11. Weekly Biospecimen Collections at HealthPartners") +
   #theme_ipsum() +
@@ -3717,8 +3826,10 @@ biospe2_CID$variable <- names(biospe2)
 y$conceptId.3 <- as.character(y$conceptId.3)
 y$conceptId.4 <- as.numeric(y$conceptId.4)
 biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable, Variable.Name)
 
 biospe2_CID_dd <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
+
 
 biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
@@ -3855,9 +3966,25 @@ recrver_CID$variable <- names(recr.bio)
 
 
 
-recrvar_CID_dd <- base::merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+# recrvar_CID_dd <- base::merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+# 
+# recrvar_CID_dd <- recrvar_CID_dd %>% arrange(CID, variable, Variable.Name) 
+# 
+# recrvar_CID_dd <-recrvar_CID_dd[!duplicated(recrvar_CID_dd[,c("CID","variable")]),]
+
+
+y$order <- rownames(y)
+
+
+
+recrvar_CID_dd <- base::merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value","order")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+
+recrvar_CID_dd <-recrvar_CID_dd %>% arrange(CID, variable,order,Variable.Name) #before remove the duplicates
+
 
 recrvar_CID_dd <-recrvar_CID_dd[!duplicated(recrvar_CID_dd[,c("CID","variable")]),]
+
+
 
 
 

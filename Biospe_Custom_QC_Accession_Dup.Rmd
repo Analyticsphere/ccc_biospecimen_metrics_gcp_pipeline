@@ -1231,19 +1231,19 @@ write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections
 
 #STRECK Tube 1 Collected BS	d_878865966	crossValid2	353358909	d_505347689_d_593843561	353358909	d_331584571	266600170							If the visit type is Baseline and any blood tube is collected, then the baseline blood is maked as collected																																																			
 
-#STEK Tube HF Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 548392715					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes	
+#STEK Tube HF Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 548392715					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
+
+
+
 #EVENTUALLY: STEK Tube Sanford Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 657167265					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
 
 #EVENTUALLY: STEK Tube HP Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 531629870					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
-
 
 
 #EVENTUALLY: ACD Tube Sanford Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_652357376_d_593843561	353358909	d_650516960	664882224	d_652357376_d_762124027	104430631		 d_827220437 657167265				If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
 #EVENTUALLY: ACD Tube HP Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_652357376_d_593843561	353358909	d_650516960	664882224	d_652357376_d_762124027	104430631		 d_827220437 531629870				If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
 
 
-# remove and update from Jake's rule list
-  #NA?
 
 
 
