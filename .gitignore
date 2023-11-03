@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 *.Rproj
-*.csv
 *.pdf
 *.tex
 *.log
@@ -11,5 +10,4 @@ test_large_gcs_upload.R
 ccc_biospecimen_metrics_api_b.R
 .DS_Store
 README.html
-*boxfolder_221297686961.csv
-*boxfolder_222593912729.csv
+*.csv
