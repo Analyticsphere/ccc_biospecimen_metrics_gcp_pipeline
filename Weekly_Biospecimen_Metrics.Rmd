@@ -905,9 +905,16 @@ table.bldcol_UC <- ctable(tube_research_UC$UC_Sites,tube_research_UC$bld.complt)
 bldcol_research_UC <- as.data.frame(cbind(table.bldcol_UC$cross_table,table.bldcol_UC$proportions))
 bldcol_research_UC$UC_Sites <-trimws(rownames(bldcol_research_UC))
                              
-bldcol_research_UC$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research_UC)),  paste(format(bldcol_research_UC[,1],big.mark=","),"(", round(100*bldcol_research_UC[,5],1),"%)",sep=" "), format(bldcol_research_UC[,1],big.mark="," ))
-bldcol_research_UC$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research_UC)),  paste(format(bldcol_research_UC[,2],big.mark=","),"(", round(100*bldcol_research_UC[,6],1),"%)",sep=" "), format(bldcol_research_UC[,2],big.mark="," ))
-bldcol_research_UC$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_UC)),  paste(format(bldcol_research_UC[,3],big.mark=","),"(", round(100*bldcol_research_UC[,7],1),"%)",sep=" "), format(bldcol_research_UC[,3],big.mark="," ))
+# bldcol_research_UC$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research_UC)),  paste(format(bldcol_research_UC[,1],big.mark=","),"(", round(100*bldcol_research_UC[,5],1),"%)",sep=" "), format(bldcol_research_UC[,1],big.mark="," ))
+# bldcol_research_UC$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research_UC)),  paste(format(bldcol_research_UC[,2],big.mark=","),"(", round(100*bldcol_research_UC[,6],1),"%)",sep=" "), format(bldcol_research_UC[,2],big.mark="," ))
+# bldcol_research_UC$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_UC)),  paste(format(bldcol_research_UC[,3],big.mark=","),"(", round(100*bldcol_research_UC[,7],1),"%)",sep=" "), format(bldcol_research_UC[,3],big.mark="," ))
+
+bldcol_research_UC$n_pct_BloodCompletion <-  paste(format(bldcol_research_UC[,1],big.mark=","),"(", round(100*bldcol_research_UC[,5],1),"%)",sep=" ") #format(bldcol_research_UC[,1],big.mark="," ))
+bldcol_research_UC$n_pct_BloodInompletion =  paste(format(bldcol_research_UC[,2],big.mark=","),"(", round(100*bldcol_research_UC[,6],1),"%)",sep=" ") #format(bldcol_research_UC[,2],big.mark="," ))
+bldcol_research_UC$n_pct_NoBlood = paste(format(bldcol_research_UC[,3],big.mark=","),"(", round(100*bldcol_research_UC[,7],1),"%)",sep=" ") #format(bldcol_research_UC[,3],big.mark="," ))
+
+bldcol_research_UC$Total <- paste(bldcol_research_UC$Total, " (100%)")
+nrow(bldcol_research_UC)
          
 bldcol_research_UC1 <- bldcol_research_UC[,c(9:12,4)]
 
@@ -941,9 +948,17 @@ table.bldcol_HF <- ctable(tube_research_HF$HF_Sites,tube_research_HF$bld.complt)
 bldcol_research_HF <- as.data.frame(cbind(table.bldcol_HF$cross_table,table.bldcol_HF$proportions))
 bldcol_research_HF$HF_Sites <-trimws(rownames(bldcol_research_HF))
                              
-bldcol_research_HF$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research_HF)),  paste(format(bldcol_research_HF[,1],big.mark=","),"(", round(100*bldcol_research_HF[,5],1),"%)",sep=" "), format(bldcol_research_HF[,1],big.mark="," ))
-bldcol_research_HF$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research_HF)),  paste(format(bldcol_research_HF[,2],big.mark=","),"(", round(100*bldcol_research_HF[,6],1),"%)",sep=" "), format(bldcol_research_HF[,2],big.mark="," ))
-bldcol_research_HF$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF)),  paste(format(bldcol_research_HF[,3],big.mark=","),"(", round(100*bldcol_research_HF[,7],1),"%)",sep=" "), format(bldcol_research_HF[,3],big.mark="," ))
+# bldcol_research_HF$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research_HF)),  paste(format(bldcol_research_HF[,1],big.mark=","),"(", round(100*bldcol_research_HF[,5],1),"%)",sep=" "), format(bldcol_research_HF[,1],big.mark="," ))
+# bldcol_research_HF$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research_HF)),  paste(format(bldcol_research_HF[,2],big.mark=","),"(", round(100*bldcol_research_HF[,6],1),"%)",sep=" "), format(bldcol_research_HF[,2],big.mark="," ))
+# bldcol_research_HF$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF)),  paste(format(bldcol_research_HF[,3],big.mark=","),"(", round(100*bldcol_research_HF[,7],1),"%)",sep=" "), format(bldcol_research_HF[,3],big.mark="," ))
+
+
+bldcol_research_HF$n_pct_BloodCompletion <- paste(format(bldcol_research_HF[,1],big.mark=","),"(", round(100*bldcol_research_HF[,5],1),"%)",sep=" ")
+bldcol_research_HF$n_pct_BloodInompletion = paste(format(bldcol_research_HF[,2],big.mark=","),"(", round(100*bldcol_research_HF[,6],1),"%)",sep=" ")
+bldcol_research_HF$n_pct_NoBlood = paste(format(bldcol_research_HF[,3],big.mark=","),"(", round(100*bldcol_research_HF[,7],1),"%)",sep=" ")
+
+bldcol_research_HF$Total <- paste(bldcol_research_HF$Total, " (100%)")
+nrow(bldcol_research_HF)
          
 bldcol_research_HF1 <- bldcol_research_HF[,c(9:12,4)]
 ```
@@ -958,19 +973,21 @@ left7 <- left_join(biospe, table7_3, by="Connect_ID")
 biospe7= left7  %>%
   #something odd going odd with the values
   filter(as.numeric(d_173836415_d_266600170_d_185243482)>72  & !is.na(d_173836415_d_266600170_d_185243482)) %>%
-  mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "Wyandotte Hospital",
-                                       d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 ~ "Macomb Medical Pavilion",
-                                       d_173836415_d_266600170_d_185243482==1040010047 | d_173836415_d_266600170_d_185243482==1040010046 ~ "West Bloomfield Hospital",
+  mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "Wyandotte",
+                                       d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 ~ "Macomb",
+                                       d_173836415_d_266600170_d_185243482==1040010047 | d_173836415_d_266600170_d_185243482==1040010046 | d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield",
                                        d_173836415_d_266600170_d_185243482==1011410008 ~ "Royal Oak",
                                        d_173836415_d_266600170_d_185243482==1010180040 ~ "Fairlane (Dearborn)",
-                                       d_173836415_d_266600170_d_185243482==1010120026 ~ "Novi",
-                                       d_173836415_d_266600170_d_185243482==1010240013 ~ "Plymouth",
-                                       d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)", 
+                                       d_173836415_d_266600170_d_185243482==1010120026 ~ "Columbus",
+                                       d_173836415_d_266600170_d_185243482==1011660013 ~ "Plymouth",
+                                       #d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)", 
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
-                             d_173836415_d_266600170_d_185243482==1011660013 ~ "Livonia",
+                             d_173836415_d_266600170_d_185243482==1010240013 ~ "Livonia",
                              d_173836415_d_266600170_d_185243482==1010320019 ~ "Sterling Heights",
                                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_185243482==1010010114 ~ "Main - K1"))    
 #biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)    #Error in UseMethod("droplevels") :  no applicable method for 'droplevels' applied to an object of class "character"
+
+
 
 tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>%
   #filter(HF_Sites=="HF Wyandotte Hospital" | HF_Sites=="HF Macomb Medical Pavilion" |  HF_Sites=="HF West Bloomfield Hospital") %>%
@@ -994,13 +1011,18 @@ table.bldcol_HF2 <- ctable(tube_research_HF2$HF_Sites,tube_research_HF2$bld.comp
 bldcol_research_HF2 <- as.data.frame(cbind(table.bldcol_HF2$cross_table,table.bldcol_HF2$proportions))
 bldcol_research_HF2$HF_Sites <-trimws(rownames(bldcol_research_HF2))
 
-bldcol_research_HF2$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,1],big.mark=","),"(", round(100*bldcol_research_HF2[,4],1),"%)",sep=" "), format(bldcol_research_HF2[,1],big.mark="," ))
-bldcol_research_HF2$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,2],big.mark=","),"(", round(100*bldcol_research_HF2[,5],1),"%)",sep=" "), format(bldcol_research_HF2[,2],big.mark="," ))
+#bldcol_research_HF2$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,1],big.mark=","),"(", round(100*bldcol_research_HF2[,4],1),"%)",sep=" "), format(bldcol_research_HF2[,1],big.mark="," ))
+bldcol_research_HF2$n_pct_BloodCompletion <- paste(format(bldcol_research_HF2[,1],big.mark=","),"(", round(100*bldcol_research_HF2[,4],1),"%)",sep=" ") #format(bldcol_research_HF2[,1],big.mark="," ))
+#bldcol_research_HF2$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,2],big.mark=","),"(", round(100*bldcol_research_HF2[,5],1),"%)",sep=" "), format(bldcol_research_HF2[,2],big.mark="," ))
+bldcol_research_HF2$n_pct_BloodInompletion =  paste(format(bldcol_research_HF2[,2],big.mark=","),"(", round(100*bldcol_research_HF2[,5],1),"%)",sep=" ") #format(bldcol_research_HF2[,2],big.mark="," ))
     # FOR NOW THERE ARE NO NO-BLOOD COLLECTIONS
 #bldcol_research_HF2$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research_HF2)),  paste(format(bldcol_research_HF2[,3],big.mark=","),"(", round(100*bldcol_research_HF2[,7],1),"%)",sep=" "), format(bldcol_research_HF2[,3],big.mark="," ))
 #if(!is.na(bldcol_research_HF2$NoBlood)){print("Table 5.3 needs to be fixed. 'No Blood' has now been added")} #For now this column doesn't exist
 #bldcol_research_HF2$None <- list("0 (0%)","0 (0%)","0 (0%)", "0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)","0 (0%)",  0)
 #bldcol_research_HF2$None <- list( list("0 (0%)")*(nrow-1) ,  0)
+
+bldcol_research_HF2$Total <- paste(bldcol_research_HF2$Total, " (100%)")
+nrow(bldcol_research_HF2)
 
 bldcol_research_HF2 <- bldcol_research_HF2[, c(7:9,3)]
 ```
@@ -1670,8 +1692,9 @@ research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type)
                    missing_text="0 ( 0 %)")%>%
      modify_header() %>%
      modify_caption("Table 12b. Reason Not Collected for Tubes Not Collected at Research Collection Visits by Tube Type") %>%
-     as_kable_extra() %>% kable_styling(latex_options = "scale_down")
-research.notcolnotes_tube
+     as_kable_extra() %>% kable_styling(latex_options = "scale_down") 
+
+
 ```
 
 
@@ -2910,7 +2933,7 @@ add_footnote(tab5_1, "Note: Some cells are not applicable. Blood and Urine Sampl
 
 
 Bld_urn_cli = knitr::kable(newtable_4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", font_size = 7) 
-add_footnote(Bld_urn_cli, "Note: Data sent by sites experience an availablility delay of up to 48 hours behind data from the Biospecimen Dashboard. Note: Data sent by sites experience an availability delay of up to 48 hours behind data from the Biospecimen Dashboard. 'Site Data Only' is assumed to have a value of '0(0%)' when not listed in this table.", notation = "none")
+add_footnote(Bld_urn_cli, "Note: Data sent by sites experience an availablility delay of up to 48 hours behind data from the Biospecimen Dashboard. Data sent by sites experience an availability delay of up to 48 hours behind data from the Biospecimen Dashboard. 'Site Data Only' is assumed to have a value of '0(0%)' when not listed in this table.", notation = "none")
 
 
 coll_completenessR %>% kable_styling(latex_options = "scale_down")
@@ -3090,13 +3113,11 @@ knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 
 
 #Switched order of 9 and 10, so now 10 is first 
 tab10_2= tube_completeness %>% kable_styling(latex_options = "scale_down")
-add_footnote(tab10_2, "Note: The expected number of blood collection tubes varies by site and is as follows: KPHI-9; KPGA-7; KPNW-9; KPCO-8, HFH-5", notation = "none") 
+add_footnote(tab10_2, "Note: The expected number of blood collection tubes varies by site and is as follows: KPHI-9; KPGA-7; KPNW-9; KPCO-8, HFH-5, HP-5", notation = "none") 
 
 
 tab8=knitr::kable(notcol_combo2,caption='Table 10. Blood Tubes Collected by Tube Type at Clinical Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% column_spec(column = 2:ncol(notcol_combo2),width = "4cm")  %>% column_spec(column = 1:ncol(notcol_combo2),width = "5cm") %>%  landscape()
-add_footnote(tab8, "Note: Expected number of collection tubes for each Kaiser Permanente site is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD", notation = "none") 
-
-
+add_footnote(tab8, "Note: Expected number of collection tubes for each Kaiser Permanente site is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD. (6) HP: 2 SST, 1 Heparin, 1 EDTA, 1 STRECK.", notation = "none") 
 
 
 knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No Deviations", "Total Tubes Collected"), caption='Table 11. Frequency of Tubes with Any Deviation by Site',row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE )
@@ -3107,8 +3128,8 @@ knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No
 
 
 research.notcolnotes_site
-research.notcolnotes_tube
-
+#research.notcolnotes_tube
+add_footnote(research.notcolnotes_tube, "Note: 'Short Draw' reason applicable to blood collection tubes only.", notation="none")
 
 
 knitr::kable(discard.site, caption='Table 13. Number of Tubes Discarded by Type and by Site', row.names=FALSE,  col.names=c("Site",  "SS Tube1", "SS Tube2", "SS Tube5", "Heparin Tube1", "Heparin Tube2", "EDTA Tubes", "ACD Tubes", "Urine Tubes", "Total Tubes"), align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
@@ -3238,16 +3259,16 @@ add_footnote(tabbB,"Note: August 2022 marks when research collection appointment
 
 
 BSL_A <- knitr::kable(verif_BSL_colctA,caption='Table 22a. Time (in Days) from Verification to Baseline Clinical  Collection for Participants Verified Before 02/01/2023',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>%  kable_styling(latex_options = "scale_down")
-add_footnote(BSL_A,"Note: Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
+add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
 
 BSL_B <-knitr::kable(verif_BSL_colctB,caption='Table 22b. Time (in Days) from Verification to Baseline Clinical  Collection for Participants Verified on or After 02/01/2023',row.names=FALSE,  align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>%  kable_styling(latex_options = "scale_down")
-add_footnote(BSL_B,"Note: Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
+add_footnote(BSL_B,"Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
 
 
 
 
 AF26 <- knitr::kable(verif_baseline_Af[c(1,2,7:9,3:6), ],caption = 'Table 23. Time (in Days) from Verification to Clinical Baseline Collection for \n Participants Verified After 06/01/2022, by Campaign Type',row.names=FALSE, booktabs = T, linesep = "", format.args = list(big.mark = ","), align = c("l", "c", "c","c", "c", "c", "c", "c", "c", "c", "c","c", "c","c"), col.names=c("Site",  'Number of Baseline Collections',"Min", "Median", "Mean", "SD", "Max", 'Number of Baseline Collections', "Min", "Median", "Mean", "SD", "Max","Total Number of Baseline Collections") ) %>% kable_styling(latex_options = "scale_down") %>% add_indent(c(1:9)) %>% add_header_above(c(" " = 1, "Upcoming Appointment" = 6, "All Other Campaigns" = 6,  " "=1)) %>% landscape() 
-add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment” and “Non-screening appointment” campaign types. All Other Campaigns include “Random”, “Demographic Group”, “Aging out of study”, “Geographic group”, “Post-Screening Selection”, “Technology adapters”, “Low-income/health professional shortage areas”, and “Other” campaign types.")
+add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment” and “Non-screening appointment” campaign types. All Other Campaigns include “Random”, “Demographic Group”, “Aging out of study”, “Geographic group”, “Post-Screening Selection”, “Technology adapters”, “Low-income/health professional shortage areas”, and “Other” campaign types.", notation = "none")
 
 
 tabl27 <- knitr::kable(verif_draw_order,caption='Table 24. Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
@@ -3825,6 +3846,8 @@ colnames(biospe2_CID)[1] <- "CID"
 biospe2_CID$variable <- names(biospe2)
 y$conceptId.3 <- as.character(y$conceptId.3)
 y$conceptId.4 <- as.numeric(y$conceptId.4)
+
+
 biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable, Variable.Name)
 
@@ -3872,7 +3895,7 @@ colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd$new.
 
 for (i in 1:length(yes_no)){
   x <- yes_no[i]
-  
+
   varname <- biospe2_CID_dd[grepl(yes_no[i],biospe2_CID_dd$variable),]$new.varname
   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
   check <- as.data.frame(biospe2[,x])
@@ -3886,6 +3909,95 @@ colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
 biospe1 <- biospe1[,order(colnames(biospe1))]
 
 biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:315,66:103,125:143,220:296,144,297,163,44)]
+
+
+
+
+
+
+
+
+
+
+
+# ##11/16 update suggestion for column header updates
+# 
+# biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE) ## the data "y" is leftover in the code
+# 
+# 
+# biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
+#                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
+#                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
+#                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
+#                                             
+#                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
+# 
+# 
+# biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12, 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))  #to add "matched"  flag to select the correct variables based on their combined CIDs (tubeID, last.CID) to compromise the changes in the DD on the biospecimen
+# 
+# 
+# biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
+# 
+# 
+# biospe2_CID_dd1 <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
+# biospe2_CID_dd1$new.varname <- ifelse(biospe2_CID_dd1$matched==1, biospe2_CID_dd1$Variable.Name, paste(gsub("SST1","",biospe2_CID_dd1$Variable.Name),biospe2_CID_dd1$label.1st,sep="_"))
+# biospe2_CID_dd1$variable[is.na(biospe2_CID_dd1$new.varname)]
+# #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
+# biospe1 <- NULL
+# select0 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
+# select2 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==2)]
+# yes_no <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==1)]
+# biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
+# n<- length(select0)
+# colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
+# 
+# 
+# 
+# for (i in 1: length(select2)){
+#   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
+# }
+# colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==2)]
+# 
+# 
+# for (i in 1:length(yes_no)){
+#   x <- yes_no[i]
+#   
+#   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable),]$new.varname
+#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
+#   check <- as.data.frame(biospe2[,x])
+#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
+#   colnames(check)[2] <- varname
+#   biospe1 <-   cbind(biospe1,subset(check,select=varname))
+# }
+# 
+# 
+# colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
+# colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
+# biospe1 <- biospe1[,order(colnames(biospe1))]
+# 
+# 
+# biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:337,66:103,125:143,220:296,144,297,163,44)]
+
+
+
+
+
+
+
 
 #biospe1_fin= subset(biospe1_final, select=-c(BioClin_DBBloodRRL_v1r0, BioClin_DBBloodRRLDt_v1r0, BioClin_DBUrineRRLDt_v1r0))
 
@@ -4133,6 +4245,9 @@ coord_csv = coord_csv %>%  mutate(BioRec_CollectFinal=case_when(d_410912345==353
                                                                  d_951355211==261931804 ~ "Minocqua",
                                                                  d_951355211==665277300 ~ " Merrill",
                                                                  d_951355211==467088902 ~ "Fargo South University",
+                                                                 d_951355211==567969985 ~ "MF Pop-Up",
+                                                      d_951355211==319518299 ~ "UCM Pop-Up",
+                                                      d_951355211==940329442 ~ "Orland Park",
                                                                  d_951355211==807835037 ~ "Other",
                                                                  d_951355211==698283667 ~ "Lake Hallie"),
                                   SMMet_BLSamplesColl_v1r0=case_when(d_254109640=="353358909" ~ 1,
