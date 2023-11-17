@@ -621,15 +621,17 @@ knitr::kable(BloodDtTm_noHP)
 
 
 
-### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
+
 ```{r HPExcluded6, echo=FALSE, warning=FALSE, message=FALSE}
+
+### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
 
 BloodDtTmVs_noHP <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_769615780) & d_173836415_d_266600170_d_530173840!=353358909	& 
                                          d_827220437!=531629870) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_530173840) %>%  sort_by(Site)
 
 colnames(BloodDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_BldOrderPlaced")
-knitr::kable(BloodDtTmVs_noHP) 
+#knitr::kable(BloodDtTmVs_noHP) -- removed. "Please adjust the blood and urine draw order flag-to-date/time QC rules to run one-way, as it is possible for a draw order date to be populated and the draw order placement flag to be "No". This happens when a site cancels an order; the flag switches from "Yes" to "No", but the original placement date cannot be retracted by the site. " 
 
 ```
 
@@ -649,15 +651,16 @@ knitr::kable(UrineDtTm_noHP)
 
 
 
-### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_UrnOrdPlaced must = 1. HP Excluded
+
 ```{r HPExcluded4, echo=FALSE, warning=FALSE, message=FALSE}
+### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_UrnOrdPlaced must = 1. HP Excluded
 
 UrineDtTmVs_noHP <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_939818935) & d_173836415_d_266600170_d_860477844!=353358909	& 
                                          d_827220437!=531629870) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_860477844) %>%  sort_by(Site)
 
 colnames(UrineDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_UrnOrdPlaced")
-knitr::kable(UrineDtTmVs_noHP) 
+#knitr::kable(UrineDtTmVs_noHP)  -- removed. "Please adjust the blood and urine draw order flag-to-date/time QC rules to run one-way, as it is possible for a draw order date to be populated and the draw order placement flag to be "No". This happens when a site cancels an order; the flag switches from "Yes" to "No", but the original placement date cannot be retracted by the site. " 
 
 ```
 
