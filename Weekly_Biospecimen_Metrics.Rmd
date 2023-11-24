@@ -294,8 +294,14 @@ biospe_var$cid2 <- sapply(strsplit(colnames(biospe),"_"), "[", 4)
 biospe_var$cid3 <- sapply(strsplit(colnames(biospe),"_"), "[", 6)
 biospe_var$cid_tail <- sapply(strsplit(colnames(biospe),"_"), tail,1)
 biospe_CID <- dd[which(dd$CID %in% CID),]
+#biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="CID", all.x=TRUE)
+#tubes <- dd[grepl(" Tube ",dd$`Variable Label`),]
+
+#Updated for labeling
 biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="CID", all.x=TRUE)
-tubes <- dd[grepl(" Tube ",dd$`Variable Label`),]
+biospe_dd <- biospe_dd[!duplicated(biospe_dd$variable),]
+tubes <- dd[grepl("BioCol_00",dd$`Variable Name`),]
+
 urine <- dd[grepl("Urine",dd$`Variable Label`),]
 mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 
@@ -970,7 +976,7 @@ bldcol_research_HF1 <- bldcol_research_HF[,c(9:12,4)]
 table7_3 <- recrver1 %>%  select(Connect_ID, d_173836415_d_266600170_d_185243482)
 left7 <- left_join(biospe, table7_3, by="Connect_ID")
 
-biospe7= left7  %>%
+biospe7= left7  %>%  
   #something odd going odd with the values
   filter(as.numeric(d_173836415_d_266600170_d_185243482)>72  & !is.na(d_173836415_d_266600170_d_185243482)) %>%
   mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "Wyandotte",
@@ -982,7 +988,7 @@ biospe7= left7  %>%
                                        d_173836415_d_266600170_d_185243482==1011660013 ~ "Plymouth",
                                        #d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)", 
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
-                             d_173836415_d_266600170_d_185243482==1011660013 ~ "Livonia",
+                             d_173836415_d_266600170_d_185243482==1010240013 ~ "Livonia",
                              d_173836415_d_266600170_d_185243482==1010320019 ~ "Sterling Heights",
                                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_185243482==1010010114 ~ "Main - K1"))    
 #biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)    #Error in UseMethod("droplevels") :  no applicable method for 'droplevels' applied to an object of class "character"
@@ -1106,18 +1112,6 @@ tube_completeness
 # ## New table 4 8/22/23
 clin_col <- biospe %>% select(Connect_ID, d_650516960, d_410912345)
 bldurcl <- left_join(recrver1, clin_col, by="Connect_ID")
-
-# bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %>%
-#   mutate(Data_System = case_when((d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909) &
-#                                    (is.na(d_173836415_d_266600170_d_786930107) | is.na(d_173836415_d_266600170_d_693370086))~ "Biospecimen Dashboard Only",
-#                                    (d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909) &
-#            (is.na(d_173836415_d_266600170_d_210921343) | is.na(d_173836415_d_266600170_d_534041351))~ "Site Data Only",
-#            (d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_534041351==353358909) &
-#                                      (d_173836415_d_266600170_d_786930107==353358909 | d_173836415_d_266600170_d_693370086==353358909) ~ "Site Data & Biospecimen Dashboard"))
-#                               # Collection = ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood",
-#                               #                     ifelse(d_173836415_d_266600170_d_210921343==353358909 | d_173836415_d_266600170_d_786930107==353358909,"Urine", "")))
-#                                                   #ifelse(d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 , "Blood", "")))
-#                                                      #d_173836415_d_266600170_d_534041351==353358909 | d_173836415_d_266600170_d_693370086==353358909 ~ "Blood"))
 
 bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %>%
   mutate(Data_System = case_when((d_173836415_d_266600170_d_534041351==353358909 & is.na(d_173836415_d_266600170_d_693370086)) |
@@ -1292,7 +1286,8 @@ for (i in 1:length(tube.ls)){
                                   grepl("d_376960806",dev_type) ~ "SS Tube3",
                                   grepl("d_232343615",dev_type) ~ "SS Tube4",
                                   grepl("d_589588440",dev_type) ~ "SS Tube5",
-                                  grepl("d_958646668",dev_type) ~ "Heparin Tube2"),
+                                  grepl("d_958646668",dev_type) ~ "Heparin Tube2",
+                                  grepl("d_505347689",dev_type) ~ "STRECK Tube1"), #make sure this doesn't break the code
             
               deviationnotes =case_when(sapply(strsplit(as.character(dev_type),"d_"),tail,1) =="102695484" ~ "Deviation Clot < 30min",
                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="242307474" ~ "Hemolyzed", 
@@ -1396,8 +1391,9 @@ notcol.ls <- sapply(strsplit(notcol_tubes, "_d"),"[[",1)
                                           tubeID == "d_376960806"  ~ "SS Tube3",
                                           tubeID == "d_232343615"  ~ "SS Tube4",
                                           tubeID == "d_589588440"  ~ "SS Tube5",
+                                          tubeID == "d_505347689"  ~ "STRECK Tube1",  #make sure this doesn't break the code
                                           tubeID == "d_958646668"  ~ "Heparin Tube2"))
-  collection_long$tube_type <- factor(collection_long$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","Urine Tube1","MW Tube1" ) )  
+  collection_long$tube_type <- factor(collection_long$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1", "STRECK Tube1", "Urine Tube1","MW Tube1" ) )   #make sure this doesn't break the code 
      
    Table17_option2 <- collection_long %>% mutate(deviation = dplyr::case_when(tube_deviation == 353358909 ~ "Any Deviation",
                                                                               tube_deviation == 104430631 ~ "No Deviation"),
@@ -1453,7 +1449,7 @@ for(site in unique(dev_tube2$Site)){
   
     research.coltube.bld.only<- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 104430631) %>% 
     mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1")))
+           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "STRECK Tube1")))  #make sure this doesn't break the code
     research.coltube.bld.only<- research.coltube.bld.only %>%  mutate(tube_type=droplevels(tube_type))
 
  
@@ -1567,7 +1563,7 @@ Tb.research.coltube <- research.coltube %>% select(tube_type,Site) %>%
 
   clinic.coltube<- collection_long %>% filter(biocol_Setting=="Clinical" & tubecol == 353358909) %>%
     mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5", "Heparin Tube1","Heparin Tube2","EDTA Tube1","EDTA Tube2","EDTA Tube3","ACD Tube1","Urine Tube1" )))
+           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5", "Heparin Tube1","Heparin Tube2","EDTA Tube1","EDTA Tube2","EDTA Tube3","ACD Tube1", "Urine Tube1" ))) #, "STRECK Tube1" NEEDS TO BE ADDED WHEN APPLICABLE
   
   clinic.coltube <- clinic.coltube %>%  filter(biocol_Setting == "Clinical")
   
@@ -1629,8 +1625,9 @@ notcol_notes <- notcol_notes %>%
                                           tubeID == "d_376960806"  ~ "SS Tube3",
                                           tubeID == "d_232343615"  ~ "SS Tube4",
                                           tubeID == "d_589588440"  ~ "SS Tube5",
+                                          tubeID == "d_505347689"  ~ "STRECK Tube1",
                                           tubeID == "d_958646668"  ~ "Heparin Tube2"))
-notcol_notes$tube_type <- factor(notcol_notes$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","Urine Tube1","MW Tube1" ) ) 
+notcol_notes$tube_type <- factor(notcol_notes$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","Urine Tube1","STRECK Tube1","MW Tube1" ) ) 
 notcol_notes$notcol.notes <- factor(notcol_notes$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
 
 
@@ -1659,7 +1656,7 @@ tb_combo <- array(pct_n(ctable$t,ctable$prop.col),dim=c(n,m))
 }
 research.notcol <- notcol_notes %>% filter(biocol_Setting=="Research" & tubecol==104430631) %>% 
    mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","Urine Tube1","MW Tube1" )))
+           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","Urine Tube1","MW Tube1" ))) #"STRECK Tube1", when applicable, right now is causing error in line reseachnotes.coltype
 research.notcol$notcol.notes <- factor(research.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Participant Refusal", "Supply Unavailable","Other",  "Missing Reasons"))
 #research.notcol$notcol.notes <- droplevels(research.notcol$notcol.notes)
 reseachnotes.notcol <- n_pct_table(research.notcol$Site,research.notcol$notcol.notes)
@@ -1732,7 +1729,7 @@ discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>%
   mutate(Site=droplevels(Site),
            tube_type = droplevels(tube_type))
 discard.site <- n_pct_table(discard.tb$Site,discard.tb$tube_type)
-discard.site <- (discard.site[, c(10, 1:9)])
+discard.site <- (discard.site[, c(10, 1:9)]) #Will need to update dimensions when STRECK Tube 1 listed 
 
 ```
 
@@ -3106,7 +3103,7 @@ knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood T
 
 
 knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  
-
+#will need to add STRECK Tube Col Name once applicable so this doesn't break
 
 
 
@@ -3673,6 +3670,9 @@ for (i in 1:length(dev_count.site)){
 
 
 
+
+
+
 ```{r data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 
 ###download the biospecimen data
@@ -3811,9 +3811,7 @@ write.csv(box1,glue("{local_drive}Formatted_prod_flatBoxes_JP_{currentDate}_boxf
 
 
 
-
-
-
+#11/20 updates
 ###to get the formats and variable names from DD
 factor_cid <-function(var,data){
   var <- as.factor(var)
@@ -3824,11 +3822,15 @@ factor_cid <-function(var,data){
 
 
 
+
+
 bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
 biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
 
+
 biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
 biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
+
 
 cnames <- names(biospe2)
 for (i in 1: length(cnames)){
@@ -3840,6 +3842,8 @@ for (i in 1: length(cnames)){
 
 
 
+
+
 biospe2_CID <- as.data.frame(sapply((strsplit(colnames(biospe2),"d_")),tail,1))
 colnames(biospe2_CID)[1] <- "CID"
 #biospe2_CID <- biospe2_CID %>% mutate(CID = ifelse(nchar(CID)>10, substring(CID,1,9), CID))
@@ -3847,17 +3851,14 @@ biospe2_CID$variable <- names(biospe2)
 y$conceptId.3 <- as.character(y$conceptId.3)
 y$conceptId.4 <- as.numeric(y$conceptId.4)
 
-
-biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
-biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable, Variable.Name)
-
-biospe2_CID_dd <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
+biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 
 biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
+                                            
                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
@@ -3872,31 +3873,41 @@ biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 
                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
+                                                                  sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ,
+                                                                  sapply(strsplit(variable,"_"),"[",2) == "505347689"  ~ "STRECKTube1" ))
 
 
+biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12 , 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))
 
-biospe2_CID_dd$new.varname <- ifelse(is.na(biospe2_CID_dd$label.1st), biospe2_CID_dd$Variable.Name,paste(biospe2_CID_dd$label.1st,biospe2_CID_dd$Variable.Name,sep="_"))
-biospe2_CID_dd$variable[is.na(biospe2_CID_dd$new.varname)]
+
+biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
+
+
+biospe2_CID_dd1 <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
+biospe2_CID_dd1$new.varname <- ifelse(biospe2_CID_dd1$matched==1, biospe2_CID_dd1$Variable.Name, paste(gsub("SST1","",biospe2_CID_dd1$Variable.Name),biospe2_CID_dd1$label.1st,sep="_"))
+biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$variable=="d_926457119")] <- "BioBPTL_DateRec_v1r0"
+biospe2_CID_dd1$variable[is.na(biospe2_CID_dd1$new.varname)]
 #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
 biospe1 <- NULL
-select0 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
-select2 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==2)]
-yes_no <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==1)]
+select0 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
+select2 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==2)]
+yes_no <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==1)]
 biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
 n<- length(select0)
-colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
+colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
+
 
 
 for (i in 1: length(select2)){
   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
 }
-colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==2)]
+colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==2)]
 
 for (i in 1:length(yes_no)){
   x <- yes_no[i]
+  
+  varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable) & biospe2_CID_dd1$category==1,]$new.varname
 
-  varname <- biospe2_CID_dd[grepl(yes_no[i],biospe2_CID_dd$variable),]$new.varname
   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
   check <- as.data.frame(biospe2[,x])
   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
@@ -3904,11 +3915,211 @@ for (i in 1:length(yes_no)){
   biospe1 <-   cbind(biospe1,subset(check,select=varname))
 }
 
+
 colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
 colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
 biospe1 <- biospe1[,order(colnames(biospe1))]
 
-biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:315,66:103,125:143,220:296,144,297,163,44)]
+
+biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:342,66:103,125:143,220:296,144,297,163,44)]
+
+
+
+# ###to get the formats and variable names from DD
+# factor_cid <-function(var,data){
+#   var <- as.factor(var)
+#   var_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(var),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(var),collapse="|"),y$conceptId.4)], "="),tail,1)))))
+#   
+#   var <- plyr::mapvalues(var,from=var_CIDs$V1,to=var_CIDs$V2)
+# }
+# 
+# 
+# 
+# bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
+# biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
+# 
+# biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
+# biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
+# 
+# cnames <- names(biospe2)
+# for (i in 1: length(cnames)){
+#   varname <- cnames[i]
+#   var<-pull(biospe2,varname)
+#   biospe2[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
+# }
+# 
+# 
+# 
+# 
+# biospe2_CID <- as.data.frame(sapply((strsplit(colnames(biospe2),"d_")),tail,1))
+# colnames(biospe2_CID)[1] <- "CID"
+# #biospe2_CID <- biospe2_CID %>% mutate(CID = ifelse(nchar(CID)>10, substring(CID,1,9), CID))
+# biospe2_CID$variable <- names(biospe2)
+# y$conceptId.3 <- as.character(y$conceptId.3)
+# y$conceptId.4 <- as.numeric(y$conceptId.4)
+# 
+# 
+# biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+# biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable, Variable.Name)
+# 
+# biospe2_CID_dd <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
+# 
+# 
+# biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
+#                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
+#                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
+#                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
+#                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
+# 
+# 
+# 
+# biospe2_CID_dd$new.varname <- ifelse(is.na(biospe2_CID_dd$label.1st), biospe2_CID_dd$Variable.Name,paste(biospe2_CID_dd$label.1st,biospe2_CID_dd$Variable.Name,sep="_"))
+# biospe2_CID_dd$variable[is.na(biospe2_CID_dd$new.varname)]
+# #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
+# biospe1 <- NULL
+# select0 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
+# select2 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==2)]
+# yes_no <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==1)]
+# biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
+# n<- length(select0)
+# colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
+# 
+# 
+# for (i in 1: length(select2)){
+#   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
+# }
+# colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==2)]
+# 
+# # for (i in 1:length(yes_no)){
+# #   x <- yes_no[i]
+# #   
+# #   varname <- biospe2_CID_dd[grepl(yes_no[i],biospe2_CID_dd$variable),]$new.varname
+# #   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
+# #   check <- as.data.frame(biospe2[,x])
+# #   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
+# #   colnames(check)[2] <- varname
+# #   biospe1 <-   cbind(biospe1,subset(check,select=varname))
+# # }
+# 
+# for (i in 1:length(yes_no)){
+#   x <- yes_no[i]
+#   
+#   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable) & biospe2_CID_dd1$category==1,]$new.varname
+#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
+#   check <- as.data.frame(biospe2[,x])
+#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
+#   colnames(check)[2] <- varname
+#   biospe1 <-   cbind(biospe1,subset(check,select=varname))
+# }
+# 
+# colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
+# colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
+# biospe1 <- biospe1[,order(colnames(biospe1))]
+# 
+# biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:315,66:103,125:143,220:296,144,297,163,44)]
+# 
+# 
+# 
+# 
+
+
+
+
+
+
+
+# ##11/16 update suggestion for column header updates
+# 
+# biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE) ## the data "y" is leftover in the code
+# 
+# 
+# biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
+#                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
+#                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
+#                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
+#                                             
+#                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
+#                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
+# 
+# 
+# biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12, 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))  #to add "matched"  flag to select the correct variables based on their combined CIDs (tubeID, last.CID) to compromise the changes in the DD on the biospecimen
+# 
+# 
+# biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
+# 
+# 
+# biospe2_CID_dd1 <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
+# biospe2_CID_dd1$new.varname <- ifelse(biospe2_CID_dd1$matched==1, biospe2_CID_dd1$Variable.Name, paste(gsub("SST1","",biospe2_CID_dd1$Variable.Name),biospe2_CID_dd1$label.1st,sep="_"))
+# biospe2_CID_dd1$variable[is.na(biospe2_CID_dd1$new.varname)]
+# #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
+# biospe1 <- NULL
+# select0 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
+# select2 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==2)]
+# yes_no <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==1)]
+# biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
+# n<- length(select0)
+# colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
+# 
+# 
+# 
+# for (i in 1: length(select2)){
+#   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
+# }
+# colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==2)]
+# 
+# 
+# for (i in 1:length(yes_no)){
+#   x <- yes_no[i]
+#   
+#   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable),]$new.varname
+#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
+#   check <- as.data.frame(biospe2[,x])
+#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
+#   colnames(check)[2] <- varname
+#   biospe1 <-   cbind(biospe1,subset(check,select=varname))
+# }
+# 
+# 
+# colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
+# colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
+# biospe1 <- biospe1[,order(colnames(biospe1))]
+# 
+# 
+# biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:337,66:103,125:143,220:296,144,297,163,44)]
+
+
+
+
+
+
+
 
 
 
@@ -4246,8 +4457,8 @@ coord_csv = coord_csv %>%  mutate(BioRec_CollectFinal=case_when(d_410912345==353
                                                                  d_951355211==665277300 ~ " Merrill",
                                                                  d_951355211==467088902 ~ "Fargo South University",
                                                                  d_951355211==567969985 ~ "MF Pop-Up",
-                                                      d_951355211==319518299 ~ "UCM Pop-Up",
-                                                      d_951355211==940329442 ~ "Orland Park",
+                                                                 d_951355211==319518299 ~ "UCM Pop-Up",
+                                                                 d_951355211==940329442 ~ "Orland Park",
                                                                  d_951355211==807835037 ~ "Other",
                                                                  d_951355211==698283667 ~ "Lake Hallie"),
                                   SMMet_BLSamplesColl_v1r0=case_when(d_254109640=="353358909" ~ 1,

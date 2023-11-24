@@ -581,28 +581,34 @@ knitr::kable(qc12)
 
 
 
-### IF BioClin_SiteBloodColl_v1r0 = 1, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
+
 ```{r HPExcluded1, echo=FALSE, warning=FALSE, message=FALSE}
+
+### IF BioClin_SiteBloodColl_v1r0 = 1, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
+#11/24 - Domonique requested this removed
 
 BloodOrderPl_noHP <- bioqc %>%  filter(d_173836415_d_266600170_d_530173840!=353358909 & d_173836415_d_266600170_d_693370086==353358909	& 
                                          d_827220437!=531629870) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_530173840) %>%  sort_by(Site)
 
 colnames(BloodOrderPl_noHP) <- c("Site", "Connect ID", "BioClin_BldOrderPlaced")
-knitr::kable(BloodOrderPl_noHP) 
+#knitr::kable(BloodOrderPl_noHP) 
 
 ```
 
 
-### IF BioClin_SiteUrineColl_v1r0 = 1, THEN BioClin_UrnOrdPlacedBL_v1r0 = 1. HP Excluded
+
 ```{r HPExcluded2, echo=FALSE, warning=FALSE, message=FALSE}
+### IF BioClin_SiteUrineColl_v1r0 = 1, THEN BioClin_UrnOrdPlacedBL_v1r0 = 1. HP Excluded
+##11/24 - Domonique requested this removed
+
 
 UrineOrderPl_noHP <- bioqc %>%  filter(d_173836415_d_266600170_d_860477844!=353358909 & d_173836415_d_266600170_d_786930107==353358909	& 
                                          d_827220437!=531629870) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_860477844) %>%  sort_by(Site)
 
 colnames(UrineOrderPl_noHP) <- c("Site", "Connect ID", "BioClin_UrnOrdPlacedBL_v1r0")
-knitr::kable(UrineOrderPl_noHP) 
+#knitr::kable(UrineOrderPl_noHP) 
 
 ```
 
@@ -728,7 +734,8 @@ knitr::kable(qc13_tube8)
 
 
 
-qc13_tube7 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119)) %>% 
+qc13_tube7 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119)
+                                & Connect_ID!=2215062576) %>% #KPNW exclusion 
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  sort_by(Site)
 
 colnames(qc13_tube7) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
@@ -758,7 +765,9 @@ knitr::kable(qc13_tube7)
 
 bioqcR <- bioqc %>%  filter(d_650516960==534621077)
 
-qc13_Rtube1 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_448660695, units="days"), digits=0))>4 & d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119)) %>%
+
+qc13_Rtube1 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_448660695, units="days"), digits=0))>4 & d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) ) %>% 
+
   select(Site, Connect_ID, d_143615646_d_926457119)%>%  sort_by(Site)
 
 colnames(qc13_Rtube1) <- c("Site", "Connect ID", "Mouthwash Tube- Date Received")
@@ -784,7 +793,10 @@ knitr::kable(qc13_Rtube3)
 
 
 
-qc13_Rtube4 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_652357376_d_593843561==353358909 & d_652357376_d_762124027==104430631 & is.na(d_652357376_d_926457119)) %>% # | d_827220437==657167265 once Sanford is hybrid
+
+qc13_Rtube4 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_652357376_d_593843561==353358909 & d_652357376_d_762124027==104430631 & is.na(d_652357376_d_926457119) & #| d_827220437==657167265 once Sanford is hybrid
+                                    Connect_ID!=1735874266) %>% # HF exclusion
+
   select(Site, Connect_ID, d_652357376_d_926457119) %>%  sort_by(Site)
 
 colnames(qc13_Rtube4) <- c("Site", "Connect ID", "ACD Tube 1- Date Received")
@@ -819,7 +831,12 @@ knitr::kable(qc13_Rtube8)
 
 
 
-qc13_Rtube7 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 &  d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119)) %>% 
+
+qc13_Rtube7 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 &  d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119) & 
+                                    Connect_ID!=9145733933 & Connect_ID!=9618974099 & Connect_ID!=8527264977 & Connect_ID!=6473532641 & #HF exclusion 
+                                    Connect_ID!=4174960021 & #UC exclusion)
+                                     Connect_ID!= 4435276749) %>% #Sanford exclusion
+
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  sort_by(Site)
 
 colnames(qc13_Rtube7) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
@@ -883,7 +900,10 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
 ```{r PolyUrineID, echo=FALSE, warning=FALSE, message=FALSE}
 
 bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120_integer) &
-                        Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662) #HFH exclusions)
+
+                        Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 &
+                          Connect_ID!=6473532641 & Connect_ID!=4435276749 ) #HFH exclusions)
+
 
 str2 <- bioqc2$d_173836415_d_266600170_d_110349197
 PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ",")) 
