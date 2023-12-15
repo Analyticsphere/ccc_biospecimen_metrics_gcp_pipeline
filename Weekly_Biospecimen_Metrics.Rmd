@@ -23,7 +23,6 @@ output:
 ---
 
 
-
 ```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
 
 
@@ -120,6 +119,10 @@ for (i in 1: length(cnames)){
 tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
 box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
 #y <- read_table(urlfile1,header = TRUE, sep = "\t", na.strings = c("NA","N/A",""),fill = TRUE, quote='')
+library(readr)
+urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github
+y <- read.csv(urlfile) #the masterDD has just been updated which can't easily pulled from github directly as before. I need to download from the raw file in the github
+#y <- read_table(urlfile1,header = TRUE, sep = "\t", na.strings = c("NA","N/A",""),fill = TRUE, quote='')
 library(rio)
 dictionary <- rio::import("https://episphere.github.io/conceptGithubActions/aggregate.json",format = "json")
 dd<-rbindlist(dictionary,fill=TRUE,use.names=TRUE,idcol="CID") #THIS TABLE HAS REPLICATED (CIDS+LABELS) WITH DIFFERENT VARIABLE NAMES,
@@ -168,21 +171,27 @@ return(pct)
 }
 ##to select biospecimen data in recruitment 
 recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants_JP'")
-recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 8000)
+recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
 recrvar_nd <- recrvar[which(grepl("d_",recrvar$column_name)),c("column_name","field_path")]
+
 recrvar_nd$last.CID <- ifelse(grepl("d_",recrvar_nd$column_name),substring(sapply(strsplit(recrvar_nd$column_name,"d_"),tail,1),1,9),NA)
-recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
-recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|Blood|Urine|Mouthwash|collection",recrvar_nd_label$Variable.Label)),] #49 updated due to the changes of the master DD
-recrvar.bio <- recrvar.bio[!duplicated(recrvar.bio[,c("last.CID","column_name")]),] #53 updated 10/05/2023 due to the updated dictionary
-query <- recrvar.bio$column_name
+recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4","Current.Format.Value")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
+
+
+#recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
+#recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|Blood|Urine|Mouthwash|collection",recrvar_nd_label$Variable.Label)),] #49 updated due to the changes of the master DD
+#recrvar.bio <- recrvar.bio[!duplicated(recrvar.bio[,c("last.CID","column_name")]),] #53 updated 10/05/2023 due to the updated dictionary #should this line be kept?
+
+recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source =="Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|collection|Blood|Urine|Mouthwash|MW|Ur|Ur Surv|MW Surv",recrvar_nd_label$Variable.Label)),] #49
+query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 #tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
 
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
  
-recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 5000)
+recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
 ##below are the commone variables in the recruitment table on Biospecimen to apply for the analysis. In case any new variables popping up, i would like #to use the one above directly from the resources (master DD and recruitment table schema to get the most updated version on this biospecimen data
 # tb <- bq_project_query(project, query="SELECT d_512820379,d_512820379, d_821247024, d_914594314, d_822499427, d_222161762, Connect_ID, d_827220437, token,d_265193023, d_878865966, d_167958071, d_684635302, d_253883960, d_534669573, d_764863765, d_331584571_d_266600170_d_135591601,d_331584571_d_266600170_d_840048338,  d_331584571_d_266600170_d_343048998, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_185243482,
 # d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428,
@@ -293,14 +302,13 @@ biospe_var$cid1 <- sapply(strsplit(colnames(biospe),"_"), "[", 2)
 biospe_var$cid2 <- sapply(strsplit(colnames(biospe),"_"), "[", 4)
 biospe_var$cid3 <- sapply(strsplit(colnames(biospe),"_"), "[", 6)
 biospe_var$cid_tail <- sapply(strsplit(colnames(biospe),"_"), tail,1)
-biospe_CID <- dd[which(dd$CID %in% CID),]
-#biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="CID", all.x=TRUE)
-#tubes <- dd[grepl(" Tube ",dd$`Variable Label`),]
-
-#Updated for labeling
-biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="CID", all.x=TRUE)
-biospe_dd <- biospe_dd[!duplicated(biospe_dd$variable),]
-tubes <- dd[grepl("BioCol_00",dd$`Variable Name`),]
+CID <- unique(c(biospe_var$cid1,biospe_var$cid2,biospe_var$cid3)) #this line is missing from your code in github.
+#biospe_CID <- dd[which(dd$CID %in% CID),]
+biospe_CID <- y[which(y$conceptId.3 %in% CID),]
+biospe_dd<- merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="conceptId.3", all.x=TRUE)
+biospe_dd <- biospe_dd%>% arrange(variable,conceptId.1) %>% filter(!duplicated(variable))
+#tubes <- dd[grepl(" Tube ",dd$`Variable Label`),] #updated 12/11/2023
+tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
 
 urine <- dd[grepl("Urine",dd$`Variable Label`),]
 mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
@@ -783,7 +791,8 @@ biospe$Site <- factor(biospe$d_827220437, levels= c("HealthPartners", "Henry For
 #125001209 300267574 303349821 327912200 452412599 531629870 548392715 657167265 809703864 
 #        2         2       329         1         4       417       169       200       314 
 biospe <- biospe %>% arrange(Site)
-tubes <- dd[grepl(" Tube ",dd$`Variable Label`),]
+#tubes <- dd[grepl(" Tube ",dd$`Variable Label`),]
+tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
 tubes[grepl("00", tubes$`Variable Name`),]
 ###         CID         Variable Label    Variable Name
 # 2: 299553921 Serum Separator Tube 1 BioCol_0001_v1r0
@@ -797,7 +806,7 @@ tubes[grepl("00", tubes$`Variable Name`),]
 # 10: 838567176         Heparin Tube 1 BioCol_0003_v1r0
 # 11: 958646668         Heparin Tube 2 BioCol_0013_v1r0
 # 6: 652357376             ACD Tube 1 BioCol_0005_v1r0
-bld.ls <- c("d_299553921","d_703954371","d_454453939","d_838567176","d_652357376","d_376960806","d_232343615","d_589588440","d_677469051", "d_683613884","d_958646668") 
+bld.ls <- c("d_299553921","d_703954371","d_454453939","d_838567176","d_652357376","d_376960806","d_232343615","d_589588440","d_677469051", "d_683613884","d_958646668", "d_505347689") #STRECK added 
 #blood tube types CIDs: the first 5 tubes are research, add the rest are clinical
 #bld.ls <- c("d_299553921","d_703954371","d_454453939","d_838567176","d_652357376") #blood tube types CIDs research collections
 ##research collection tubes
@@ -976,8 +985,7 @@ table7_3 <- recrver1 %>%  select(Connect_ID, d_173836415_d_266600170_d_185243482
 left7 <- left_join(biospe, table7_3, by="Connect_ID")
 
 biospe7= left7  %>%  
-  #something odd going odd with the values
-  filter(as.numeric(d_173836415_d_266600170_d_185243482)>72  & !is.na(d_173836415_d_266600170_d_185243482) ) %>% # & d_827220437==548392715
+  filter(as.numeric(d_173836415_d_266600170_d_185243482)>72  & !is.na(d_173836415_d_266600170_d_185243482) & d_827220437==548392715 & d_650516960==664882224) %>%
   mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "Wyandotte",
                                        d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 ~ "Macomb",
                                        d_173836415_d_266600170_d_185243482==1040010047 | d_173836415_d_266600170_d_185243482==1040010046 | d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield",
@@ -989,9 +997,10 @@ biospe7= left7  %>%
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
                              d_173836415_d_266600170_d_185243482==1010240013 ~ "Livonia",
                              d_173836415_d_266600170_d_185243482==1010320019 ~ "Sterling Heights",
-                                       d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_185243482==1010010114 ~ "Main - K1"))    
-#biospe7$HF_Sites<- droplevels(biospe7$HF_Sites)    #Error in UseMethod("droplevels") :  no applicable method for 'droplevels' applied to an object of class "character"
+                                       d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_185243482==1010010114 ~ "Main - K1",
+                             TRUE ~ "Other"))    #to avoid errors when new sites come in without a heads up
 
+biospe7 <- biospe7 %>% filter(!is.na(HF_Sites))
 
 tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>%
   #filter(HF_Sites=="HF Wyandotte Hospital" | HF_Sites=="HF Macomb Medical Pavilion" |  HF_Sites=="HF West Bloomfield Hospital") %>%
@@ -1124,7 +1133,7 @@ bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %
            (d_173836415_d_266600170_d_534041351==353358909 & d_173836415_d_266600170_d_693370086==353358909) |
                                      (d_173836415_d_266600170_d_210921343==353358909 & d_173836415_d_266600170_d_786930107==353358909) ~ "Site Data & Biospecimen Dashboard"))
 
-bldurcl <- bldurcl %>% filter(!is.na(Data_System)) #will comment out once we find out whats going on
+bldurcl <- bldurcl %>%  filter(!is.na(Data_System)) ##Domonique looking into why this is happening
 
 newtable_4 <- bldurcl %>% select(Data_System) %>%  group_by(Data_System) %>%  tally()
 #newtable4 <- rbind(newtable_4, c("Total", colSums(newtable_4[,2])))
@@ -1187,11 +1196,14 @@ table(bio_checkin_resh$BiospeCollection)
 # 13: 838567176                          Heparin Tube 1 BioCol_0003_v1r0
 # 14: 958646668                          Heparin Tube 2 BioCol_0013_v1r0
 # 15: 973670172                                   Urine BioCol_0006_v1r0
-tubes <- dd[which(grepl("BioCol_00",as.character(dd$`Variable Name`)) & !grepl("Biohazard Bag", dd$`Variable Label`)),] 
-tubes <- tubes[order(tubes$"Variable Name"),]
-tube.ls <- paste0("d_", trimws(paste(tubes[which(grepl("00", tubes$`Variable Name`)),]$CID,collapes="")))
-# [1] "d_299553921" "d_703954371" "d_838567176" "d_454453939" "d_652357376" "d_973670172" "d_143615646"
-# [8] "d_376960806" "d_232343615" "d_958646668" "d_677469051" "d_589588440" "d_683613884"
+#tubes <- dd[which(grepl("BioCol_00",as.character(dd$`Variable Name`)) & !grepl("Biohazard Bag", dd$`Variable Label`)),] 
+#tubes <- tubes[order(tubes$"Variable Name"),]
+#tube.ls <- paste0("d_", trimws(paste(tubes[which(grepl("00", tubes$`Variable Name`)),]$CID,collapes="")))
+tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
+tube.ls <- paste0("d_", trimws(paste(tubes$conceptId.1,collapes="")))
+#tube.ls
+#[1] "d_299553921" "d_703954371" "d_376960806" "d_232343615" "d_589588440" "d_652357376" "d_505347689" "d_973670172"
+#[9] "d_143615646" "d_454453939" "d_677469051" "d_683613884" "d_838567176" "d_958646668"
 biospe$tubedev <-0 #biospecimen deviations
 biospe$tubecol <- 0 #tube collections
 biospe$tubedid <- 0 #tube discarded
@@ -1475,7 +1487,7 @@ nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
 
 
   #notcol_combo = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,7))
-  notcol_combo = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,5))
+  notcol_combo = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,6))
 
   notcol_combo <- as.data.frame(notcol_combo)
   colnames(notcol_combo) <- colnames(count2)
@@ -1489,61 +1501,11 @@ nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
   notcol_combo$Site <- rownames(count2)
 
   #notcol_combo[6,c(1:8)] <- as.character(apply(count,2,sum))
-notcol_combo[6,c(1:6)] <- as.character(apply(count2,2,sum))
+notcol_combo[6,c(1:7)] <- as.character(apply(count2,2,sum))
   notcol_combo$Site[is.na(notcol_combo$Site)] <- replace_na("Total") 
   
   
-  
-  
-  
-
-# ## Table 8.1 ON HOLD , will hybrid be a setting added to the DD?
-#       # for now just filtering by site=HF, as its the only hybrid site right now
-# 
-#   research.coltube8_1<- collection_long %>% filter(biocol_Setting == "Clinical" & Site == "Henry Ford Health System" & tubecol == 104430631) %>%
-#     mutate(Site=droplevels(Site),
-#            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","Urine Tube1","MW Tube1" )))
-# 
-# 
-#     research.coltube8_1.bld.only<- collection_long %>% filter(biocol_Setting == "Clinical" & Site == "Henry Ford Health System" & tubecol == 104430631) %>%
-#     mutate(Site=droplevels(Site),
-#            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2", "SS Tube3", "SS Tube4","Heparin Tube1", "Heparin Tube2","EDTA Tube1", "EDTA Tube2", "EDTA Tube3"))) #,"ACD Tube1"
-#     research.coltube8_1.bld.only<- research.coltube8_1.bld.only %>%  mutate(tube_type=droplevels(tube_type))
-# 
-# 
-# 
-# ctable <-  CrossTable(research.coltube8_1.bld.only$Site, research.coltube8_1.bld.only$tube_type)
-# 
-# 
-# nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
-# 
-#   pct_n <- function(x,y){ paste0(x,"( ", round(100*y,1), " %)")}
-#       count <- as.data.frame.matrix(ctable$t) # to convert the S3 table into the same dimention table via as.data.frame.matrix
-#       perc <- as.data.frame.matrix(ctable$prop.col)
-# 
-# 
-#    pct_n2 <- function(x,y){ paste0(x,"( ", round(100*y,1), " %)")}
-#       count8_1 <- as.data.frame.matrix(ctable$t) # to convert the S3 table into the same dimention table via as.data.frame.matrix
-#       perc2 <- as.data.frame.matrix(ctable$prop.col)
-# 
-# 
-#   #notcol_combo8_1 = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,7))
-#   notcol_combo8_1 = array(pct_n(ctable$t,ctable$prop.col),dim=c(5,6))
-# 
-#   notcol_combo8_1 <- as.data.frame(notcol_combo8_1)
-#   colnames(notcol_combo8_1) <- colnames(count8_1)
-#   #notcol_combo8_1 <- notcol_combo8_1[, c(1:5)] # I added to get rid of MW and Urine, to fix total column
-# 
-#   count8_1$Total.NotCol <- apply(count8_1,1,sum)
-#   total <- sum(count8_1)
-#   #notcol_combo8_1$Total.Notcol <- paste0(apply(count[c(1:5),c(1:7)],1,sum), "( ", round(100*apply(count8_1[c(1:5),c(1:7)],1,sum)/total,2), " %)")
-#   notcol_combo8_1$Total.Notcol <- paste0(count8_1$Total.NotCol, "( ", round(100*count8_1$Total.NotCol/sum(count8_1$Total.NotCol),2), " %)")
-# 
-#   notcol_combo8_1$Site <- rownames(count8_1)
-# 
-#   #notcol_combo8_1[6,c(1:8)] <- as.character(apply(count,2,sum))
-# notcol_combo8_1[6,c(1:6)] <- as.character(apply(count8_1,2,sum))
-#   notcol_combo8_1$Site[is.na(notcol_combo8_1$Site)] <- replace_na("Total")
+notcol_combo
 ```
 
 
@@ -1566,35 +1528,35 @@ Tb.research.coltube <- research.coltube %>% select(tube_type,Site) %>%
 
 ## Number of tube tubes not collected at clinical collections
 
-  clinic.coltube<- collection_long %>% filter(biocol_Setting=="Clinical" & tubecol == 353358909) %>%
+  clinic.coltube<- collection_long %>% filter(biocol_Setting == "Clinical" & tubecol == 353358909) %>% # & tube_type!="MW Tube1") %>% #added, need to test 
     mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5", "Heparin Tube1","Heparin Tube2","EDTA Tube1","EDTA Tube2","EDTA Tube3","ACD Tube1", "STRECK Tube1", "Urine Tube1" ))) #, "STRECK Tube1" NEEDS TO BE ADDED WHEN APPLICABLE
-  
-  clinic.coltube <- clinic.coltube %>%  filter(biocol_Setting == "Clinical")
+           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5", "Heparin Tube1","Heparin Tube2","EDTA Tube1","EDTA Tube2","EDTA Tube3","ACD Tube1","STRECK Tube1","Urine Tube1" )))
   
 clinic.ctable<- CrossTable(clinic.coltube$Site,clinic.coltube$tube_type)
 count <- as.data.frame.matrix(clinic.ctable$t)
 perc <- as.data.frame.matrix(clinic.ctable$prop.col)
-
-#notcol_combo2 <- array(pct_n(clinic.ctable$t,clinic.ctable$prop.col), dim=c(5,12)) ##think this should be 4 without HP  
-notcol_combo2 <- array(pct_n(clinic.ctable$t,clinic.ctable$prop.col), dim=c(6,12)) #changed back to 6 with HP now hybrid
-
+ 
+notcol_combo2 <- array(pct_n(clinic.ctable$t,clinic.ctable$prop.col),dim=c(6,13))     
+ 
   notcol_combo2 <- as.data.frame(notcol_combo2)
   colnames(notcol_combo2) <- colnames(count)
   
+ 
+  #total <- sum(count)
+  #notcol_combo2$Total.Notcol <- paste0(apply(count[c(1:6),],1,sum), "( ", round(100*apply(count,1,sum)/total,2), " %)")
   count$Total.NotCol <- apply(count,1,sum)
   total <- sum(count)
-  #notcol_combo2$Total.Notcol <- paste0(apply(count[c(1:5),],1,sum), "( ", round(100*apply(count,1,sum)/total,2), " %)") #should this also be 1:4??
-  #notcol_combo2$Total.Notcol <- paste0(apply(count[c(1:4),],1,sum), "( ", round(100*apply(count,1,sum)/total,2), " %)")
   
   notcol_combo2$Site <- rownames(count)
-
-  notcol_combo2[6,c(1:13)] <- as.character(apply(count,2,sum))
-  notcol_combo2[6,13] <- NA
-  notcol_combo2$Site[is.na(notcol_combo2$Site)] <- replace_na("Total")  
-  notcol_combo2 <- notcol_combo2[, c(13, 1:11)] #removing Urine
-  #notcol_combo2[5,1] <- "Total"
-  notcol_combo2 <- notcol_combo2[,c(1:12)]
+ 
+  notcol_combo2[7,c(1:14)] <- as.character(apply(count,2,sum))
+  notcol_combo2[7,14] <- NA
+  notcol_combo2$Site[is.na(notcol_combo2$Site)] <- replace_na("Total") 
+  notcol_combo2 <- notcol_combo2[, c(14, 1:12)]
+  
+  notcol_combo2
+  
+  #notcol_combo2 <- notcol_combo2[, c(15, 1:12)] #added, need to test 
   
 ```
 
@@ -1659,10 +1621,10 @@ tb_combo <- array(pct_n(ctable$t,ctable$prop.col),dim=c(n,m))
   tb_combo$Site[is.na(tb_combo$Site)] <- replace_na("Total")  
   return(tb_combo)
 }
-research.notcol <- notcol_notes %>% filter(biocol_Setting=="Research" & tubecol==104430631) %>% 
+research.notcol <- notcol_notes %>% filter(biocol_Setting=="Research" & tubecol==104430631) %>%
    mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "Urine Tube1","MW Tube1" ))) #"STRECK Tube1", when applicable, right now is causing error in line reseachnotes.coltype
-research.notcol$notcol.notes <- factor(research.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Participant Refusal", "Supply Unavailable","Other",  "Missing Reasons"))
+           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","STRECK Tube1","Urine Tube1","MW Tube1" )))
+research.notcol$notcol.notes <- factor(research.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
 #research.notcol$notcol.notes <- droplevels(research.notcol$notcol.notes)
 reseachnotes.notcol <- n_pct_table(research.notcol$Site,research.notcol$notcol.notes)
 reseachnotes.coltype <- n_pct_table(research.notcol$tube_type,research.notcol$notcol.notes)
@@ -1706,7 +1668,7 @@ research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type)
 research.notcolnotes <- research.notcol %>% select(notcol.notes,Site, tube_type) %>% crosstable(c(Site, tube_type),by=notcol.notes,showNA="ifany", total="row",margin=c("row", "col"),
            percent_digits=1, percent_pattern="{n} ({p_col})") %>% as_flextable() #%>% as_flex_table()  
 clinicnotes.notcol <- notcol_notes %>% filter(biocol_Setting=="Clinical" & tubecol==104430631 & notcol_notes$biospecimen!="Mouthwash"  )%>%    mutate(Site=droplevels(Site),
-           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","Urine Tube1" )))
+           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","STRECK Tube1","Urine Tube1" )))
           
 clinicnotes.notcol$notcol.notes <- factor(clinicnotes.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
 clinicnotes.notcol$notcol.notes <- droplevels(clinicnotes.notcol$notcol.notes)
@@ -1721,7 +1683,9 @@ for (i in 1:length(missing)){
 notcol.reasons.clinic[,(n.col+i)] <- "0 (0 %)"
   colnames(notcol.reasons.clinic)[n.col+i] <- missing[i]
 }
-notcol.reasons.clinic[c(13,19),c((n.col+1):8)] <- "0"
+#notcol.reasons.clinic[c(13,19),c((n.col+1):8)] <- "0"
+#Row 1721 to updated as below
+notcol.reasons.clinic[c(14,21),c((n.col+1):8)] <- "0"
 
 
 
@@ -2329,7 +2293,7 @@ verif_draw_order = verif_draw %>%group_by(Site) %>%
 
 
 
-## New table 26
+
 
 
     ## ON OR AFTER 2/1/23
@@ -2605,7 +2569,7 @@ clc_both_vt.site.NW
 ```{r Table26, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 
-#Fig 1 & Table 26
+#Table 26
 
 recr_site_only <- recr.biospe %>%  select(d_650516960, Connect_ID)
 
@@ -2613,29 +2577,19 @@ blood_fig4 <- left_join(recr.bio, recr_site_only, by="Connect_ID")
 
 #blood_placed= blood_fig4 %>%  filter(recr.bio$d_821247024==197316935  & (d_827220437==125001209 | d_827220437==327912200 |d_827220437==300267574 | d_827220437==452412599 | (d_650516960==664882224 & d_827220437==548392715)))
 
-#Update to clinical sites only, so hybrid sites are included instead of specifying sites
-blood_placed= blood_fig4 %>%  filter(d_650516960==664882224 & d_827220437!=531629870) ##won't receive a draw order from HP--Github issue 72
-
+###won't receive a draw order from HP--Github issue 72
+blood_placed= blood_fig4 %>%  filter(recr.bio$d_821247024==197316935  & (d_827220437==125001209 | d_827220437==327912200 |
+                                                                        d_827220437==300267574 | d_827220437==452412599 | (d_650516960==664882224 & d_827220437==548392715)))
 blood_placed= blood_placed %>%  mutate(bld_placed= case_when(d_173836415_d_266600170_d_530173840==353358909 ~ "Blood Draw Order Placed",
                                                              (d_173836415_d_266600170_d_530173840==104430631 | is.na(d_173836415_d_266600170_d_530173840))~ "No Blood Draw Order Placed"),
                                Site= case_when(d_827220437==125001209 ~ "Kaiser Permanente Colorado",
                                                   d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                                   d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
                                                   d_827220437==452412599 ~ "Kaiser Permanente Northwest",
-                                                  #d_827220437==531629870 ~ "HealthPartners",
+                                                  #d_827220437==657167265 ~ "Sanford Health",
                                                   d_827220437==548392715 ~ "Henry Ford Health System"), 
                                verif_bld= case_when(d_821247024==197316935 ~ 1,
                                                     TRUE ~ 0))
-
-# blood_placed_plot <- ggplot(blood_placed, aes(x=KP_Site, y=verif_bld, fill=bld_placed)) + #, label="Frequency of Status"
-#   geom_bar(position="stack",stat="identity") + 
-#   ggtitle("Fig 5. Clinical Blood Draw Order Status \n of Verified Participants by Site") + 
-#   ylab("Number of Verified Participants") + xlab("Site") +
-#   theme(panel.background = element_blank(),
-#           legend.title = element_blank(),
-#           axis.line = element_line(size=0.2),
-#           axis.text.x = element_text(angle = 60,hjust = 1, size = 8, face = "bold"), 
-#           plot.title = element_text(hjust = 0.5,size = 12, face = "bold"))
 
 
 
@@ -2929,11 +2883,11 @@ biospe.bld %>% kable_styling(latex_options = "scale_down")
 
 
 tab5=knitr::kable(bioset, col.names=c("Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 3. Baseline Biospecimen Collection by Collection Setting', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)   
-add_footnote(tab5, "Note: Some cells are not applicable. Blood and Urine Samples cannot be collected in a Home Setting. Mouthwash cannot be collected in a Clinical Setting.", notation = "none")
+add_footnote(tab5, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 #footnote(tab5, "Note: Some cells are not applicable. Blood and Urine Samples cannot be collected in a Home Setting. Mouthwash cannot be collected in a Clinical Setting.",fixed_small_size=T)
 
 tab5_1=knitr::kable(bioset5_1, col.names=c("Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 3.1 Baseline Biospecimen Collection by Collection Setting at Henry Ford Health System', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)   
-add_footnote(tab5_1, "Note: Some cells are not applicable. Blood and Urine Samples cannot be collected in a Home Setting. Mouthwash cannot be collected in a Clinical Setting.", notation = "none")
+add_footnote(tab5_1, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 
 
 
@@ -3110,7 +3064,7 @@ research.1_2
 knitr::kable(bldcol_research_HF2, col.names=c("Collection Location","All Blood Tubes Collected","Partial Blood Tubes Collected","Total"), caption='Table 7.3 Blood Completeness among Henry Ford Baseline Clinical Collections by Clinic Location', row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") #"No Blood Tubes Collected",
 
 
-knitr::kable(notcol_combo[, c(7,1:6)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  
+knitr::kable(notcol_combo[, c(8,1:7)] ,col.names=c("Site", "SS Tube1", "SS Tube 2", "Heparin Tube1", "EDTA Tube1", "ACD Tube1","STRECK Tube1", "Total Not Collected"), caption='Table 8. Blood Tubes Not Collected Among Partial Blood Collections at Research Collection Visits', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") %>% landscape()  
 #will need to add STRECK Tube Col Name once applicable so this doesn't break
 
 
@@ -3202,17 +3156,11 @@ research.3 <- ggplot(figsub3_5, aes(x=as.Date(col.Monday.date), y=100*(cum_sub/c
 
 
 research.3
-
-
-
-
 ```
 
 \newpage
 \FloatBarrier
 ```{r Figure3.1, echo=FALSE, eval=TRUE, warning=FALSE}
-
-
 #Comparative Figure 3 of weekly not cummulative
 
 research.3.1 <- ggplot(figsub3_5, aes(x=as.Date(col.Monday.date), y=100*(weekly_sub/per_week_parts))) + #, color=Site)) + #,fill=Site, color=Site)) +
@@ -3692,28 +3640,7 @@ print(research.vt_plotHP)
 
 
 
-research.vt_plHP_locations <- clinic.survey %>% filter(Site=="HealthPartners") %>%
-  filter(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 | d_173836415_d_266600170_d_185243482==2 |
-           d_173836415_d_266600170_d_452847912==2 | d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3) %>%
-  mutate(HP_cl_locs = case_when(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
-                             d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
-                             d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen"))
-edited_fig11_1_Clin_tally <- research.vt_plHP_locations %>% arrange(HP_cl_locs, col.Sunday.week,col.Monday.date) %>% group_by(HP_cl_locs, col.Sunday.week,col.Monday.date) %>% tally()
 
-research.vt_plotHP_locs <- ggplot(edited_fig11_1_Clin_tally, aes(x=as.Date(col.Monday.date), y=n, color=HP_cl_locs)) + 
-  geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="# Number Collections") + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
-  scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 11.1 Weekly Clinical Biospecimen Collections at HealthPartners by Clinic Location") +
-  #theme_ipsum() +
-  theme(panel.background = element_blank(),
-        #legend.title = element_text(size=7),
-        axis.line = element_line(size=0.2),
-        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
-        axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
-        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
-#print(research.vt_plotHP_locs)
 
 ```
 
