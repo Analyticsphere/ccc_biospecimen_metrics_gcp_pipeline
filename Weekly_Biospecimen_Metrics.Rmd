@@ -993,7 +993,7 @@ biospe7= left7  %>%
                                        d_173836415_d_266600170_d_185243482==1010180040 ~ "Fairlane (Dearborn)",
                                        d_173836415_d_266600170_d_185243482==1010120026 ~ "Columbus",
                                        d_173836415_d_266600170_d_185243482==1011660013 ~ "Plymouth",
-                                       #d_173836415_d_266600170_d_185243482==1011220006 ~ "West Bloomfield Hospital (Bloom TWP)", 
+                                       d_173836415_d_266600170_d_185243482==1010350019 ~ "Taylor", 
                                        d_173836415_d_266600170_d_185243482==1010360011 ~ "Troy",
                              d_173836415_d_266600170_d_185243482==1010240013 ~ "Livonia",
                              d_173836415_d_266600170_d_185243482==1010320019 ~ "Sterling Heights",
@@ -3139,7 +3139,7 @@ research.3 <- ggplot(figsub3_5, aes(x=as.Date(col.Monday.date), y=100*(cum_sub/c
   scale_y_continuous(name="Percent",limits=c(0,100),expand=c(0,0)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 3. Cumulative Percent of Biospecimen Surveys \n Submitted, University of Chicago Medicine") +
+  ggtitle(label="Figure 3. Cumulative Percent of Biospecimen Surveys Submitted, \n University of Chicago Medicine") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -3168,7 +3168,7 @@ research.3.1 <- ggplot(figsub3_5, aes(x=as.Date(col.Monday.date), y=100*(weekly_
   scale_y_continuous(name="Percent",limits=c(0,100),expand=c(0,0)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 3.1 Weekly Percent of Biospecimen Surveys Submitted, University of Chicago Medicine") +
+  ggtitle(label="Figure 3.1 Weekly Percent of Biospecimen Surveys Submitted, \n University of Chicago Medicine") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -3639,6 +3639,29 @@ print(research.vt_plotHP)
 
 
 
+research.vt_plHP_locations <- clinic.survey %>% filter(Site=="HealthPartners") %>%
+  filter(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 | d_173836415_d_266600170_d_185243482==2 |
+           d_173836415_d_266600170_d_452847912==2 | d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3) %>%
+  mutate(HP_cl_locs = case_when(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
+                             d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
+                             d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen"))
+edited_fig11_1_Clin_tally <- research.vt_plHP_locations %>% arrange(HP_cl_locs, col.Sunday.week,col.Monday.date) %>% group_by(HP_cl_locs, col.Sunday.week,col.Monday.date) %>% tally()
+
+research.vt_plotHP_locs <- ggplot(edited_fig11_1_Clin_tally, aes(x=as.Date(col.Monday.date), y=n, color=HP_cl_locs)) +  
+  geom_line() + geom_point(width = 0.2) +
+  scale_y_continuous(name="# Number Collections", breaks = seq(min(edited_fig11_1_Clin_tally$n), max(edited_fig11_1_Clin_tally$n), by = 1)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-11-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_fill_brewer(palette="Dark2") +
+  ggtitle(label="Figure 11.1 Weekly Clinical Biospecimen Collections \n at HealthPartners by Clinic Location") +
+  #theme_ipsum() +
+  theme(panel.background = element_blank(),
+        #legend.title = element_text(size=7),
+        legend.position = "bottom",
+        axis.line = element_line(size=0.2),
+        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
+        axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
+        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
+research.vt_plotHP_locs + guides(color = guide_legend(title = "Site Locations")) 
 
 
 
@@ -4754,9 +4777,16 @@ for (i in 1:length(yes_no)){
 #need to make sure BioChk_CompleteBL_v1r0 is not in their twice--cols 39 & 40 right now
 recrbio_1 <- recrbio1[!duplicated(names(recrbio1))]
 
+
 #new column order requested 11/22/23
 recrbio_1 <- recrbio_1[, c("Connect_ID","RcrtES_Site_v1r0","BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMouthCol_v1r0","BioSpm_BloodSettingBL_v1r0", "BioSpm_UrineSettingBL_v1r0","BioSpm_MWSettingBL_v1r0","BioChk_CompleteBL_v1r0","BioChk_TimeBL_v1r0","BioFin_CheckOutTmBL_v1r0","BioFin_ResearchBldTmBL_v1r0", "BioFin_ResearchUrnTmBL_v1r0","BioFin_BMTimeBL_v1r0","BioClin_SiteBldLocBL_v1r0","BioClin_SiteUrLocatBL_v1r0","BioClin_SntBloodAccIDBL_v1r0","BioClin_SntUrineAccIDBL_v1r0", "BioClin_PolyBloodIDBL_v1r0","BioClin_PolyUrineIDBL_v1r0","BioClin_SiteBloodCollBL_v1r0","BioClin_ClinBloodTmBL_v1r0","BioClin_SiteUrineCollBL_v1r0", "BioClin_ClinicalUrnTmBL_v1r0","BioClin_SiteBloodRRLBL_v1r0","BioClin_SiteBldRRLDtBL_v1r0","BioClin_SiteUrineRRLBL_v1r0","BioClin_SiteUrnRRLDtBL_v1r0", "BioClin_BldOrUrnPlcdBL_v1r0","BioClin_BldUrnPlcdTmBL_v1r0","BioClin_BldOrderPlcdBL_v1r0","BioClin_BldOrdPlacdDtBL_v1r0","BioClin_UrnOrdPlacedBL_v1r0", "BioClin_UrnOrdPlcdDtBL_v1r0","BioClin_DBBloodRRLBL_v1r0","BioClin_DBBloodRRLDtBL_v1r0","BioClin_DBUrineRRLBL_v1r0","BioClin_DBUrineRRLDtBL_v1r0","BioClin_AnySpecRRLBL_v1r0", "BioClin_AnySpecRRLTmBL_v1r0","BioClin_AnyBldUrnRecBL_v1r0","RcrtSI_RecruitType_v1r0","RcrtUP_Submitted_v1r0","RcrtV_Verification_v1r0","RcrtV_VerificationTm_V1R0", "SrvBLM_ResSrvCompl_v1r0","SrvBLM_TmComplete_v1r0","SrvBLM_TmStart_v1r0","SrvBlU_BaseComplete_v1r0","SrvBlU_TmComplete_v1r0","SrvBlU_TmStart_v1r0",
                            "BioClin_BldAndUrnRef_v1r0", "HdRef_Baseblood_v1r0","HdRef_DateBaseblood_v1r0","date","token")]
+
+# #For some reason the yes/no of some columns are changing back to CIDs
+recrbio_1[recrbio_1== as.character("353358909")] = "Yes"
+recrbio_1[recrbio_1== as.character("104430631")] = "No"
+# 
+# recrbio1.replace({'353358909': 'Yes'}, regex=True, inplace=True)
 
 # write.csv(recrbio1,paste(local_drive, "Connect_prod_recr_veriBiospe_Formats_",currentDate,".csv",sep=""),row.names = F,na="")
 write.csv(recrbio_1,glue("{local_drive}Connect_prod_recr_veriBiospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
