@@ -4919,8 +4919,6 @@ biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 
                                                                   sapply(strsplit(variable,"_"),"[",2) == "505347689"  ~ "STRECKTube1" ))
 
 
-biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
-
 biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12 , 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))
 
 
