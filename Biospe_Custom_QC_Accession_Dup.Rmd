@@ -22,7 +22,6 @@ output:
 
 ```{r library, include=FALSE}
 
-
 library(bigrquery)
 library(lubridate)
 library(dplyr)
