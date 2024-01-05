@@ -305,7 +305,7 @@ biospe_var$cid_tail <- sapply(strsplit(colnames(biospe),"_"), tail,1)
 CID <- unique(c(biospe_var$cid1,biospe_var$cid2,biospe_var$cid3)) #this line is missing from your code in github.
 #biospe_CID <- dd[which(dd$CID %in% CID),]
 biospe_CID <- y[which(y$conceptId.3 %in% CID),]
-biospe_dd<- merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="conceptId.3", all.x=TRUE)
+biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="conceptId.3", all.x=TRUE)
 biospe_dd <- biospe_dd%>% arrange(variable,conceptId.1) %>% filter(!duplicated(variable))
 #tubes <- dd[grepl(" Tube ",dd$`Variable Label`),] #updated 12/11/2023
 tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
