@@ -565,7 +565,7 @@ knitr::kable(qc11)
 ```{r BioClin_SiteUrineColl, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-qc12 <- bioqc %>%  filter(d_973670172_d_593843561==353358909  & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_915838974, units="days"), digits=0)) >7 & is.na(d_173836415_d_266600170_d_786930107)) %>% 
+qc12 <- bioqc %>%  filter(Connect_ID!=5667758818 & d_973670172_d_593843561==353358909  & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_915838974, units="days"), digits=0)) >7 & is.na(d_173836415_d_266600170_d_786930107)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_786930107) %>%  sort_by(Site)
 
 # qc12 %>%  gt() %>%  
