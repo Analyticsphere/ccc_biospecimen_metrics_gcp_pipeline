@@ -18,13 +18,13 @@ output:
     fig_width: 7
     fig_height: 5
     fig_caption: true
-    latex_engine: xelatex
     df_print: paged 
 ---
 
 
 ```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
 
+#    latex_engine: xelatex -- this was in the set up previously, but caused issues when running locally so it was removed 
 
 #old.packages()
 #update.packages()  
@@ -487,6 +487,7 @@ col_num_1.1 <- col_num_1.1 %>%
 col_num_1.1_gt <- col_num_1.1 %>%
 
   gt::gt(groupname_col = "Site_Group") 
+
 
 
 
@@ -1182,13 +1183,14 @@ bldcol_research1 <- bldcol_research[c(1:5,10),c(9:12,4)] #c(9:12,4)
 
 ```{r Table7s, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ### Table 7.1- specifically for U-Chicago 
-biospe= biospe  %>% mutate(UC_Sites= case_when(d_951355211==777644826 ~ "UC-DCAM",
+
+biospe= biospe %>%  mutate(UC_Sites= case_when(d_951355211==777644826 ~ "UC-DCAM",
                                        d_951355211==145191545 ~ "Ingalls Harvey",
                                        d_951355211==489380324 ~ "River East",
                                        d_951355211==120264574 ~ "South Loop",
-                                       d_951355211==3195182099 ~ "UCM Pop-Up",
+                                       d_951355211==319518299 ~ "UCM Pop-Up",
                                        d_951355211==940329442 ~ "Orland Park"))
-tube_col_UC <- biospe  %>% group_by(as.character(Connect_ID),UC_Sites,d_650516960) %>% 
+tube_col_UC <- biospe   %>% filter(d_827220437==809703864) %>% group_by(as.character(Connect_ID),UC_Sites,d_650516960) %>% 
   #filter(UC_Sites=="UC-DCAM" | UC_Sites=="Ingalls Harvey" |  UC_Sites=="River East" |  UC_Sites=="South Loop" |  UC_Sites=="UCM Pop-Up"  |  UC_Sites=="Orland Park" ) %>% 
   dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
                    Urine_col_max= max(Urine_col,na.rm=TRUE),
@@ -1198,7 +1200,7 @@ tube_col_UC <- biospe  %>% group_by(as.character(Connect_ID),UC_Sites,d_65051696
                    d_410912345_max=max(d_410912345,na.rm=TRUE),
                    collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE),
                    schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505)),na.rm=TRUE))
-table(tube_col_UC$d_650516960)
+#table(tube_col_UC$d_650516960)
 #534621077 664882224 
 #     1421        10 
 tube_col_UC$Connect_ID <- as.numeric(tube_col_UC$`as.character(Connect_ID)`)
@@ -3247,10 +3249,7 @@ research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(col.Monday.date), y=100*
 
 ```
  
-
-
- 
-```{r Table28,include=FALSE, echo=FALSE, warning=FALSE}
+```{r Table28a,include=FALSE, echo=FALSE, warning=FALSE}
 
 #need to make all BPTL 11:30 for consistency purposes of tables 3 & 4
 
@@ -3271,7 +3270,7 @@ str_sub(biospe$d_958646668_d_926457119,12,24)[!is.na(biospe$d_958646668_d_926457
 str_sub(biospe$d_973670172_d_926457119,12,24)[!is.na(biospe$d_973670172_d_926457119)] <- "11:30:00.000Z"
 
 #RESEARCH 
-biospe_adhoc= biospe %>%  filter(d_650516960==534621077 & d_410912345==353358909 & !is.na(d_556788178) & 
+biospe_adhoc= biospe %>%  filter(d_650516960==534621077 & d_410912345==353358909 & !is.na(d_678166505) & 
                                    #BPTL not null
                              (!is.na(d_143615646_d_926457119) | !is.na(d_232343615_d_926457119) | !is.na(d_299553921_d_926457119) | !is.na(d_376960806_d_926457119) |
                                 !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) | !is.na(d_652357376_d_926457119) |
@@ -3307,17 +3306,130 @@ biospe_adhoc= biospe %>%  filter(d_650516960==534621077 & d_410912345==353358909
                                              TRUE ~ "Remove"))
 
 #biospe_adhoc$Site_location<- droplevels(biospe_adhoc$Site_location)
-biospe_adhoc$Site_location <- factor(biospe_adhoc$Site_location,levels=c("HP Research Clinic","HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic", "HFH Livonia Research Clinic","Marshfield", "MF Pop-Up",
-                                                                         "Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", "Colby Abbotsford","Minocqua","Merrill","Sioux Falls Imagenetics","Fargo South University",
+biospe_adhoc$Site_location <- factor(biospe_adhoc$Site_location,levels=c("HP Research Clinic","HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic", 
+                                                                         "HFH Livonia Research Clinic","Marshfield", "MF Pop-Up",
+                                                                         "Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
+                                                                         "Colby Abbotsford","Minocqua","Merrill","Sioux Falls Imagenetics","Fargo South University",
                                                                          "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park")) 
 
 coll_bptl_diff <- biospe_adhoc  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
   mutate(any_collection = min(d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, na.rm=T),
-         day_past = difftime(as.Date(any_collection), as.Date(d_556788178), units="days"),
+         day_past = difftime(as.Date(any_collection), as.Date(d_678166505), units="days"),
          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",ifelse(as.numeric(day_past)<3,"2 Days",ifelse(as.numeric(day_past)<4,"3 Days", ifelse(as.numeric(day_past)<5,"4 Days", ">4 Days")))))
 
 
 coll_bptl_diff$Connect_ID <- as.numeric(coll_bptl_diff$`as.character(Connect_ID)`)
+
+table.coll_bptl_28a <- ctable(coll_bptl_diff$Site,coll_bptl_diff$coll_days_diff)
+crosstable.coll_bptl28a <- as.data.frame(cbind(table.coll_bptl_28a$cross_table,table.coll_bptl_28a$proportions))
+#crosstable.coll_bptl28a$UC_Sites <-trimws(rownames(crosstable.coll_bptl28a))
+#crosstable.coll_bptl28$UC_Sites<- droplevels(crosstable.coll_bptl28$UC_Sites)
+crosstable.coll_bptl28a <- crosstable.coll_bptl28a[c(1:5),]
+crosstable.coll_bptl28a$Site <- list("HealthPartners", "Henry Ford Health", "Marshfield", "Sanford Health", "University of Chicago")
+
+#crosstable.coll_bptl28a <- crosstable.coll_bptl28a %>%  filter9
+
+crosstable.coll_bptl28a$n_pct_1_Day <-  paste(format(crosstable.coll_bptl28a[,2],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,8],1),"%)",sep=" ")
+crosstable.coll_bptl28a$n_pct_2_Day <-  paste(format(crosstable.coll_bptl28a[,3],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,9],1),"%)",sep=" ")
+crosstable.coll_bptl28a$n_pct_3_Day <-  paste(format(crosstable.coll_bptl28a[,4],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,10],1),"%)",sep=" ")
+crosstable.coll_bptl28a$n_pct_4_Day <-  paste(format(crosstable.coll_bptl28a[,5],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,11],1),"%)",sep=" ")
+crosstable.coll_bptl28a$n_pct_4_plus_days =  paste(format(crosstable.coll_bptl28a[,1],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,7],1),"%)",sep=" ")
+crosstable.coll_bptl28a$Total <- paste(crosstable.coll_bptl28a$Total, " (100%)")
+#nrow(crosstable.coll_bptl28a)
+
+         
+crosstable.coll_bptl28a <- crosstable.coll_bptl28a[,c(13:18,6)]
+
+
+crosstable.coll_bptl28a[6,] <- list('Total', sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,2], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,3], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,4], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,5], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,6], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,7], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))))
+
+crosstable.coll_bptl28a[6,2] <- paste(crosstable.coll_bptl28a[6,2], "(",round(100*as.numeric(crosstable.coll_bptl28a[6,2])/as.numeric(crosstable.coll_bptl28a[6,7]), digits=1), "%)")
+crosstable.coll_bptl28a[6,3] <- paste(crosstable.coll_bptl28a[6,3], "(",round(100*as.numeric(crosstable.coll_bptl28a[6,3])/as.numeric(crosstable.coll_bptl28a[6,7]), digits=1), "%)")
+crosstable.coll_bptl28a[6,4] <- paste(crosstable.coll_bptl28a[6,4], "(",round(100*as.numeric(crosstable.coll_bptl28a[6,4])/as.numeric(crosstable.coll_bptl28a[6,7]), digits=1), "%)")
+crosstable.coll_bptl28a[6,5] <- paste(crosstable.coll_bptl28a[6,5], "(",round(100*as.numeric(crosstable.coll_bptl28a[6,5])/as.numeric(crosstable.coll_bptl28a[6,7]), digits=1), "%)")
+crosstable.coll_bptl28a[6,6] <- paste(crosstable.coll_bptl28a[6,6], "(",round(100*as.numeric(crosstable.coll_bptl28a[6,6])/as.numeric(crosstable.coll_bptl28a[6,7]), digits=1), "%)")
+crosstable.coll_bptl28a[6,7] <- paste(crosstable.coll_bptl28a[6,7], " (100%)")
+
+
+
+```
+
+
+
+ 
+```{r Table28b,include=FALSE, echo=FALSE, warning=FALSE}
+
+# #need to make all BPTL 11:30 for consistency purposes of tables 3 & 4
+# 
+# 
+# str_sub(biospe$d_143615646_d_926457119,12,24)[!is.na(biospe$d_143615646_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_232343615_d_926457119,12,24)[!is.na(biospe$d_232343615_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_299553921_d_926457119,12,24)[!is.na(biospe$d_299553921_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_376960806_d_926457119,12,24)[!is.na(biospe$d_376960806_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_454453939_d_926457119,12,24)[!is.na(biospe$d_454453939_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_505347689_d_926457119,12,24)[!is.na(biospe$d_505347689_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_589588440_d_926457119,12,24)[!is.na(biospe$d_589588440_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_652357376_d_926457119,12,24)[!is.na(biospe$d_652357376_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_677469051_d_926457119,12,24)[!is.na(biospe$d_677469051_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_683613884_d_926457119,12,24)[!is.na(biospe$d_683613884_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_703954371_d_926457119,12,24)[!is.na(biospe$d_703954371_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_838567176_d_926457119,12,24)[!is.na(biospe$d_838567176_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_958646668_d_926457119,12,24)[!is.na(biospe$d_958646668_d_926457119)] <- "11:30:00.000Z"
+# str_sub(biospe$d_973670172_d_926457119,12,24)[!is.na(biospe$d_973670172_d_926457119)] <- "11:30:00.000Z"
+# 
+# #RESEARCH 
+# biospe_adhoc= biospe %>%  filter(d_650516960==534621077 & d_410912345==353358909 & !is.na(d_556788178) & 
+#                                    #BPTL not null
+#                              (!is.na(d_143615646_d_926457119) | !is.na(d_232343615_d_926457119) | !is.na(d_299553921_d_926457119) | !is.na(d_376960806_d_926457119) |
+#                                 !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) | !is.na(d_652357376_d_926457119) |
+#                                 !is.na(d_677469051_d_926457119) | !is.na(d_683613884_d_926457119) | !is.na(d_703954371_d_926457119) | !is.na(d_838567176_d_926457119) |
+#                                 !is.na(d_958646668_d_926457119) | !is.na(d_973670172_d_926457119))) %>% 
+#                      mutate(Site_location = case_when(d_951355211==777644826 ~ "UC-DCAM",
+#                                                       d_951355211==145191545 ~ "Ingalls Harvey",
+#                                                       d_951355211==489380324 ~ "River East",
+#                                                       d_951355211==120264574 ~ "South Loop",
+#                                                       d_951355211==834825425 ~ "HP Research Clinic",
+#                                                       d_951355211==736183094 ~ "HFH K-13 Research Clinic",
+#                                                       d_951355211==886364332 ~ "HFH Cancer Pavilion Research Clinic",
+#                                                       d_951355211==706927479 ~ "HFH Livonia Research Clinic",
+#                                                       d_951355211==692275326 ~ "Marshfield",
+#                                                       d_951355211==813701399 ~ "Weston",
+#                                                       d_951355211==698283667 ~ "Lake Hallie",
+#                                                       d_951355211==691714762 ~ "Rice Lake",
+#                                                       d_951355211==487512085 ~ "Wisconsin Rapids",
+#                                                       d_951355211==983848564 ~ "Colby Abbotsford",
+#                                                       d_951355211==261931804 ~ "Minocqua",
+#                                                       d_951355211==665277300 ~ "Merrill",
+#                                                       d_951355211==589224449 ~ "Sioux Falls Imagenetics",
+#                                                       d_951355211==467088902 ~ "Fargo South University",
+#                                                       d_951355211==834825425 ~ "HP Research Clinic",
+#                                                       d_951355211==567969985 ~ "MF Pop-Up",
+#                                                       d_951355211==319518299 ~ "UCM Pop-Up",
+#                                                       d_951355211==940329442 ~ "Orland Park"),
+#                             Site = case_when(d_827220437==548392715 ~ "Henry Ford",
+#                                                   d_827220437==531629870 ~ "HealthPartners",
+#                                                   d_827220437==303349821 ~ "Marshfield",
+#                                                   d_827220437==657167265 ~ "Sanford",
+#                                                   d_827220437==809703864 ~ "UChicago",
+#                                              TRUE ~ "Remove"))
+# 
+# #biospe_adhoc$Site_location<- droplevels(biospe_adhoc$Site_location)
+# biospe_adhoc$Site_location <- factor(biospe_adhoc$Site_location,levels=c("HP Research Clinic","HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic", "HFH Livonia Research Clinic","Marshfield", "MF Pop-Up",
+#                                                                          "Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", "Colby Abbotsford","Minocqua","Merrill","Sioux Falls Imagenetics","Fargo South University",
+#                                                                          "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park")) 
+# 
+# coll_bptl_diff <- biospe_adhoc  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
+#   mutate(any_collection = min(d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, na.rm=T),
+#          day_past = difftime(as.Date(any_collection), as.Date(d_556788178), units="days"),
+#          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",ifelse(as.numeric(day_past)<3,"2 Days",ifelse(as.numeric(day_past)<4,"3 Days", ifelse(as.numeric(day_past)<5,"4 Days", ">4 Days")))))
+# 
+# 
+# coll_bptl_diff$Connect_ID <- as.numeric(coll_bptl_diff$`as.character(Connect_ID)`)
 
 table.coll_bptl <- ctable(coll_bptl_diff$Site_location,coll_bptl_diff$coll_days_diff)
 crosstable.coll_bptl28 <- as.data.frame(cbind(table.coll_bptl$cross_table,table.coll_bptl$proportions))
@@ -3336,17 +3448,13 @@ crosstable.coll_bptl28$Total <- paste(crosstable.coll_bptl28$Total, " (100%)")
 crosstable.coll_bptl28 <- crosstable.coll_bptl28[,c(13:18,6)]
 
 
-#crosstable.coll_bptl1 %>% gt::gt(groupname_col = "Site")
-
 
 
 
 
 ```
 
-
-
-```{r, Table29, include=FALSE, echo=FALSE, warning=FALSE}
+```{r, Table29a, include=FALSE, echo=FALSE, warning=FALSE}
 
 table2_col_bplt <- recrver1 %>% select(Connect_ID, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_139245758)
 table2_col_bplt$Connect_ID <- as.numeric(table2_col_bplt$Connect_ID)
@@ -3430,6 +3538,132 @@ coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
 
 coll_bptl_diff2$Connect_ID <- as.numeric(coll_bptl_diff2$`as.character(Connect_ID)`)
 
+crosstable.coll_bptl29a <- ctable(coll_bptl_diff2$Site,coll_bptl_diff2$coll_days_diff)
+crosstable.coll_bptl29a <- as.data.frame(cbind(crosstable.coll_bptl29a$cross_table,crosstable.coll_bptl29a$proportions))
+#crosstable.coll_bptl29a$UC_Sites <-trimws(rownames(crosstable.coll_bptl29a))
+#crosstable.coll_bptl28$UC_Sites<- droplevels(crosstable.coll_bptl28$UC_Sites)
+crosstable.coll_bptl29a <- crosstable.coll_bptl29a[c(1:6),]
+crosstable.coll_bptl29a$Site <- list("HealthPartners", "Henry Ford Health", "Kaiser Permanente Colorado", "Kaiser Permanente Georgia",
+                                     "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest")
+
+#crosstable.coll_bptl29a <- crosstable.coll_bptl29a %>%  filter9
+
+crosstable.coll_bptl29a$n_pct_1_Day <-  paste(format(crosstable.coll_bptl29a[,2],big.mark=","),"(", round(100*crosstable.coll_bptl29a[,8],1),"%)",sep=" ")
+crosstable.coll_bptl29a$n_pct_2_Day <-  paste(format(crosstable.coll_bptl29a[,3],big.mark=","),"(", round(100*crosstable.coll_bptl29a[,9],1),"%)",sep=" ")
+crosstable.coll_bptl29a$n_pct_3_Day <-  paste(format(crosstable.coll_bptl29a[,4],big.mark=","),"(", round(100*crosstable.coll_bptl29a[,10],1),"%)",sep=" ")
+crosstable.coll_bptl29a$n_pct_4_Day <-  paste(format(crosstable.coll_bptl29a[,5],big.mark=","),"(", round(100*crosstable.coll_bptl29a[,11],1),"%)",sep=" ")
+crosstable.coll_bptl29a$n_pct_4_plus_days =  paste(format(crosstable.coll_bptl29a[,1],big.mark=","),"(", round(100*crosstable.coll_bptl29a[,7],1),"%)",sep=" ")
+crosstable.coll_bptl29a$Total <- paste(crosstable.coll_bptl29a$Total, " (100%)")
+#nrow(crosstable.coll_bptl29a)
+
+         
+crosstable.coll_bptl29a <- crosstable.coll_bptl29a[,c(13:18,6)]
+
+
+crosstable.coll_bptl29a[7,] <- list('Total', sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,2], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,3], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,4], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,5], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,6], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+                                    sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,7], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))))
+
+
+
+crosstable.coll_bptl29a[7,2] <- paste(crosstable.coll_bptl29a[7,2], "(",round(100*as.numeric(crosstable.coll_bptl29a[7,2])/as.numeric(crosstable.coll_bptl29a[7,7]), digits=1), "%)")
+crosstable.coll_bptl29a[7,3] <- paste(crosstable.coll_bptl29a[7,3], "(",round(100*as.numeric(crosstable.coll_bptl29a[7,3])/as.numeric(crosstable.coll_bptl29a[7,7]), digits=1), "%)")
+crosstable.coll_bptl29a[7,4] <- paste(crosstable.coll_bptl29a[7,4], "(",round(100*as.numeric(crosstable.coll_bptl29a[7,4])/as.numeric(crosstable.coll_bptl29a[7,7]), digits=1), "%)")
+crosstable.coll_bptl29a[7,5] <- paste(crosstable.coll_bptl29a[7,5], "(",round(100*as.numeric(crosstable.coll_bptl29a[7,5])/as.numeric(crosstable.coll_bptl29a[7,7]), digits=1), "%)")
+crosstable.coll_bptl29a[7,6] <- paste(crosstable.coll_bptl29a[7,6], "(",round(100*as.numeric(crosstable.coll_bptl29a[7,6])/as.numeric(crosstable.coll_bptl29a[7,7]), digits=1), "%)")
+crosstable.coll_bptl29a[7,7] <- paste(crosstable.coll_bptl29a[7,7], " (100%)")
+
+
+```
+
+
+```{r, Table29b, include=FALSE, echo=FALSE, warning=FALSE}
+# 
+# table2_col_bplt <- recrver1 %>% select(Connect_ID, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_139245758)
+# table2_col_bplt$Connect_ID <- as.numeric(table2_col_bplt$Connect_ID)
+# biospe$Connect_ID <- as.numeric(biospe$Connect_ID)
+# table2 <- left_join(biospe, table2_col_bplt, by="Connect_ID")
+# 
+# biospe_adhoc2= table2 %>%  filter(d_650516960==664882224 & d_410912345==353358909  & #clinical and finalized collections
+#                                    #SiteBlLocatBL / SiteUrLocatBL
+#                                    (!is.na(d_173836415_d_266600170_d_185243482) | !is.na(d_173836415_d_266600170_d_452847912)) & 
+#                                    #ClinBloodTmBL/ ClinUrnieTmBL 
+#                                    (!is.na(d_173836415_d_266600170_d_822274939) | !is.na(d_173836415_d_266600170_d_139245758)) & 
+#                                    #BioBPTL_DateRec_v1r0 blood or urine
+#                              (!is.na(d_232343615_d_926457119) | !is.na(d_299553921_d_926457119) | !is.na(d_376960806_d_926457119) |
+#                                 !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) | !is.na(d_652357376_d_926457119) |
+#                                 !is.na(d_677469051_d_926457119) | !is.na(d_683613884_d_926457119) | !is.na(d_703954371_d_926457119) | !is.na(d_838567176_d_926457119) |
+#                                 !is.na(d_958646668_d_926457119) | !is.na(d_973670172_d_926457119))) %>%  
+#                      mutate(Site_location = case_when(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
+#                                                       d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
+#                                                       d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen",
+#                                                       d_173836415_d_266600170_d_185243482==22 | d_173836415_d_266600170_d_452847912==22 |
+#                                                       d_173836415_d_266600170_d_185243482==24 | d_173836415_d_266600170_d_452847912==24 |
+#                                                       d_173836415_d_266600170_d_185243482==28 | d_173836415_d_266600170_d_452847912==28 |
+#                                                       d_173836415_d_266600170_d_185243482==33 | d_173836415_d_266600170_d_452847912==33 |
+#                                                       d_173836415_d_266600170_d_185243482==34 | d_173836415_d_266600170_d_452847912==34 |
+#                                                       d_173836415_d_266600170_d_185243482==35 | d_173836415_d_266600170_d_452847912==35 |
+#                                                         d_173836415_d_266600170_d_185243482==38 | d_173836415_d_266600170_d_452847912==38 |
+#                                                         d_173836415_d_266600170_d_185243482==40 | d_173836415_d_266600170_d_452847912==40 |
+#                                                         d_173836415_d_266600170_d_185243482==55 | d_173836415_d_266600170_d_452847912==55 |
+#                                                       d_173836415_d_266600170_d_185243482==71 | d_173836415_d_266600170_d_452847912==71 ~ "Oahu Clinics",
+#                                                       d_173836415_d_266600170_d_185243482==23 | d_173836415_d_266600170_d_452847912==23 |
+#                                                       d_173836415_d_266600170_d_185243482==26 | d_173836415_d_266600170_d_452847912==26 |
+#                                                       d_173836415_d_266600170_d_185243482==27 | d_173836415_d_266600170_d_452847912==27 |
+#                                                       d_173836415_d_266600170_d_185243482==32 | d_173836415_d_266600170_d_452847912==32 |
+#                                                         d_173836415_d_266600170_d_185243482==37 | d_173836415_d_266600170_d_452847912==37 |
+#                                                         d_173836415_d_266600170_d_185243482==49 | d_173836415_d_266600170_d_452847912==49 |
+#                                                         d_173836415_d_266600170_d_185243482==56 | d_173836415_d_266600170_d_452847912==56 |
+#                                                       d_173836415_d_266600170_d_185243482==69 | d_173836415_d_266600170_d_452847912==69 ~ "Non-Oahu Clinics",
+#                        d_173836415_d_266600170_d_185243482==1050010095 | d_173836415_d_266600170_d_452847912==1050010095 ~ "Wyandotte",
+#                        d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 |
+#                          d_173836415_d_266600170_d_452847912==1060010063 | d_173836415_d_266600170_d_452847912==1060170018~ "Macomb",
+#                        d_173836415_d_266600170_d_185243482==1040010047 | d_173836415_d_266600170_d_185243482==1040010046 |
+#                          d_173836415_d_266600170_d_185243482==1011220006 |
+#                          d_173836415_d_266600170_d_452847912==1040010047 | d_173836415_d_266600170_d_452847912==1040010046 |
+#                          d_173836415_d_266600170_d_452847912==1011220006 ~ "West Bloomfield",
+#                        d_173836415_d_266600170_d_185243482==1011410008 | d_173836415_d_266600170_d_452847912==1011410008 ~ "Royal Oak",
+#                        d_173836415_d_266600170_d_185243482 ==1010180040 |d_173836415_d_266600170_d_452847912 ==1010180040 ~ "Fairlane (Dearborn)",
+#                        d_173836415_d_266600170_d_185243482==1010120026 | d_173836415_d_266600170_d_452847912==1010120026 ~ "Columbus",
+#                        d_173836415_d_266600170_d_185243482==1011660013  | d_173836415_d_266600170_d_452847912==1011660013 ~ "Plymouth",
+#                        d_173836415_d_266600170_d_185243482==1010360011 | d_173836415_d_266600170_d_452847912==1010360011 ~ "Troy",
+#                        d_173836415_d_266600170_d_185243482==1010350019 ~ "Taylor",
+#                        d_173836415_d_266600170_d_185243482==1010240013 | d_173836415_d_266600170_d_452847912==1010240013 ~ "Livonia",
+#                        d_173836415_d_266600170_d_185243482==1010320019 | d_173836415_d_266600170_d_452847912==1010320019 ~ "Sterling Heights",
+#                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010114 |
+#                          d_173836415_d_266600170_d_452847912==1010010193 | d_173836415_d_266600170_d_452847912==1010010114~ "K1 HFH Main",
+#                                         d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+#                                         d_827220437==452412599 ~ "Kaiser Permanente Northwest",
+#                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+#                        TRUE ~ "Remove"),
+#                        Site = case_when(d_827220437==548392715 ~ "Henry Ford",
+#                                         d_827220437==531629870 ~ "HealthPartners",
+#                                         d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+#                                         d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+#                                         d_827220437==452412599 ~ "Kaiser Permanente Northwest",
+#                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+#                                         TRUE ~ "Remove"))
+# biospe_adhoc2 <- biospe_adhoc2 %>%  filter(Site_location!="Remove" & Site!="Remove")
+# biospe_adhoc2$Site_location <- factor(biospe_adhoc2$Site_location,levels=c("Macomb","West Bloomfield","Wyandotte","Fairlane (Dearborn)","Plymouth", "Royal Oak","Troy", "Taylor",
+#                                                   "K1 HFH Main","Sterling Heights","Columbus", "Livonia" , "Chanhassen", "Elk River", "Kaiser Permanente Colorado", 
+#                                                   "Kaiser Permanente Georgia", "Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest")) 
+# 
+# 
+# coll_bptl_diff2 <- biospe_adhoc2  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
+#   mutate(any_collection = min(d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119,
+#                               d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119,
+#                               d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, na.rm=T),
+#          clin_coll_bu = min(d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_139245758, na.rm=T),
+#          day_past = difftime(as.Date(any_collection), as.Date(clin_coll_bu), units="days"),
+#          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",ifelse(as.numeric(day_past)<3,"2 Days",ifelse(as.numeric(day_past)<4,"3 Days", ifelse(as.numeric(day_past)<5,"4 Days", ">4 Days")))))
+# #don't know how this is happening but needs to be included for now
+# coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
+# 
+# coll_bptl_diff2$Connect_ID <- as.numeric(coll_bptl_diff2$`as.character(Connect_ID)`)
+
 table.coll_bptl2 <- ctable(coll_bptl_diff2$Site_location,coll_bptl_diff2$coll_days_diff)
 crosstable.coll_bptl2 <- as.data.frame(cbind(table.coll_bptl2$cross_table,table.coll_bptl2$proportions))
 crosstable.coll_bptl2$location <-trimws(rownames(crosstable.coll_bptl2))
@@ -3470,7 +3704,7 @@ format_with_decimal <- function(x, digits = 1) {
 
 
 
-coll_bptl_diff <- coll_bptl_diff %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_556788178)), units="hours"))
+coll_bptl_diff <- coll_bptl_diff %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_678166505)), units="hours"))
 coll_bptl_diff$hrs_past <- as.numeric(coll_bptl_diff$hrs_past)
 coll_bptl_diff<- coll_bptl_diff %>%  filter(hrs_past>0)
 Hrs_bptl_col <- coll_bptl_diff %>% group_by(Site_location) %>% dplyr::summarise('Min' = format_with_decimal(min(hrs_past)),
@@ -3539,7 +3773,10 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 col_num_1.1_gt #%>% kable_styling(latex_options = "scale_down")
 col_num_1.2_gt #%>% kable_styling(latex_options = "scale_down")
+```
 
+\FloatBarrier
+```{r KnitrTables2_5, eval=TRUE,echo=FALSE, ,results='asis'}
 biospe.bld %>% kable_styling(latex_options = "scale_down")
 
 
@@ -3972,7 +4209,10 @@ coll_bplt_knitr
 
 Table_bld_draw 
 
-coll_bplt_knitr <- knitr::kable(crosstable.coll_bptl28, col.names=c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Day", ">4 Days", "Total"), caption='Table 28. Research Biospecimen Collection to Receipt at BPTL (in Days) by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
+
+knitr::kable(crosstable.coll_bptl28a, col.names=c("Site", "1 Day", "2 Days", "3 Days", "4 Day", ">4 Days", "Total"), caption='Table 28.a Research Biospecimen Collection to Receipt at BPTL (in Days) by Site', row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+
+coll_bplt_knitr <- knitr::kable(crosstable.coll_bptl28, col.names=c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Day", ">4 Days", "Total"), caption='Table 28.b Research Biospecimen Collection to Receipt at BPTL (in Days) by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 coll_bplt_knitr <- group_rows(
   coll_bplt_knitr,
@@ -4086,9 +4326,10 @@ coll_bplt_knitr
 
 
 
+knitr::kable(crosstable.coll_bptl29a, col.names=c("Site", "1 Day", "2 Days", "3 Days", "4 Days", ">4 Days", "Total"), caption='Table 29.a Clinical Biospecimen Collection to Receipt at BPTL (in Days) by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 
-coll_bplt_knitr2 <- knitr::kable(crosstable.coll_bptl_2, col.names=c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Days", ">4 Days", "Total"), caption='Table 29. Clinical Biospecimen Collection to Receipt at BPTL (in Days) by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
+coll_bplt_knitr2 <- knitr::kable(crosstable.coll_bptl_2, col.names=c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Days", ">4 Days", "Total"), caption='Table 29.b Clinical Biospecimen Collection to Receipt at BPTL (in Days) by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
@@ -4123,8 +4364,39 @@ coll_bplt_knitr2 <- group_rows(
 
 coll_bplt_knitr2
 
+coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Henry Ford Health",
+  start_row = 1,
+  end_row = 12)
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "HealthPartners",
+  start_row = 13,
+  end_row = 14)
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Colorado",
+  start_row = 15,
+  end_row = 15) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Georgia",
+  start_row = 16,
+  end_row = 16) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Hawaii",
+  start_row = 17,
+  end_row = 18) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Northwest",
+  start_row = 19,
+  end_row = 19) 
 
 
 
@@ -4250,6 +4522,12 @@ add_footnote(coll_bplt_knitr4, "Note: BPTL receipt time is assumed to be 11:30am
 
 ```{r Figs6_14 , Plots, warning=FALSE, eval=TRUE,echo=FALSE}
 
+coll_bptl_diff$Weekdays <- factor(weekdays(as.Date(coll_bptl_diff$d_678166505)))
+coll_bptl_diff$Weekdays<- factor(coll_bptl_diff$Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
+coll_bptl_diff2$Weekdays <- factor(weekdays(as.Date(coll_bptl_diff2$clin_coll_bu)))
+coll_bptl_diff2$Weekdays<- factor(coll_bptl_diff2$Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+
 scatMF <- coll_bptl_diff %>%  filter(Site=="Marshfield")
 scatSF <- coll_bptl_diff %>%  filter(Site=="Sanford")
 scatUC <- coll_bptl_diff %>%  filter(Site=="UChicago")
@@ -4266,9 +4544,12 @@ scatCHF <- coll_bptl_diff2 %>%  filter(Site=="Henry Ford")
 
 
 
-ggplot(scatMF, aes(x=as.Date(d_556788178), y=hrs_past)) + 
+
+ggplot(scatMF, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) + 
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown")) +
   theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4279,9 +4560,14 @@ ggplot(scatMF, aes(x=as.Date(d_556788178), y=hrs_past)) +
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0))  + ggtitle(label="Figure 6. Hours from Collection to BPTL Receipt, \n Marshfield")
 
-ggplot(scatSF, aes(x=as.Date(d_556788178), y=hrs_past)) + 
+
+
+
+ggplot(scatSF, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) + 
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown")) +
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4293,9 +4579,11 @@ ggplot(scatSF, aes(x=as.Date(d_556788178), y=hrs_past)) +
   theme(plot.caption = element_text(hjust=0))  +
   ggtitle(label="Figure 7. Hours from Collection to BPTL Receipt, \n Sanford Health")
 
-ggplot(scatUC, aes(x=as.Date(d_556788178), y=hrs_past)) + 
-    geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) +
+ggplot(scatUC, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) + 
+    geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) + 
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown")) +
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4307,9 +4595,11 @@ ggplot(scatUC, aes(x=as.Date(d_556788178), y=hrs_past)) +
   theme(plot.caption = element_text(hjust=0))  +
   ggtitle(label="Figure 8. Hours from Collection to BPTL Receipt, \n University of Chicago Medicine")
 
-ggplot(scatKPCO, aes(x=as.Date(clin_coll_bu), y=hrs_past)) + 
+ggplot(scatKPCO, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) + 
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown")) +
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4321,9 +4611,11 @@ ggplot(scatKPCO, aes(x=as.Date(clin_coll_bu), y=hrs_past)) +
   theme(plot.caption = element_text(hjust=0))  +
   ggtitle(label="Figure 9. Hours from Collection to BPTL Receipt, \n Kaiser Permanente Colorado")
 
-ggplot(scatKPGA, aes(x=as.Date(clin_coll_bu), y=hrs_past)) + 
-    geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) +
+ggplot(scatKPGA, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
+    geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) + 
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown")) +
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4335,9 +4627,11 @@ ggplot(scatKPGA, aes(x=as.Date(clin_coll_bu), y=hrs_past)) +
   theme(plot.caption = element_text(hjust=0))  +
   ggtitle(label="Figure 10. Hours from Collection to BPTL Receipt, \n Kaiser Permanente Georgia")
 
-ggplot(scatKPHI, aes(x=as.Date(clin_coll_bu), y=hrs_past)) + 
+ggplot(scatKPHI, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) + 
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown")) +
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4349,9 +4643,11 @@ ggplot(scatKPHI, aes(x=as.Date(clin_coll_bu), y=hrs_past)) +
   theme(plot.caption = element_text(hjust=0))  +
   ggtitle(label="Figure 11. Hours from Collection to BPTL Receipt, \n Kaiser Permanente Hawaii")
 
-ggplot(scatKPNW, aes(x=as.Date(clin_coll_bu), y=hrs_past)) + 
-    geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) +
+ggplot(scatKPNW, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
+    geom_point() + scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) + 
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown")) +
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4367,16 +4663,22 @@ ggplot(scatKPNW, aes(x=as.Date(clin_coll_bu), y=hrs_past)) +
 
 #HP
 # Combine the data
-scatRHP$coldate <- scatRHP$d_556788178
+scatRHP$coldate <- scatRHP$d_678166505
 scatCHP$coldate <- scatCHP$clin_coll_bu
 combined_dataHP <- rbind(cbind(scatRHP, Group = "Research"), cbind(scatCHP, Group = "Clinical"))
 
-# Create a scatter plot with colored points
-combined_plotHP <- ggplot(combined_dataHP, aes(x = as.Date(coldate), y = hrs_past, color = Group)) +
+weekday_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+
+
+combined_plotHP <- ggplot(combined_dataHP, aes(x = as.Date(coldate), y = hrs_past, shape = Group, color = factor(weekdays(as.Date(coldate))))) +
   geom_point() +
-  scale_color_manual(values = c("Research" = "red", "Clinical" = "blue")) +
+  #scale_color_manual(values = c("Research" = "red", "Clinical" = "blue")) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) +
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  labs(color = "Weekdays", shape="Setting") +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown"), limits = weekday_order) +
+  scale_shape_manual(values = c("Research" = 0, "Clinical" = 17)) + 
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4385,22 +4687,26 @@ combined_plotHP <- ggplot(combined_dataHP, aes(x = as.Date(coldate), y = hrs_pas
         axis.title.x = element_text( size = 14, face = "bold") ,         
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
-  theme(plot.caption = element_text(hjust=0))  +
+  theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
   ggtitle(label="Figure 13. Hours from Collection to BPTL Receipt, \n HealthPartners")
 combined_plotHP
 
 
 #HF
-scatRHF$coldate <- scatRHF$d_556788178
+scatRHF$coldate <- scatRHF$d_678166505
 scatCHF$coldate <- scatCHF$clin_coll_bu
 combined_dataHF <- rbind(cbind(scatRHF, Group = "Research"), cbind(scatCHF, Group = "Clinical"))
 
 # Create a scatter plot with colored points
-combined_plotHF <- ggplot(combined_dataHF, aes(x = as.Date(coldate), y = hrs_past, color = Group)) +
+combined_plotHF <- ggplot(combined_dataHF, aes(x = as.Date(coldate), y = hrs_past, shape = Group, color = factor(weekdays(as.Date(coldate))))) +
   geom_point() +
-  scale_color_manual(values = c("Research" = "red", "Clinical" = "blue")) +
+  #scale_color_manual(values = c("Research" = "red", "Clinical" = "blue")) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", expand=c(0,0)) +
   scale_y_continuous(name="Hours to BPTL Receipt",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  labs(color = "Weekdays", shape="Setting") +
+  scale_color_manual(values=c("Sunday"="red", "Monday"="orange", "Tuesday"="pink", "Wednesday"="lightgreen", 
+                     "Thursday"="blue", "Friday"="purple", "Saturday"="brown"), limits = weekday_order) +
+  scale_shape_manual(values = c("Research" = 0, "Clinical" = 17)) + 
     theme(panel.background = element_blank(),         
         #legend.title = element_text(size=7),         
         legend.position = "bottom",        
@@ -4409,7 +4715,7 @@ combined_plotHF <- ggplot(combined_dataHF, aes(x = as.Date(coldate), y = hrs_pas
         axis.title.x = element_text( size = 14, face = "bold") ,         
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
-  theme(plot.caption = element_text(hjust=0))  +
+  theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
   ggtitle(label="Figure 14. Hours from Collection to BPTL Receipt, \n Henry Ford")
 combined_plotHF
 
@@ -4835,10 +5141,6 @@ clc_both_vt.site.NW
 
 
 
-
-
-
-
 ```{r data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 
 ###download the biospecimen data
@@ -5074,7 +5376,7 @@ for (i in 1:length(yes_no)){
   x <- yes_no[i]
   
   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable) & biospe2_CID_dd1$category==1,]$new.varname
-
+  
   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
   check <- as.data.frame(biospe2[,x])
   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
@@ -5288,336 +5590,336 @@ biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:16
 
 # 11/21/23 request from Domonique for specific column order 
 biospe1_final <- biospe1_final[,c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setting_v1r0","BioSpm_Location_v1r0","BioSpm_ColIDScan_v1r0",
-"BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0","BioClin_DBBloodRRLBL_v1r0",
-"BioClin_DBBloodRRLDtBL_v1r0",
-"BioClin_DBUrineID_v1r0",
-"BioClin_DBUrineRRLBL_v1r0",
-"BioClin_DBUrineRRLDtBL_v1r0",
-"BioCol_PhlebInitials_v1r0",
-"BioCol_ColNote1_v1r0",
-"BioCol_TubeColl_v1r0_Bio",
-"BioCol_TubeID_v1r0_Bio",
-"BioCol_TubeColl_v1r0_SST1",
-"BioCol_TubeID_v1r0_SST1",
-"BioCol_NotCol_v1r0_SST1",
-"BioCol_NotCol_v1r0_SST1",
-"BioCol_Discard_v1r0_SST1",
-"BioCol_TubeColl_v1r0_SST2",
-"BioCol_TubeID_v1r0_SST2",
-"BioCol_NotCol_v1r0_SST2",
-"BioCol_NotCol_v1r0_SST2",
-"BioCol_Discard_v1r0_SST2",
-"BioCol_TubeColl_v1r0_HT1",
-"BioCol_TubeID_v1r0_HT1",
-"BioCol_NotCol_v1r0_HT1",
-"BioCol_NotCol_v1r0_HT1",
-"BioCol_Discard_v1r0_HT1",
-"BioCol_TubeColl_v1r0_EDTAT1",
-"BioCol_TubeID_v1r0_EDTAT1",
-"BioCol_NotCol_v1r0_EDTAT1",
-"BioCol_NotCol_v1r0_EDTAT1",
-"BioCol_Discard_v1r0_EDTAT1",
-"BioCol_TubeColl_v1r0_ACDT1",
-"BioCol_TubeID_v1r0_ACDT1",
-"BioCol_NotCol_v1r0_ACDT1",
-"BioCol_NotCol_v1r0_ACDT1",
-"BioCol_Discard_v1r0_ACDT1",
-"BioCol_TubeColl_v1r0_STRT1",
-"BioCol_TubeID_v1r0_STRT1",
-"BioCol_NotCol_v1r0_STRT1",
-"BioCol_NotCol_v1r0_STRT1",
-"BioCol_Discard_v1r0_STRT1",
-"BioCol_TubeColl_v1r0_UT1",
-"BioCol_TubeID_v1r0_UT1",
-"BioCol_NotCol_v1r0_UT1",
-"BioCol_NotCol_v1r0_UT1",
-"BioCol_Discard_v1r0_UT1",
-"BioCol_TubeColl_v1r0_MWT1",
-"BioCol_TubeID_v1r0_MWT1",
-"BioCol_NotCol_v1r0_MWT1",
-"BioCol_NotCol_v1r0_MWT1",
-"BioCol_Discard_v1r0_MWT1",
-"BioCol_TubeColl_v1r0_BioMW",
-"BioCol_TubeID_v1r0_BioMW",
-"BioCol_TubeColl_v1r0_SST3",
-"BioCol_TubeID_v1r0_SST3",
-"BioCol_Discard_v1r0_SST3",
-"BioCol_TubeColl_v1r0_SST4",
-"BioCol_TubeID_v1r0_SST4",
-"BioCol_Discard_v1r0_SST4",
-"BioCol_TubeColl_v1r0_SST5",
-"BioCol_TubeID_v1r0_SST5",
-"BioCol_Discard_v1r0_SST5",
-"BioCol_TubeID_v1r0_HT2",
-"BioCol_TubeColl_v1r0_HT2",
-"BioCol_Discard_v1r0_HT2",
-"BioCol_TubeColl_v1r0_EDTAT2",
-"BioCol_TubeID_v1r0_EDTAT2",
-"BioCol_Discard_v1r0_EDTAT2",
-"BioCol_TubeColl_v1r0_EDTAT3",
-"BioCol_TubeID_v1r0_EDTAT3",
-"BioCol_Discard_v1r0_EDTAT3",
-"BioCol_CollBoxedStatus_v1r0",
-"BioBPTL_DateRec_v1r0_SST1",
-"BioBPTL_DateRec_v1r0_SST2",
-"BioBPTL_DateRec_v1r0_HT1",
-"BioBPTL_DateRec_v1r0_EDTAT1",
-"BioBPTL_DateRec_v1r0_ACDT1",
-"BioBPTL_DateRec_v1r0_STRT1",
-"BioBPTL_DateRec_v1r0_UT1",
-"BioBPTL_DateRec_v1r0_MWT1",
-"BioKit_KitRecdTmBL_v1r0_MWTube1",
-"BioBPTL_DateRec_v1r0_SST3",
-"BioBPTL_DateRec_v1r0_SST4",
-"BioBPTL_DateRec_v1r0_SST5",
-"BioBPTL_DateRec_v1r0_HT2",
-"BioBPTL_DateRec_v1r0_EDTAT2",
-"BioBPTL_DateRec_v1r0_EDTAT3",
-"BioRec_NoteOpt_v1r0",
-"BioCol_StrayTubesList_v1r0",
-"siteAcronym",
-"BioCol_Deviation_v1r0_SST1",
-"BioCol_DevNotes_v1r0_SST1",
-"Deviation_BrokenSST1",
-"Deviation_ClotLSST1",
-"Deviation_ClotSSST1",
-"Deviation_DiscardSST1",
-"Deviation_GelSST1",
-"Deviation_HemoSST1",
-"Deviation_LeakSST1",
-"Deviation_LowVolSST1",
-"Deviation_MislabDSST1",
-"Deviation_MislabRSST1",
-"Deviation_NotFoundSST1",
-"Deviation_OtherSST1",
-"Deviation_OutContSST1",
-"Deviation_SpeedHSST1",
-"Deviation_SpeedLSST1",
-"Deviation_TempHSST1",
-"Deviation_TempLSST1",
-"Deviation_TimeLSST1",
-"Deviation_TimeSSST1",
-"Deviation_TubeSzSST1",
-"BioCol_Deviation_v1r0_SST2",
-"BioCol_DevNotes_v1r0_SST2",
-"Deviation_BrokenSST2",
-"Deviation_ClotLSST2",
-"Deviation_ClotSSST2",
-"Deviation_DiscardSST2",
-"Deviation_GelSST2",
-"Deviation_HemoSST2",
-"Deviation_LeakSST2",
-"Deviation_LowVolSST2",
-"Deviation_MislabDSST2",
-"Deviation_MislabRSST2",
-"Deviation_NotFoundSST2",
-"Deviation_OtherSST2",
-"Deviation_OutContSST2",
-"Deviation_SpeedHSST2",
-"Deviation_SpeedLSST2",
-"Deviation_TempHSST2",
-"Deviation_TempLSST2",
-"Deviation_TimeLSST2",
-"Deviation_TimeSSST2",
-"Deviation_TubeSzSST2",
-"BioCol_Deviation_v1r0_SST3",
-"BioCol_DevNotes_v1r0_SST3",
-"Deviation_BrokenSST3",
-"Deviation_ClotLSST3",
-"Deviation_ClotS_SST3",
-"Deviation_DiscardSST3",
-"Deviation_GelSST3",
-"Deviation_HemoSST3",
-"Deviation_LeakSST3",
-"Deviation_LowVolSST3",
-"Deviation_MislabDSST3",
-"Deviation_MislabRSST3",
-"Deviation_NotFoundSST3",
-"Deviation_OtherSST3",
-"Deviation_OutContSST3",
-"Deviation_SpeedHSST3",
-"Deviation_SpeedLSST3",
-"Deviation_TempHSST3",
-"Deviation_TempLSST3",
-"Deviation_TimeLSST3",
-"Deviation_TimeSSST3",
-"Deviation_TubeSzSST3",
-"BioCol_Deviation_v1r0_SST4",
-"BioCol_DevNotes_v1r0_SST4",
-"Deviation_BrokenSST4",
-"Deviation_ClotLSST4",
-"Deviation_ClotSSST4",
-"Deviation_DiscardSST4",
-"Deviation_GelSST4",
-"Deviation_HemoSST4",
-"Deviation_LeakSST4",
-"Deviation_LowVolSST4",
-"Deviation_MislabDSST4",
-"Deviation_MislabRSST4",
-"Deviation_NotFoundSST4",
-"Deviation_OtherSST4",
-"Deviation_OutContSST4",
-"Deviation_SpeedHSST4",
-"Deviation_SpeedLSST4",
-"Deviation_TempHSST4",
-"Deviation_TempLSST4",
-"Deviation_TimeLSST4",
-"Deviation_TimeSSST4",
-"Deviation_TubeSzSST4",
-"BioCol_Deviation_v1r0_SST5",
-"BioCol_DevNotes_v1r0_SST5",
-"Deviation_BrokenSST5",
-"Deviation_ClotLSST5",
-"Deviation_ClotSSST5",
-"Deviation_DiscardSST5",
-"Deviation_GelSST5",
-"Deviation_HemoSST5",
-"Deviation_LeakSST5",
-"Deviation_LowVolSST5",
-"Deviation_MislabDSST5",
-"Deviation_MislabRSST5",
-"Deviation_NotFoundSST5",
-"Deviation_OtherSST5",
-"Deviation_OutContSST5",
-"Deviation_SpeedHSST5",
-"Deviation_SpeedLSST5",
-"Deviation_TempHSST5",
-"Deviation_TempLSST5",
-"Deviation_TimeLSST5",
-"Deviation_TimeSSST5",
-"Deviation_TubeSzSST5",
-"BioCol_Deviation_v1r0_HT1",
-"BioCol_DevNotes_v1r0_HT1",
-"Deviation_BrokenHT1",
-"Deviation_DiscardHT1",
-"Deviation_HemoHT1",
-"Deviation_LeakHT1",
-"Deviation_LowVolHT1",
-"Deviation_MislabelDHT1",
-"Deviation_MislabelRHT1",
-"Deviation_NotFoundHT1",
-"Deviation_OtherHT1",
-"Deviation_OutContamHT1",
-"Deviation_TempHHT1",
-"Deviation_TempLHT1",
-"Deviation_TubeSzHT1",
-"BioCol_Deviation_v1r0_HT2",
-"BioCol_DevNotes_v1r0_HT2",
-"Deviation_BrokenHT2",
-"Deviation_DiscardHT2",
-"Deviation_HemoHT2",
-"Deviation_LeakHT2",
-"Deviation_LowVolHT2",
-"Deviation_MislabelDHT2",
-"Deviation_MislabelRHT2",
-"Deviation_NotFoundHT2",
-"Deviation_OtherHT2",
-"Deviation_OutContamHT2",
-"Deviation_TempHHT2",
-"Deviation_TempLHT2",
-"Deviation_TubeSzHT2",
-"BioCol_Deviation_v1r0_EDTAT1",
-"BioCol_DevNotes_v1r0_EDTAT1",
-"Deviation_BrokenEDTAT1",
-"Deviation_DiscEDTAT1",
-"Deviation_HemoEDTAT1",
-"Deviation_LeakEDTAT1",
-"Deviation_LowVolEDTAT1",
-"Deviation_MislDEDTAT1",
-"Deviation_MislREDTAT1",
-"Deviation_NFEDTAT1",
-"Deviation_OtherEDTAT1",
-"Deviation_OutConEDTAT1",
-"Deviation_TempHEDTAT1",
-"Deviation_TempLEDTAT1",
-"Deviation_TubeSzEDTAT1",
-"BioCol_Deviation_v1r0_EDTAT2",
-"BioCol_DevNotes_v1r0_EDTAT2",
-"Deviation_BrokenEDTAT2",
-"Deviation_DiscEDTAT2",
-"Deviation_HemoEDTAT2",
-"Deviation_LeakEDTAT2",
-"Deviation_LowVolEDTAT2",
-"Deviation_MislDEDTAT2",
-"Deviation_MislREDTAT2",
-"Deviation_NFEDTAT2",
-"Deviation_OtherEDTAT2",
-"Deviation_OutConEDTAT2",
-"Deviation_TempHEDTAT2",
-"Deviation_TempLEDTAT2",
-"Deviation_TubeSzEDTAT2",
-"BioCol_Deviation_v1r0_EDTAT3",
-"BioCol_DevNotes_v1r0_EDTAT3",
-"Deviation_BrokenEDTAT3",
-"Deviation_DiscEDTAT3",
-"Deviation_HemoEDTAT3",
-"Deviation_LeakEDTAT3",
-"Deviation_LowVolEDTAT3",
-"Deviation_MislDEDTAT3",
-"Deviation_MislREDTAT3",
-"Deviation_NFEDTAT3",
-"Deviation_OtherEDTAT3",
-"Deviation_OutConEDTAT3",
-"Deviation_TempHEDTAT3",
-"Deviation_TempLEDTAT3",
-"Deviation_TubeSzEDTAT3",
-"BioCol_Deviation_v1r0_ACDT1",
-"BioCol_DevNotes_v1r0_ACDT1",
-"Deviation_BrokenACDT1",
-"Deviation_DiscardACDT1",
-"Deviation_HemoACDT1",
-"Deviation_LeakACDT1",
-"Deviation_LowVolACDT1",
-"Deviation_MislabDACDT1",
-"Deviation_MislabRACDT1",
-"Deviation_NotFndACDT1",
-"Deviation_OtherACDT1",
-"Deviation_OutContACDT1",
-"Deviation_TempHACDT1",
-"Deviation_TempLACDT1",
-"Deviation_TubeSzACDT1",
-"BioCol_Deviation_v1r0_STRT1",
-"BioCol_DevNotes_v1r0_STRT1",
-"Deviation_BrokenSTRT1",
-"Deviation_DiscardSTRT1",
-"Deviation_HemoSTRT1",
-"Deviation_LeakSTRT1",
-"Deviation_LowVolSTRT1",
-"Deviation_MislabDSTRT1",
-"Deviation_MislabRSTRT1",
-"Deviation_NotFndSTRT1",
-"Deviation_OtherSTRT1",
-"Deviation_OutContSTRT1",
-"Deviation_TempHSTRT1",
-"Deviation_TempLSTRT1",
-"Deviation_TubeSzSTRT1",
-"BioCol_Deviation_v1r0_UT1",
-"BioCol_DevNotes_v1r0_UT1",
-"Deviation_BrokenUT1",
-"Deviation_LeakUT1",
-"Deviation_LowVolUT1",
-"Deviation_MislabelDUT1",
-"Deviation_MislabelRUT1",
-"Deviation_NotFoundUT1",
-"Deviation_OtherUT1",
-"Deviation_OutContamUT1",
-"Deviation_TempHUT1",
-"Deviation_TempLUT1",
-"Deviation_UrVolUT1",
-"BioCol_Deviation_v1r0_MWT1",
-"BioCol_DevNotes_v1r0_MWT1",
-"Deviation_BrokenMWT1",
-"Deviation_LeakMWT1",
-"Deviation_LowVolMWT1",
-"Deviation_MislabDMWT1",
-"Deviation_MislabRMWT1",
-"Deviation_MWUnd30sMWT1",
-"Deviation_NotFoundMWT1",
-"Deviation_OtherMWT1",
-"Deviation_OutContMWT1",
-"token",
-"date")]
- 
+                                  "BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0","BioClin_DBBloodRRLBL_v1r0",
+                                  "BioClin_DBBloodRRLDtBL_v1r0",
+                                  "BioClin_DBUrineID_v1r0",
+                                  "BioClin_DBUrineRRLBL_v1r0",
+                                  "BioClin_DBUrineRRLDtBL_v1r0",
+                                  "BioCol_PhlebInitials_v1r0",
+                                  "BioCol_ColNote1_v1r0",
+                                  "BioCol_TubeColl_v1r0_Bio",
+                                  "BioCol_TubeID_v1r0_Bio",
+                                  "BioCol_TubeColl_v1r0_SST1",
+                                  "BioCol_TubeID_v1r0_SST1",
+                                  "BioCol_NotCol_v1r0_SST1",
+                                  "BioCol_NotCol_v1r0_SST1",
+                                  "BioCol_Discard_v1r0_SST1",
+                                  "BioCol_TubeColl_v1r0_SST2",
+                                  "BioCol_TubeID_v1r0_SST2",
+                                  "BioCol_NotCol_v1r0_SST2",
+                                  "BioCol_NotCol_v1r0_SST2",
+                                  "BioCol_Discard_v1r0_SST2",
+                                  "BioCol_TubeColl_v1r0_HT1",
+                                  "BioCol_TubeID_v1r0_HT1",
+                                  "BioCol_NotCol_v1r0_HT1",
+                                  "BioCol_NotCol_v1r0_HT1",
+                                  "BioCol_Discard_v1r0_HT1",
+                                  "BioCol_TubeColl_v1r0_EDTAT1",
+                                  "BioCol_TubeID_v1r0_EDTAT1",
+                                  "BioCol_NotCol_v1r0_EDTAT1",
+                                  "BioCol_NotCol_v1r0_EDTAT1",
+                                  "BioCol_Discard_v1r0_EDTAT1",
+                                  "BioCol_TubeColl_v1r0_ACDT1",
+                                  "BioCol_TubeID_v1r0_ACDT1",
+                                  "BioCol_NotCol_v1r0_ACDT1",
+                                  "BioCol_NotCol_v1r0_ACDT1",
+                                  "BioCol_Discard_v1r0_ACDT1",
+                                  "BioCol_TubeColl_v1r0_STRT1",
+                                  "BioCol_TubeID_v1r0_STRT1",
+                                  "BioCol_NotCol_v1r0_STRT1",
+                                  "BioCol_NotCol_v1r0_STRT1",
+                                  "BioCol_Discard_v1r0_STRT1",
+                                  "BioCol_TubeColl_v1r0_UT1",
+                                  "BioCol_TubeID_v1r0_UT1",
+                                  "BioCol_NotCol_v1r0_UT1",
+                                  "BioCol_NotCol_v1r0_UT1",
+                                  "BioCol_Discard_v1r0_UT1",
+                                  "BioCol_TubeColl_v1r0_MWT1",
+                                  "BioCol_TubeID_v1r0_MWT1",
+                                  "BioCol_NotCol_v1r0_MWT1",
+                                  "BioCol_NotCol_v1r0_MWT1",
+                                  "BioCol_Discard_v1r0_MWT1",
+                                  "BioCol_TubeColl_v1r0_BioMW",
+                                  "BioCol_TubeID_v1r0_BioMW",
+                                  "BioCol_TubeColl_v1r0_SST3",
+                                  "BioCol_TubeID_v1r0_SST3",
+                                  "BioCol_Discard_v1r0_SST3",
+                                  "BioCol_TubeColl_v1r0_SST4",
+                                  "BioCol_TubeID_v1r0_SST4",
+                                  "BioCol_Discard_v1r0_SST4",
+                                  "BioCol_TubeColl_v1r0_SST5",
+                                  "BioCol_TubeID_v1r0_SST5",
+                                  "BioCol_Discard_v1r0_SST5",
+                                  "BioCol_TubeID_v1r0_HT2",
+                                  "BioCol_TubeColl_v1r0_HT2",
+                                  "BioCol_Discard_v1r0_HT2",
+                                  "BioCol_TubeColl_v1r0_EDTAT2",
+                                  "BioCol_TubeID_v1r0_EDTAT2",
+                                  "BioCol_Discard_v1r0_EDTAT2",
+                                  "BioCol_TubeColl_v1r0_EDTAT3",
+                                  "BioCol_TubeID_v1r0_EDTAT3",
+                                  "BioCol_Discard_v1r0_EDTAT3",
+                                  "BioCol_CollBoxedStatus_v1r0",
+                                  "BioBPTL_DateRec_v1r0_SST1",
+                                  "BioBPTL_DateRec_v1r0_SST2",
+                                  "BioBPTL_DateRec_v1r0_HT1",
+                                  "BioBPTL_DateRec_v1r0_EDTAT1",
+                                  "BioBPTL_DateRec_v1r0_ACDT1",
+                                  "BioBPTL_DateRec_v1r0_STRT1",
+                                  "BioBPTL_DateRec_v1r0_UT1",
+                                  "BioBPTL_DateRec_v1r0_MWT1",
+                                  "BioKit_KitRecdTmBL_v1r0_MWTube1",
+                                  "BioBPTL_DateRec_v1r0_SST3",
+                                  "BioBPTL_DateRec_v1r0_SST4",
+                                  "BioBPTL_DateRec_v1r0_SST5",
+                                  "BioBPTL_DateRec_v1r0_HT2",
+                                  "BioBPTL_DateRec_v1r0_EDTAT2",
+                                  "BioBPTL_DateRec_v1r0_EDTAT3",
+                                  "BioRec_NoteOpt_v1r0",
+                                  "BioCol_StrayTubesList_v1r0",
+                                  "siteAcronym",
+                                  "BioCol_Deviation_v1r0_SST1",
+                                  "BioCol_DevNotes_v1r0_SST1",
+                                  "Deviation_BrokenSST1",
+                                  "Deviation_ClotLSST1",
+                                  "Deviation_ClotSSST1",
+                                  "Deviation_DiscardSST1",
+                                  "Deviation_GelSST1",
+                                  "Deviation_HemoSST1",
+                                  "Deviation_LeakSST1",
+                                  "Deviation_LowVolSST1",
+                                  "Deviation_MislabDSST1",
+                                  "Deviation_MislabRSST1",
+                                  "Deviation_NotFoundSST1",
+                                  "Deviation_OtherSST1",
+                                  "Deviation_OutContSST1",
+                                  "Deviation_SpeedHSST1",
+                                  "Deviation_SpeedLSST1",
+                                  "Deviation_TempHSST1",
+                                  "Deviation_TempLSST1",
+                                  "Deviation_TimeLSST1",
+                                  "Deviation_TimeSSST1",
+                                  "Deviation_TubeSzSST1",
+                                  "BioCol_Deviation_v1r0_SST2",
+                                  "BioCol_DevNotes_v1r0_SST2",
+                                  "Deviation_BrokenSST2",
+                                  "Deviation_ClotLSST2",
+                                  "Deviation_ClotSSST2",
+                                  "Deviation_DiscardSST2",
+                                  "Deviation_GelSST2",
+                                  "Deviation_HemoSST2",
+                                  "Deviation_LeakSST2",
+                                  "Deviation_LowVolSST2",
+                                  "Deviation_MislabDSST2",
+                                  "Deviation_MislabRSST2",
+                                  "Deviation_NotFoundSST2",
+                                  "Deviation_OtherSST2",
+                                  "Deviation_OutContSST2",
+                                  "Deviation_SpeedHSST2",
+                                  "Deviation_SpeedLSST2",
+                                  "Deviation_TempHSST2",
+                                  "Deviation_TempLSST2",
+                                  "Deviation_TimeLSST2",
+                                  "Deviation_TimeSSST2",
+                                  "Deviation_TubeSzSST2",
+                                  "BioCol_Deviation_v1r0_SST3",
+                                  "BioCol_DevNotes_v1r0_SST3",
+                                  "Deviation_BrokenSST3",
+                                  "Deviation_ClotLSST3",
+                                  "Deviation_ClotS_SST3",
+                                  "Deviation_DiscardSST3",
+                                  "Deviation_GelSST3",
+                                  "Deviation_HemoSST3",
+                                  "Deviation_LeakSST3",
+                                  "Deviation_LowVolSST3",
+                                  "Deviation_MislabDSST3",
+                                  "Deviation_MislabRSST3",
+                                  "Deviation_NotFoundSST3",
+                                  "Deviation_OtherSST3",
+                                  "Deviation_OutContSST3",
+                                  "Deviation_SpeedHSST3",
+                                  "Deviation_SpeedLSST3",
+                                  "Deviation_TempHSST3",
+                                  "Deviation_TempLSST3",
+                                  "Deviation_TimeLSST3",
+                                  "Deviation_TimeSSST3",
+                                  "Deviation_TubeSzSST3",
+                                  "BioCol_Deviation_v1r0_SST4",
+                                  "BioCol_DevNotes_v1r0_SST4",
+                                  "Deviation_BrokenSST4",
+                                  "Deviation_ClotLSST4",
+                                  "Deviation_ClotSSST4",
+                                  "Deviation_DiscardSST4",
+                                  "Deviation_GelSST4",
+                                  "Deviation_HemoSST4",
+                                  "Deviation_LeakSST4",
+                                  "Deviation_LowVolSST4",
+                                  "Deviation_MislabDSST4",
+                                  "Deviation_MislabRSST4",
+                                  "Deviation_NotFoundSST4",
+                                  "Deviation_OtherSST4",
+                                  "Deviation_OutContSST4",
+                                  "Deviation_SpeedHSST4",
+                                  "Deviation_SpeedLSST4",
+                                  "Deviation_TempHSST4",
+                                  "Deviation_TempLSST4",
+                                  "Deviation_TimeLSST4",
+                                  "Deviation_TimeSSST4",
+                                  "Deviation_TubeSzSST4",
+                                  "BioCol_Deviation_v1r0_SST5",
+                                  "BioCol_DevNotes_v1r0_SST5",
+                                  "Deviation_BrokenSST5",
+                                  "Deviation_ClotLSST5",
+                                  "Deviation_ClotSSST5",
+                                  "Deviation_DiscardSST5",
+                                  "Deviation_GelSST5",
+                                  "Deviation_HemoSST5",
+                                  "Deviation_LeakSST5",
+                                  "Deviation_LowVolSST5",
+                                  "Deviation_MislabDSST5",
+                                  "Deviation_MislabRSST5",
+                                  "Deviation_NotFoundSST5",
+                                  "Deviation_OtherSST5",
+                                  "Deviation_OutContSST5",
+                                  "Deviation_SpeedHSST5",
+                                  "Deviation_SpeedLSST5",
+                                  "Deviation_TempHSST5",
+                                  "Deviation_TempLSST5",
+                                  "Deviation_TimeLSST5",
+                                  "Deviation_TimeSSST5",
+                                  "Deviation_TubeSzSST5",
+                                  "BioCol_Deviation_v1r0_HT1",
+                                  "BioCol_DevNotes_v1r0_HT1",
+                                  "Deviation_BrokenHT1",
+                                  "Deviation_DiscardHT1",
+                                  "Deviation_HemoHT1",
+                                  "Deviation_LeakHT1",
+                                  "Deviation_LowVolHT1",
+                                  "Deviation_MislabelDHT1",
+                                  "Deviation_MislabelRHT1",
+                                  "Deviation_NotFoundHT1",
+                                  "Deviation_OtherHT1",
+                                  "Deviation_OutContamHT1",
+                                  "Deviation_TempHHT1",
+                                  "Deviation_TempLHT1",
+                                  "Deviation_TubeSzHT1",
+                                  "BioCol_Deviation_v1r0_HT2",
+                                  "BioCol_DevNotes_v1r0_HT2",
+                                  "Deviation_BrokenHT2",
+                                  "Deviation_DiscardHT2",
+                                  "Deviation_HemoHT2",
+                                  "Deviation_LeakHT2",
+                                  "Deviation_LowVolHT2",
+                                  "Deviation_MislabelDHT2",
+                                  "Deviation_MislabelRHT2",
+                                  "Deviation_NotFoundHT2",
+                                  "Deviation_OtherHT2",
+                                  "Deviation_OutContamHT2",
+                                  "Deviation_TempHHT2",
+                                  "Deviation_TempLHT2",
+                                  "Deviation_TubeSzHT2",
+                                  "BioCol_Deviation_v1r0_EDTAT1",
+                                  "BioCol_DevNotes_v1r0_EDTAT1",
+                                  "Deviation_BrokenEDTAT1",
+                                  "Deviation_DiscEDTAT1",
+                                  "Deviation_HemoEDTAT1",
+                                  "Deviation_LeakEDTAT1",
+                                  "Deviation_LowVolEDTAT1",
+                                  "Deviation_MislDEDTAT1",
+                                  "Deviation_MislREDTAT1",
+                                  "Deviation_NFEDTAT1",
+                                  "Deviation_OtherEDTAT1",
+                                  "Deviation_OutConEDTAT1",
+                                  "Deviation_TempHEDTAT1",
+                                  "Deviation_TempLEDTAT1",
+                                  "Deviation_TubeSzEDTAT1",
+                                  "BioCol_Deviation_v1r0_EDTAT2",
+                                  "BioCol_DevNotes_v1r0_EDTAT2",
+                                  "Deviation_BrokenEDTAT2",
+                                  "Deviation_DiscEDTAT2",
+                                  "Deviation_HemoEDTAT2",
+                                  "Deviation_LeakEDTAT2",
+                                  "Deviation_LowVolEDTAT2",
+                                  "Deviation_MislDEDTAT2",
+                                  "Deviation_MislREDTAT2",
+                                  "Deviation_NFEDTAT2",
+                                  "Deviation_OtherEDTAT2",
+                                  "Deviation_OutConEDTAT2",
+                                  "Deviation_TempHEDTAT2",
+                                  "Deviation_TempLEDTAT2",
+                                  "Deviation_TubeSzEDTAT2",
+                                  "BioCol_Deviation_v1r0_EDTAT3",
+                                  "BioCol_DevNotes_v1r0_EDTAT3",
+                                  "Deviation_BrokenEDTAT3",
+                                  "Deviation_DiscEDTAT3",
+                                  "Deviation_HemoEDTAT3",
+                                  "Deviation_LeakEDTAT3",
+                                  "Deviation_LowVolEDTAT3",
+                                  "Deviation_MislDEDTAT3",
+                                  "Deviation_MislREDTAT3",
+                                  "Deviation_NFEDTAT3",
+                                  "Deviation_OtherEDTAT3",
+                                  "Deviation_OutConEDTAT3",
+                                  "Deviation_TempHEDTAT3",
+                                  "Deviation_TempLEDTAT3",
+                                  "Deviation_TubeSzEDTAT3",
+                                  "BioCol_Deviation_v1r0_ACDT1",
+                                  "BioCol_DevNotes_v1r0_ACDT1",
+                                  "Deviation_BrokenACDT1",
+                                  "Deviation_DiscardACDT1",
+                                  "Deviation_HemoACDT1",
+                                  "Deviation_LeakACDT1",
+                                  "Deviation_LowVolACDT1",
+                                  "Deviation_MislabDACDT1",
+                                  "Deviation_MislabRACDT1",
+                                  "Deviation_NotFndACDT1",
+                                  "Deviation_OtherACDT1",
+                                  "Deviation_OutContACDT1",
+                                  "Deviation_TempHACDT1",
+                                  "Deviation_TempLACDT1",
+                                  "Deviation_TubeSzACDT1",
+                                  "BioCol_Deviation_v1r0_STRT1",
+                                  "BioCol_DevNotes_v1r0_STRT1",
+                                  "Deviation_BrokenSTRT1",
+                                  "Deviation_DiscardSTRT1",
+                                  "Deviation_HemoSTRT1",
+                                  "Deviation_LeakSTRT1",
+                                  "Deviation_LowVolSTRT1",
+                                  "Deviation_MislabDSTRT1",
+                                  "Deviation_MislabRSTRT1",
+                                  "Deviation_NotFndSTRT1",
+                                  "Deviation_OtherSTRT1",
+                                  "Deviation_OutContSTRT1",
+                                  "Deviation_TempHSTRT1",
+                                  "Deviation_TempLSTRT1",
+                                  "Deviation_TubeSzSTRT1",
+                                  "BioCol_Deviation_v1r0_UT1",
+                                  "BioCol_DevNotes_v1r0_UT1",
+                                  "Deviation_BrokenUT1",
+                                  "Deviation_LeakUT1",
+                                  "Deviation_LowVolUT1",
+                                  "Deviation_MislabelDUT1",
+                                  "Deviation_MislabelRUT1",
+                                  "Deviation_NotFoundUT1",
+                                  "Deviation_OtherUT1",
+                                  "Deviation_OutContamUT1",
+                                  "Deviation_TempHUT1",
+                                  "Deviation_TempLUT1",
+                                  "Deviation_UrVolUT1",
+                                  "BioCol_Deviation_v1r0_MWT1",
+                                  "BioCol_DevNotes_v1r0_MWT1",
+                                  "Deviation_BrokenMWT1",
+                                  "Deviation_LeakMWT1",
+                                  "Deviation_LowVolMWT1",
+                                  "Deviation_MislabDMWT1",
+                                  "Deviation_MislabRMWT1",
+                                  "Deviation_MWUnd30sMWT1",
+                                  "Deviation_NotFoundMWT1",
+                                  "Deviation_OtherMWT1",
+                                  "Deviation_OutContMWT1",
+                                  "token",
+                                  "date")]
+
 
 # If in the future we have additional cols and there's a discrpency between the request column order and the existing column names
 #  missing_columns <- setdiff(expected_columns, colnames(biospe1))
@@ -5919,3 +6221,4 @@ write.csv(recrbio_1,glue("{local_drive}Connect_prod_recr_veriBiospe_Formats_{cur
 
 
 ```
+
