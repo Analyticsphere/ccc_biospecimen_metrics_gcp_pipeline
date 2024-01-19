@@ -485,6 +485,7 @@ col_num_1.1 <- col_num_1.1 %>%
 
 
 col_num_1.1_gt <- col_num_1.1 %>%
+
   gt::gt(groupname_col = "Site_Group") 
 
 
@@ -3450,6 +3451,7 @@ crosstable.coll_bptl28 <- crosstable.coll_bptl28[,c(13:18,6)]
 
 
 
+
 ```
 
 ```{r, Table29a, include=FALSE, echo=FALSE, warning=FALSE}
@@ -4362,8 +4364,39 @@ coll_bplt_knitr2 <- group_rows(
 
 coll_bplt_knitr2
 
+coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Henry Ford Health",
+  start_row = 1,
+  end_row = 12)
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "HealthPartners",
+  start_row = 13,
+  end_row = 14)
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Colorado",
+  start_row = 15,
+  end_row = 15) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Georgia",
+  start_row = 16,
+  end_row = 16) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Hawaii",
+  start_row = 17,
+  end_row = 18) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Northwest",
+  start_row = 19,
+  end_row = 19) 
 
 
 
