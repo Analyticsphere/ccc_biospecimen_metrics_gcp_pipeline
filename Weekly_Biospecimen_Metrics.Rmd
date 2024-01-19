@@ -4136,7 +4136,6 @@ uc_col_time <- knitr::kable(research.vt.length.UC.table,caption='Table 20a. Rese
 add_footnote(uc_col_time,"Note: Times at the 95th percentile and above are likely the result of participants not having been checked out at the end of their visit and do not reflect actual visit lengths.", notation = "none") 
 
 
-```{r KnitrTable21_26,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
 ```
 \FloatBarrier
