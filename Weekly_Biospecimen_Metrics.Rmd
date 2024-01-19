@@ -305,7 +305,7 @@ biospe_var$cid_tail <- sapply(strsplit(colnames(biospe),"_"), tail,1)
 CID <- unique(c(biospe_var$cid1,biospe_var$cid2,biospe_var$cid3)) #this line is missing from your code in github.
 #biospe_CID <- dd[which(dd$CID %in% CID),]
 biospe_CID <- y[which(y$conceptId.3 %in% CID),]
-biospe_dd<- merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="conceptId.3", all.x=TRUE)
+biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="conceptId.3", all.x=TRUE)
 biospe_dd <- biospe_dd%>% arrange(variable,conceptId.1) %>% filter(!duplicated(variable))
 #tubes <- dd[grepl(" Tube ",dd$`Variable Label`),] #updated 12/11/2023
 tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
@@ -485,7 +485,9 @@ col_num_1.1 <- col_num_1.1 %>%
 
 
 col_num_1.1_gt <- col_num_1.1 %>%
-  gt(groupname_col = "Site_Group") 
+
+  gt::gt(groupname_col = "Site_Group") 
+
 
 
 
@@ -601,7 +603,9 @@ col_num_1.2 <- col_num_1.2 %>%
 
 
 col_num_1.2_gt <- col_num_1.2 %>%
-  gt(groupname_col = "Site_Group") 
+
+  gt::gt(groupname_col = "Site_Group") 
+
 
 
 
@@ -3331,7 +3335,9 @@ crosstable.coll_bptl28$Total <- paste(crosstable.coll_bptl28$Total, " (100%)")
          
 crosstable.coll_bptl28 <- crosstable.coll_bptl28[,c(13:18,6)]
 
-#crosstable.coll_bptl1 %>% gt(groupname_col = "Site")
+
+#crosstable.coll_bptl1 %>% gt::gt(groupname_col = "Site")
+
 
 
 
@@ -3442,7 +3448,8 @@ crosstable.coll_bptl2$Count <- 1:as.numeric(dim(crosstable.coll_bptl2)[[1]])
          
 crosstable.coll_bptl_2 <- crosstable.coll_bptl2[,c("location","n_pct_1_Day", "n_pct_2_Day", "n_pct_3_Day", "n_pct_4_Day", "n_pct_4_plus_days", "Totals")]
 
-#crosstable.coll_bptl21 %>% gt(groupname_col = "Site")
+#crosstable.coll_bptl21 %>% gt::gt(groupname_col = "Site")
+
 
 
 
@@ -3894,6 +3901,8 @@ uc_col_time <- knitr::kable(research.vt.length.UC.table,caption='Table 20a. Rese
 add_footnote(uc_col_time,"Note: Times at the 95th percentile and above are likely the result of participants not having been checked out at the end of their visit and do not reflect actual visit lengths.", notation = "none") 
 
 
+```{r KnitrTable21_26,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+
 ```
 \FloatBarrier
 ```{r newFig5, eval=TRUE,echo=FALSE}
@@ -3931,11 +3940,11 @@ UC_Time
 tabbA <- knitr::kable(verif_BSL_colctC,caption='Table 21a. Time (in Days) from Verification to Research Baseline Collection for Participants Verified Before 08/01/2022',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 add_footnote(tabbA,"Note: August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near time of collection.", notation = "none")
 
-#verif_BSL_colctC %>% gt() %>%  tab_header(title = html("Table 23c. Time (in Days) from Verification to Baseline Research Collection for Participants Verified Verified Before 02/01/2023"))
+#verif_BSL_colctC %>% gt::gt() %>%  tab_header(title = html("Table 23c. Time (in Days) from Verification to Baseline Research Collection for Participants Verified Verified Before 02/01/2023"))
 
 tabbB <- knitr::kable(verif_BSL_colctD,caption='Table 21b. Time (in Days) from Verification to Research Baseline Collection for Participants Verified on or After 08/01/2022',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 add_footnote(tabbB,"Note: August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near time of collection.", notation = "none")
-#verif_BSL_colctD %>% gt() %>%  tab_header(title = html("Table 22d. Time (in Days) from Verification to Baseline Research Collection for Participants Verified on or After 02/01/2023"))
+#verif_BSL_colctD %>% gt::gt() %>%  tab_header(title = html("Table 22d. Time (in Days) from Verification to Baseline Research Collection for Participants Verified on or After 02/01/2023"))
 
 
 BSL_A <- knitr::kable(verif_BSL_colctA,caption='Table 22a. Time (in Days) from Verification to Baseline Clinical  Collection for Participants Verified Before 02/01/2023',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>%  kable_styling(latex_options = "scale_down")
@@ -3990,6 +3999,87 @@ coll_bplt_knitr <- group_rows(
   group_label = "University of Chicago",
   start_row = 16,
   end_row = 21)
+
+
+coll_bplt_knitr
+
+
+
+
+
+
+coll_bplt_knitr2 <- knitr::kable(crosstable.coll_bptl_2, col.names=c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Days", ">4 Days", "Total"), caption='Table 29. Clinical Biospecimen Collection to Receipt at BPTL (in Days) by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
+
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Henry Ford Health",
+  start_row = 1,
+  end_row = 12)
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "HealthPartners",
+  start_row = 13,
+  end_row = 14)
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Kaiser Permanente Colorado",
+  start_row = 15,
+  end_row = 15) 
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Kaiser Permanente Georgia",
+  start_row = 16,
+  end_row = 16) 
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Kaiser Permanente Hawaii",
+  start_row = 17,
+  end_row = 18) 
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Kaiser Permanente Northwest",
+  start_row = 19,
+  end_row = 19) 
+
+coll_bplt_knitr2
+
+
+
+
+
+
+coll_bplt_knitr3 <- knitr::kable(Hrs_bptl_col, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 30. Time (in Hours) from Research Biospecimen Collection to Receipt at BPTL by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
+
+
+
+coll_bplt_knitr3 <- group_rows(
+  coll_bplt_knitr3,
+  group_label = "HealtPartners",
+  start_row = 1,
+  end_row = 1)  
+coll_bplt_knitr3 <- group_rows(
+  coll_bplt_knitr3,
+  group_label = "Henry Ford Health",
+  start_row = 2,
+  end_row = 4) 
+coll_bplt_knitr3 <- group_rows(
+  coll_bplt_knitr3,
+  group_label = "Marshfield",
+  start_row = 5,
+  end_row = 10) 
+coll_bplt_knitr3 <- group_rows(
+  coll_bplt_knitr3,
+  group_label = "Sanford Health",
+  start_row = 11,
+  end_row = 12)
+coll_bplt_knitr3 <- group_rows(
+  coll_bplt_knitr3,
+  group_label = "University of Chicago",
+  start_row = 13,
+  end_row = 18)
+
+
+add_footnote(coll_bplt_knitr3, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
 
 coll_bplt_knitr
 
@@ -4076,11 +4166,43 @@ add_footnote(coll_bplt_knitr3, "Note: BPTL receipt time is assumed to be 11:30am
 
 
 
+coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Henry Ford Health",
+  start_row = 1,
+  end_row = 12)
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "HealthPartners",
+  start_row = 13,
+  end_row = 14)
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Colorado",
+  start_row = 15,
+  end_row = 15) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Georgia",
+  start_row = 16,
+  end_row = 16) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Hawaii",
+  start_row = 17,
+  end_row = 18) 
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "Kaiser Permanente Northwest",
+  start_row = 19,
+  end_row = 19) 
 
 coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
+add_footnote(coll_bplt_knitr4, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
 
 coll_bplt_knitr4 <- group_rows(
   coll_bplt_knitr4,
@@ -4116,6 +4238,8 @@ coll_bplt_knitr4 <- group_rows(
 
 add_footnote(coll_bplt_knitr4, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
 
+
+```
 
 ```
 
@@ -4918,8 +5042,6 @@ biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 
                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ,
                                                                   sapply(strsplit(variable,"_"),"[",2) == "505347689"  ~ "STRECKTube1" ))
 
-
-biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
 
 biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12 , 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))
 
