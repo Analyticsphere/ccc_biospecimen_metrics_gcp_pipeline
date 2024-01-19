@@ -24,7 +24,7 @@ output:
 
 ```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
 
-#    latex_engine: xelatex
+#    latex_engine: xelatex -- this was in the set up previously, but caused issues when running locally so it was removed 
 
 #old.packages()
 #update.packages()  
