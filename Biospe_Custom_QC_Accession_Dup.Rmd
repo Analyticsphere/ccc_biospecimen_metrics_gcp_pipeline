@@ -14,7 +14,6 @@ output:
     fig_width: 7
     fig_height: 5
     fig_caption: true
-    latex_engine: xelatex
     df_print: paged 
 ---
 
@@ -580,6 +579,7 @@ knitr::kable(qc12)
 
 
 
+  
 
 ```{r HPExcluded1, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -856,11 +856,111 @@ knitr::kable(qc13_Rtube7)
 ```
 
 
+### If BioClin_BldOrderPlcdBL_v1r0=yes or BioClin_UrnOrdPlacedBL_v1r0=yes, then BioClin_BldUrnPlcdTmBL_v1r0 is the first of BioClin_BldOrdPlacdDtBL_v1r0 and BioClin_UrnOrdPlcdDtBL_v1r0
+```{r BioClin_BldUrnPlcdTmBL_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
+
+BLUR_Time <- bioqc %>% filter( (d_173836415_d_266600170_d_530173840 == 353358909 | d_173836415_d_266600170_d_860477844 == 353358909) & 
+                             d_173836415_d_266600170_d_184451682 != min(as.Date(d_173836415_d_266600170_d_769615780), as.Date(d_173836415_d_266600170_d_939818935))) %>% 
+    select(Site, Connect_ID, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_939818935) %>%  sort_by(Site)
+
+colnames(BLUR_Time) <- c("Site", "Connect ID", "BioClin_BldUrnPlcdTmBL", "BioClin_BldOrdPlacdDtBL", "BioClin_UrnOrdPlcdDtBL")
+knitr::kable(BLUR_Time)
+
+
+```
+
+
+
+### If any blood tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_BloodSettingBL_v1r0 must be Research.
+```{r BioSpm_BloodSettingBL_res, echo=FALSE, warning=FALSE, message=FALSE}
+
+bio_bl_setting_res <- bioqc %>%  filter((d_232343615_d_593843561==353358909 | d_299553921_d_593843561==353358909 | d_376960806_d_593843561==353358909 | d_454453939_d_593843561==353358909 | d_589588440_d_593843561==353358909 | d_958646668_d_593843561==353358909 | d_677469051_d_593843561==353358909 | d_683613884_d_593843561==353358909 | d_703954371_d_593843561==353358909 | d_838567176_d_593843561==353358909) & 
+                    d_650516960==534621077 & d_173836415_d_266600170_d_592099155 !=534621077) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_592099155) %>%  sort_by(Site)
+
+
+colnames(bio_bl_setting_res) <- c("Site", "Connect ID", "BioSpm_BloodSettingBL_v1r0")
+knitr::kable(bio_bl_setting_res)                             
+                              
+```  
+
+
+### If any blood tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_BloodSettingBL_v1r0 must be Clinical.
+```{r BioSpm_BloodSettingBL_clin, echo=FALSE, warning=FALSE, message=FALSE}
+
+bio_bl_setting_clin <- bioqc %>%  filter((d_232343615_d_593843561==353358909 | d_299553921_d_593843561==353358909 | d_376960806_d_593843561==353358909 | d_454453939_d_593843561==353358909 | d_589588440_d_593843561==353358909 | d_958646668_d_593843561==353358909 | d_677469051_d_593843561==353358909 | d_683613884_d_593843561==353358909 | d_703954371_d_593843561==353358909 | d_838567176_d_593843561==353358909) & 
+                    d_650516960==664882224 & d_173836415_d_266600170_d_592099155 !=664882224) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_592099155) %>%  sort_by(Site)
+
+
+colnames(bio_bl_setting_clin) <- c("Site", "Connect ID", "BioSpm_BloodSettingBL_v1r0")
+knitr::kable(bio_bl_setting_clin)                                 
+                              
+                              
+```  
+                              
+### If the Urine tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_UrineSettingBL_v1r0 must be Clinical.
+```{r BioSpm_UrineSettingBL_clin, echo=FALSE, warning=FALSE, message=FALSE}
+
+bio_ur_setting_clin <- bioqc %>%  filter((d_973670172_d_593843561==353358909) & d_650516960==664882224 & d_173836415_d_266600170_d_718172863 !=664882224) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_718172863) %>%  sort_by(Site)
+
+
+colnames(bio_ur_setting_clin) <- c("Site", "Connect ID", "BioSpm_UrineSettingBL_v1r0")
+knitr::kable(bio_ur_setting_clin)                                 
+                              
+```  
+
+### If the Urine tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_UrineSettingBL_v1r0 must be Research.
+```{r BioSpm_UrineSettingBL_res, echo=FALSE, warning=FALSE, message=FALSE}
+
+bio_ur_setting_res <- bioqc %>%  filter((d_973670172_d_593843561==353358909) & d_650516960==534621077 & d_173836415_d_266600170_d_718172863 !=534621077) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_718172863) %>%  sort_by(Site)
+
+
+colnames(bio_ur_setting_res) <- c("Site", "Connect ID", "BioSpm_UrineSettingBL_v1r0")
+knitr::kable(bio_ur_setting_res)                                
+                              
+```  
+
+                              
+### If the Mouthwash tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_MWSettingBL_v1r0 must be Clinical.
+```{r BioSpm_MWSettingBL_clin, echo=FALSE, warning=FALSE, message=FALSE}
+
+bio_mw_setting_clin <- bioqc %>%  filter((d_143615646_d_593843561==353358909) & d_650516960==664882224 & d_173836415_d_266600170_d_915179629 !=664882224) %>% 
+    select(Site, Connect_ID, d_173836415_d_266600170_d_915179629) %>%  sort_by(Site)
+
+
+colnames(bio_mw_setting_clin) <- c("Site", "Connect ID", "BioSpm_MWSettingBL_v1r0")
+knitr::kable(bio_mw_setting_clin) 
+                              
+                              
+```  
+
+### If the Mouthwash tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_MWSettingBL_v1r0 must be Research.
+```{r BioSpm_MWSettingBL_res, echo=FALSE, warning=FALSE, message=FALSE}
+
+bio_mw_setting_res <- bioqc %>%  filter((d_143615646_d_593843561==353358909) & d_650516960==534621077 & d_173836415_d_266600170_d_915179629 !=534621077) %>% 
+    select(Site, Connect_ID, d_173836415_d_266600170_d_915179629) %>%  sort_by(Site)
+
+
+colnames(bio_mw_setting_res) <- c("Site", "Connect ID", "BioSpm_MWSettingBL_v1r0")
+knitr::kable(bio_mw_setting_res) 
+                              
+                              
+```
 
 
 
 
 
+
+
+
+
+
+
+\newpage
 
 ## BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0
 \FloatBarrier
@@ -919,6 +1019,7 @@ knitr::kable(polyurine) %>% kable_styling(latex_options = "scale_down")
 
 
 ```
+
 
 
 
