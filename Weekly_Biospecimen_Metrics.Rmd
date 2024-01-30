@@ -3795,7 +3795,7 @@ add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the H
 
 
 
-Bld_urn_cli = knitr::kable(newtable_4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", font_size = 7) 
+Bld_urn_cli = knitr::kable(newtable_4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "hold_position") 
 add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later than Biospecimen Dashboard data. 'Site Data Only' is assumed to be '0 (0%)' when not listed.", notation = "none")
 
 
