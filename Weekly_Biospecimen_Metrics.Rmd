@@ -1,7 +1,7 @@
 
 ---
 title: "Biospecimen Weekly Metrics RMD"
-author: "Kelsey Dowling"
+author: "Kelsey Sanchez"
 date: "Data Extracted and Report Ran: `r Sys.Date()`"
 header-includes:  
     \usepackage[labelformat=empty]{caption}
@@ -2331,7 +2331,7 @@ Table18_combined <- test18a_B %>% dplyr::select(Site, checktmvisit )  %>% tbl_cr
   #bold_labels() %>%
   #italicize_levels() %>% 
   modify_header() %>%
-  modify_caption("Table 17. Baseline Clinical Biospecimen Survey Complete Time from Collection Time") %>% #on hold: check that HF shows up
+  modify_caption("Table 17. Baseline Clinical Biospecimen Survey Complete Time from Collection Time") %>% 
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 ```
@@ -3992,6 +3992,7 @@ knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No
 
 research.notcolnotes_site
 #research.notcolnotes_tube
+
 add_footnote(research.notcolnotes_tube, "Note: 'Short Draw' reason applicable to blood collection tubes only.", notation="none")
 
 
@@ -4090,6 +4091,7 @@ research.3.1
 
 
 ```{r KnitrTables15_16,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+
 Table16_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -4113,6 +4115,7 @@ research.4_3
 \newpage
 \FloatBarrier
 ```{r KnitrTables17_20,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+
 Table18_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -4239,87 +4242,6 @@ coll_bplt_knitr <- group_rows(
   start_row = 16,
   end_row = 21)
 
-
-coll_bplt_knitr
-
-
-
-
-
-
-coll_bplt_knitr2 <- knitr::kable(crosstable.coll_bptl_2, col.names=c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Days", ">4 Days", "Total"), caption='Table 29. Clinical Biospecimen Collection to Receipt at BPTL (in Days) by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
-
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Henry Ford Health",
-  start_row = 1,
-  end_row = 12)
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "HealthPartners",
-  start_row = 13,
-  end_row = 14)
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Colorado",
-  start_row = 15,
-  end_row = 15) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Georgia",
-  start_row = 16,
-  end_row = 16) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Hawaii",
-  start_row = 17,
-  end_row = 18) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Northwest",
-  start_row = 19,
-  end_row = 19) 
-
-coll_bplt_knitr2
-
-
-
-
-
-
-coll_bplt_knitr3 <- knitr::kable(Hrs_bptl_col, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 30. Time (in Hours) from Research Biospecimen Collection to Receipt at BPTL by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
-
-
-
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "HealtPartners",
-  start_row = 1,
-  end_row = 1)  
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "Henry Ford Health",
-  start_row = 2,
-  end_row = 4) 
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "Marshfield",
-  start_row = 5,
-  end_row = 10) 
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "Sanford Health",
-  start_row = 11,
-  end_row = 12)
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "University of Chicago",
-  start_row = 13,
-  end_row = 18)
-
-
-add_footnote(coll_bplt_knitr3, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
-
 coll_bplt_knitr
 
 
@@ -4363,40 +4285,6 @@ coll_bplt_knitr2 <- group_rows(
 
 coll_bplt_knitr2
 
-coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
-
-
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Henry Ford Health",
-  start_row = 1,
-  end_row = 12)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "HealthPartners",
-  start_row = 13,
-  end_row = 14)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Colorado",
-  start_row = 15,
-  end_row = 15) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Georgia",
-  start_row = 16,
-  end_row = 16) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Hawaii",
-  start_row = 17,
-  end_row = 18) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Northwest",
-  start_row = 19,
-  end_row = 19) 
-
 
 
 coll_bplt_knitr3 <- knitr::kable(Hrs_bptl_col, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 30. Time (in Hours) from Research Biospecimen Collection to Receipt at BPTL by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
@@ -4437,6 +4325,7 @@ add_footnote(coll_bplt_knitr3, "Note: BPTL receipt time is assumed to be 11:30am
 
 
 
+
 coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 
@@ -4471,48 +4360,11 @@ coll_bplt_knitr4 <- group_rows(
   start_row = 19,
   end_row = 19) 
 
-coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
-add_footnote(coll_bplt_knitr4, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
-
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Henry Ford Health",
-  start_row = 1,
-  end_row = 12)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "HealthPartners",
-  start_row = 13,
-  end_row = 14)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Colorado",
-  start_row = 15,
-  end_row = 15) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Georgia",
-  start_row = 16,
-  end_row = 16) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Hawaii",
-  start_row = 17,
-  end_row = 18) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Northwest",
-  start_row = 19,
-  end_row = 19) 
-
-
-add_footnote(coll_bplt_knitr4, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
-
-
+coll_bplt_knitr4
 ```
 
-```
+
 
 
 \newpage
@@ -4717,7 +4569,7 @@ combined_plotHF <- ggplot(combined_dataHF, aes(x = as.Date(coldate), y = hrs_pas
   theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
   ggtitle(label="Figure 14. Hours from Collection to BPTL Receipt, \n Henry Ford")
 combined_plotHF
-
+```
 
 
 
@@ -5140,43 +4992,30 @@ clc_both_vt.site.NW
 
 
 
-```{r data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
+
+```{r box_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 
 ###download the biospecimen data
-
 currentDate <- Sys.Date()
-
-
-
 box_CID <- as.data.frame(as.numeric(sapply((strsplit(colnames(box_wl_flat),"d_")),tail,1)))
 box_CID$variable <- colnames(box_wl_flat)
-
 colnames(box_CID)[1] <-"CID"
 box_CID$CID <- ifelse(is.na(box_CID$CID), 0, box_CID$CID)
-
 box_CID_dd <- base::merge(box_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
-
 box_CID_dd$Variable.Name <- ifelse(is.na(box_CID_dd$Variable.Name), box_CID_dd$variable,box_CID_dd$Variable.Name)
 box_CID_dd$category<- ifelse(is.na(box_CID_dd$conceptId.4), 0,ifelse(!is.na(box_CID_dd$conceptId.4) &  box_CID_dd$conceptId.4 !=104430631, 2, 1))
-
 select1 <- box_CID_dd$variable[which(box_CID_dd$category==0)]
 yes_no <- box_CID_dd$variable[which(box_CID_dd$category==1)]
 box1 <- subset(box_wl_flat,select=select1)
 colnames(box1) <- box_CID_dd$Variable.Name[which(box_CID_dd$category==0)]
-
 ##for the categorical variables
 box1$BioPack_Courier_v1r0 <- ifelse(box_wl_flat$d_666553960==712278213, "FedEx",ifelse(box_wl_flat$d_666553960==149772928, "World Courier",NA))
-
 box_wl_flat$d_560975149 <- as.factor(box_wl_flat$d_560975149)
 d_560975149_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-
 box1$d_560975149 <- plyr::mapvalues(box_wl_flat$d_560975149,from=d_560975149_CIDs$V1,to=d_560975149_CIDs$V2)
 colnames(box1)[which(colnames(box1)=="d_560975149") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_560975149")]
-
 box_wl_flat$d_789843387 <- as.factor(box_wl_flat$d_789843387)
 d_789843387_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-
-
 # box1$BioPack_BoxID_v1r0 <- box_wl_flat$d_132929440
 # box1$BioPack_ModifiedTime_v1r0 <- box_wl_flat$d_555611076
 # box1$BioShip_ShipTime_v1r0 <- box_wl_flat$d_656548982
@@ -5186,12 +5025,9 @@ d_789843387_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(
 # box1$BioShip_SignEmail_v1r0 <- box_wl_flat$d_948887825
 # box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
 # box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
-
-
 #box1$d_789843387 <- boxes$d_789843387 %>% mutate(d_789843387=factor(d_789843387))
 box1$d_789843387 <- plyr::mapvalues(box_wl_flat$d_789843387,from=d_789843387_CIDs$V1,to=d_789843387_CIDs$V2)
 colnames(box1)[which(colnames(box1)=="d_789843387") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_789843387")]
-
 ##for binary variables
 for (i in 1:length(yes_no)){
   x <- yes_no[i]
@@ -5203,10 +5039,7 @@ for (i in 1:length(yes_no)){
   colnames(check)[2] <- varname
   box1 <-   cbind(box1,subset(check,select=varname))
 }
-
-
 #gsub("[^[:alnum:][:blank:]+?&/\\-]", "", c) #to remove any specific character in a variable in r
-
 box1 <- box1  %>% mutate(d_238268405=gsub("^[:alnum:][:blank:]","",d_238268405),
                          d_238268405_1=case_when(substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"121149986"~"Crushed",
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"200183516" ~"Vials - Incorrect Material Type",
@@ -5246,12 +5079,9 @@ box1 <- box1  %>% mutate(d_238268405=gsub("^[:alnum:][:blank:]","",d_238268405),
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"922995819" ~ "Manifest/Paperwork/Vial information do not match",
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"933646000" ~ "Other- Package Condition",
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"958000780" ~ "Shipment Delay"))
-
 box1<- box1 %>% mutate(BioPack_ShipCondtion_v1r0=ifelse(is.na(d_238268405_2), d_238268405_1, paste(d_238268405_1,d_238268405_2,sep=",")))
 #box1 <- box1[, c(1:4, 6:22, 25)] --- why are some columns missing???
 #missing: BioPack_BoxID_v1r0	BioPack_ModifiedTime_v1r0	BioShip_ShipTime_v1r0	BioPack_BoxStrtTime_v1r0	BioBPTL_ShipComments_v1r0	BioBPTL_DateRec_v1r0	BioShip_SignEmail_v1r0	BioPack_TrackScan1_v1r0		BioBPTL_ShipRec_v1r0
-
-
 box1$BioPack_BoxID_v1r0 <- box_wl_flat$d_132929440
 box1$BioPack_ModifiedTime_v1r0 <- box_wl_flat$d_555611076
 box1$BioShip_ShipTime_v1r0 <- box_wl_flat$d_656548982
@@ -5261,23 +5091,19 @@ box1$BioBPTL_DateRec_v1r0 <- box_wl_flat$d_926457119
 box1$BioShip_SignEmail_v1r0 <- box_wl_flat$d_948887825
 box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
 box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
-
 box1 <- box1 %>%  mutate(BioBPTL_ShipRec_v1r0= case_when(BioBPTL_ShipRec_v1r0==353358909 ~ "Yes",
                                                          BioBPTL_ShipRec_v1r0==104430631  ~ "No"))
-
-
 box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_ModifiedTime_v1r0,	BioShip_ShipTime_v1r0,	BioPack_BoxStrtTime_v1r0,	BioBPTL_ShipComments_v1r0,	d_885486943,
                          BioBPTL_DateRec_v1r0,	BioShip_SignEmail_v1r0,	BioPack_TrackScan1_v1r0,	BioPack_Courier_v1r0,	BioShip_LocalID_v1r0,	BioShip_LogSite_v1r0,	BioPack_TempProbe_v1r0,
                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
 box1 <- box1[, c(1:8, 10:21)]
-
 write.csv(box1,glue("{local_drive}Formatted_prod_flatBoxes_JP_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 # write.csv(box1,paste(local_drive, "Formatted_prod_flatBoxes_JP_",currentDate,".csv",sep=""),row.names = F,na="")
+```
 
 
 
-
-
+```{r bipspec_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 #11/20 updates
 ###to get the formats and variable names from DD
 factor_cid <-function(var,data){
@@ -5318,7 +5144,7 @@ biospe2_CID$variable <- names(biospe2)
 y$conceptId.3 <- as.character(y$conceptId.3)
 y$conceptId.4 <- as.numeric(y$conceptId.4)
 
-biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Formula.for.Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 
 biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
@@ -5347,7 +5173,7 @@ biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 
 biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12 , 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))
 
 
-biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
+biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Formula.for.Index)
 
 
 
@@ -5375,7 +5201,7 @@ for (i in 1:length(yes_no)){
   x <- yes_no[i]
   
   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable) & biospe2_CID_dd1$category==1,]$new.varname
-  
+
   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
   check <- as.data.frame(biospe2[,x])
   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
@@ -5388,537 +5214,342 @@ colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
 colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
 biospe1 <- biospe1[,order(colnames(biospe1))]
 
+# the rest part on ordering of the variables is still the same as before or what you shared with me last Friday.
+#I don't have any problem running this part
+names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setting_v1r0","BioSpm_Location_v1r0","BioSpm_ColIDScan_v1r0",
+"BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0","BioClin_DBBloodRRLBL_v1r0",
+"BioClin_DBBloodRRLDtBL_v1r0",
+"BioClin_DBUrineID_v1r0",
+"BioClin_DBUrineRRLBL_v1r0",
+"BioClin_DBUrineRRLDtBL_v1r0",
+"BioCol_PhlebInitials_v1r0",
+"BioCol_ColNote1_v1r0",
+"BioCol_TubeColl_v1r0_Bio",
+"BioCol_TubeID_v1r0_Bio",
+"BioCol_TubeColl_v1r0_SST1",
+"BioCol_TubeID_v1r0_SST1",
+"BioCol_NotCol_v1r0_SST1",
+"BioCol_NotCol_v1r0_SST1",
+"BioCol_Discard_v1r0_SST1",
+"BioCol_TubeColl_v1r0_SST2",
+"BioCol_TubeID_v1r0_SST2",
+"BioCol_NotCol_v1r0_SST2",
+"BioCol_NotCol_v1r0_SST2",
+"BioCol_Discard_v1r0_SST2",
+"BioCol_TubeColl_v1r0_HT1",
+"BioCol_TubeID_v1r0_HT1",
+"BioCol_NotCol_v1r0_HT1",
+"BioCol_NotCol_v1r0_HT1",
+"BioCol_Discard_v1r0_HT1",
+"BioCol_TubeColl_v1r0_EDTAT1",
+"BioCol_TubeID_v1r0_EDTAT1",
+"BioCol_NotCol_v1r0_EDTAT1",
+"BioCol_NotCol_v1r0_EDTAT1",
+"BioCol_Discard_v1r0_EDTAT1",
+"BioCol_TubeColl_v1r0_ACDT1",
+"BioCol_TubeID_v1r0_ACDT1",
+"BioCol_NotCol_v1r0_ACDT1",
+"BioCol_NotCol_v1r0_ACDT1",
+"BioCol_Discard_v1r0_ACDT1",
+"BioCol_TubeColl_v1r0_STRT1",
+"BioCol_TubeID_v1r0_STRT1",
+"BioCol_NotCol_v1r0_STRT1",
+"BioCol_NotCol_v1r0_STRT1",
+"BioCol_Discard_v1r0_STRT1",
+"BioCol_TubeColl_v1r0_UT1",
+"BioCol_TubeID_v1r0_UT1",
+"BioCol_NotCol_v1r0_UT1",
+"BioCol_NotCol_v1r0_UT1",
+"BioCol_Discard_v1r0_UT1",
+"BioCol_TubeColl_v1r0_MWT1",
+"BioCol_TubeID_v1r0_MWT1",
+"BioCol_NotCol_v1r0_MWT1",
+"BioCol_NotCol_v1r0_MWT1",
+"BioCol_Discard_v1r0_MWT1",
+"BioCol_TubeColl_v1r0_BioMW",
+"BioCol_TubeID_v1r0_BioMW",
+"BioCol_TubeColl_v1r0_SST3",
+"BioCol_TubeID_v1r0_SST3",
+"BioCol_Discard_v1r0_SST3",
+"BioCol_TubeColl_v1r0_SST4",
+"BioCol_TubeID_v1r0_SST4",
+"BioCol_Discard_v1r0_SST4",
+"BioCol_TubeColl_v1r0_SST5",
+"BioCol_TubeID_v1r0_SST5",
+"BioCol_Discard_v1r0_SST5",
+"BioCol_TubeID_v1r0_HT2",
+"BioCol_TubeColl_v1r0_HT2",
+"BioCol_Discard_v1r0_HT2",
+"BioCol_TubeColl_v1r0_EDTAT2",
+"BioCol_TubeID_v1r0_EDTAT2",
+"BioCol_Discard_v1r0_EDTAT2",
+"BioCol_TubeColl_v1r0_EDTAT3",
+"BioCol_TubeID_v1r0_EDTAT3",
+"BioCol_Discard_v1r0_EDTAT3",
+"BioCol_CollBoxedStatus_v1r0",
+"BioBPTL_DateRec_v1r0_SST1",
+"BioBPTL_DateRec_v1r0_SST2",
+"BioBPTL_DateRec_v1r0_HT1",
+"BioBPTL_DateRec_v1r0_EDTAT1",
+"BioBPTL_DateRec_v1r0_ACDT1",
+"BioBPTL_DateRec_v1r0_STRT1",
+"BioBPTL_DateRec_v1r0_UT1",
+"BioBPTL_DateRec_v1r0_MWT1",
+"BioKit_KitRecdTmBL_v1r0_MWTube1",
+"BioBPTL_DateRec_v1r0_SST3",
+"BioBPTL_DateRec_v1r0_SST4",
+"BioBPTL_DateRec_v1r0_SST5",
+"BioBPTL_DateRec_v1r0_HT2",
+"BioBPTL_DateRec_v1r0_EDTAT2",
+"BioBPTL_DateRec_v1r0_EDTAT3",
+"BioRec_NoteOpt_v1r0",
+"BioCol_StrayTubesList_v1r0",
+"siteAcronym",
+"BioCol_Deviation_v1r0_SST1",
+"BioCol_DevNotes_v1r0_SST1",
+"Deviation_BrokenSST1",
+"Deviation_ClotLSST1",
+"Deviation_ClotSSST1",
+"Deviation_DiscardSST1",
+"Deviation_GelSST1",
+"Deviation_HemoSST1",
+"Deviation_LeakSST1",
+"Deviation_LowVolSST1",
+"Deviation_MislabDSST1",
+"Deviation_MislabRSST1",
+"Deviation_NotFoundSST1",
+"Deviation_OtherSST1",
+"Deviation_OutContSST1",
+"Deviation_SpeedHSST1",
+"Deviation_SpeedLSST1",
+"Deviation_TempHSST1",
+"Deviation_TempLSST1",
+"Deviation_TimeLSST1",
+"Deviation_TimeSSST1",
+"Deviation_TubeSzSST1",
+"BioCol_Deviation_v1r0_SST2",
+"BioCol_DevNotes_v1r0_SST2",
+"Deviation_BrokenSST2",
+"Deviation_ClotLSST2",
+"Deviation_ClotSSST2",
+"Deviation_DiscardSST2",
+"Deviation_GelSST2",
+"Deviation_HemoSST2",
+"Deviation_LeakSST2",
+"Deviation_LowVolSST2",
+"Deviation_MislabDSST2",
+"Deviation_MislabRSST2",
+"Deviation_NotFoundSST2",
+"Deviation_OtherSST2",
+"Deviation_OutContSST2",
+"Deviation_SpeedHSST2",
+"Deviation_SpeedLSST2",
+"Deviation_TempHSST2",
+"Deviation_TempLSST2",
+"Deviation_TimeLSST2",
+"Deviation_TimeSSST2",
+"Deviation_TubeSzSST2",
+"BioCol_Deviation_v1r0_SST3",
+"BioCol_DevNotes_v1r0_SST3",
+"Deviation_BrokenSST3",
+"Deviation_ClotLSST3",
+"Deviation_ClotS_SST3",
+"Deviation_DiscardSST3",
+"Deviation_GelSST3",
+"Deviation_HemoSST3",
+"Deviation_LeakSST3",
+"Deviation_LowVolSST3",
+"Deviation_MislabDSST3",
+"Deviation_MislabRSST3",
+"Deviation_NotFoundSST3",
+"Deviation_OtherSST3",
+"Deviation_OutContSST3",
+"Deviation_SpeedHSST3",
+"Deviation_SpeedLSST3",
+"Deviation_TempHSST3",
+"Deviation_TempLSST3",
+"Deviation_TimeLSST3",
+"Deviation_TimeSSST3",
+"Deviation_TubeSzSST3",
+"BioCol_Deviation_v1r0_SST4",
+"BioCol_DevNotes_v1r0_SST4",
+"Deviation_BrokenSST4",
+"Deviation_ClotLSST4",
+"Deviation_ClotSSST4",
+"Deviation_DiscardSST4",
+"Deviation_GelSST4",
+"Deviation_HemoSST4",
+"Deviation_LeakSST4",
+"Deviation_LowVolSST4",
+"Deviation_MislabDSST4",
+"Deviation_MislabRSST4",
+"Deviation_NotFoundSST4",
+"Deviation_OtherSST4",
+"Deviation_OutContSST4",
+"Deviation_SpeedHSST4",
+"Deviation_SpeedLSST4",
+"Deviation_TempHSST4",
+"Deviation_TempLSST4",
+"Deviation_TimeLSST4",
+"Deviation_TimeSSST4",
+"Deviation_TubeSzSST4",
+"BioCol_Deviation_v1r0_SST5",
+"BioCol_DevNotes_v1r0_SST5",
+"Deviation_BrokenSST5",
+"Deviation_ClotLSST5",
+"Deviation_ClotSSST5",
+"Deviation_DiscardSST5",
+"Deviation_GelSST5",
+"Deviation_HemoSST5",
+"Deviation_LeakSST5",
+"Deviation_LowVolSST5",
+"Deviation_MislabDSST5",
+"Deviation_MislabRSST5",
+"Deviation_NotFoundSST5",
+"Deviation_OtherSST5",
+"Deviation_OutContSST5",
+"Deviation_SpeedHSST5",
+"Deviation_SpeedLSST5",
+"Deviation_TempHSST5",
+"Deviation_TempLSST5",
+"Deviation_TimeLSST5",
+"Deviation_TimeSSST5",
+"Deviation_TubeSzSST5",
+"BioCol_Deviation_v1r0_HT1",
+"BioCol_DevNotes_v1r0_HT1",
+"Deviation_BrokenHT1",
+"Deviation_DiscardHT1",
+"Deviation_HemoHT1",
+"Deviation_LeakHT1",
+"Deviation_LowVolHT1",
+"Deviation_MislabelDHT1",
+"Deviation_MislabelRHT1",
+"Deviation_NotFoundHT1",
+"Deviation_OtherHT1",
+"Deviation_OutContamHT1",
+"Deviation_TempHHT1",
+"Deviation_TempLHT1",
+"Deviation_TubeSzHT1",
+"BioCol_Deviation_v1r0_HT2",
+"BioCol_DevNotes_v1r0_HT2",
+"Deviation_BrokenHT2",
+"Deviation_DiscardHT2",
+"Deviation_HemoHT2",
+"Deviation_LeakHT2",
+"Deviation_LowVolHT2",
+"Deviation_MislabelDHT2",
+"Deviation_MislabelRHT2",
+"Deviation_NotFoundHT2",
+"Deviation_OtherHT2",
+"Deviation_OutContamHT2",
+"Deviation_TempHHT2",
+"Deviation_TempLHT2",
+"Deviation_TubeSzHT2",
+"BioCol_Deviation_v1r0_EDTAT1",
+"BioCol_DevNotes_v1r0_EDTAT1",
+"Deviation_BrokenEDTAT1",
+"Deviation_DiscEDTAT1",
+"Deviation_HemoEDTAT1",
+"Deviation_LeakEDTAT1",
+"Deviation_LowVolEDTAT1",
+"Deviation_MislDEDTAT1",
+"Deviation_MislREDTAT1",
+"Deviation_NFEDTAT1",
+"Deviation_OtherEDTAT1",
+"Deviation_OutConEDTAT1",
+"Deviation_TempHEDTAT1",
+"Deviation_TempLEDTAT1",
+"Deviation_TubeSzEDTAT1",
+"BioCol_Deviation_v1r0_EDTAT2",
+"BioCol_DevNotes_v1r0_EDTAT2",
+"Deviation_BrokenEDTAT2",
+"Deviation_DiscEDTAT2",
+"Deviation_HemoEDTAT2",
+"Deviation_LeakEDTAT2",
+"Deviation_LowVolEDTAT2",
+"Deviation_MislDEDTAT2",
+"Deviation_MislREDTAT2",
+"Deviation_NFEDTAT2",
+"Deviation_OtherEDTAT2",
+"Deviation_OutConEDTAT2",
+"Deviation_TempHEDTAT2",
+"Deviation_TempLEDTAT2",
+"Deviation_TubeSzEDTAT2",
+"BioCol_Deviation_v1r0_EDTAT3",
+"BioCol_DevNotes_v1r0_EDTAT3",
+"Deviation_BrokenEDTAT3",
+"Deviation_DiscEDTAT3",
+"Deviation_HemoEDTAT3",
+"Deviation_LeakEDTAT3",
+"Deviation_LowVolEDTAT3",
+"Deviation_MislDEDTAT3",
+"Deviation_MislREDTAT3",
+"Deviation_NFEDTAT3",
+"Deviation_OtherEDTAT3",
+"Deviation_OutConEDTAT3",
+"Deviation_TempHEDTAT3",
+"Deviation_TempLEDTAT3",
+"Deviation_TubeSzEDTAT3",
+"BioCol_Deviation_v1r0_ACDT1",
+"BioCol_DevNotes_v1r0_ACDT1",
+"Deviation_BrokenACDT1",
+"Deviation_DiscardACDT1",
+"Deviation_HemoACDT1",
+"Deviation_LeakACDT1",
+"Deviation_LowVolACDT1",
+"Deviation_MislabDACDT1",
+"Deviation_MislabRACDT1",
+"Deviation_NotFndACDT1",
+"Deviation_OtherACDT1",
+"Deviation_OutContACDT1",
+"Deviation_TempHACDT1",
+"Deviation_TempLACDT1",
+"Deviation_TubeSzACDT1",
+"BioCol_Deviation_v1r0_STRT1",
+"BioCol_DevNotes_v1r0_STRT1",
+"Deviation_BrokenSTRT1",
+"Deviation_DiscardSTRT1",
+"Deviation_HemoSTRT1",
+"Deviation_LeakSTRT1",
+"Deviation_LowVolSTRT1",
+"Deviation_MislabDSTRT1",
+"Deviation_MislabRSTRT1",
+"Deviation_NotFndSTRT1",
+"Deviation_OtherSTRT1",
+"Deviation_OutContSTRT1",
+"Deviation_TempHSTRT1",
+"Deviation_TempLSTRT1",
+"Deviation_TubeSzSTRT1",
+"BioCol_Deviation_v1r0_UT1",
+"BioCol_DevNotes_v1r0_UT1",
+"Deviation_BrokenUT1",
+"Deviation_LeakUT1",
+"Deviation_LowVolUT1",
+"Deviation_MislabelDUT1",
+"Deviation_MislabelRUT1",
+"Deviation_NotFoundUT1",
+"Deviation_OtherUT1",
+"Deviation_OutContamUT1",
+"Deviation_TempHUT1",
+"Deviation_TempLUT1",
+"Deviation_UrVolUT1",
+"BioCol_Deviation_v1r0_MWT1",
+"BioCol_DevNotes_v1r0_MWT1",
+"Deviation_BrokenMWT1",
+"Deviation_LeakMWT1",
+"Deviation_LowVolMWT1",
+"Deviation_MislabDMWT1",
+"Deviation_MislabRMWT1",
+"Deviation_MWUnd30sMWT1",
+"Deviation_NotFoundMWT1",
+"Deviation_OtherMWT1",
+"Deviation_OutContMWT1",
+"token",
+"date")
 
-biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:342,66:103,125:143,220:296,144,297,163,44)]
+biospe1_final <- biospe1 %>% select(names_set)
 
-
-#new column order requested 11/22/23
-
-
-
-# ###to get the formats and variable names from DD
-# factor_cid <-function(var,data){
-#   var <- as.factor(var)
-#   var_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(var),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(var),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-#   
-#   var <- plyr::mapvalues(var,from=var_CIDs$V1,to=var_CIDs$V2)
-# }
-# 
-# 
-# 
-# bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
-# biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
-# 
-# biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
-# biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
-# 
-# cnames <- names(biospe2)
-# for (i in 1: length(cnames)){
-#   varname <- cnames[i]
-#   var<-pull(biospe2,varname)
-#   biospe2[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
-# }
-# 
-# 
-# 
-# 
-# biospe2_CID <- as.data.frame(sapply((strsplit(colnames(biospe2),"d_")),tail,1))
-# colnames(biospe2_CID)[1] <- "CID"
-# #biospe2_CID <- biospe2_CID %>% mutate(CID = ifelse(nchar(CID)>10, substring(CID,1,9), CID))
-# biospe2_CID$variable <- names(biospe2)
-# y$conceptId.3 <- as.character(y$conceptId.3)
-# y$conceptId.4 <- as.numeric(y$conceptId.4)
-# 
-# 
-# biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
-# biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable, Variable.Name)
-# 
-# biospe2_CID_dd <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
-# 
-# 
-# biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
-#                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
-#                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
-#                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
-#                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
-# 
-# 
-# 
-# biospe2_CID_dd$new.varname <- ifelse(is.na(biospe2_CID_dd$label.1st), biospe2_CID_dd$Variable.Name,paste(biospe2_CID_dd$label.1st,biospe2_CID_dd$Variable.Name,sep="_"))
-# biospe2_CID_dd$variable[is.na(biospe2_CID_dd$new.varname)]
-# #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
-# biospe1 <- NULL
-# select0 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
-# select2 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==2)]
-# yes_no <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==1)]
-# biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
-# n<- length(select0)
-# colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
-# 
-# 
-# for (i in 1: length(select2)){
-#   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
-# }
-# colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==2)]
-# 
-# # for (i in 1:length(yes_no)){
-# #   x <- yes_no[i]
-# #   
-# #   varname <- biospe2_CID_dd[grepl(yes_no[i],biospe2_CID_dd$variable),]$new.varname
-# #   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-# #   check <- as.data.frame(biospe2[,x])
-# #   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
-# #   colnames(check)[2] <- varname
-# #   biospe1 <-   cbind(biospe1,subset(check,select=varname))
-# # }
-# 
-# for (i in 1:length(yes_no)){
-#   x <- yes_no[i]
-#   
-#   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable) & biospe2_CID_dd1$category==1,]$new.varname
-#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-#   check <- as.data.frame(biospe2[,x])
-#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
-#   colnames(check)[2] <- varname
-#   biospe1 <-   cbind(biospe1,subset(check,select=varname))
-# }
-# 
-# colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
-# colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
-# biospe1 <- biospe1[,order(colnames(biospe1))]
-# 
-# biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:315,66:103,125:143,220:296,144,297,163,44)]
-# 
-# 
-# 
-# 
-
-
-
-
-
-
-
-# ##11/16 update suggestion for column header updates
-# 
-# biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE) ## the data "y" is leftover in the code
-# 
-# 
-# biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
-#                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
-#                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
-#                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
-#                                             
-#                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
-# 
-# 
-# biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12, 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))  #to add "matched"  flag to select the correct variables based on their combined CIDs (tubeID, last.CID) to compromise the changes in the DD on the biospecimen
-# 
-# 
-# biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
-# 
-# 
-# biospe2_CID_dd1 <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
-# biospe2_CID_dd1$new.varname <- ifelse(biospe2_CID_dd1$matched==1, biospe2_CID_dd1$Variable.Name, paste(gsub("SST1","",biospe2_CID_dd1$Variable.Name),biospe2_CID_dd1$label.1st,sep="_"))
-# biospe2_CID_dd1$variable[is.na(biospe2_CID_dd1$new.varname)]
-# #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
-# biospe1 <- NULL
-# select0 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
-# select2 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==2)]
-# yes_no <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==1)]
-# biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
-# n<- length(select0)
-# colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
-# 
-# 
-# 
-# for (i in 1: length(select2)){
-#   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
-# }
-# colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==2)]
-# 
-# 
-# for (i in 1:length(yes_no)){
-#   x <- yes_no[i]
-#   
-#   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable),]$new.varname
-#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-#   check <- as.data.frame(biospe2[,x])
-#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
-#   colnames(check)[2] <- varname
-#   biospe1 <-   cbind(biospe1,subset(check,select=varname))
-# }
-# 
-# 
-# colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
-# colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
-# biospe1 <- biospe1[,order(colnames(biospe1))]
-# 
-# 
-# biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:337,66:103,125:143,220:296,144,297,163,44)]
-
-
-
-# 11/21/23 request from Domonique for specific column order 
-biospe1_final <- biospe1_final[,c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setting_v1r0","BioSpm_Location_v1r0","BioSpm_ColIDScan_v1r0",
-                                  "BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0","BioClin_DBBloodRRLBL_v1r0",
-                                  "BioClin_DBBloodRRLDtBL_v1r0",
-                                  "BioClin_DBUrineID_v1r0",
-                                  "BioClin_DBUrineRRLBL_v1r0",
-                                  "BioClin_DBUrineRRLDtBL_v1r0",
-                                  "BioCol_PhlebInitials_v1r0",
-                                  "BioCol_ColNote1_v1r0",
-                                  "BioCol_TubeColl_v1r0_Bio",
-                                  "BioCol_TubeID_v1r0_Bio",
-                                  "BioCol_TubeColl_v1r0_SST1",
-                                  "BioCol_TubeID_v1r0_SST1",
-                                  "BioCol_NotCol_v1r0_SST1",
-                                  "BioCol_NotCol_v1r0_SST1",
-                                  "BioCol_Discard_v1r0_SST1",
-                                  "BioCol_TubeColl_v1r0_SST2",
-                                  "BioCol_TubeID_v1r0_SST2",
-                                  "BioCol_NotCol_v1r0_SST2",
-                                  "BioCol_NotCol_v1r0_SST2",
-                                  "BioCol_Discard_v1r0_SST2",
-                                  "BioCol_TubeColl_v1r0_HT1",
-                                  "BioCol_TubeID_v1r0_HT1",
-                                  "BioCol_NotCol_v1r0_HT1",
-                                  "BioCol_NotCol_v1r0_HT1",
-                                  "BioCol_Discard_v1r0_HT1",
-                                  "BioCol_TubeColl_v1r0_EDTAT1",
-                                  "BioCol_TubeID_v1r0_EDTAT1",
-                                  "BioCol_NotCol_v1r0_EDTAT1",
-                                  "BioCol_NotCol_v1r0_EDTAT1",
-                                  "BioCol_Discard_v1r0_EDTAT1",
-                                  "BioCol_TubeColl_v1r0_ACDT1",
-                                  "BioCol_TubeID_v1r0_ACDT1",
-                                  "BioCol_NotCol_v1r0_ACDT1",
-                                  "BioCol_NotCol_v1r0_ACDT1",
-                                  "BioCol_Discard_v1r0_ACDT1",
-                                  "BioCol_TubeColl_v1r0_STRT1",
-                                  "BioCol_TubeID_v1r0_STRT1",
-                                  "BioCol_NotCol_v1r0_STRT1",
-                                  "BioCol_NotCol_v1r0_STRT1",
-                                  "BioCol_Discard_v1r0_STRT1",
-                                  "BioCol_TubeColl_v1r0_UT1",
-                                  "BioCol_TubeID_v1r0_UT1",
-                                  "BioCol_NotCol_v1r0_UT1",
-                                  "BioCol_NotCol_v1r0_UT1",
-                                  "BioCol_Discard_v1r0_UT1",
-                                  "BioCol_TubeColl_v1r0_MWT1",
-                                  "BioCol_TubeID_v1r0_MWT1",
-                                  "BioCol_NotCol_v1r0_MWT1",
-                                  "BioCol_NotCol_v1r0_MWT1",
-                                  "BioCol_Discard_v1r0_MWT1",
-                                  "BioCol_TubeColl_v1r0_BioMW",
-                                  "BioCol_TubeID_v1r0_BioMW",
-                                  "BioCol_TubeColl_v1r0_SST3",
-                                  "BioCol_TubeID_v1r0_SST3",
-                                  "BioCol_Discard_v1r0_SST3",
-                                  "BioCol_TubeColl_v1r0_SST4",
-                                  "BioCol_TubeID_v1r0_SST4",
-                                  "BioCol_Discard_v1r0_SST4",
-                                  "BioCol_TubeColl_v1r0_SST5",
-                                  "BioCol_TubeID_v1r0_SST5",
-                                  "BioCol_Discard_v1r0_SST5",
-                                  "BioCol_TubeID_v1r0_HT2",
-                                  "BioCol_TubeColl_v1r0_HT2",
-                                  "BioCol_Discard_v1r0_HT2",
-                                  "BioCol_TubeColl_v1r0_EDTAT2",
-                                  "BioCol_TubeID_v1r0_EDTAT2",
-                                  "BioCol_Discard_v1r0_EDTAT2",
-                                  "BioCol_TubeColl_v1r0_EDTAT3",
-                                  "BioCol_TubeID_v1r0_EDTAT3",
-                                  "BioCol_Discard_v1r0_EDTAT3",
-                                  "BioCol_CollBoxedStatus_v1r0",
-                                  "BioBPTL_DateRec_v1r0_SST1",
-                                  "BioBPTL_DateRec_v1r0_SST2",
-                                  "BioBPTL_DateRec_v1r0_HT1",
-                                  "BioBPTL_DateRec_v1r0_EDTAT1",
-                                  "BioBPTL_DateRec_v1r0_ACDT1",
-                                  "BioBPTL_DateRec_v1r0_STRT1",
-                                  "BioBPTL_DateRec_v1r0_UT1",
-                                  "BioBPTL_DateRec_v1r0_MWT1",
-                                  "BioKit_KitRecdTmBL_v1r0_MWTube1",
-                                  "BioBPTL_DateRec_v1r0_SST3",
-                                  "BioBPTL_DateRec_v1r0_SST4",
-                                  "BioBPTL_DateRec_v1r0_SST5",
-                                  "BioBPTL_DateRec_v1r0_HT2",
-                                  "BioBPTL_DateRec_v1r0_EDTAT2",
-                                  "BioBPTL_DateRec_v1r0_EDTAT3",
-                                  "BioRec_NoteOpt_v1r0",
-                                  "BioCol_StrayTubesList_v1r0",
-                                  "siteAcronym",
-                                  "BioCol_Deviation_v1r0_SST1",
-                                  "BioCol_DevNotes_v1r0_SST1",
-                                  "Deviation_BrokenSST1",
-                                  "Deviation_ClotLSST1",
-                                  "Deviation_ClotSSST1",
-                                  "Deviation_DiscardSST1",
-                                  "Deviation_GelSST1",
-                                  "Deviation_HemoSST1",
-                                  "Deviation_LeakSST1",
-                                  "Deviation_LowVolSST1",
-                                  "Deviation_MislabDSST1",
-                                  "Deviation_MislabRSST1",
-                                  "Deviation_NotFoundSST1",
-                                  "Deviation_OtherSST1",
-                                  "Deviation_OutContSST1",
-                                  "Deviation_SpeedHSST1",
-                                  "Deviation_SpeedLSST1",
-                                  "Deviation_TempHSST1",
-                                  "Deviation_TempLSST1",
-                                  "Deviation_TimeLSST1",
-                                  "Deviation_TimeSSST1",
-                                  "Deviation_TubeSzSST1",
-                                  "BioCol_Deviation_v1r0_SST2",
-                                  "BioCol_DevNotes_v1r0_SST2",
-                                  "Deviation_BrokenSST2",
-                                  "Deviation_ClotLSST2",
-                                  "Deviation_ClotSSST2",
-                                  "Deviation_DiscardSST2",
-                                  "Deviation_GelSST2",
-                                  "Deviation_HemoSST2",
-                                  "Deviation_LeakSST2",
-                                  "Deviation_LowVolSST2",
-                                  "Deviation_MislabDSST2",
-                                  "Deviation_MislabRSST2",
-                                  "Deviation_NotFoundSST2",
-                                  "Deviation_OtherSST2",
-                                  "Deviation_OutContSST2",
-                                  "Deviation_SpeedHSST2",
-                                  "Deviation_SpeedLSST2",
-                                  "Deviation_TempHSST2",
-                                  "Deviation_TempLSST2",
-                                  "Deviation_TimeLSST2",
-                                  "Deviation_TimeSSST2",
-                                  "Deviation_TubeSzSST2",
-                                  "BioCol_Deviation_v1r0_SST3",
-                                  "BioCol_DevNotes_v1r0_SST3",
-                                  "Deviation_BrokenSST3",
-                                  "Deviation_ClotLSST3",
-                                  "Deviation_ClotS_SST3",
-                                  "Deviation_DiscardSST3",
-                                  "Deviation_GelSST3",
-                                  "Deviation_HemoSST3",
-                                  "Deviation_LeakSST3",
-                                  "Deviation_LowVolSST3",
-                                  "Deviation_MislabDSST3",
-                                  "Deviation_MislabRSST3",
-                                  "Deviation_NotFoundSST3",
-                                  "Deviation_OtherSST3",
-                                  "Deviation_OutContSST3",
-                                  "Deviation_SpeedHSST3",
-                                  "Deviation_SpeedLSST3",
-                                  "Deviation_TempHSST3",
-                                  "Deviation_TempLSST3",
-                                  "Deviation_TimeLSST3",
-                                  "Deviation_TimeSSST3",
-                                  "Deviation_TubeSzSST3",
-                                  "BioCol_Deviation_v1r0_SST4",
-                                  "BioCol_DevNotes_v1r0_SST4",
-                                  "Deviation_BrokenSST4",
-                                  "Deviation_ClotLSST4",
-                                  "Deviation_ClotSSST4",
-                                  "Deviation_DiscardSST4",
-                                  "Deviation_GelSST4",
-                                  "Deviation_HemoSST4",
-                                  "Deviation_LeakSST4",
-                                  "Deviation_LowVolSST4",
-                                  "Deviation_MislabDSST4",
-                                  "Deviation_MislabRSST4",
-                                  "Deviation_NotFoundSST4",
-                                  "Deviation_OtherSST4",
-                                  "Deviation_OutContSST4",
-                                  "Deviation_SpeedHSST4",
-                                  "Deviation_SpeedLSST4",
-                                  "Deviation_TempHSST4",
-                                  "Deviation_TempLSST4",
-                                  "Deviation_TimeLSST4",
-                                  "Deviation_TimeSSST4",
-                                  "Deviation_TubeSzSST4",
-                                  "BioCol_Deviation_v1r0_SST5",
-                                  "BioCol_DevNotes_v1r0_SST5",
-                                  "Deviation_BrokenSST5",
-                                  "Deviation_ClotLSST5",
-                                  "Deviation_ClotSSST5",
-                                  "Deviation_DiscardSST5",
-                                  "Deviation_GelSST5",
-                                  "Deviation_HemoSST5",
-                                  "Deviation_LeakSST5",
-                                  "Deviation_LowVolSST5",
-                                  "Deviation_MislabDSST5",
-                                  "Deviation_MislabRSST5",
-                                  "Deviation_NotFoundSST5",
-                                  "Deviation_OtherSST5",
-                                  "Deviation_OutContSST5",
-                                  "Deviation_SpeedHSST5",
-                                  "Deviation_SpeedLSST5",
-                                  "Deviation_TempHSST5",
-                                  "Deviation_TempLSST5",
-                                  "Deviation_TimeLSST5",
-                                  "Deviation_TimeSSST5",
-                                  "Deviation_TubeSzSST5",
-                                  "BioCol_Deviation_v1r0_HT1",
-                                  "BioCol_DevNotes_v1r0_HT1",
-                                  "Deviation_BrokenHT1",
-                                  "Deviation_DiscardHT1",
-                                  "Deviation_HemoHT1",
-                                  "Deviation_LeakHT1",
-                                  "Deviation_LowVolHT1",
-                                  "Deviation_MislabelDHT1",
-                                  "Deviation_MislabelRHT1",
-                                  "Deviation_NotFoundHT1",
-                                  "Deviation_OtherHT1",
-                                  "Deviation_OutContamHT1",
-                                  "Deviation_TempHHT1",
-                                  "Deviation_TempLHT1",
-                                  "Deviation_TubeSzHT1",
-                                  "BioCol_Deviation_v1r0_HT2",
-                                  "BioCol_DevNotes_v1r0_HT2",
-                                  "Deviation_BrokenHT2",
-                                  "Deviation_DiscardHT2",
-                                  "Deviation_HemoHT2",
-                                  "Deviation_LeakHT2",
-                                  "Deviation_LowVolHT2",
-                                  "Deviation_MislabelDHT2",
-                                  "Deviation_MislabelRHT2",
-                                  "Deviation_NotFoundHT2",
-                                  "Deviation_OtherHT2",
-                                  "Deviation_OutContamHT2",
-                                  "Deviation_TempHHT2",
-                                  "Deviation_TempLHT2",
-                                  "Deviation_TubeSzHT2",
-                                  "BioCol_Deviation_v1r0_EDTAT1",
-                                  "BioCol_DevNotes_v1r0_EDTAT1",
-                                  "Deviation_BrokenEDTAT1",
-                                  "Deviation_DiscEDTAT1",
-                                  "Deviation_HemoEDTAT1",
-                                  "Deviation_LeakEDTAT1",
-                                  "Deviation_LowVolEDTAT1",
-                                  "Deviation_MislDEDTAT1",
-                                  "Deviation_MislREDTAT1",
-                                  "Deviation_NFEDTAT1",
-                                  "Deviation_OtherEDTAT1",
-                                  "Deviation_OutConEDTAT1",
-                                  "Deviation_TempHEDTAT1",
-                                  "Deviation_TempLEDTAT1",
-                                  "Deviation_TubeSzEDTAT1",
-                                  "BioCol_Deviation_v1r0_EDTAT2",
-                                  "BioCol_DevNotes_v1r0_EDTAT2",
-                                  "Deviation_BrokenEDTAT2",
-                                  "Deviation_DiscEDTAT2",
-                                  "Deviation_HemoEDTAT2",
-                                  "Deviation_LeakEDTAT2",
-                                  "Deviation_LowVolEDTAT2",
-                                  "Deviation_MislDEDTAT2",
-                                  "Deviation_MislREDTAT2",
-                                  "Deviation_NFEDTAT2",
-                                  "Deviation_OtherEDTAT2",
-                                  "Deviation_OutConEDTAT2",
-                                  "Deviation_TempHEDTAT2",
-                                  "Deviation_TempLEDTAT2",
-                                  "Deviation_TubeSzEDTAT2",
-                                  "BioCol_Deviation_v1r0_EDTAT3",
-                                  "BioCol_DevNotes_v1r0_EDTAT3",
-                                  "Deviation_BrokenEDTAT3",
-                                  "Deviation_DiscEDTAT3",
-                                  "Deviation_HemoEDTAT3",
-                                  "Deviation_LeakEDTAT3",
-                                  "Deviation_LowVolEDTAT3",
-                                  "Deviation_MislDEDTAT3",
-                                  "Deviation_MislREDTAT3",
-                                  "Deviation_NFEDTAT3",
-                                  "Deviation_OtherEDTAT3",
-                                  "Deviation_OutConEDTAT3",
-                                  "Deviation_TempHEDTAT3",
-                                  "Deviation_TempLEDTAT3",
-                                  "Deviation_TubeSzEDTAT3",
-                                  "BioCol_Deviation_v1r0_ACDT1",
-                                  "BioCol_DevNotes_v1r0_ACDT1",
-                                  "Deviation_BrokenACDT1",
-                                  "Deviation_DiscardACDT1",
-                                  "Deviation_HemoACDT1",
-                                  "Deviation_LeakACDT1",
-                                  "Deviation_LowVolACDT1",
-                                  "Deviation_MislabDACDT1",
-                                  "Deviation_MislabRACDT1",
-                                  "Deviation_NotFndACDT1",
-                                  "Deviation_OtherACDT1",
-                                  "Deviation_OutContACDT1",
-                                  "Deviation_TempHACDT1",
-                                  "Deviation_TempLACDT1",
-                                  "Deviation_TubeSzACDT1",
-                                  "BioCol_Deviation_v1r0_STRT1",
-                                  "BioCol_DevNotes_v1r0_STRT1",
-                                  "Deviation_BrokenSTRT1",
-                                  "Deviation_DiscardSTRT1",
-                                  "Deviation_HemoSTRT1",
-                                  "Deviation_LeakSTRT1",
-                                  "Deviation_LowVolSTRT1",
-                                  "Deviation_MislabDSTRT1",
-                                  "Deviation_MislabRSTRT1",
-                                  "Deviation_NotFndSTRT1",
-                                  "Deviation_OtherSTRT1",
-                                  "Deviation_OutContSTRT1",
-                                  "Deviation_TempHSTRT1",
-                                  "Deviation_TempLSTRT1",
-                                  "Deviation_TubeSzSTRT1",
-                                  "BioCol_Deviation_v1r0_UT1",
-                                  "BioCol_DevNotes_v1r0_UT1",
-                                  "Deviation_BrokenUT1",
-                                  "Deviation_LeakUT1",
-                                  "Deviation_LowVolUT1",
-                                  "Deviation_MislabelDUT1",
-                                  "Deviation_MislabelRUT1",
-                                  "Deviation_NotFoundUT1",
-                                  "Deviation_OtherUT1",
-                                  "Deviation_OutContamUT1",
-                                  "Deviation_TempHUT1",
-                                  "Deviation_TempLUT1",
-                                  "Deviation_UrVolUT1",
-                                  "BioCol_Deviation_v1r0_MWT1",
-                                  "BioCol_DevNotes_v1r0_MWT1",
-                                  "Deviation_BrokenMWT1",
-                                  "Deviation_LeakMWT1",
-                                  "Deviation_LowVolMWT1",
-                                  "Deviation_MislabDMWT1",
-                                  "Deviation_MislabRMWT1",
-                                  "Deviation_MWUnd30sMWT1",
-                                  "Deviation_NotFoundMWT1",
-                                  "Deviation_OtherMWT1",
-                                  "Deviation_OutContMWT1",
-                                  "token",
-                                  "date")]
-
+write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 # If in the future we have additional cols and there's a discrpency between the request column order and the existing column names
 #  missing_columns <- setdiff(expected_columns, colnames(biospe1))
@@ -5928,21 +5559,6 @@ biospe1_final <- biospe1_final[,c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_
 # } else {
 #   cat("All expected columns are present in the dataframe.\n")
 # }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # ##11/16 update suggestion for column header updates
 # 
 # biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE) ## the data "y" is leftover in the code
@@ -6014,20 +5630,12 @@ biospe1_final <- biospe1_final[,c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_
 # 
 # 
 # biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:337,66:103,125:143,220:296,144,297,163,44)]
-
-
-
-
-
-
-
-
 #biospe1_fin= subset(biospe1_final, select=-c(BioClin_DBBloodRRL_v1r0, BioClin_DBBloodRRLDt_v1r0, BioClin_DBUrineRRLDt_v1r0))
-
-
 # write.csv(biospe1_fin,paste(local_drive, "Connect_prod_Biospe_Formats",currentDate,".csv",sep="_"),row.names = F,na="")
 #write.csv(biospe1_fin,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
-write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
+
+```
 
 
 
@@ -6040,8 +5648,7 @@ write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentD
 
 
 
-
-
+```{r recrbio_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 
 ###biospecimen data
 # cnames <- names(recrver)
@@ -6220,4 +5827,5 @@ write.csv(recrbio_1,glue("{local_drive}Connect_prod_recr_veriBiospe_Formats_{cur
 
 
 ```
+
 
