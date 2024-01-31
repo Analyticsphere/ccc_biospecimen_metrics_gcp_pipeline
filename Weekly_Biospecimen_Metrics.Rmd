@@ -1,7 +1,7 @@
 
 ---
 title: "Biospecimen Weekly Metrics RMD"
-author: "Kelsey Dowling"
+author: "Kelsey Sanchez"
 date: "Data Extracted and Report Ran: `r Sys.Date()`"
 header-includes:  
     \usepackage[labelformat=empty]{caption}
@@ -2331,7 +2331,7 @@ Table18_combined <- test18a_B %>% dplyr::select(Site, checktmvisit )  %>% tbl_cr
   #bold_labels() %>%
   #italicize_levels() %>% 
   modify_header() %>%
-  modify_caption("Table 17. Baseline Clinical Biospecimen Survey Complete Time from Collection Time") %>% #on hold: check that HF shows up
+  modify_caption("Table 17. Baseline Clinical Biospecimen Survey Complete Time from Collection Time") %>% 
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 ```
@@ -2676,20 +2676,6 @@ verif_baseline_Af <- verif_baseline_Af %>%  select(Site,  'Number of Baseline Co
 #Code for figures
 
 
-#Fig 1-- for now, no longer being used
-sv.outlier.research <- ggplot(research.survey, aes(x=Site, y=as.numeric(time_biochk),fill=Site,color=Site)) + 
-  geom_boxplot() + geom_jitter(width = 0.2) +   scale_fill_brewer(palette="Dark2") +
-  geom_hline(linetype = "dashed", yintercept = 1440,color="red") + 
-  annotate('text', x=1, y=1800, label = "24 hours",size=3)+
-  ggtitle("Fig 2. Research Biospecimen Collection \n Visit Length (in Minutes) by Site") +
-    ylab("Visit Length (minutes)") + xlab("Site") +
-    scale_y_continuous(limits = c(0, 50000)) +
-    theme(panel.background = element_blank(),
-          legend.title = element_text(size=7),
-          axis.line = element_line(size=0.2),
-          axis.text.x = element_text(angle = 60,hjust = 1, size = 8, face = "bold"), 
-          plot.title = element_text(hjust = 0.5,size = 12, face = "bold"))
-
 
 #Fig 2- 
 research.survey<- research.survey %>% mutate(#weekday = weekdays(ymd_hms(collection.tm)),
@@ -2698,58 +2684,6 @@ research.survey<- research.survey %>% mutate(#weekday = weekdays(ymd_hms(collect
                                     current.date=max(as.POSIXct(ymd_hms(schedulecol.tm))),
                                     BioRec_CollectScheduled = ifelse(as.Date(ymd_hms(schedulecol.tm)) >= as.Date(as.POSIXct(ymd_hms(d_914594314))),1,0))
                                     
-                                    
-# research.survey$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(research.survey$collection.tm),research.survey$start.date, units="weeks")))
-# research.survey$visit.wkdate <- research.survey$start.date + dweeks(research.survey$visit.wk)
-# 
-#the visit.wkdate by the collection time has been defined at the tube_col by the collect.tm censoring by the week defined and started from the verified start date.
-
-#   #+scale_x_date(limit=c(as.Date("2022-06-10"),as.Date("2023-10-16"))) + scale_y_continuous(breaks = seq(0, 30, by = 3))
-# ###clnical blood collections
-# clc.bldtm <- c("d_173836415_d_266600170_d_769615780","d_173836415_d_266600170_d_822274939","d_173836415_d_266600170_d_398645039","d_173836415_d_266600170_d_982213346","d_173836415_d_266600170_d_740582332")
-# clc.urinetm <- c("d_173836415_d_266600170_d_139245758","d_173836415_d_266600170_d_224596428","d_173836415_d_266600170_d_541311218","d_173836415_d_266600170_d_939818935","d_173836415_d_266600170_d_740582332")
-# clc.blood.vt <- clinic.survey[which(clinic.survey$Site!="HealthPartners"),c("Connect_ID","Site","bldcol_max","collection.tm",clc.bldtm)]
-# clc.blood.vt$bld.startdate <- min(as.POSIXct(ymd_hms(clc.blood.vt$d_173836415_d_266600170_d_982213346)),na.rm=TRUE)
-# clc.blood.vt$bld.receiveddate <- as.POSIXct(ymd_hms(clc.blood.vt$d_173836415_d_266600170_d_398645039))
-# clc.blood.vt$visit.wk <- ceiling(as.numeric(difftime(clc.blood.vt$bld.receiveddate,clc.blood.vt$bld.startdate, units="weeks")))
-# clc.blood.vt$visit.wkdate <- as_date(clc.blood.vt$bld.startdate + dweeks(clc.blood.vt$visit.wk))
-# 
-# #to update the censoring date of blood collection consistent with the weekly log from Monday to Sunday
-# clc.blood.vt$Bld.Sunday.week <- ceiling(as.numeric(difftime(clc.blood.vt$bld.receiveddate,as.Date(veristart.date-days(2)),units="days"))/7)
-# clc.blood.vt$Bld.Sunday.date <- veristart.date + days(5) + dweeks(clc.blood.vt$Bld.Sunday.week -1)
-# 
-# # 
-# # clc.blood.wk_site <- clc.blood.vt %>% arrange(Site,visit.wk,visit.wkdate) %>% group_by(Site,visit.wk,visit.wkdate) %>% tally()
-# # clc_bld_vt.site<-ggplot(clc.blood.wk_site, aes(x=as_date(ymd(visit.wkdate)), y=n,fill=Site, color=Site)) +
-# #   geom_line() + 
-# #   geom_point(width = 0.2) +
-# #   scale_y_continuous(name="# Number Collections")+ #, limits=c(0,5) 
-# #   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
-# #   scale_fill_brewer(palette="Dark2") + 
-# #   ggtitle(label="TESTING--Fig 3. Number of biospecimen collection visits over time by site") +
-# #   #theme_ipsum() +
-# #   theme(panel.background = element_blank(),
-# #         legend.title = element_text(size=7),
-# #         axis.line = element_line(size=0.2),
-# #         axis.text.x = element_text(angle=60, hjust = 1,size = 8, face = "bold"),                                                            
-# #         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
-# #update the code Oct. 31, 2023
-# clc.blood.wk_site <- clc.blood.vt %>% arrange(Site,Bld.Sunday.week,Bld.Sunday.date) %>% group_by(Site,Bld.Sunday.week,Bld.Sunday.date) %>% tally()
-# clc_bld_vt.site<-ggplot(clc.blood.wk_site, aes(x=as_date(ymd(Bld.Sunday.date)), y=n,fill=Site, color=Site)) +
-#     geom_line() + 
-#     geom_point(width = 0.2) +
-#     scale_y_continuous(name="# Number Collections") +
-#     scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week")  +
-#     scale_fill_brewer(palette="Dark2") + 
-#     ggtitle(label="TESTING--Fig 3. Number of biospecimen collection visits over time by site") +
-#     #theme_ipsum() +
-#     theme(panel.background = element_blank(),
-#           legend.title = element_text(size=7),
-#           axis.line = element_line(size=0.2),
-#           axis.text.x = element_text(angle=60, hjust = 1,size = 8, face = "bold"),                                                            
-#           plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
-
-
 
 
 
@@ -2804,7 +2738,7 @@ clc.both.vt.NW <- clc.both.vt.KP %>%  filter(clc.both.vt.KP$Site=="Kaiser Perman
    geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, minor_breaks=0) + #, limits=c(0,max(clc.both.wk_site.CO$visit.wk))) + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
 
   ggtitle(label="Figure 21. Weekly Biospecimen Collections \n at Kaiser Permanente Colorado") +
@@ -2828,7 +2762,7 @@ clc_both_vt.site.GA<- clc.both.wk_site.GA  %>% ggplot( aes(x=as_date(clc.both.wk
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Figure 22. Weekly Biospecimen Collections \n at Kaiser Permanente Georgia") +
   #theme_ipsum() +
@@ -2850,7 +2784,7 @@ clc_both_vt.site.HI<- clc.both.wk_site.HI %>% ggplot( aes(x=as_date(clc.both.wk_
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Figure 23. Weekly Biospecimen Collections \n at Kaiser Permanente Hawaii") +
   #theme_ipsum() +
@@ -2872,7 +2806,7 @@ clc_both_vt.site.NW<- clc.both.wk_site.NW  %>% ggplot( aes(x=as_date(clc.both.wk
   geom_line() + 
   geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + #, limits=c(0,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
   ggtitle(label="Figure 24. Weekly Biospecimen Collections \n at Kaiser Permanente Northwest") +
   #theme_ipsum() +
@@ -3018,105 +2952,9 @@ avg_draw_order = avg_coll %>%group_by(Site) %>% #biochk_outlier,
 
 
 
-
-```{r TempTable, include=FALSE, echo=FALSE, warning=FALSE}
-
-
-
-##Temporary Table -- recr.bio : d_764863765 is BU completion time stamp and d_222161762 is BUM,     biospe: d_678166505 is time stamp anything collected?
-
-timestamps <-  "SELECT Connect_ID, d_764863765, d_222161762, d_173836415_d_266600170_d_982213346, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_847159717
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID is not null"
-TSofcollection <-  "SELECT Connect_ID, d_678166505, d_650516960 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null"
-
-timestamps_cc <- bq_project_query(project, timestamps)
-TSofcollection_cc <- bq_project_query(project, TSofcollection)
-
-compTS <- bq_table_download(timestamps_cc, bigint="integer64",n_max = Inf, page_size = 10000)
-collTS <- bq_table_download(TSofcollection_cc, bigint="integer64",n_max = Inf, page_size = 1000)
-
-biosurvTS <- left_join(compTS, collTS, by="Connect_ID")
-
-#####table(biosurvTS$d_650516960[!is.na(biosurvTS$d_678166505)])--- collection time stamp d_678166505 is only applicable to research samples
-
-##BU (clinical)
-BU_TS <- biosurvTS %>%  filter(!is.na(d_764863765) & (!is.na(d_173836415_d_266600170_d_982213346) | !is.na(d_173836415_d_266600170_d_139245758)) )  # &  d_650516960==664882224
-
-
-
-BU_TS <- BU_TS %>%  mutate(time = as.numeric(difftime( as.POSIXct(ymd_hms(d_764863765)),min(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)), as.POSIXct(ymd_hms(d_173836415_d_266600170_d_139245758)), na.rm=T),
-                                                       units="days")))
-
-BU_TS_time_span = BU_TS %>% #group_by(Site) %>% #biochk_outlier,
-  dplyr::summarize(#'Number of Collection'=n(),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   SD= round(sd(time,na.rm = TRUE), digits=1),
-                   Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
-
-timelag1 <- knitr::kable(BU_TS_time_span, caption='Time Lag (in Days) from Clinical Blood Urine Biospecimen Donation to Survey Completion', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
-
-
-
-
-
-
-BUM_TS <- biosurvTS %>%  filter(!is.na(d_222161762)  & (!is.na(d_173836415_d_266600170_d_561681068) | !is.na(d_173836415_d_266600170_d_847159717))) #& !is.na(d_678166505)
-
-
-BUM_TS <- BUM_TS %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),
-                                                        min(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_561681068)), as.POSIXct(ymd_hms(d_173836415_d_266600170_d_847159717)), na.rm=T) ,units="days")))
-
-
-BUM_TS_time_span = BUM_TS %>% #group_by(Site) %>% #biochk_outlier,
-  dplyr::summarize(#'Number of Collection'=n(),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   SD= round(sd(time,na.rm = TRUE), digits=1),
-                   Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
-
-timelag2 <- knitr::kable(BUM_TS_time_span, caption='Time Lag (in Days) from Research Biospecimen Donation to Blood Urine Mouthwash Survey Completion', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
-
-
-timelag1
-timelag2
-
-
-```
- 
- 
-
-
  
 ```{r Figures4, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
-### ADD TO REPORT
 
-#NEW FIGURE 4, NOW MOVED UP
-
-# #fig4_sub_all <- research.survey %>%  filter(Site=="Henry Ford Health System" | Site=="Sanford Health" | Site=="University of Chicago Medicine")
-# fig4_sub_all <- research.survey %>%  filter((d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909) & !is.na(checktmvisit)) # & d_222161762<as.Date("2023-07-05")
-# 
-# fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
-# 
-# 
-# 
-# 
-# fig4_sub_1<- fig4_sub_all %>% mutate(hours3 = case_when(checktmvisit=="0 hrs to 3 hrs"~1,
-#                                                 TRUE~0),
-#                                     start.date = min(schedulecol.tm),
-#                                     current.date=max(as.POSIXct(ymd_hms(schedulecol.tm))),
-#                                     BioRec_CollectScheduled = ifelse(as.Date(ymd_hms(schedulecol.tm)) >= as.Date(as.POSIXct(ymd_hms(d_914594314))),1,0))
-#                                     
-# fig4_sub_1$visit.wk <- ceiling(as.numeric(difftime(ymd_hms(fig4_sub_1$collection.tm),fig4_sub_1$start.date, units="weeks")))
-# fig4_sub_1$visit.wkdate <- fig4_sub_1$start.date + dweeks(fig4_sub_1$visit.wk)
-# visit_wk_site4 <- fig4_sub_1 %>% arrange(Site,hours3,visit.wk,visit.wkdate) %>% group_by(Site,hours3,visit.wk,visit.wkdate) %>% tally()
-# visit_wk_site4__1 <- visit_wk_site4 %>%  filter(hours3>0)
 
 ##HF
 fig4_sub_all <- research.survey %>%  filter(Site=="Henry Ford Health System") # | Site=="Sanford Health" | Site=="University of Chicago Medicine")
@@ -3149,7 +2987,7 @@ visit_wk_site4__1 <- visit_wk_site4 %>%  filter(hours3>0 & col.Monday.date < Sys
 research.4_1 <- ggplot(visit_wk_site4__1, aes(x=as.Date(col.Monday.date), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.1 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Henry Ford Health System") +
   #theme_ipsum() +
@@ -3190,7 +3028,7 @@ visit_wk_site4__2 <- visit_wk_site4 %>%  filter(hours3>0 & col.Monday.date < Sys
 research.4_2 <- ggplot(visit_wk_site4__2, aes(x=as.Date(col.Monday.date), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.2  Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, Sanford Health") +
   #theme_ipsum() +
@@ -3233,7 +3071,7 @@ visit_wk_site4__3 <- visit_wk_site4 %>%  filter(hours3>0 & col.Monday.date < Sys
 research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(col.Monday.date), y=100*(hours3/n))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 4.3 Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Visit Check-In, University of Chicago Medicine") +
   #theme_ipsum() +
@@ -3364,72 +3202,6 @@ crosstable.coll_bptl28a[6,7] <- paste(crosstable.coll_bptl28a[6,7], " (100%)")
  
 ```{r Table28b,include=FALSE, echo=FALSE, warning=FALSE}
 
-# #need to make all BPTL 11:30 for consistency purposes of tables 3 & 4
-# 
-# 
-# str_sub(biospe$d_143615646_d_926457119,12,24)[!is.na(biospe$d_143615646_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_232343615_d_926457119,12,24)[!is.na(biospe$d_232343615_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_299553921_d_926457119,12,24)[!is.na(biospe$d_299553921_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_376960806_d_926457119,12,24)[!is.na(biospe$d_376960806_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_454453939_d_926457119,12,24)[!is.na(biospe$d_454453939_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_505347689_d_926457119,12,24)[!is.na(biospe$d_505347689_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_589588440_d_926457119,12,24)[!is.na(biospe$d_589588440_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_652357376_d_926457119,12,24)[!is.na(biospe$d_652357376_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_677469051_d_926457119,12,24)[!is.na(biospe$d_677469051_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_683613884_d_926457119,12,24)[!is.na(biospe$d_683613884_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_703954371_d_926457119,12,24)[!is.na(biospe$d_703954371_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_838567176_d_926457119,12,24)[!is.na(biospe$d_838567176_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_958646668_d_926457119,12,24)[!is.na(biospe$d_958646668_d_926457119)] <- "11:30:00.000Z"
-# str_sub(biospe$d_973670172_d_926457119,12,24)[!is.na(biospe$d_973670172_d_926457119)] <- "11:30:00.000Z"
-# 
-# #RESEARCH 
-# biospe_adhoc= biospe %>%  filter(d_650516960==534621077 & d_410912345==353358909 & !is.na(d_556788178) & 
-#                                    #BPTL not null
-#                              (!is.na(d_143615646_d_926457119) | !is.na(d_232343615_d_926457119) | !is.na(d_299553921_d_926457119) | !is.na(d_376960806_d_926457119) |
-#                                 !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) | !is.na(d_652357376_d_926457119) |
-#                                 !is.na(d_677469051_d_926457119) | !is.na(d_683613884_d_926457119) | !is.na(d_703954371_d_926457119) | !is.na(d_838567176_d_926457119) |
-#                                 !is.na(d_958646668_d_926457119) | !is.na(d_973670172_d_926457119))) %>% 
-#                      mutate(Site_location = case_when(d_951355211==777644826 ~ "UC-DCAM",
-#                                                       d_951355211==145191545 ~ "Ingalls Harvey",
-#                                                       d_951355211==489380324 ~ "River East",
-#                                                       d_951355211==120264574 ~ "South Loop",
-#                                                       d_951355211==834825425 ~ "HP Research Clinic",
-#                                                       d_951355211==736183094 ~ "HFH K-13 Research Clinic",
-#                                                       d_951355211==886364332 ~ "HFH Cancer Pavilion Research Clinic",
-#                                                       d_951355211==706927479 ~ "HFH Livonia Research Clinic",
-#                                                       d_951355211==692275326 ~ "Marshfield",
-#                                                       d_951355211==813701399 ~ "Weston",
-#                                                       d_951355211==698283667 ~ "Lake Hallie",
-#                                                       d_951355211==691714762 ~ "Rice Lake",
-#                                                       d_951355211==487512085 ~ "Wisconsin Rapids",
-#                                                       d_951355211==983848564 ~ "Colby Abbotsford",
-#                                                       d_951355211==261931804 ~ "Minocqua",
-#                                                       d_951355211==665277300 ~ "Merrill",
-#                                                       d_951355211==589224449 ~ "Sioux Falls Imagenetics",
-#                                                       d_951355211==467088902 ~ "Fargo South University",
-#                                                       d_951355211==834825425 ~ "HP Research Clinic",
-#                                                       d_951355211==567969985 ~ "MF Pop-Up",
-#                                                       d_951355211==319518299 ~ "UCM Pop-Up",
-#                                                       d_951355211==940329442 ~ "Orland Park"),
-#                             Site = case_when(d_827220437==548392715 ~ "Henry Ford",
-#                                                   d_827220437==531629870 ~ "HealthPartners",
-#                                                   d_827220437==303349821 ~ "Marshfield",
-#                                                   d_827220437==657167265 ~ "Sanford",
-#                                                   d_827220437==809703864 ~ "UChicago",
-#                                              TRUE ~ "Remove"))
-# 
-# #biospe_adhoc$Site_location<- droplevels(biospe_adhoc$Site_location)
-# biospe_adhoc$Site_location <- factor(biospe_adhoc$Site_location,levels=c("HP Research Clinic","HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic", "HFH Livonia Research Clinic","Marshfield", "MF Pop-Up",
-#                                                                          "Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", "Colby Abbotsford","Minocqua","Merrill","Sioux Falls Imagenetics","Fargo South University",
-#                                                                          "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park")) 
-# 
-# coll_bptl_diff <- biospe_adhoc  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
-#   mutate(any_collection = min(d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, na.rm=T),
-#          day_past = difftime(as.Date(any_collection), as.Date(d_556788178), units="days"),
-#          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",ifelse(as.numeric(day_past)<3,"2 Days",ifelse(as.numeric(day_past)<4,"3 Days", ifelse(as.numeric(day_past)<5,"4 Days", ">4 Days")))))
-# 
-# 
-# coll_bptl_diff$Connect_ID <- as.numeric(coll_bptl_diff$`as.character(Connect_ID)`)
 
 table.coll_bptl <- ctable(coll_bptl_diff$Site_location,coll_bptl_diff$coll_days_diff)
 crosstable.coll_bptl28 <- as.data.frame(cbind(table.coll_bptl$cross_table,table.coll_bptl$proportions))
@@ -3581,88 +3353,6 @@ crosstable.coll_bptl29a[7,7] <- paste(crosstable.coll_bptl29a[7,7], " (100%)")
 
 
 ```{r, Table29b, include=FALSE, echo=FALSE, warning=FALSE}
-# 
-# table2_col_bplt <- recrver1 %>% select(Connect_ID, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_139245758)
-# table2_col_bplt$Connect_ID <- as.numeric(table2_col_bplt$Connect_ID)
-# biospe$Connect_ID <- as.numeric(biospe$Connect_ID)
-# table2 <- left_join(biospe, table2_col_bplt, by="Connect_ID")
-# 
-# biospe_adhoc2= table2 %>%  filter(d_650516960==664882224 & d_410912345==353358909  & #clinical and finalized collections
-#                                    #SiteBlLocatBL / SiteUrLocatBL
-#                                    (!is.na(d_173836415_d_266600170_d_185243482) | !is.na(d_173836415_d_266600170_d_452847912)) & 
-#                                    #ClinBloodTmBL/ ClinUrnieTmBL 
-#                                    (!is.na(d_173836415_d_266600170_d_822274939) | !is.na(d_173836415_d_266600170_d_139245758)) & 
-#                                    #BioBPTL_DateRec_v1r0 blood or urine
-#                              (!is.na(d_232343615_d_926457119) | !is.na(d_299553921_d_926457119) | !is.na(d_376960806_d_926457119) |
-#                                 !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) | !is.na(d_652357376_d_926457119) |
-#                                 !is.na(d_677469051_d_926457119) | !is.na(d_683613884_d_926457119) | !is.na(d_703954371_d_926457119) | !is.na(d_838567176_d_926457119) |
-#                                 !is.na(d_958646668_d_926457119) | !is.na(d_973670172_d_926457119))) %>%  
-#                      mutate(Site_location = case_when(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
-#                                                       d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
-#                                                       d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen",
-#                                                       d_173836415_d_266600170_d_185243482==22 | d_173836415_d_266600170_d_452847912==22 |
-#                                                       d_173836415_d_266600170_d_185243482==24 | d_173836415_d_266600170_d_452847912==24 |
-#                                                       d_173836415_d_266600170_d_185243482==28 | d_173836415_d_266600170_d_452847912==28 |
-#                                                       d_173836415_d_266600170_d_185243482==33 | d_173836415_d_266600170_d_452847912==33 |
-#                                                       d_173836415_d_266600170_d_185243482==34 | d_173836415_d_266600170_d_452847912==34 |
-#                                                       d_173836415_d_266600170_d_185243482==35 | d_173836415_d_266600170_d_452847912==35 |
-#                                                         d_173836415_d_266600170_d_185243482==38 | d_173836415_d_266600170_d_452847912==38 |
-#                                                         d_173836415_d_266600170_d_185243482==40 | d_173836415_d_266600170_d_452847912==40 |
-#                                                         d_173836415_d_266600170_d_185243482==55 | d_173836415_d_266600170_d_452847912==55 |
-#                                                       d_173836415_d_266600170_d_185243482==71 | d_173836415_d_266600170_d_452847912==71 ~ "Oahu Clinics",
-#                                                       d_173836415_d_266600170_d_185243482==23 | d_173836415_d_266600170_d_452847912==23 |
-#                                                       d_173836415_d_266600170_d_185243482==26 | d_173836415_d_266600170_d_452847912==26 |
-#                                                       d_173836415_d_266600170_d_185243482==27 | d_173836415_d_266600170_d_452847912==27 |
-#                                                       d_173836415_d_266600170_d_185243482==32 | d_173836415_d_266600170_d_452847912==32 |
-#                                                         d_173836415_d_266600170_d_185243482==37 | d_173836415_d_266600170_d_452847912==37 |
-#                                                         d_173836415_d_266600170_d_185243482==49 | d_173836415_d_266600170_d_452847912==49 |
-#                                                         d_173836415_d_266600170_d_185243482==56 | d_173836415_d_266600170_d_452847912==56 |
-#                                                       d_173836415_d_266600170_d_185243482==69 | d_173836415_d_266600170_d_452847912==69 ~ "Non-Oahu Clinics",
-#                        d_173836415_d_266600170_d_185243482==1050010095 | d_173836415_d_266600170_d_452847912==1050010095 ~ "Wyandotte",
-#                        d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 |
-#                          d_173836415_d_266600170_d_452847912==1060010063 | d_173836415_d_266600170_d_452847912==1060170018~ "Macomb",
-#                        d_173836415_d_266600170_d_185243482==1040010047 | d_173836415_d_266600170_d_185243482==1040010046 |
-#                          d_173836415_d_266600170_d_185243482==1011220006 |
-#                          d_173836415_d_266600170_d_452847912==1040010047 | d_173836415_d_266600170_d_452847912==1040010046 |
-#                          d_173836415_d_266600170_d_452847912==1011220006 ~ "West Bloomfield",
-#                        d_173836415_d_266600170_d_185243482==1011410008 | d_173836415_d_266600170_d_452847912==1011410008 ~ "Royal Oak",
-#                        d_173836415_d_266600170_d_185243482 ==1010180040 |d_173836415_d_266600170_d_452847912 ==1010180040 ~ "Fairlane (Dearborn)",
-#                        d_173836415_d_266600170_d_185243482==1010120026 | d_173836415_d_266600170_d_452847912==1010120026 ~ "Columbus",
-#                        d_173836415_d_266600170_d_185243482==1011660013  | d_173836415_d_266600170_d_452847912==1011660013 ~ "Plymouth",
-#                        d_173836415_d_266600170_d_185243482==1010360011 | d_173836415_d_266600170_d_452847912==1010360011 ~ "Troy",
-#                        d_173836415_d_266600170_d_185243482==1010350019 ~ "Taylor",
-#                        d_173836415_d_266600170_d_185243482==1010240013 | d_173836415_d_266600170_d_452847912==1010240013 ~ "Livonia",
-#                        d_173836415_d_266600170_d_185243482==1010320019 | d_173836415_d_266600170_d_452847912==1010320019 ~ "Sterling Heights",
-#                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010114 |
-#                          d_173836415_d_266600170_d_452847912==1010010193 | d_173836415_d_266600170_d_452847912==1010010114~ "K1 HFH Main",
-#                                         d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-#                                         d_827220437==452412599 ~ "Kaiser Permanente Northwest",
-#                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-#                        TRUE ~ "Remove"),
-#                        Site = case_when(d_827220437==548392715 ~ "Henry Ford",
-#                                         d_827220437==531629870 ~ "HealthPartners",
-#                                         d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-#                                         d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-#                                         d_827220437==452412599 ~ "Kaiser Permanente Northwest",
-#                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-#                                         TRUE ~ "Remove"))
-# biospe_adhoc2 <- biospe_adhoc2 %>%  filter(Site_location!="Remove" & Site!="Remove")
-# biospe_adhoc2$Site_location <- factor(biospe_adhoc2$Site_location,levels=c("Macomb","West Bloomfield","Wyandotte","Fairlane (Dearborn)","Plymouth", "Royal Oak","Troy", "Taylor",
-#                                                   "K1 HFH Main","Sterling Heights","Columbus", "Livonia" , "Chanhassen", "Elk River", "Kaiser Permanente Colorado", 
-#                                                   "Kaiser Permanente Georgia", "Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest")) 
-# 
-# 
-# coll_bptl_diff2 <- biospe_adhoc2  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
-#   mutate(any_collection = min(d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119,
-#                               d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119,
-#                               d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, na.rm=T),
-#          clin_coll_bu = min(d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_139245758, na.rm=T),
-#          day_past = difftime(as.Date(any_collection), as.Date(clin_coll_bu), units="days"),
-#          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",ifelse(as.numeric(day_past)<3,"2 Days",ifelse(as.numeric(day_past)<4,"3 Days", ifelse(as.numeric(day_past)<5,"4 Days", ">4 Days")))))
-# #don't know how this is happening but needs to be included for now
-# coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
-# 
-# coll_bptl_diff2$Connect_ID <- as.numeric(coll_bptl_diff2$`as.character(Connect_ID)`)
 
 table.coll_bptl2 <- ctable(coll_bptl_diff2$Site_location,coll_bptl_diff2$coll_days_diff)
 crosstable.coll_bptl2 <- as.data.frame(cbind(table.coll_bptl2$cross_table,table.coll_bptl2$proportions))
@@ -3677,12 +3367,9 @@ crosstable.coll_bptl2$n_pct_4_plus_days =  paste(format(crosstable.coll_bptl2[,1
 crosstable.coll_bptl2$Totals <- paste(crosstable.coll_bptl2$Total, " (100%)")
 #nrow(crosstable.coll_bptl2)
 crosstable.coll_bptl2$Count <- 1:as.numeric(dim(crosstable.coll_bptl2)[[1]])
-
-#crosstable.coll_bptl_2 <- crosstable.coll_bptl2[, c("Count", "location", "n_pct_1_Day", "n_pct_2_Day", "n_pct_3_Day", "n_pct_4_Day", "n_pct_4_plus_days", "Totals")]
          
 crosstable.coll_bptl_2 <- crosstable.coll_bptl2[,c("location","n_pct_1_Day", "n_pct_2_Day", "n_pct_3_Day", "n_pct_4_Day", "n_pct_4_plus_days", "Totals")]
 
-#crosstable.coll_bptl21 %>% gt::gt(groupname_col = "Site")
 
 
 
@@ -3795,7 +3482,7 @@ add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the H
 
 
 
-Bld_urn_cli = knitr::kable(newtable_4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", font_size = 7) 
+Bld_urn_cli = knitr::kable(newtable_4, caption='Table 4. Data System Status Among Baseline Clinical Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "hold_position") 
 add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later than Biospecimen Dashboard data. 'Site Data Only' is assumed to be '0 (0%)' when not listed.", notation = "none")
 
 
@@ -3869,7 +3556,7 @@ research.1_1 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
   geom_line(data=final_fig1_table, aes(x=as.Date(col.Monday.date), y=No__Blood, colour="No__Blood"), na.rm=T) +
   geom_point(width = 0.2) +
   scale_y_continuous(name="Percent", limits=c(0,100),expand = c(0, 0), breaks=seq(0,100,25)) +  
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   scale_color_manual(name = "Incompletion Level", values = c("All_Incomplete"="darkred","Partial__Blood" = "blue", "No__Blood" = "darkgreen"), labels = c("Total","Partial Blood", "No Blood")) +
   #scale_fill_discrete(name = "Incompletion Level", labels = c("Partial Blood", "No Blood")) +
@@ -3992,6 +3679,7 @@ knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No
 
 research.notcolnotes_site
 #research.notcolnotes_tube
+
 add_footnote(research.notcolnotes_tube, "Note: 'Short Draw' reason applicable to blood collection tubes only.", notation="none")
 
 
@@ -4012,10 +3700,6 @@ Table15_combined %>% kable_styling(latex_options = "scale_down")
 ```{r Figure3, echo=FALSE, eval=TRUE, warning=FALSE}
 
 
-
-### ADD TO REPORT
-
-#NEW FIGURE 3, NOW MOVED UP
 
 fig3_sub <- research.survey %>%  filter(Site=="University of Chicago Medicine")
 fig3_sub <- fig3_sub %>%  filter(!is.na(research.sv)) 
@@ -4041,7 +3725,7 @@ figsub3_6 <- figsub3_5 %>%  mutate(percent_3= 100*(cum_sub/cumtotal))
 research.3 <- ggplot(figsub3_5, aes(x=as.Date(col.Monday.date), y=100*(cum_sub/cumtotal))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line(na.rm=T) + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",limits=c(0,100),expand=c(0,0)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 3. Cumulative Percent of Biospecimen Surveys Submitted, \n University of Chicago Medicine") +
   #theme_ipsum() +
@@ -4070,7 +3754,7 @@ research.3
 research.3.1 <- ggplot(figsub3_5, aes(x=as.Date(col.Monday.date), y=100*(weekly_sub/per_week_parts))) + #, color=Site)) + #,fill=Site, color=Site)) +
   geom_line(na.rm=T) + geom_point(width = 0.2) +
   scale_y_continuous(name="Percent",limits=c(0,100),expand=c(0,0)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 3.1 Weekly Percent of Biospecimen Surveys Submitted, \n University of Chicago Medicine") +
   #theme_ipsum() +
@@ -4090,6 +3774,7 @@ research.3.1
 
 
 ```{r KnitrTables15_16,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+
 Table16_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -4113,6 +3798,7 @@ research.4_3
 \newpage
 \FloatBarrier
 ```{r KnitrTables17_20,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
+
 Table18_combined  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -4149,8 +3835,8 @@ UC_Time_plot <- research.vt.length.UC %>%  group_by(col.Monday.date, Site_locati
 UC_Time <- ggplot(UC_Time_plot, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Minutes",limits=c(0,300)) +     #limits=c(0,100*round(max(UC_Time_plot$n/100,1)))) +          #, limits=c(0,30), breaks=seq(0,30,5)) +
-  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0)) +
+  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0)) +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 5. 'Weekly Research Biospecimen Collection Average Visit Length (in minutes) \n for Chicago Collection Locations'") +
   #theme_ipsum() +
@@ -4239,87 +3925,6 @@ coll_bplt_knitr <- group_rows(
   start_row = 16,
   end_row = 21)
 
-
-coll_bplt_knitr
-
-
-
-
-
-
-coll_bplt_knitr2 <- knitr::kable(crosstable.coll_bptl_2, col.names=c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Days", ">4 Days", "Total"), caption='Table 29. Clinical Biospecimen Collection to Receipt at BPTL (in Days) by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
-
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Henry Ford Health",
-  start_row = 1,
-  end_row = 12)
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "HealthPartners",
-  start_row = 13,
-  end_row = 14)
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Colorado",
-  start_row = 15,
-  end_row = 15) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Georgia",
-  start_row = 16,
-  end_row = 16) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Hawaii",
-  start_row = 17,
-  end_row = 18) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Northwest",
-  start_row = 19,
-  end_row = 19) 
-
-coll_bplt_knitr2
-
-
-
-
-
-
-coll_bplt_knitr3 <- knitr::kable(Hrs_bptl_col, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 30. Time (in Hours) from Research Biospecimen Collection to Receipt at BPTL by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
-
-
-
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "HealtPartners",
-  start_row = 1,
-  end_row = 1)  
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "Henry Ford Health",
-  start_row = 2,
-  end_row = 4) 
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "Marshfield",
-  start_row = 5,
-  end_row = 10) 
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "Sanford Health",
-  start_row = 11,
-  end_row = 12)
-coll_bplt_knitr3 <- group_rows(
-  coll_bplt_knitr3,
-  group_label = "University of Chicago",
-  start_row = 13,
-  end_row = 18)
-
-
-add_footnote(coll_bplt_knitr3, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
-
 coll_bplt_knitr
 
 
@@ -4363,41 +3968,6 @@ coll_bplt_knitr2 <- group_rows(
 
 coll_bplt_knitr2
 
-coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
-
-
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Henry Ford Health",
-  start_row = 1,
-  end_row = 12)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "HealthPartners",
-  start_row = 13,
-  end_row = 14)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Colorado",
-  start_row = 15,
-  end_row = 15) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Georgia",
-  start_row = 16,
-  end_row = 16) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Hawaii",
-  start_row = 17,
-  end_row = 18) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Northwest",
-  start_row = 19,
-  end_row = 19) 
-
-
 
 coll_bplt_knitr3 <- knitr::kable(Hrs_bptl_col, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 30. Time (in Hours) from Research Biospecimen Collection to Receipt at BPTL by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
@@ -4437,6 +4007,7 @@ add_footnote(coll_bplt_knitr3, "Note: BPTL receipt time is assumed to be 11:30am
 
 
 
+
 coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 
@@ -4471,48 +4042,11 @@ coll_bplt_knitr4 <- group_rows(
   start_row = 19,
   end_row = 19) 
 
-coll_bplt_knitr4 <- knitr::kable(Hrs_bptl_col4, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 31. Time (in Hours) from Clinical Biospecimen Collection to Receipt at BPTL by Clinic Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
-add_footnote(coll_bplt_knitr4, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
-
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Henry Ford Health",
-  start_row = 1,
-  end_row = 12)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "HealthPartners",
-  start_row = 13,
-  end_row = 14)
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Colorado",
-  start_row = 15,
-  end_row = 15) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Georgia",
-  start_row = 16,
-  end_row = 16) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Hawaii",
-  start_row = 17,
-  end_row = 18) 
-coll_bplt_knitr4 <- group_rows(
-  coll_bplt_knitr4,
-  group_label = "Kaiser Permanente Northwest",
-  start_row = 19,
-  end_row = 19) 
-
-
-add_footnote(coll_bplt_knitr4, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
-
-
+coll_bplt_knitr4
 ```
 
-```
+
 
 
 \newpage
@@ -4717,7 +4251,7 @@ combined_plotHF <- ggplot(combined_dataHF, aes(x = as.Date(coldate), y = hrs_pas
   theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
   ggtitle(label="Figure 14. Hours from Collection to BPTL Receipt, \n Henry Ford")
 combined_plotHF
-
+```
 
 
 
@@ -4750,8 +4284,8 @@ visit_wk_site1 <- fig2_1 %>% arrange(col.Sunday.week,col.Monday.date) %>% group_
 research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(col.Monday.date), y=n)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number of Collections",limits=c(0,100*round(max(visit_wk_site1$n/100,1)))) + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0)) +
+  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0)) +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 15. Weekly Biospecimen Collections, \n All Sites") +
   #theme_ipsum() +
@@ -4834,7 +4368,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
  research.vt_plotH <- ggplot(visit_wk_site.hybridHF, aes(x=as.Date(col.Monday.date), y=n, color=Setting )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Figure 16. Weekly Biospecimen Collections \n at Henry Ford") +
    #theme_ipsum() +
@@ -4853,7 +4387,7 @@ visit_wk_site.hybrid <-research.survey.hybrid %>% arrange(Site,Site_location, Se
   research.vt_plotHF <- ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_point(width = 0.2) + geom_line() + 
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Figure 16.1 Weekly Research Biospecimen Collections \n at Henry Ford by Collection Location") +
    #theme_ipsum() +
@@ -4888,7 +4422,7 @@ edited_fig3_1_Clin_tally <- edited_fig3_1_Clin %>% arrange(HF_Sites, col.Sunday.
   research.vt_plotH_Clin <- ggplot(edited_fig3_1_Clin_tally, aes(x=as.Date(col.Monday.date), y=n, color=HF_Sites )) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-05-22"),as.Date(Sys.Date())),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-05-22"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Figure 16.2 Weekly Clinical Biospecimen Collections \n at Henry Ford by Clinic Location") +
    #theme_ipsum() +
@@ -4946,7 +4480,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site,Site_location,Setting,col.Sunda
  research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Figure 17. Weekly Biospecimen Collections at \n University of Chicago Medicine") +
    #theme_ipsum() +
@@ -4959,10 +4493,10 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site,Site_location,Setting,col.Sunda
  print(research.vt_plotUC)
 
  research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
- research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+ research.vt_plotUC1 <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Figure 17.1 Weekly Biospecimen Collections at \n University of Chicago Medicine Locations") +
    #theme_ipsum() +
@@ -4973,7 +4507,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site,Site_location,Setting,col.Sunda
          axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
          axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
          plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
-research.vt_plotUC + guides(color = guide_legend(title = "Site Locations")) 
+research.vt_plotUC1 + guides(color = guide_legend(title = "Site Locations")) 
  
  
  
@@ -4986,7 +4520,7 @@ research.vt_plotUC + guides(color = guide_legend(title = "Site Locations"))
  research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(col.Monday.date), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections") +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Figure 18. Weekly Biospecimen Collections at \n Marshfield Clinic Health System") +
    #theme_ipsum() +
@@ -5004,7 +4538,7 @@ research.vt_plotUC + guides(color = guide_legend(title = "Site Locations"))
  research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
    scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
-   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
    scale_fill_brewer(palette="Dark2") +
    ggtitle(label="Figure 18.1 Weekly Biospecimen Collections at \n Marshfield Clinic Health System Locations") +
    #theme_ipsum() +
@@ -5031,7 +4565,7 @@ research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
 research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y=n)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 19. Weekly Biospecimen Collections \n at Sanford Health") +
   #theme_ipsum() +
@@ -5048,7 +4582,7 @@ research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
 research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + 
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 19.1 Weekly Biospecimen Collections \n at Sanford Health Locations") +
   #theme_ipsum() +
@@ -5070,7 +4604,7 @@ research.vt_plHP= visit_wk_site.hybrid %>%  filter( Site=="HealthPartners")
 research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(col.Monday.date), y=n, color=Setting)) + 
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections") + 
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 20. Weekly Biospecimen Collections \n at HealthPartners") +
   #theme_ipsum() +
@@ -5096,7 +4630,7 @@ edited_fig11_1_Clin_tally <- research.vt_plHP_locations %>% arrange(HP_cl_locs, 
 research.vt_plotHP_locs <- ggplot(edited_fig11_1_Clin_tally, aes(x=as.Date(col.Monday.date), y=n, color=HP_cl_locs)) +  
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="# Number Collections", breaks = seq(min(edited_fig11_1_Clin_tally$n), max(edited_fig11_1_Clin_tally$n), by = 1)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-11-20"),as.Date(Sys.Date())),expand=c(0,0))  +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-11-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 20.1 Weekly Clinical Biospecimen Collections \n at HealthPartners by Clinic Location") +
   #theme_ipsum() +
@@ -5140,43 +4674,32 @@ clc_both_vt.site.NW
 
 
 
-```{r data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
+
+
+```{r box_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
+
 
 ###download the biospecimen data
-
 currentDate <- Sys.Date()
-
-
-
 box_CID <- as.data.frame(as.numeric(sapply((strsplit(colnames(box_wl_flat),"d_")),tail,1)))
 box_CID$variable <- colnames(box_wl_flat)
-
 colnames(box_CID)[1] <-"CID"
 box_CID$CID <- ifelse(is.na(box_CID$CID), 0, box_CID$CID)
-
 box_CID_dd <- base::merge(box_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
-
 box_CID_dd$Variable.Name <- ifelse(is.na(box_CID_dd$Variable.Name), box_CID_dd$variable,box_CID_dd$Variable.Name)
 box_CID_dd$category<- ifelse(is.na(box_CID_dd$conceptId.4), 0,ifelse(!is.na(box_CID_dd$conceptId.4) &  box_CID_dd$conceptId.4 !=104430631, 2, 1))
-
 select1 <- box_CID_dd$variable[which(box_CID_dd$category==0)]
 yes_no <- box_CID_dd$variable[which(box_CID_dd$category==1)]
 box1 <- subset(box_wl_flat,select=select1)
 colnames(box1) <- box_CID_dd$Variable.Name[which(box_CID_dd$category==0)]
-
 ##for the categorical variables
 box1$BioPack_Courier_v1r0 <- ifelse(box_wl_flat$d_666553960==712278213, "FedEx",ifelse(box_wl_flat$d_666553960==149772928, "World Courier",NA))
-
 box_wl_flat$d_560975149 <- as.factor(box_wl_flat$d_560975149)
 d_560975149_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-
 box1$d_560975149 <- plyr::mapvalues(box_wl_flat$d_560975149,from=d_560975149_CIDs$V1,to=d_560975149_CIDs$V2)
 colnames(box1)[which(colnames(box1)=="d_560975149") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_560975149")]
-
 box_wl_flat$d_789843387 <- as.factor(box_wl_flat$d_789843387)
 d_789843387_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-
-
 # box1$BioPack_BoxID_v1r0 <- box_wl_flat$d_132929440
 # box1$BioPack_ModifiedTime_v1r0 <- box_wl_flat$d_555611076
 # box1$BioShip_ShipTime_v1r0 <- box_wl_flat$d_656548982
@@ -5186,12 +4709,9 @@ d_789843387_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(
 # box1$BioShip_SignEmail_v1r0 <- box_wl_flat$d_948887825
 # box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
 # box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
-
-
 #box1$d_789843387 <- boxes$d_789843387 %>% mutate(d_789843387=factor(d_789843387))
 box1$d_789843387 <- plyr::mapvalues(box_wl_flat$d_789843387,from=d_789843387_CIDs$V1,to=d_789843387_CIDs$V2)
 colnames(box1)[which(colnames(box1)=="d_789843387") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_789843387")]
-
 ##for binary variables
 for (i in 1:length(yes_no)){
   x <- yes_no[i]
@@ -5203,10 +4723,7 @@ for (i in 1:length(yes_no)){
   colnames(check)[2] <- varname
   box1 <-   cbind(box1,subset(check,select=varname))
 }
-
-
 #gsub("[^[:alnum:][:blank:]+?&/\\-]", "", c) #to remove any specific character in a variable in r
-
 box1 <- box1  %>% mutate(d_238268405=gsub("^[:alnum:][:blank:]","",d_238268405),
                          d_238268405_1=case_when(substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"121149986"~"Crushed",
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"200183516" ~"Vials - Incorrect Material Type",
@@ -5246,12 +4763,9 @@ box1 <- box1  %>% mutate(d_238268405=gsub("^[:alnum:][:blank:]","",d_238268405),
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"922995819" ~ "Manifest/Paperwork/Vial information do not match",
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"933646000" ~ "Other- Package Condition",
                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"958000780" ~ "Shipment Delay"))
-
 box1<- box1 %>% mutate(BioPack_ShipCondtion_v1r0=ifelse(is.na(d_238268405_2), d_238268405_1, paste(d_238268405_1,d_238268405_2,sep=",")))
 #box1 <- box1[, c(1:4, 6:22, 25)] --- why are some columns missing???
 #missing: BioPack_BoxID_v1r0	BioPack_ModifiedTime_v1r0	BioShip_ShipTime_v1r0	BioPack_BoxStrtTime_v1r0	BioBPTL_ShipComments_v1r0	BioBPTL_DateRec_v1r0	BioShip_SignEmail_v1r0	BioPack_TrackScan1_v1r0		BioBPTL_ShipRec_v1r0
-
-
 box1$BioPack_BoxID_v1r0 <- box_wl_flat$d_132929440
 box1$BioPack_ModifiedTime_v1r0 <- box_wl_flat$d_555611076
 box1$BioShip_ShipTime_v1r0 <- box_wl_flat$d_656548982
@@ -5261,23 +4775,19 @@ box1$BioBPTL_DateRec_v1r0 <- box_wl_flat$d_926457119
 box1$BioShip_SignEmail_v1r0 <- box_wl_flat$d_948887825
 box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
 box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
-
 box1 <- box1 %>%  mutate(BioBPTL_ShipRec_v1r0= case_when(BioBPTL_ShipRec_v1r0==353358909 ~ "Yes",
                                                          BioBPTL_ShipRec_v1r0==104430631  ~ "No"))
-
-
 box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_ModifiedTime_v1r0,	BioShip_ShipTime_v1r0,	BioPack_BoxStrtTime_v1r0,	BioBPTL_ShipComments_v1r0,	d_885486943,
                          BioBPTL_DateRec_v1r0,	BioShip_SignEmail_v1r0,	BioPack_TrackScan1_v1r0,	BioPack_Courier_v1r0,	BioShip_LocalID_v1r0,	BioShip_LogSite_v1r0,	BioPack_TempProbe_v1r0,
                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
 box1 <- box1[, c(1:8, 10:21)]
-
 write.csv(box1,glue("{local_drive}Formatted_prod_flatBoxes_JP_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 # write.csv(box1,paste(local_drive, "Formatted_prod_flatBoxes_JP_",currentDate,".csv",sep=""),row.names = F,na="")
+```
 
 
 
-
-
+```{r bipspec_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 #11/20 updates
 ###to get the formats and variable names from DD
 factor_cid <-function(var,data){
@@ -5318,7 +4828,7 @@ biospe2_CID$variable <- names(biospe2)
 y$conceptId.3 <- as.character(y$conceptId.3)
 y$conceptId.4 <- as.numeric(y$conceptId.4)
 
-biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Formula.for.Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 
 biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
@@ -5347,7 +4857,7 @@ biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 
 biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12 , 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))
 
 
-biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
+biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Formula.for.Index)
 
 
 
@@ -5389,535 +4899,342 @@ colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
 biospe1 <- biospe1[,order(colnames(biospe1))]
 
 
-biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:342,66:103,125:143,220:296,144,297,163,44)]
+# the rest part on ordering of the variables is still the same as before or what you shared with me last Friday.
+#I don't have any problem running this part
+names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setting_v1r0","BioSpm_Location_v1r0","BioSpm_ColIDScan_v1r0",
+"BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0","BioClin_DBBloodRRLBL_v1r0",
+"BioClin_DBBloodRRLDtBL_v1r0",
+"BioClin_DBUrineID_v1r0",
+"BioClin_DBUrineRRLBL_v1r0",
+"BioClin_DBUrineRRLDtBL_v1r0",
+"BioCol_PhlebInitials_v1r0",
+"BioCol_ColNote1_v1r0",
+"BioCol_TubeColl_v1r0_Bio",
+"BioCol_TubeID_v1r0_Bio",
+"BioCol_TubeColl_v1r0_SST1",
+"BioCol_TubeID_v1r0_SST1",
+"BioCol_NotCol_v1r0_SST1",
+"BioCol_NotCol_v1r0_SST1",
+"BioCol_Discard_v1r0_SST1",
+"BioCol_TubeColl_v1r0_SST2",
+"BioCol_TubeID_v1r0_SST2",
+"BioCol_NotCol_v1r0_SST2",
+"BioCol_NotCol_v1r0_SST2",
+"BioCol_Discard_v1r0_SST2",
+"BioCol_TubeColl_v1r0_HT1",
+"BioCol_TubeID_v1r0_HT1",
+"BioCol_NotCol_v1r0_HT1",
+"BioCol_NotCol_v1r0_HT1",
+"BioCol_Discard_v1r0_HT1",
+"BioCol_TubeColl_v1r0_EDTAT1",
+"BioCol_TubeID_v1r0_EDTAT1",
+"BioCol_NotCol_v1r0_EDTAT1",
+"BioCol_NotCol_v1r0_EDTAT1",
+"BioCol_Discard_v1r0_EDTAT1",
+"BioCol_TubeColl_v1r0_ACDT1",
+"BioCol_TubeID_v1r0_ACDT1",
+"BioCol_NotCol_v1r0_ACDT1",
+"BioCol_NotCol_v1r0_ACDT1",
+"BioCol_Discard_v1r0_ACDT1",
+"BioCol_TubeColl_v1r0_STRT1",
+"BioCol_TubeID_v1r0_STRT1",
+"BioCol_NotCol_v1r0_STRT1",
+"BioCol_NotCol_v1r0_STRT1",
+"BioCol_Discard_v1r0_STRT1",
+"BioCol_TubeColl_v1r0_UT1",
+"BioCol_TubeID_v1r0_UT1",
+"BioCol_NotCol_v1r0_UT1",
+"BioCol_NotCol_v1r0_UT1",
+"BioCol_Discard_v1r0_UT1",
+"BioCol_TubeColl_v1r0_MWT1",
+"BioCol_TubeID_v1r0_MWT1",
+"BioCol_NotCol_v1r0_MWT1",
+"BioCol_NotCol_v1r0_MWT1",
+"BioCol_Discard_v1r0_MWT1",
+"BioCol_TubeColl_v1r0_BioMW",
+"BioCol_TubeID_v1r0_BioMW",
+"BioCol_TubeColl_v1r0_SST3",
+"BioCol_TubeID_v1r0_SST3",
+"BioCol_Discard_v1r0_SST3",
+"BioCol_TubeColl_v1r0_SST4",
+"BioCol_TubeID_v1r0_SST4",
+"BioCol_Discard_v1r0_SST4",
+"BioCol_TubeColl_v1r0_SST5",
+"BioCol_TubeID_v1r0_SST5",
+"BioCol_Discard_v1r0_SST5",
+"BioCol_TubeID_v1r0_HT2",
+"BioCol_TubeColl_v1r0_HT2",
+"BioCol_Discard_v1r0_HT2",
+"BioCol_TubeColl_v1r0_EDTAT2",
+"BioCol_TubeID_v1r0_EDTAT2",
+"BioCol_Discard_v1r0_EDTAT2",
+"BioCol_TubeColl_v1r0_EDTAT3",
+"BioCol_TubeID_v1r0_EDTAT3",
+"BioCol_Discard_v1r0_EDTAT3",
+"BioCol_CollBoxedStatus_v1r0",
+"BioBPTL_DateRec_v1r0_SST1",
+"BioBPTL_DateRec_v1r0_SST2",
+"BioBPTL_DateRec_v1r0_HT1",
+"BioBPTL_DateRec_v1r0_EDTAT1",
+"BioBPTL_DateRec_v1r0_ACDT1",
+"BioBPTL_DateRec_v1r0_STRT1",
+"BioBPTL_DateRec_v1r0_UT1",
+"BioBPTL_DateRec_v1r0_MWT1",
+"BioKit_KitRecdTmBL_v1r0_MWTube1",
+"BioBPTL_DateRec_v1r0_SST3",
+"BioBPTL_DateRec_v1r0_SST4",
+"BioBPTL_DateRec_v1r0_SST5",
+"BioBPTL_DateRec_v1r0_HT2",
+"BioBPTL_DateRec_v1r0_EDTAT2",
+"BioBPTL_DateRec_v1r0_EDTAT3",
+"BioRec_NoteOpt_v1r0",
+"BioCol_StrayTubesList_v1r0",
+"siteAcronym",
+"BioCol_Deviation_v1r0_SST1",
+"BioCol_DevNotes_v1r0_SST1",
+"Deviation_BrokenSST1",
+"Deviation_ClotLSST1",
+"Deviation_ClotSSST1",
+"Deviation_DiscardSST1",
+"Deviation_GelSST1",
+"Deviation_HemoSST1",
+"Deviation_LeakSST1",
+"Deviation_LowVolSST1",
+"Deviation_MislabDSST1",
+"Deviation_MislabRSST1",
+"Deviation_NotFoundSST1",
+"Deviation_OtherSST1",
+"Deviation_OutContSST1",
+"Deviation_SpeedHSST1",
+"Deviation_SpeedLSST1",
+"Deviation_TempHSST1",
+"Deviation_TempLSST1",
+"Deviation_TimeLSST1",
+"Deviation_TimeSSST1",
+"Deviation_TubeSzSST1",
+"BioCol_Deviation_v1r0_SST2",
+"BioCol_DevNotes_v1r0_SST2",
+"Deviation_BrokenSST2",
+"Deviation_ClotLSST2",
+"Deviation_ClotSSST2",
+"Deviation_DiscardSST2",
+"Deviation_GelSST2",
+"Deviation_HemoSST2",
+"Deviation_LeakSST2",
+"Deviation_LowVolSST2",
+"Deviation_MislabDSST2",
+"Deviation_MislabRSST2",
+"Deviation_NotFoundSST2",
+"Deviation_OtherSST2",
+"Deviation_OutContSST2",
+"Deviation_SpeedHSST2",
+"Deviation_SpeedLSST2",
+"Deviation_TempHSST2",
+"Deviation_TempLSST2",
+"Deviation_TimeLSST2",
+"Deviation_TimeSSST2",
+"Deviation_TubeSzSST2",
+"BioCol_Deviation_v1r0_SST3",
+"BioCol_DevNotes_v1r0_SST3",
+"Deviation_BrokenSST3",
+"Deviation_ClotLSST3",
+"Deviation_ClotS_SST3",
+"Deviation_DiscardSST3",
+"Deviation_GelSST3",
+"Deviation_HemoSST3",
+"Deviation_LeakSST3",
+"Deviation_LowVolSST3",
+"Deviation_MislabDSST3",
+"Deviation_MislabRSST3",
+"Deviation_NotFoundSST3",
+"Deviation_OtherSST3",
+"Deviation_OutContSST3",
+"Deviation_SpeedHSST3",
+"Deviation_SpeedLSST3",
+"Deviation_TempHSST3",
+"Deviation_TempLSST3",
+"Deviation_TimeLSST3",
+"Deviation_TimeSSST3",
+"Deviation_TubeSzSST3",
+"BioCol_Deviation_v1r0_SST4",
+"BioCol_DevNotes_v1r0_SST4",
+"Deviation_BrokenSST4",
+"Deviation_ClotLSST4",
+"Deviation_ClotSSST4",
+"Deviation_DiscardSST4",
+"Deviation_GelSST4",
+"Deviation_HemoSST4",
+"Deviation_LeakSST4",
+"Deviation_LowVolSST4",
+"Deviation_MislabDSST4",
+"Deviation_MislabRSST4",
+"Deviation_NotFoundSST4",
+"Deviation_OtherSST4",
+"Deviation_OutContSST4",
+"Deviation_SpeedHSST4",
+"Deviation_SpeedLSST4",
+"Deviation_TempHSST4",
+"Deviation_TempLSST4",
+"Deviation_TimeLSST4",
+"Deviation_TimeSSST4",
+"Deviation_TubeSzSST4",
+"BioCol_Deviation_v1r0_SST5",
+"BioCol_DevNotes_v1r0_SST5",
+"Deviation_BrokenSST5",
+"Deviation_ClotLSST5",
+"Deviation_ClotSSST5",
+"Deviation_DiscardSST5",
+"Deviation_GelSST5",
+"Deviation_HemoSST5",
+"Deviation_LeakSST5",
+"Deviation_LowVolSST5",
+"Deviation_MislabDSST5",
+"Deviation_MislabRSST5",
+"Deviation_NotFoundSST5",
+"Deviation_OtherSST5",
+"Deviation_OutContSST5",
+"Deviation_SpeedHSST5",
+"Deviation_SpeedLSST5",
+"Deviation_TempHSST5",
+"Deviation_TempLSST5",
+"Deviation_TimeLSST5",
+"Deviation_TimeSSST5",
+"Deviation_TubeSzSST5",
+"BioCol_Deviation_v1r0_HT1",
+"BioCol_DevNotes_v1r0_HT1",
+"Deviation_BrokenHT1",
+"Deviation_DiscardHT1",
+"Deviation_HemoHT1",
+"Deviation_LeakHT1",
+"Deviation_LowVolHT1",
+"Deviation_MislabelDHT1",
+"Deviation_MislabelRHT1",
+"Deviation_NotFoundHT1",
+"Deviation_OtherHT1",
+"Deviation_OutContamHT1",
+"Deviation_TempHHT1",
+"Deviation_TempLHT1",
+"Deviation_TubeSzHT1",
+"BioCol_Deviation_v1r0_HT2",
+"BioCol_DevNotes_v1r0_HT2",
+"Deviation_BrokenHT2",
+"Deviation_DiscardHT2",
+"Deviation_HemoHT2",
+"Deviation_LeakHT2",
+"Deviation_LowVolHT2",
+"Deviation_MislabelDHT2",
+"Deviation_MislabelRHT2",
+"Deviation_NotFoundHT2",
+"Deviation_OtherHT2",
+"Deviation_OutContamHT2",
+"Deviation_TempHHT2",
+"Deviation_TempLHT2",
+"Deviation_TubeSzHT2",
+"BioCol_Deviation_v1r0_EDTAT1",
+"BioCol_DevNotes_v1r0_EDTAT1",
+"Deviation_BrokenEDTAT1",
+"Deviation_DiscEDTAT1",
+"Deviation_HemoEDTAT1",
+"Deviation_LeakEDTAT1",
+"Deviation_LowVolEDTAT1",
+"Deviation_MislDEDTAT1",
+"Deviation_MislREDTAT1",
+"Deviation_NFEDTAT1",
+"Deviation_OtherEDTAT1",
+"Deviation_OutConEDTAT1",
+"Deviation_TempHEDTAT1",
+"Deviation_TempLEDTAT1",
+"Deviation_TubeSzEDTAT1",
+"BioCol_Deviation_v1r0_EDTAT2",
+"BioCol_DevNotes_v1r0_EDTAT2",
+"Deviation_BrokenEDTAT2",
+"Deviation_DiscEDTAT2",
+"Deviation_HemoEDTAT2",
+"Deviation_LeakEDTAT2",
+"Deviation_LowVolEDTAT2",
+"Deviation_MislDEDTAT2",
+"Deviation_MislREDTAT2",
+"Deviation_NFEDTAT2",
+"Deviation_OtherEDTAT2",
+"Deviation_OutConEDTAT2",
+"Deviation_TempHEDTAT2",
+"Deviation_TempLEDTAT2",
+"Deviation_TubeSzEDTAT2",
+"BioCol_Deviation_v1r0_EDTAT3",
+"BioCol_DevNotes_v1r0_EDTAT3",
+"Deviation_BrokenEDTAT3",
+"Deviation_DiscEDTAT3",
+"Deviation_HemoEDTAT3",
+"Deviation_LeakEDTAT3",
+"Deviation_LowVolEDTAT3",
+"Deviation_MislDEDTAT3",
+"Deviation_MislREDTAT3",
+"Deviation_NFEDTAT3",
+"Deviation_OtherEDTAT3",
+"Deviation_OutConEDTAT3",
+"Deviation_TempHEDTAT3",
+"Deviation_TempLEDTAT3",
+"Deviation_TubeSzEDTAT3",
+"BioCol_Deviation_v1r0_ACDT1",
+"BioCol_DevNotes_v1r0_ACDT1",
+"Deviation_BrokenACDT1",
+"Deviation_DiscardACDT1",
+"Deviation_HemoACDT1",
+"Deviation_LeakACDT1",
+"Deviation_LowVolACDT1",
+"Deviation_MislabDACDT1",
+"Deviation_MislabRACDT1",
+"Deviation_NotFndACDT1",
+"Deviation_OtherACDT1",
+"Deviation_OutContACDT1",
+"Deviation_TempHACDT1",
+"Deviation_TempLACDT1",
+"Deviation_TubeSzACDT1",
+"BioCol_Deviation_v1r0_STRT1",
+"BioCol_DevNotes_v1r0_STRT1",
+"Deviation_BrokenSTRT1",
+"Deviation_DiscardSTRT1",
+"Deviation_HemoSTRT1",
+"Deviation_LeakSTRT1",
+"Deviation_LowVolSTRT1",
+"Deviation_MislabDSTRT1",
+"Deviation_MislabRSTRT1",
+"Deviation_NotFndSTRT1",
+"Deviation_OtherSTRT1",
+"Deviation_OutContSTRT1",
+"Deviation_TempHSTRT1",
+"Deviation_TempLSTRT1",
+"Deviation_TubeSzSTRT1",
+"BioCol_Deviation_v1r0_UT1",
+"BioCol_DevNotes_v1r0_UT1",
+"Deviation_BrokenUT1",
+"Deviation_LeakUT1",
+"Deviation_LowVolUT1",
+"Deviation_MislabelDUT1",
+"Deviation_MislabelRUT1",
+"Deviation_NotFoundUT1",
+"Deviation_OtherUT1",
+"Deviation_OutContamUT1",
+"Deviation_TempHUT1",
+"Deviation_TempLUT1",
+"Deviation_UrVolUT1",
+"BioCol_Deviation_v1r0_MWT1",
+"BioCol_DevNotes_v1r0_MWT1",
+"Deviation_BrokenMWT1",
+"Deviation_LeakMWT1",
+"Deviation_LowVolMWT1",
+"Deviation_MislabDMWT1",
+"Deviation_MislabRMWT1",
+"Deviation_MWUnd30sMWT1",
+"Deviation_NotFoundMWT1",
+"Deviation_OtherMWT1",
+"Deviation_OutContMWT1",
+"token",
+"date")
 
+biospe1_final <- biospe1 %>% select(names_set)
 
-#new column order requested 11/22/23
-
-
-
-# ###to get the formats and variable names from DD
-# factor_cid <-function(var,data){
-#   var <- as.factor(var)
-#   var_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(var),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(var),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-#   
-#   var <- plyr::mapvalues(var,from=var_CIDs$V1,to=var_CIDs$V2)
-# }
-# 
-# 
-# 
-# bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`')  
-# biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
-# 
-# biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
-# biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
-# 
-# cnames <- names(biospe2)
-# for (i in 1: length(cnames)){
-#   varname <- cnames[i]
-#   var<-pull(biospe2,varname)
-#   biospe2[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
-# }
-# 
-# 
-# 
-# 
-# biospe2_CID <- as.data.frame(sapply((strsplit(colnames(biospe2),"d_")),tail,1))
-# colnames(biospe2_CID)[1] <- "CID"
-# #biospe2_CID <- biospe2_CID %>% mutate(CID = ifelse(nchar(CID)>10, substring(CID,1,9), CID))
-# biospe2_CID$variable <- names(biospe2)
-# y$conceptId.3 <- as.character(y$conceptId.3)
-# y$conceptId.4 <- as.numeric(y$conceptId.4)
-# 
-# 
-# biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
-# biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable, Variable.Name)
-# 
-# biospe2_CID_dd <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
-# 
-# 
-# biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
-#                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
-#                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
-#                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
-#                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
-# 
-# 
-# 
-# biospe2_CID_dd$new.varname <- ifelse(is.na(biospe2_CID_dd$label.1st), biospe2_CID_dd$Variable.Name,paste(biospe2_CID_dd$label.1st,biospe2_CID_dd$Variable.Name,sep="_"))
-# biospe2_CID_dd$variable[is.na(biospe2_CID_dd$new.varname)]
-# #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
-# biospe1 <- NULL
-# select0 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
-# select2 <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==2)]
-# yes_no <- biospe2_CID_dd$variable[which(biospe2_CID_dd$category==1)]
-# biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
-# n<- length(select0)
-# colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==0 & !is.na(biospe2_CID_dd$Variable.Name))]
-# 
-# 
-# for (i in 1: length(select2)){
-#   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
-# }
-# colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd$new.varname[which(biospe2_CID_dd$category==2)]
-# 
-# # for (i in 1:length(yes_no)){
-# #   x <- yes_no[i]
-# #   
-# #   varname <- biospe2_CID_dd[grepl(yes_no[i],biospe2_CID_dd$variable),]$new.varname
-# #   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-# #   check <- as.data.frame(biospe2[,x])
-# #   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
-# #   colnames(check)[2] <- varname
-# #   biospe1 <-   cbind(biospe1,subset(check,select=varname))
-# # }
-# 
-# for (i in 1:length(yes_no)){
-#   x <- yes_no[i]
-#   
-#   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable) & biospe2_CID_dd1$category==1,]$new.varname
-#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-#   check <- as.data.frame(biospe2[,x])
-#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
-#   colnames(check)[2] <- varname
-#   biospe1 <-   cbind(biospe1,subset(check,select=varname))
-# }
-# 
-# colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
-# colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
-# biospe1 <- biospe1[,order(colnames(biospe1))]
-# 
-# biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:315,66:103,125:143,220:296,144,297,163,44)]
-# 
-# 
-# 
-# 
-
-
-
-
-
-
-
-# ##11/16 update suggestion for column header updates
-# 
-# biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE) ## the data "y" is leftover in the code
-# 
-# 
-# biospe2_CID_dd <- biospe2_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
-#                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
-#                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
-#                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
-#                                             
-#                                             label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
-#                                                                   sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ))
-# 
-# 
-# biospe2_CID_dd$matched <- ifelse(nchar(biospe2_CID_dd$variable) <12, 1, ifelse(nchar(biospe2_CID_dd$variable) >12 & biospe2_CID_dd$conceptId.1 == biospe2_CID_dd$firstCID, 1, 0))  #to add "matched"  flag to select the correct variables based on their combined CIDs (tubeID, last.CID) to compromise the changes in the DD on the biospecimen
-# 
-# 
-# biospe2_CID_dd <- biospe2_CID_dd %>% arrange(CID, variable,desc(matched),Index)
-# 
-# 
-# biospe2_CID_dd1 <- biospe2_CID_dd[!duplicated(biospe2_CID_dd[,c("CID","variable")]),]
-# biospe2_CID_dd1$new.varname <- ifelse(biospe2_CID_dd1$matched==1, biospe2_CID_dd1$Variable.Name, paste(gsub("SST1","",biospe2_CID_dd1$Variable.Name),biospe2_CID_dd1$label.1st,sep="_"))
-# biospe2_CID_dd1$variable[is.na(biospe2_CID_dd1$new.varname)]
-# #"d_611091485" "Connect_ID"  "date"        "id"          "Site"        "siteAcronym" "token"
-# biospe1 <- NULL
-# select0 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
-# select2 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==2)]
-# yes_no <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==1)]
-# biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
-# n<- length(select0)
-# colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
-# 
-# 
-# 
-# for (i in 1: length(select2)){
-#   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
-# }
-# colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==2)]
-# 
-# 
-# for (i in 1:length(yes_no)){
-#   x <- yes_no[i]
-#   
-#   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable),]$new.varname
-#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-#   check <- as.data.frame(biospe2[,x])
-#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
-#   colnames(check)[2] <- varname
-#   biospe1 <-   cbind(biospe1,subset(check,select=varname))
-# }
-# 
-# 
-# colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
-# colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
-# biospe1 <- biospe1[,order(colnames(biospe1))]
-# 
-# 
-# biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:337,66:103,125:143,220:296,144,297,163,44)]
-
-
-
-# 11/21/23 request from Domonique for specific column order 
-biospe1_final <- biospe1_final[,c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setting_v1r0","BioSpm_Location_v1r0","BioSpm_ColIDScan_v1r0",
-                                  "BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0","BioClin_DBBloodRRLBL_v1r0",
-                                  "BioClin_DBBloodRRLDtBL_v1r0",
-                                  "BioClin_DBUrineID_v1r0",
-                                  "BioClin_DBUrineRRLBL_v1r0",
-                                  "BioClin_DBUrineRRLDtBL_v1r0",
-                                  "BioCol_PhlebInitials_v1r0",
-                                  "BioCol_ColNote1_v1r0",
-                                  "BioCol_TubeColl_v1r0_Bio",
-                                  "BioCol_TubeID_v1r0_Bio",
-                                  "BioCol_TubeColl_v1r0_SST1",
-                                  "BioCol_TubeID_v1r0_SST1",
-                                  "BioCol_NotCol_v1r0_SST1",
-                                  "BioCol_NotCol_v1r0_SST1",
-                                  "BioCol_Discard_v1r0_SST1",
-                                  "BioCol_TubeColl_v1r0_SST2",
-                                  "BioCol_TubeID_v1r0_SST2",
-                                  "BioCol_NotCol_v1r0_SST2",
-                                  "BioCol_NotCol_v1r0_SST2",
-                                  "BioCol_Discard_v1r0_SST2",
-                                  "BioCol_TubeColl_v1r0_HT1",
-                                  "BioCol_TubeID_v1r0_HT1",
-                                  "BioCol_NotCol_v1r0_HT1",
-                                  "BioCol_NotCol_v1r0_HT1",
-                                  "BioCol_Discard_v1r0_HT1",
-                                  "BioCol_TubeColl_v1r0_EDTAT1",
-                                  "BioCol_TubeID_v1r0_EDTAT1",
-                                  "BioCol_NotCol_v1r0_EDTAT1",
-                                  "BioCol_NotCol_v1r0_EDTAT1",
-                                  "BioCol_Discard_v1r0_EDTAT1",
-                                  "BioCol_TubeColl_v1r0_ACDT1",
-                                  "BioCol_TubeID_v1r0_ACDT1",
-                                  "BioCol_NotCol_v1r0_ACDT1",
-                                  "BioCol_NotCol_v1r0_ACDT1",
-                                  "BioCol_Discard_v1r0_ACDT1",
-                                  "BioCol_TubeColl_v1r0_STRT1",
-                                  "BioCol_TubeID_v1r0_STRT1",
-                                  "BioCol_NotCol_v1r0_STRT1",
-                                  "BioCol_NotCol_v1r0_STRT1",
-                                  "BioCol_Discard_v1r0_STRT1",
-                                  "BioCol_TubeColl_v1r0_UT1",
-                                  "BioCol_TubeID_v1r0_UT1",
-                                  "BioCol_NotCol_v1r0_UT1",
-                                  "BioCol_NotCol_v1r0_UT1",
-                                  "BioCol_Discard_v1r0_UT1",
-                                  "BioCol_TubeColl_v1r0_MWT1",
-                                  "BioCol_TubeID_v1r0_MWT1",
-                                  "BioCol_NotCol_v1r0_MWT1",
-                                  "BioCol_NotCol_v1r0_MWT1",
-                                  "BioCol_Discard_v1r0_MWT1",
-                                  "BioCol_TubeColl_v1r0_BioMW",
-                                  "BioCol_TubeID_v1r0_BioMW",
-                                  "BioCol_TubeColl_v1r0_SST3",
-                                  "BioCol_TubeID_v1r0_SST3",
-                                  "BioCol_Discard_v1r0_SST3",
-                                  "BioCol_TubeColl_v1r0_SST4",
-                                  "BioCol_TubeID_v1r0_SST4",
-                                  "BioCol_Discard_v1r0_SST4",
-                                  "BioCol_TubeColl_v1r0_SST5",
-                                  "BioCol_TubeID_v1r0_SST5",
-                                  "BioCol_Discard_v1r0_SST5",
-                                  "BioCol_TubeID_v1r0_HT2",
-                                  "BioCol_TubeColl_v1r0_HT2",
-                                  "BioCol_Discard_v1r0_HT2",
-                                  "BioCol_TubeColl_v1r0_EDTAT2",
-                                  "BioCol_TubeID_v1r0_EDTAT2",
-                                  "BioCol_Discard_v1r0_EDTAT2",
-                                  "BioCol_TubeColl_v1r0_EDTAT3",
-                                  "BioCol_TubeID_v1r0_EDTAT3",
-                                  "BioCol_Discard_v1r0_EDTAT3",
-                                  "BioCol_CollBoxedStatus_v1r0",
-                                  "BioBPTL_DateRec_v1r0_SST1",
-                                  "BioBPTL_DateRec_v1r0_SST2",
-                                  "BioBPTL_DateRec_v1r0_HT1",
-                                  "BioBPTL_DateRec_v1r0_EDTAT1",
-                                  "BioBPTL_DateRec_v1r0_ACDT1",
-                                  "BioBPTL_DateRec_v1r0_STRT1",
-                                  "BioBPTL_DateRec_v1r0_UT1",
-                                  "BioBPTL_DateRec_v1r0_MWT1",
-                                  "BioKit_KitRecdTmBL_v1r0_MWTube1",
-                                  "BioBPTL_DateRec_v1r0_SST3",
-                                  "BioBPTL_DateRec_v1r0_SST4",
-                                  "BioBPTL_DateRec_v1r0_SST5",
-                                  "BioBPTL_DateRec_v1r0_HT2",
-                                  "BioBPTL_DateRec_v1r0_EDTAT2",
-                                  "BioBPTL_DateRec_v1r0_EDTAT3",
-                                  "BioRec_NoteOpt_v1r0",
-                                  "BioCol_StrayTubesList_v1r0",
-                                  "siteAcronym",
-                                  "BioCol_Deviation_v1r0_SST1",
-                                  "BioCol_DevNotes_v1r0_SST1",
-                                  "Deviation_BrokenSST1",
-                                  "Deviation_ClotLSST1",
-                                  "Deviation_ClotSSST1",
-                                  "Deviation_DiscardSST1",
-                                  "Deviation_GelSST1",
-                                  "Deviation_HemoSST1",
-                                  "Deviation_LeakSST1",
-                                  "Deviation_LowVolSST1",
-                                  "Deviation_MislabDSST1",
-                                  "Deviation_MislabRSST1",
-                                  "Deviation_NotFoundSST1",
-                                  "Deviation_OtherSST1",
-                                  "Deviation_OutContSST1",
-                                  "Deviation_SpeedHSST1",
-                                  "Deviation_SpeedLSST1",
-                                  "Deviation_TempHSST1",
-                                  "Deviation_TempLSST1",
-                                  "Deviation_TimeLSST1",
-                                  "Deviation_TimeSSST1",
-                                  "Deviation_TubeSzSST1",
-                                  "BioCol_Deviation_v1r0_SST2",
-                                  "BioCol_DevNotes_v1r0_SST2",
-                                  "Deviation_BrokenSST2",
-                                  "Deviation_ClotLSST2",
-                                  "Deviation_ClotSSST2",
-                                  "Deviation_DiscardSST2",
-                                  "Deviation_GelSST2",
-                                  "Deviation_HemoSST2",
-                                  "Deviation_LeakSST2",
-                                  "Deviation_LowVolSST2",
-                                  "Deviation_MislabDSST2",
-                                  "Deviation_MislabRSST2",
-                                  "Deviation_NotFoundSST2",
-                                  "Deviation_OtherSST2",
-                                  "Deviation_OutContSST2",
-                                  "Deviation_SpeedHSST2",
-                                  "Deviation_SpeedLSST2",
-                                  "Deviation_TempHSST2",
-                                  "Deviation_TempLSST2",
-                                  "Deviation_TimeLSST2",
-                                  "Deviation_TimeSSST2",
-                                  "Deviation_TubeSzSST2",
-                                  "BioCol_Deviation_v1r0_SST3",
-                                  "BioCol_DevNotes_v1r0_SST3",
-                                  "Deviation_BrokenSST3",
-                                  "Deviation_ClotLSST3",
-                                  "Deviation_ClotS_SST3",
-                                  "Deviation_DiscardSST3",
-                                  "Deviation_GelSST3",
-                                  "Deviation_HemoSST3",
-                                  "Deviation_LeakSST3",
-                                  "Deviation_LowVolSST3",
-                                  "Deviation_MislabDSST3",
-                                  "Deviation_MislabRSST3",
-                                  "Deviation_NotFoundSST3",
-                                  "Deviation_OtherSST3",
-                                  "Deviation_OutContSST3",
-                                  "Deviation_SpeedHSST3",
-                                  "Deviation_SpeedLSST3",
-                                  "Deviation_TempHSST3",
-                                  "Deviation_TempLSST3",
-                                  "Deviation_TimeLSST3",
-                                  "Deviation_TimeSSST3",
-                                  "Deviation_TubeSzSST3",
-                                  "BioCol_Deviation_v1r0_SST4",
-                                  "BioCol_DevNotes_v1r0_SST4",
-                                  "Deviation_BrokenSST4",
-                                  "Deviation_ClotLSST4",
-                                  "Deviation_ClotSSST4",
-                                  "Deviation_DiscardSST4",
-                                  "Deviation_GelSST4",
-                                  "Deviation_HemoSST4",
-                                  "Deviation_LeakSST4",
-                                  "Deviation_LowVolSST4",
-                                  "Deviation_MislabDSST4",
-                                  "Deviation_MislabRSST4",
-                                  "Deviation_NotFoundSST4",
-                                  "Deviation_OtherSST4",
-                                  "Deviation_OutContSST4",
-                                  "Deviation_SpeedHSST4",
-                                  "Deviation_SpeedLSST4",
-                                  "Deviation_TempHSST4",
-                                  "Deviation_TempLSST4",
-                                  "Deviation_TimeLSST4",
-                                  "Deviation_TimeSSST4",
-                                  "Deviation_TubeSzSST4",
-                                  "BioCol_Deviation_v1r0_SST5",
-                                  "BioCol_DevNotes_v1r0_SST5",
-                                  "Deviation_BrokenSST5",
-                                  "Deviation_ClotLSST5",
-                                  "Deviation_ClotSSST5",
-                                  "Deviation_DiscardSST5",
-                                  "Deviation_GelSST5",
-                                  "Deviation_HemoSST5",
-                                  "Deviation_LeakSST5",
-                                  "Deviation_LowVolSST5",
-                                  "Deviation_MislabDSST5",
-                                  "Deviation_MislabRSST5",
-                                  "Deviation_NotFoundSST5",
-                                  "Deviation_OtherSST5",
-                                  "Deviation_OutContSST5",
-                                  "Deviation_SpeedHSST5",
-                                  "Deviation_SpeedLSST5",
-                                  "Deviation_TempHSST5",
-                                  "Deviation_TempLSST5",
-                                  "Deviation_TimeLSST5",
-                                  "Deviation_TimeSSST5",
-                                  "Deviation_TubeSzSST5",
-                                  "BioCol_Deviation_v1r0_HT1",
-                                  "BioCol_DevNotes_v1r0_HT1",
-                                  "Deviation_BrokenHT1",
-                                  "Deviation_DiscardHT1",
-                                  "Deviation_HemoHT1",
-                                  "Deviation_LeakHT1",
-                                  "Deviation_LowVolHT1",
-                                  "Deviation_MislabelDHT1",
-                                  "Deviation_MislabelRHT1",
-                                  "Deviation_NotFoundHT1",
-                                  "Deviation_OtherHT1",
-                                  "Deviation_OutContamHT1",
-                                  "Deviation_TempHHT1",
-                                  "Deviation_TempLHT1",
-                                  "Deviation_TubeSzHT1",
-                                  "BioCol_Deviation_v1r0_HT2",
-                                  "BioCol_DevNotes_v1r0_HT2",
-                                  "Deviation_BrokenHT2",
-                                  "Deviation_DiscardHT2",
-                                  "Deviation_HemoHT2",
-                                  "Deviation_LeakHT2",
-                                  "Deviation_LowVolHT2",
-                                  "Deviation_MislabelDHT2",
-                                  "Deviation_MislabelRHT2",
-                                  "Deviation_NotFoundHT2",
-                                  "Deviation_OtherHT2",
-                                  "Deviation_OutContamHT2",
-                                  "Deviation_TempHHT2",
-                                  "Deviation_TempLHT2",
-                                  "Deviation_TubeSzHT2",
-                                  "BioCol_Deviation_v1r0_EDTAT1",
-                                  "BioCol_DevNotes_v1r0_EDTAT1",
-                                  "Deviation_BrokenEDTAT1",
-                                  "Deviation_DiscEDTAT1",
-                                  "Deviation_HemoEDTAT1",
-                                  "Deviation_LeakEDTAT1",
-                                  "Deviation_LowVolEDTAT1",
-                                  "Deviation_MislDEDTAT1",
-                                  "Deviation_MislREDTAT1",
-                                  "Deviation_NFEDTAT1",
-                                  "Deviation_OtherEDTAT1",
-                                  "Deviation_OutConEDTAT1",
-                                  "Deviation_TempHEDTAT1",
-                                  "Deviation_TempLEDTAT1",
-                                  "Deviation_TubeSzEDTAT1",
-                                  "BioCol_Deviation_v1r0_EDTAT2",
-                                  "BioCol_DevNotes_v1r0_EDTAT2",
-                                  "Deviation_BrokenEDTAT2",
-                                  "Deviation_DiscEDTAT2",
-                                  "Deviation_HemoEDTAT2",
-                                  "Deviation_LeakEDTAT2",
-                                  "Deviation_LowVolEDTAT2",
-                                  "Deviation_MislDEDTAT2",
-                                  "Deviation_MislREDTAT2",
-                                  "Deviation_NFEDTAT2",
-                                  "Deviation_OtherEDTAT2",
-                                  "Deviation_OutConEDTAT2",
-                                  "Deviation_TempHEDTAT2",
-                                  "Deviation_TempLEDTAT2",
-                                  "Deviation_TubeSzEDTAT2",
-                                  "BioCol_Deviation_v1r0_EDTAT3",
-                                  "BioCol_DevNotes_v1r0_EDTAT3",
-                                  "Deviation_BrokenEDTAT3",
-                                  "Deviation_DiscEDTAT3",
-                                  "Deviation_HemoEDTAT3",
-                                  "Deviation_LeakEDTAT3",
-                                  "Deviation_LowVolEDTAT3",
-                                  "Deviation_MislDEDTAT3",
-                                  "Deviation_MislREDTAT3",
-                                  "Deviation_NFEDTAT3",
-                                  "Deviation_OtherEDTAT3",
-                                  "Deviation_OutConEDTAT3",
-                                  "Deviation_TempHEDTAT3",
-                                  "Deviation_TempLEDTAT3",
-                                  "Deviation_TubeSzEDTAT3",
-                                  "BioCol_Deviation_v1r0_ACDT1",
-                                  "BioCol_DevNotes_v1r0_ACDT1",
-                                  "Deviation_BrokenACDT1",
-                                  "Deviation_DiscardACDT1",
-                                  "Deviation_HemoACDT1",
-                                  "Deviation_LeakACDT1",
-                                  "Deviation_LowVolACDT1",
-                                  "Deviation_MislabDACDT1",
-                                  "Deviation_MislabRACDT1",
-                                  "Deviation_NotFndACDT1",
-                                  "Deviation_OtherACDT1",
-                                  "Deviation_OutContACDT1",
-                                  "Deviation_TempHACDT1",
-                                  "Deviation_TempLACDT1",
-                                  "Deviation_TubeSzACDT1",
-                                  "BioCol_Deviation_v1r0_STRT1",
-                                  "BioCol_DevNotes_v1r0_STRT1",
-                                  "Deviation_BrokenSTRT1",
-                                  "Deviation_DiscardSTRT1",
-                                  "Deviation_HemoSTRT1",
-                                  "Deviation_LeakSTRT1",
-                                  "Deviation_LowVolSTRT1",
-                                  "Deviation_MislabDSTRT1",
-                                  "Deviation_MislabRSTRT1",
-                                  "Deviation_NotFndSTRT1",
-                                  "Deviation_OtherSTRT1",
-                                  "Deviation_OutContSTRT1",
-                                  "Deviation_TempHSTRT1",
-                                  "Deviation_TempLSTRT1",
-                                  "Deviation_TubeSzSTRT1",
-                                  "BioCol_Deviation_v1r0_UT1",
-                                  "BioCol_DevNotes_v1r0_UT1",
-                                  "Deviation_BrokenUT1",
-                                  "Deviation_LeakUT1",
-                                  "Deviation_LowVolUT1",
-                                  "Deviation_MislabelDUT1",
-                                  "Deviation_MislabelRUT1",
-                                  "Deviation_NotFoundUT1",
-                                  "Deviation_OtherUT1",
-                                  "Deviation_OutContamUT1",
-                                  "Deviation_TempHUT1",
-                                  "Deviation_TempLUT1",
-                                  "Deviation_UrVolUT1",
-                                  "BioCol_Deviation_v1r0_MWT1",
-                                  "BioCol_DevNotes_v1r0_MWT1",
-                                  "Deviation_BrokenMWT1",
-                                  "Deviation_LeakMWT1",
-                                  "Deviation_LowVolMWT1",
-                                  "Deviation_MislabDMWT1",
-                                  "Deviation_MislabRMWT1",
-                                  "Deviation_MWUnd30sMWT1",
-                                  "Deviation_NotFoundMWT1",
-                                  "Deviation_OtherMWT1",
-                                  "Deviation_OutContMWT1",
-                                  "token",
-                                  "date")]
+write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 # If in the future we have additional cols and there's a discrpency between the request column order and the existing column names
@@ -5928,21 +5245,6 @@ biospe1_final <- biospe1_final[,c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_
 # } else {
 #   cat("All expected columns are present in the dataframe.\n")
 # }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # ##11/16 update suggestion for column header updates
 # 
 # biospe2_CID_dd <- base::merge(biospe2_CID, y[,c("Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE) ## the data "y" is leftover in the code
@@ -6014,20 +5316,12 @@ biospe1_final <- biospe1_final[,c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_
 # 
 # 
 # biospe1_final <- biospe1[,c(43,162,42,29,38,35:36,41,30,39,40,22,37,23:28,145:161,31:34,164:219,45:65,104:124,1:21,298:337,66:103,125:143,220:296,144,297,163,44)]
-
-
-
-
-
-
-
-
 #biospe1_fin= subset(biospe1_final, select=-c(BioClin_DBBloodRRL_v1r0, BioClin_DBBloodRRLDt_v1r0, BioClin_DBUrineRRLDt_v1r0))
-
-
 # write.csv(biospe1_fin,paste(local_drive, "Connect_prod_Biospe_Formats",currentDate,".csv",sep="_"),row.names = F,na="")
 #write.csv(biospe1_fin,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
-write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
+
+```
 
 
 
@@ -6040,8 +5334,7 @@ write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentD
 
 
 
-
-
+```{r recrbio_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 
 ###biospecimen data
 # cnames <- names(recrver)
@@ -6220,4 +5513,5 @@ write.csv(recrbio_1,glue("{local_drive}Connect_prod_recr_veriBiospe_Formats_{cur
 
 
 ```
+
 

@@ -282,6 +282,21 @@ knitr::kable(qc2_2)
 
 
 
+### (Derived) Baseline urine sample collected (BioFin_BaseUrineCol_v1r0): If any urine tubes are not collected, this should be no
+```{r BioFin_BaseUrineCol_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
+
+derv_ur <- bioqc %>%  filter(d_973670172_d_593843561==104430631  & d_678166505>=as.Date("2022-11-21") & d_167958071!=104430631) %>% 
+  select(Site, Connect_ID, d_167958071) %>%  sort_by(Site)
+
+
+colnames(derv_ur) <- c("Site", "Connect ID", "Baseline Urine Collected (Supposed to be no)")
+knitr::kable(derv_ur)
+
+```
+
+
+
+
 ### If BioClin_BldOrderPlacdDt_v1r0 occured before BioClin_UrnOrderPlacdDt_v1r0, then BioClin_BldUrnPlacedTm_v1r0 should = BioClin_BldOrderPlacdDt_v1r0
 ```{r BioClin_BldUrnPlacedTm_1, echo=FALSE, warning=FALSE, message=FALSE}
 
