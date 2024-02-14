@@ -3354,8 +3354,6 @@ crosstable.coll_bptl29a[7,7] <- paste(crosstable.coll_bptl29a[7,7], " (100%)")
 
 ```{r, Table29b, include=FALSE, echo=FALSE, warning=FALSE}
 
-
-
 table.coll_bptl2 <- ctable(coll_bptl_diff2$Site_location,coll_bptl_diff2$coll_days_diff)
 crosstable.coll_bptl2 <- as.data.frame(cbind(table.coll_bptl2$cross_table,table.coll_bptl2$proportions))
 crosstable.coll_bptl2$location <-trimws(rownames(crosstable.coll_bptl2))
@@ -3969,7 +3967,6 @@ coll_bplt_knitr2 <- group_rows(
   end_row = 19) 
 
 coll_bplt_knitr2
-
 
 
 coll_bplt_knitr3 <- knitr::kable(Hrs_bptl_col, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 30. Time (in Hours) from Research Biospecimen Collection to Receipt at BPTL by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
@@ -4678,7 +4675,9 @@ clc_both_vt.site.NW
 
 
 
+
 ```{r box_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
+
 
 ###download the biospecimen data
 currentDate <- Sys.Date()
@@ -4886,7 +4885,7 @@ for (i in 1:length(yes_no)){
   x <- yes_no[i]
   
   varname <- biospe2_CID_dd1[grepl(yes_no[i],biospe2_CID_dd1$variable) & biospe2_CID_dd1$category==1,]$new.varname
-
+  
   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
   check <- as.data.frame(biospe2[,x])
   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
@@ -4898,6 +4897,7 @@ for (i in 1:length(yes_no)){
 colnames(biospe1) <- gsub("Object|Obj","Tube", colnames(biospe1))
 colnames(biospe1) <- gsub("BioCol_Dev_v1r0","Deviation",colnames(biospe1))
 biospe1 <- biospe1[,order(colnames(biospe1))]
+
 
 # the rest part on ordering of the variables is still the same as before or what you shared with me last Friday.
 #I don't have any problem running this part
@@ -5235,6 +5235,7 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
 biospe1_final <- biospe1 %>% select(names_set)
 
 write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+
 
 # If in the future we have additional cols and there's a discrpency between the request column order and the existing column names
 #  missing_columns <- setdiff(expected_columns, colnames(biospe1))
