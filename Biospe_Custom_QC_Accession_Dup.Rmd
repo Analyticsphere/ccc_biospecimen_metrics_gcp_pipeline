@@ -231,7 +231,7 @@ colnames(qcKP_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Ac
 
 
 
-### (Derived) Clinical DB Blood RRL Received (BioClin_DBBloodRRL_v1r0): If all blood tubes are not collected, this should be no
+### 1. (Derived) Clinical DB Blood RRL Received (BioClin_DBBloodRRL_v1r0): If all blood tubes are not collected, this should be no
 ```{r BioClin_DBBloodRRL_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc2 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & d_173836415_d_266600170_d_534041351!=104430631) 
@@ -245,7 +245,7 @@ knitr::kable(qc2)
 
 
 
-### If all blood tubes are not collected, (Derived) Clinical Site Blood Collected (BioClin_SiteBloodColl_v1r0) should be no or NULL.
+### 2. If all blood tubes are not collected, (Derived) Clinical Site Blood Collected (BioClin_SiteBloodColl_v1r0) should be no or NULL.
 ```{r Clin_SiteBloodColl, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & !is.na(d_173836415_d_266600170_d_693370086)) 
@@ -263,7 +263,7 @@ knitr::kable(qc2_1)
 
 
 
-### (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
+### 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
 ```{r BioFin_BaseBloodCol_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc2_2 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & d_878865966!=104430631 & 
@@ -282,7 +282,7 @@ knitr::kable(qc2_2)
 
 
 
-### (Derived) Baseline urine sample collected (BioFin_BaseUrineCol_v1r0): If any urine tubes are not collected, this should be no
+### 4. (Derived) Baseline urine sample collected (BioFin_BaseUrineCol_v1r0): If any urine tubes are not collected, this should be no
 ```{r BioFin_BaseUrineCol_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 derv_ur <- bioqc %>%  filter(d_973670172_d_593843561==104430631  & d_678166505>=as.Date("2022-11-21") & d_167958071!=104430631) %>% 
@@ -297,7 +297,7 @@ knitr::kable(derv_ur)
 
 
 
-### If BioClin_BldOrderPlacdDt_v1r0 occured before BioClin_UrnOrderPlacdDt_v1r0, then BioClin_BldUrnPlacedTm_v1r0 should = BioClin_BldOrderPlacdDt_v1r0
+### 5. If BioClin_BldOrderPlacdDt_v1r0 occured before BioClin_UrnOrderPlacdDt_v1r0, then BioClin_BldUrnPlacedTm_v1r0 should = BioClin_BldOrderPlacdDt_v1r0
 ```{r BioClin_BldUrnPlacedTm_1, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc3_1 <- bioqc %>%  filter(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)) < as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935)) & as.POSIXct(ymd_hms(d_173836415_d_266600170_d_184451682))!=as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780))) %>%  select(Site, Connect_ID, d_173836415_d_266600170_d_184451682) %>%  sort_by(Site)
@@ -312,7 +312,7 @@ knitr::kable(qc3_1)
 ```
 
 
-### If BioClin_BldOrderPlacdDt_v1r0 occured after BioClin_UrnOrderPlacdDt_v1r0, then BioClin_BldUrnPlacedTm_v1r0 should = BioClin_UrnOrderPlacdDt_v1r0
+### 6. If BioClin_BldOrderPlacdDt_v1r0 occured after BioClin_UrnOrderPlacdDt_v1r0, then BioClin_BldUrnPlacedTm_v1r0 should = BioClin_UrnOrderPlacdDt_v1r0
 ```{r BioClin_BldUrnPlacedTm_2, echo=FALSE, warning=FALSE, message=FALSE}
 qc3_2 <- bioqc %>%  filter(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)) > as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935)) & as.POSIXct(ymd_hms(d_173836415_d_266600170_d_184451682))!=as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935))) %>% select(Site, Connect_ID, d_173836415_d_266600170_d_184451682) %>%  sort_by(Site)
 
@@ -328,7 +328,7 @@ knitr::kable(qc3_2)
 
 
 
-###	If the Urine Tube was collected and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, BioClin_SiteUrineColl_v1r0 must be yes
+###	7. If the Urine Tube was collected and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, BioClin_SiteUrineColl_v1r0 must be yes
 ```{r BioClin_SiteUrineColl_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 currentDate <- Sys.Date()
@@ -346,10 +346,10 @@ knitr::kable(qc4)
 ```
 
 
-### If(Site Serum Separator Tube Number) has been collected, the collection site is clinical, and BioClin_DBBloodRRLDt_v1r0 occured more than 7 days ago, then BioClin_SiteBloodColl_v1r0 should be yes
+### 8. If(Site Serum Separator Tube Number) has been collected, the collection site is clinical, and BioClin_DBBloodRRLDt_v1r0 occured more than 7 days ago, then BioClin_SiteBloodColl_v1r0 should be yes
 ```{r Clin_SiteBloodColl_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc5_tube4 <- bioqc %>%  filter( d_232343615_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc5_tube4 <- bioqc %>%  filter( d_232343615_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc5_tube4 %>%  gt() %>%  
@@ -363,7 +363,7 @@ knitr::kable(qc5_tube4)
 
 
 
-qc5_tube1 <- bioqc %>%  filter( d_299553921_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc5_tube1 <- bioqc %>%  filter( d_299553921_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc5_tube1 %>%  gt() %>%  
@@ -376,7 +376,7 @@ knitr::kable(qc5_tube1)
 
 
 
-qc5_tube3 <- bioqc %>%  filter( d_376960806_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc5_tube3 <- bioqc %>%  filter( d_376960806_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc5_tube3 %>%  gt() %>%  
@@ -389,7 +389,7 @@ knitr::kable(qc5_tube3)
 
 
 
-qc5_tube5 <- bioqc %>%  filter( d_589588440_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc5_tube5 <- bioqc %>%  filter( d_589588440_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc5_tube5 %>%  gt() %>%  
@@ -402,7 +402,7 @@ knitr::kable(qc5_tube5)
 
 
 
-qc5_tube2 <- bioqc %>%  filter( d_703954371_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc5_tube2 <- bioqc %>%  filter( d_703954371_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc5_tube2 %>%  gt() %>%  
@@ -417,10 +417,10 @@ knitr::kable(qc5_tube2)
 
 
 
-### If(EDTA Tube Number) has been collected, the collection site is clinical, and BioClin_DBBloodRRLDt_v1r0 occured more than 7 days ago, then BioClin_SiteBloodColl_v1r0 should be yes
+### 9. If(EDTA Tube Number) has been collected, the collection site is clinical, and BioClin_DBBloodRRLDt_v1r0 occured more than 7 days ago, then BioClin_SiteBloodColl_v1r0 should be yes
 ```{r BioClin_SiteBloodColl_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc6_tube1 <- bioqc %>%  filter( d_454453939_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc6_tube1 <- bioqc %>%  filter( d_454453939_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc6_tube1 %>%  gt() %>%  
@@ -433,7 +433,7 @@ knitr::kable(qc6_tube1)
 
 
 
-qc6_tube2 <- bioqc %>%  filter( d_677469051_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc6_tube2 <- bioqc %>%  filter( d_677469051_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc6_tube2 %>%  gt() %>%  
@@ -446,7 +446,7 @@ knitr::kable(qc6_tube2)
 
 
 
-qc6_tube3 <- bioqc %>%  filter( d_683613884_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & d_173836415_d_266600170_d_693370086 !=353358909) %>% 
+qc6_tube3 <- bioqc %>%  filter( d_683613884_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
 
 # qc6_tube3 %>%  gt() %>%  
@@ -461,7 +461,7 @@ knitr::kable(qc6_tube3)
 ```
 
 
-###  If Heparin Tube 1 was collected, site was Clinical, and BioClin_DBBloodRRLDt_v1r0 occurred more than 7 days ago, BioClin_SiteBloodColl_v1r0 must be yes
+###  10. If Heparin Tube 1 was collected, site was Clinical, and BioClin_DBBloodRRLDt_v1r0 occurred more than 7 days ago, BioClin_SiteBloodColl_v1r0 must be yes
 
 ```{r Herapin1, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -476,7 +476,7 @@ colnames(qc7_tube1) <- c("Site", "Connect ID", "Site Heparin Tube 1 Collected (S
 knitr::kable(qc7_tube1)
 ```
 
-### If Heparin Tube 2 was collected, site was Clinical, and BioClin_DBBloodRRLDt_v1r0 occurred more than 7 days ago, BioClin_SiteBloodColl_v1r0 must be yes
+### 11. If Heparin Tube 2 was collected, site was Clinical, and BioClin_DBBloodRRLDt_v1r0 occurred more than 7 days ago, BioClin_SiteBloodColl_v1r0 must be yes
 ```{r Herapin2, echo=FALSE, warning=FALSE, message=FALSE}
 qc7_tube2 <- bioqc %>%  filter( d_958646668_d_593843561==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_693370086)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
@@ -492,7 +492,7 @@ knitr::kable(qc7_tube2)
 
 
 
-### All baseline samples ("BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMWCol_v1r0") are collected, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then SMMet_BLSamplesColl_v1r0 must be YES
+### 12. All baseline samples ("BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMWCol_v1r0") are collected, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then SMMet_BLSamplesColl_v1r0 must be YES
 ```{r SMMET, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc8 <- bioqc %>%  filter(d_878865966==353358909 & d_167958071==353358909 & d_684635302==353358909 & d_678166505>=as.Date("2022-11-21")  & d_254109640 !=353358909) %>% 
@@ -509,7 +509,7 @@ knitr::kable(qc8)
 
 
 
-### If BioFin_BaseBloodCol_v1r0 is yes and the collection setting is Research, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then (Autogenerated) Date/time Baseline Research Blood Collected must be populated  
+### 13. If BioFin_BaseBloodCol_v1r0 is yes and the collection setting is Research, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then (Autogenerated) Date/time Baseline Research Blood Collected must be populated  
 ```{r BloodDateTime, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc9B <- bioqc %>%  filter(d_878865966==353358909 & d_650516960==534621077 & d_678166505>=as.Date("2022-11-21") & is.na(d_173836415_d_266600170_d_561681068)) %>% 
@@ -523,7 +523,7 @@ colnames(qc9B) <- c("Site", "Connect ID", "(Autogenerated) Date/time Baseline Re
 knitr::kable(qc9B)
 ```
 
-### If BioFin_BaseUrineCol_v1r0 is yes and the collection setting is Research, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then (Autogenerated) Date/time Baseline Research Urine Collected must be populated
+### 14. If BioFin_BaseUrineCol_v1r0 is yes and the collection setting is Research, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then (Autogenerated) Date/time Baseline Research Urine Collected must be populated
 ```{r UrineDateTime, echo=FALSE, warning=FALSE, message=FALSE}
 qc9U <- bioqc %>%  filter(d_167958071==353358909 & d_650516960==534621077  & d_678166505>=as.Date("2022-11-21") & is.na(d_173836415_d_266600170_d_847159717)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_847159717) %>%  sort_by(Site)
@@ -541,7 +541,7 @@ knitr::kable(qc9U)
 
 
 
-### If BioFin_BaseBloodCol_v1r0 is yes and the collection setting is Research, BioCol_ColTime_v1r0 must be populated 
+### 15. If BioFin_BaseBloodCol_v1r0 is yes and the collection setting is Research, BioCol_ColTime_v1r0 must be populated 
 ```{r BioCol_ColTime_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc10 <- bioqc %>%  filter(d_878865966==353358909 & d_650516960==534621077   & is.na(d_678166505)) %>% #& d_678166505>=as.Date("2022-11-21")) %>% 
@@ -558,7 +558,7 @@ knitr::kable(qc10)
 
 
 
-### If BioCol_ObjCollected_v1r0 (mouthwash), and BioCol_ColTime_v1r0 occured on or after 11/21/2022, then  BioFin_BaseMouthCol_v1r0 should be no 
+### 16. If BioCol_ObjCollected_v1r0 (mouthwash), and BioCol_ColTime_v1r0 occured on or after 11/21/2022, then  BioFin_BaseMouthCol_v1r0 should be no 
 ```{r BioFin_BaseMouthCol_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc11 <- bioqc %>%  filter(d_143615646_d_593843561==104430631  & d_678166505>=as.Date("2022-11-21") & d_684635302!=104430631) %>% 
@@ -575,7 +575,7 @@ knitr::kable(qc11)
 
 
 
-### If Urine tube was collected, site was Clinical, and BioReg_ArRegTime_v1r0 occurred more than 7 days ago, BioClin_SiteUrineColl_v1r0 must be yes
+### 17. If Urine tube was collected, site was Clinical, and BioReg_ArRegTime_v1r0 occurred more than 7 days ago, BioClin_SiteUrineColl_v1r0 must be yes
 ```{r BioClin_SiteUrineColl, echo=FALSE, warning=FALSE, message=FALSE}
 
 
@@ -627,7 +627,7 @@ colnames(UrineOrderPl_noHP) <- c("Site", "Connect ID", "BioClin_UrnOrdPlacedBL_v
 ```
 
 
-### IF BioClin_BldOrderPlaced_v1r0 = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP Excluded
+### 18. IF BioClin_BldOrderPlaced_v1r0 = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP Excluded
 ```{r HPExcluded5, echo=FALSE, warning=FALSE, message=FALSE}
 
 BloodDtTm_noHP <- bioqc %>%  filter(is.na(d_173836415_d_266600170_d_769615780) & d_173836415_d_266600170_d_530173840==353358909	& 
@@ -657,7 +657,7 @@ colnames(BloodDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_BldOrderPlaced")
 
 
 
-### IF BioClin_UrnOrdPlaced = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP Excluded
+### 19. IF BioClin_UrnOrdPlaced = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP Excluded
 ```{r HPExcluded3, echo=FALSE, warning=FALSE, message=FALSE}
 
 UrineDtTm_noHP <- bioqc %>%  filter(is.na(d_173836415_d_266600170_d_939818935) & d_173836415_d_266600170_d_860477844==353358909	& 
@@ -689,7 +689,7 @@ colnames(UrineDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_UrnOrdPlaced")
 
 
 
-### Tube Date Received Clinical - If BioClin_DBBloodRRLDt_v1r0 occurred more than 4 days ago, (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
+### 20. Tube Date Received Clinical - If BioClin_DBBloodRRLDt_v1r0 occurred more than 4 days ago, (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
 ```{r BioBPTL_DateRecClinical, echo=FALSE, warning=FALSE, message=FALSE}
 
 
@@ -771,7 +771,7 @@ knitr::kable(qc13_tube7)
 
 
 
-### Tube Date Received Research - If (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
+### 21. Tube Date Received Research - If (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
 ```{r BioBPTL_DateRecResearch, echo=FALSE, warning=FALSE, message=FALSE}
 
 
@@ -871,7 +871,7 @@ knitr::kable(qc13_Rtube7)
 ```
 
 
-### If BioClin_BldOrderPlcdBL_v1r0=yes or BioClin_UrnOrdPlacedBL_v1r0=yes, then BioClin_BldUrnPlcdTmBL_v1r0 is the first of BioClin_BldOrdPlacdDtBL_v1r0 and BioClin_UrnOrdPlcdDtBL_v1r0
+### 22. If BioClin_BldOrderPlcdBL_v1r0=yes or BioClin_UrnOrdPlacedBL_v1r0=yes, then BioClin_BldUrnPlcdTmBL_v1r0 is the first of BioClin_BldOrdPlacdDtBL_v1r0 and BioClin_UrnOrdPlcdDtBL_v1r0
 ```{r BioClin_BldUrnPlcdTmBL_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 BLUR_Time <- bioqc %>% filter( (d_173836415_d_266600170_d_530173840 == 353358909 | d_173836415_d_266600170_d_860477844 == 353358909) & 
@@ -886,7 +886,7 @@ knitr::kable(BLUR_Time)
 
 
 
-### If any blood tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_BloodSettingBL_v1r0 must be Research.
+### 23. If any blood tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_BloodSettingBL_v1r0 must be Research.
 ```{r BioSpm_BloodSettingBL_res, echo=FALSE, warning=FALSE, message=FALSE}
 
 bio_bl_setting_res <- bioqc %>%  filter((d_232343615_d_593843561==353358909 | d_299553921_d_593843561==353358909 | d_376960806_d_593843561==353358909 | d_454453939_d_593843561==353358909 | d_589588440_d_593843561==353358909 | d_958646668_d_593843561==353358909 | d_677469051_d_593843561==353358909 | d_683613884_d_593843561==353358909 | d_703954371_d_593843561==353358909 | d_838567176_d_593843561==353358909) & 
@@ -900,7 +900,7 @@ knitr::kable(bio_bl_setting_res)
 ```  
 
 
-### If any blood tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_BloodSettingBL_v1r0 must be Clinical.
+### 24. If any blood tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_BloodSettingBL_v1r0 must be Clinical.
 ```{r BioSpm_BloodSettingBL_clin, echo=FALSE, warning=FALSE, message=FALSE}
 
 bio_bl_setting_clin <- bioqc %>%  filter((d_232343615_d_593843561==353358909 | d_299553921_d_593843561==353358909 | d_376960806_d_593843561==353358909 | d_454453939_d_593843561==353358909 | d_589588440_d_593843561==353358909 | d_958646668_d_593843561==353358909 | d_677469051_d_593843561==353358909 | d_683613884_d_593843561==353358909 | d_703954371_d_593843561==353358909 | d_838567176_d_593843561==353358909) & 
@@ -914,7 +914,7 @@ knitr::kable(bio_bl_setting_clin)
                               
 ```  
                               
-### If the Urine tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_UrineSettingBL_v1r0 must be Clinical.
+### 25. If the Urine tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_UrineSettingBL_v1r0 must be Clinical.
 ```{r BioSpm_UrineSettingBL_clin, echo=FALSE, warning=FALSE, message=FALSE}
 
 bio_ur_setting_clin <- bioqc %>%  filter((d_973670172_d_593843561==353358909) & d_650516960==664882224 & d_173836415_d_266600170_d_718172863 !=664882224) %>% 
@@ -926,7 +926,7 @@ knitr::kable(bio_ur_setting_clin)
                               
 ```  
 
-### If the Urine tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_UrineSettingBL_v1r0 must be Research.
+### 26. If the Urine tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_UrineSettingBL_v1r0 must be Research.
 ```{r BioSpm_UrineSettingBL_res, echo=FALSE, warning=FALSE, message=FALSE}
 
 bio_ur_setting_res <- bioqc %>%  filter((d_973670172_d_593843561==353358909) & d_650516960==534621077 & d_173836415_d_266600170_d_718172863 !=534621077) %>% 
@@ -939,7 +939,7 @@ knitr::kable(bio_ur_setting_res)
 ```  
 
                               
-### If the Mouthwash tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_MWSettingBL_v1r0 must be Clinical.
+### 27. If the Mouthwash tube is collected and BioSpm_Setting_v1r0= Clinical then BioSpm_MWSettingBL_v1r0 must be Clinical.
 ```{r BioSpm_MWSettingBL_clin, echo=FALSE, warning=FALSE, message=FALSE}
 
 bio_mw_setting_clin <- bioqc %>%  filter((d_143615646_d_593843561==353358909) & d_650516960==664882224 & d_173836415_d_266600170_d_915179629 !=664882224) %>% 
@@ -952,7 +952,7 @@ knitr::kable(bio_mw_setting_clin)
                               
 ```  
 
-### If the Mouthwash tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_MWSettingBL_v1r0 must be Research.
+### 28. If the Mouthwash tube is collected and BioSpm_Setting_v1r0= Research then BioSpm_MWSettingBL_v1r0 must be Research.
 ```{r BioSpm_MWSettingBL_res, echo=FALSE, warning=FALSE, message=FALSE}
 
 bio_mw_setting_res <- bioqc %>%  filter((d_143615646_d_593843561==353358909) & d_650516960==534621077 & d_173836415_d_266600170_d_915179629 !=534621077) %>% 
@@ -976,9 +976,9 @@ knitr::kable(bio_mw_setting_res)
 
 
 \newpage
-
-## BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0
 \FloatBarrier
+## 29. BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0
+
 
 ```{r BioClin_PolyBloodID_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -1007,9 +1007,8 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
 
 ```
 
-
-## BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0
 \FloatBarrier
+## 30. BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0
 
 ```{r PolyUrineID, echo=FALSE, warning=FALSE, message=FALSE}
 
