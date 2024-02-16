@@ -517,7 +517,7 @@ biospe_site<-biospe %>% mutate(Site=case_when(siteAcronym=="HFHS" ~ "Henry Ford 
 
 table1.2 <- biocol.tb %>% filter(d_410912345== 353358909) %>%
   mutate(#appointment = ifelse((d_410912345!= 353358909 | is.na(d_410912345)), 104430631, 353358909),
-         biocol.appoint = case_when(BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 ~ "Baseline Collection",
+         biocol.appoint = case_when(BiospeCollection == "Any biospecimen Collections" ~ "Baseline Collection", # & d_410912345== 353358909
                                     #BiospeCollection == "No biospecimen collections" & (d_410912345!= 353358909 | is.na(d_410912345)) ~ "No Baseline Collection"
                                     TRUE ~ "No Baseline Collection"))
 
@@ -612,7 +612,7 @@ col_num_1.2_gt <- col_num_1.2 %>%
 
 col_num_1.2_gt <- col_num_1.2_gt %>%  summary_rows(
         groups = TRUE,
-        columns = vars("Number of Research Collections"),
+        columns = vars("Number of Clinical Collections"),
         fns = (Sum = ~sum(.)),
         ) %>% tab_header("Table 1.2 Baseline Clinical Biospecimen Collections by Clinic Location")
 
