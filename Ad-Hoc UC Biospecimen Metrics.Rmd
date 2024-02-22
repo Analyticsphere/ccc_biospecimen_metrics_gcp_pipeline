@@ -17,7 +17,6 @@ output:
     fig_width: 7
     fig_height: 5
     fig_caption: true
-    latex_engine: xelatex
     df_print: paged 
 ---
 
@@ -25,7 +24,7 @@ output:
 
 ```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
 
-
+#    latex_engine: xelatex
 #old.packages()
 #update.packages()  
 
@@ -99,13 +98,14 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 
 ```
 
+
 ```{r BQPull, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ##import data to R
 
 project <- "nih-nci-dceg-connect-prod-6d04"
 billing <- "nih-nci-dceg-connect-prod-6d04" ##project and billing should be consistent
-bio_tb <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null")  
-biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1000)
+bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null')  
+biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
@@ -118,6 +118,10 @@ for (i in 1: length(cnames)){
 }
 tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
 box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
+#y <- read_table(urlfile1,header = TRUE, sep = "\t", na.strings = c("NA","N/A",""),fill = TRUE, quote='')
+library(readr)
+urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github
+y <- read.csv(urlfile) #the masterDD has just been updated which can't easily pulled from github directly as before. I need to download from the raw file in the github
 #y <- read_table(urlfile1,header = TRUE, sep = "\t", na.strings = c("NA","N/A",""),fill = TRUE, quote='')
 library(rio)
 dictionary <- rio::import("https://episphere.github.io/conceptGithubActions/aggregate.json",format = "json")
@@ -171,17 +175,23 @@ recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
 recrvar_nd <- recrvar[which(grepl("d_",recrvar$column_name)),c("column_name","field_path")]
+
 recrvar_nd$last.CID <- ifelse(grepl("d_",recrvar_nd$column_name),substring(sapply(strsplit(recrvar_nd$column_name,"d_"),tail,1),1,9),NA)
-recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
-recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|Blood|Urine|Mouthwash|collection",recrvar_nd_label$Variable.Label)),] #49 updated due to the changes of the master DD
-recrvar.bio <- recrvar.bio[!duplicated(recrvar.bio[,c("last.CID","column_name")]),] #53 updated 10/05/2023 due to the updated dictionary
-query <- recrvar.bio$column_name
+recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4","Current.Format.Value")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
+
+
+#recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Label","conceptId.4")],by.x="last.CID",by.y="conceptId.3",all.x=TRUE)
+#recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|Blood|Urine|Mouthwash|collection",recrvar_nd_label$Variable.Label)),] #49 updated due to the changes of the master DD
+#recrvar.bio <- recrvar.bio[!duplicated(recrvar.bio[,c("last.CID","column_name")]),] #53 updated 10/05/2023 due to the updated dictionary #should this line be kept?
+
+recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source =="Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|collection|Blood|Urine|Mouthwash|MW|Ur|Ur Surv|MW Surv",recrvar_nd_label$Variable.Label)),] #49
+query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 #tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
 
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
  
-recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 10000)
+recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
 ##below are the commone variables in the recruitment table on Biospecimen to apply for the analysis. In case any new variables popping up, i would like #to use the one above directly from the resources (master DD and recruitment table schema to get the most updated version on this biospecimen data
 # tb <- bq_project_query(project, query="SELECT d_512820379,d_512820379, d_821247024, d_914594314, d_822499427, d_222161762, Connect_ID, d_827220437, token,d_265193023, d_878865966, d_167958071, d_684635302, d_253883960, d_534669573, d_764863765, d_331584571_d_266600170_d_135591601,d_331584571_d_266600170_d_840048338,  d_331584571_d_266600170_d_343048998, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_185243482,
 # d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428,
@@ -250,12 +260,6 @@ recrver1 <- expss::apply_labels(recrver,
                         d_822499427 = "Placeholder (Autogenerated) - Date/time Status of Start of blood/urine/mouthwash research survey",#SrvBLM_TmStart_v1r0
                         d_222161762  = "Placeholder (Autogenerated)- Date/Time blood/urine/mouthwash research survey completed" #   SrvBLM_TmComplete_v1r0
 )
-
-
-
-
-
-
 ###to convert to categorical variables
 recrver1$RcrtSI_RecruitType_v1r0 <- factor(recrver1$d_512820379, exclude=NULL)
 recrver1$RcrtV_Verification_v1r0 <- factor(recrver1$d_821247024, exclude=NULL)
@@ -298,9 +302,14 @@ biospe_var$cid1 <- sapply(strsplit(colnames(biospe),"_"), "[", 2)
 biospe_var$cid2 <- sapply(strsplit(colnames(biospe),"_"), "[", 4)
 biospe_var$cid3 <- sapply(strsplit(colnames(biospe),"_"), "[", 6)
 biospe_var$cid_tail <- sapply(strsplit(colnames(biospe),"_"), tail,1)
-biospe_CID <- dd[which(dd$CID %in% CID),]
-biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="CID", all.x=TRUE)
-tubes <- dd[grepl(" Tube ",dd$`Variable Label`),]
+CID <- unique(c(biospe_var$cid1,biospe_var$cid2,biospe_var$cid3)) #this line is missing from your code in github.
+#biospe_CID <- dd[which(dd$CID %in% CID),]
+biospe_CID <- y[which(y$conceptId.3 %in% CID),]
+biospe_dd<- base::merge(biospe_var,biospe_CID,by.x="cid_tail",by.y="conceptId.3", all.x=TRUE)
+biospe_dd <- biospe_dd%>% arrange(variable,conceptId.1) %>% filter(!duplicated(variable))
+#tubes <- dd[grepl(" Tube ",dd$`Variable Label`),] #updated 12/11/2023
+tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
+
 urine <- dd[grepl("Urine",dd$`Variable Label`),]
 mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 
@@ -497,25 +506,26 @@ biospe$Site <- factor(biospe$d_827220437, levels= c("HealthPartners", "Henry For
 # 
 # 
 # 
-# biospeUC<- expss::apply_labels(biospe,d_951355211 = "Site_location",#RcrtES_Site_v1r0
+# biospeUC<- expss::apply_labels(biospe,d_951355211 = "Collection_Location",#RcrtES_Site_v1r0
 #                      d_827220437 = c("UC-DCAM"= 777644826, "Ingalls Harvey"=548392715,"River East" = 303349821, "South Loop" = 657167265, "UCM Pop-Up" = 809703864))
 # 
-# biospeUC$Site_location <- factor(biospeUC$d_951355211, levels= c("UC-DCAM", "Ingalls Harvey","River East", "South Loop", "UCM Pop-Up"))
+# biospeUC$Collection_Location <- factor(biospeUC$d_951355211, levels= c("UC-DCAM", "Ingalls Harvey","River East", "South Loop", "UCM Pop-Up"))
 # 
-# biospeUC$Site_location<- droplevels(biospeUC$Site_location)
+# biospeUC$Collection_Location<- droplevels(biospeUC$Collection_Location)
 
 biospe_UC <- biospe %>%  filter(Site=="University of Chicago Medicine")
 
-biospeUC<-biospe_UC %>% mutate(Site_location = case_when(d_951355211==777644826 ~ "UC-DCAM",
+biospeUC<-biospe_UC %>% mutate(Collection_Location = case_when(d_951355211==777644826 ~ "UC-DCAM",
                                                       d_951355211==145191545 ~ "Ingalls Harvey",
                                                       d_951355211==489380324 ~ "River East",
                                                       d_951355211==120264574 ~ "South Loop",
                                                       d_951355211==319518299 ~ "UCM Pop-Up",
-                                                      TRUE ~ "Error"))
+                                                      d_951355211==940329442 ~ "Orland Park",
+                                                      TRUE ~ "Null Collection Location"))
 
-biospeUC <- biospeUC %>%  filter(Site_location =="UC-DCAM" | Site_location == "Ingalls Harvey"| Site_location == "River East"| Site_location == "South Loop"| Site_location == "UCM Pop-Up")
+biospeUC <- biospeUC #%>%  filter(Collection_Location != "Error")
 
-b6 <- biospeUC %>%  select(Connect_ID, Site_location, d_650516960, d_410912345)
+b6 <- biospeUC %>%  select(Connect_ID, Collection_Location, d_650516960, d_410912345)
 
 spec_collt <- recrver1 %>%  select(Connect_ID, BioFin_BaseBloodCol_v1r0,BioFin_BaseUrineCol_v1r0,BioFin_BaseMWCol_v1r0)
 
@@ -540,15 +550,15 @@ site.sub <- site.sub1 %>%  mutate(Setting = case_when(d_650516960==534621077 ~ "
 site.sub$'Specimens Collected' <- factor(site.sub$'Specimens Collected',levels=c('Blood, Urine, Mouthwash (All)', 'Blood & Urine Only','Blood & Mouthwash Only','Urine & Mouthwash Only','Blood Only','Urine Only','Mouthwash Only','No Specimens Collected'))
 
 table4_redone__R <- site.sub %>% filter(Setting=="Research Collections") 
-#table4_redone__R$Site_location <- droplevels(table4_redone__R$Site_location)
+#table4_redone__R$Collection_Location <- droplevels(table4_redone__R$Collection_Location)
 table4_redone__R$'Specimens Collected' <- droplevels(table4_redone__R$'Specimens Collected')
-coll_completenessR <- table4_redone__R %>% dplyr::select('Specimens Collected', Site_location )  %>% 
+coll_completenessR <- table4_redone__R %>% dplyr::select('Specimens Collected', Collection_Location )  %>% 
   tbl_cross(
-    row =  Site_location,
+    row =  Collection_Location,
     col = 'Specimens Collected',
     digits=c(0,1),
     percent = "row",
-    label=list(Site_location=" "),
+    label=list(Collection_Location=" "),
     missing="ifany",
     margin_text="Total")
 
@@ -567,7 +577,7 @@ coll_completenessR <- coll_completenessR %>%
 
 
 
-```{r Table6, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Table7s, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ##Fig 1(table6)
 recrver1 <- recrver1 %>% mutate(BiospmCols_v1r0 = 
                                   case_when((recrver1$d_684635302 == 353358909 & recrver1$d_878865966 == 353358909 & recrver1$d_167958071 == 353358909) ~ "All blood, urine and mouthwash",
@@ -763,19 +773,22 @@ bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research))
          
 bldcol_research1 <- bldcol_research[c(1:5,10),c(9:12,4)] #c(9:12,4)
 
-```
 
 
 
 
-```{r Table7s, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ### Table 7.1- specifically for U-Chicago 
-biospe= biospe  %>% mutate(UC_Sites= case_when(d_951355211==777644826 ~ "UC-DCAM",
-                                       d_951355211==145191545 ~ "Ingalls Harvey",
-                                       d_951355211==489380324 ~ "River East",
-                                       d_951355211==120264574 ~ "South Loop"))
+biospe= biospe  %>% filter(Site=="University of Chicago Medicine") %>% mutate(UC_Sites= case_when(d_951355211==777644826 ~ "UC-DCAM",
+                                                      d_951355211==145191545 ~ "Ingalls Harvey",
+                                                      d_951355211==489380324 ~ "River East",
+                                                      d_951355211==120264574 ~ "South Loop",
+                                                      d_951355211==319518299 ~ "UCM Pop-Up",
+                                                      d_951355211==940329442 ~ "Orland Park",
+                                                      TRUE~"Null Collection Location"))
+
+
 tube_col_UC <- biospe  %>% group_by(as.character(Connect_ID),UC_Sites,d_650516960) %>% 
-  filter(UC_Sites=="UC-DCAM" | UC_Sites=="Ingalls Harvey" |  UC_Sites=="River East" |  UC_Sites=="South Loop" ) %>% 
+  #filter(!is.na(UC_Sites)) %>% 
   dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
                    Urine_col_max= max(Urine_col,na.rm=TRUE),
                    MW_col_max=max(MW_col,na.rm=TRUE),
@@ -840,6 +853,8 @@ tb_combo <- array(pct_n(ctable$t,ctable$prop.col),dim=c(n,m))
 
 ```{r Table11, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
+
+
 #Table 13 
 #Participants who checked in for a baseline biospecimen visit but did not give any samples
 dd[grepl("BioChk",dd$`Variable Name`),]
@@ -864,7 +879,7 @@ table(bio_checkin_resh$BiospeCollection)
 # 13: 838567176                          Heparin Tube 1 BioCol_0003_v1r0
 # 14: 958646668                          Heparin Tube 2 BioCol_0013_v1r0
 # 15: 973670172                                   Urine BioCol_0006_v1r0
-tubes <- dd[which(grepl("BioCol_00",as.character(dd$`Variable Name`)) & !grepl("Biohazard Bag", dd$`Variable Label`)),] 
+tubes <- dd[which(grepl("BioCol_00",as.character(dd$`Variable Name`)) & !grepl("Biohazard Bag", dd$`Variable Label`) & !grepl("Biohaz Bag", dd$`Variable Label`)),] #Biohazard changed to Biohaz, noticed 2/21/24
 tubes <- tubes[order(tubes$"Variable Name"),]
 tube.ls <- paste0("d_", trimws(paste(tubes[which(grepl("00", tubes$`Variable Name`)),]$CID,collapes="")))
 # [1] "d_299553921" "d_703954371" "d_838567176" "d_454453939" "d_652357376" "d_973670172" "d_143615646"
@@ -872,6 +887,12 @@ tube.ls <- paste0("d_", trimws(paste(tubes[which(grepl("00", tubes$`Variable Nam
 biospe$tubedev <-0 #biospecimen deviations
 biospe$tubecol <- 0 #tube collections
 biospe$tubedid <- 0 #tube discarded
+
+
+
+
+#here starts the error
+
 for(i in 1:length(tube.ls)){
   
   tubecol <- ifelse(biospe[,paste(tube.ls[i],"d_593843561",sep="_")] == 104430631 | is.na(biospe[,paste(tube.ls[i],"d_593843561",sep="_")]),0,1)  ##for tube collected
@@ -921,6 +942,10 @@ Deviation_Freq <- Deviation_Freq %>% mutate(Site = ifelse(is.na(Group.1.x), "Tot
 
 
 ```{r Deviations, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
+
+
+
 #Table 14. Number of deviations by biospecimen type and by tube type 
 #keep this table for CCC version but remove from version that we are sharing with the sites
 dev_tube <- NULL
@@ -1151,11 +1176,11 @@ for(site in unique(dev_tube2$Site)){
            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1")))
     research.coltube.bld.only<- research.coltube.bld.only %>%  mutate(tube_type=droplevels(tube_type))
 
-T8UC <- biospeUC %>%  select(Site_location, Site) ##MAY NOT WORK ADDING CONNECTID 
+T8UC <- biospeUC %>%  select(Collection_Location, Site) ##MAY NOT WORK ADDING CONNECTID 
 T8__UC <- left_join(research.coltube.bld.only, T8UC, by= "Site") #aDDING IN CONNECT id IS A PROBLEM, BUT i NEED A WAY TO DISTINGUISH PARTICIPANTS SO THEY'RE NOT COUNTED REPEATEDLY
 # tube_col_UC3 <- tube_col_UC %>% select(UC_Sites)
-# tube_col_UC3$Site_location <- tube_col_UC3$UC_Sites 
-# df3 <- left_join(tube_col_UC3, T8__UC, by='Site_location')
+# tube_col_UC3$Collection_Location <- tube_col_UC3$UC_Sites 
+# df3 <- left_join(tube_col_UC3, T8__UC, by='Collection_Location')
 # tube_col_UC3 <- tube_col_UC %>% select(UC_Sites)
 # 
 # table3_tubes <- research.coltube.bld.only %>% select(tube_type, Site)
@@ -1163,9 +1188,9 @@ T8__UC <- left_join(research.coltube.bld.only, T8UC, by= "Site") #aDDING IN CONN
 
 
 tube_col_UC3 <- tube_col_UC %>% select(UC_Sites, Connect_ID, bldcol_max)
-All_UC3 <- biospeUC %>% select(Site_location, Connect_ID,  d_820476880,  d_299553921_d_825582494,  d_454453939_d_825582494, d_652357376_d_825582494, d_703954371_d_825582494,  d_838567176_d_825582494) #d_505347689_d_825582494,
-tube_col_UC3$Site_location <- tube_col_UC3$UC_Sites 
-df3 <- left_join(tube_col_UC3, All_UC3, by=c("Connect_ID", 'Site_location'))
+All_UC3 <- biospeUC %>% select(Collection_Location, Connect_ID,  d_820476880,  d_299553921_d_825582494,  d_454453939_d_825582494, d_652357376_d_825582494, d_703954371_d_825582494,  d_838567176_d_825582494) #d_505347689_d_825582494,
+tube_col_UC3$Collection_Location <- tube_col_UC3$UC_Sites 
+df3 <- left_join(tube_col_UC3, All_UC3, by=c("Connect_ID", 'Collection_Location'))
 
 df3 <- df3 %>% mutate(tube_type = case_when(!is.na(d_299553921_d_825582494) ~ "SS Tube1",
                                           !is.na(d_703954371_d_825582494) ~ "SS Tube2",
@@ -1174,17 +1199,17 @@ df3 <- df3 %>% mutate(tube_type = case_when(!is.na(d_299553921_d_825582494) ~ "S
                                           !is.na(d_652357376_d_825582494) ~ "ACD Tube1"))
 
 
-#df4 <- left_join(df3, All_UC3, by=c("Connect_ID", 'Site_location'))    
+#df4 <- left_join(df3, All_UC3, by=c("Connect_ID", 'Collection_Location'))    
 
 
 tbl_3 <- df3 %>%  filter(bldcol_max!=5 & bldcol_max!=0)
-tbl_3_ncol <- tbl_3 %>% dplyr::select(Site_location, tube_type )  %>% tbl_cross(
-  row = Site_location,
+tbl_3_ncol <- tbl_3 %>% dplyr::select(Collection_Location, tube_type )  %>% tbl_cross(
+  row = Collection_Location,
   col = tube_type, 
   digits=c(0,1),
   percent = "row",
-  label=list(Site_location ~ " ", tube_type ~ " "),
-  # label=list(Site_location,="",
+  label=list(Collection_Location ~ " ", tube_type ~ " "),
+  # label=list(Collection_Location,="",
   #            tube_type = ""),
   missing="ifany") %>%
   #bold_labels() %>%
@@ -1197,7 +1222,7 @@ tbl_3_ncol <- tbl_3 %>% dplyr::select(Site_location, tube_type )  %>% tbl_cross(
 
  
   
-# ctable <-  CrossTable(T8__UC$Site_location, T8__UC$tube_type)
+# ctable <-  CrossTable(T8__UC$Collection_Location, T8__UC$tube_type)
 # 
 # 
 # nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
@@ -1224,11 +1249,11 @@ tbl_3_ncol <- tbl_3 %>% dplyr::select(Site_location, tube_type )  %>% tbl_cross(
 #   #notcol_combo$Total.Notcol <- paste0(apply(count[c(1:5),c(1:7)],1,sum), "( ", round(100*apply(count2[c(1:5),c(1:7)],1,sum)/total,2), " %)")
 #   notcol_combo$Total.Notcol <- paste0(count2$Total.NotCol, "( ", round(100*count2$Total.NotCol/sum(count2$Total.NotCol),1), " %)")
 #   
-#   notcol_combo$Site_location <- rownames(count2)
+#   notcol_combo$Collection_Location <- rownames(count2)
 # 
 #   #notcol_combo[6,c(1:8)] <- as.character(apply(count,2,sum))
 # notcol_combo[6,c(1:6)] <- as.character(apply(count2,2,sum))
-#   notcol_combo$Site_location[is.na(notcol_combo$Site_location)] <- replace_na("Total") 
+#   notcol_combo$Collection_Location[is.na(notcol_combo$Collection_Location)] <- replace_na("Total") 
   
   
   
@@ -1310,7 +1335,7 @@ reseachnotes.coltype <- n_pct_table(research.notcol$tube_type,research.notcol$no
 notcol.reasons.research <- rbind(reseachnotes.notcol,reseachnotes.coltype)
 
 
-#research.notcol$Site_location <- droplevels(research.notcol$Site_location)
+#research.notcol$Collection_Location <- droplevels(research.notcol$Collection_Location)
 
 
 T12__UC <- research.notcol %>% filter(Site=="University of Chicago Medicine")
@@ -1320,21 +1345,23 @@ T12__UC$Site=droplevels(T12__UC$Site)
 notcol_notes_table4 <- research.notcol %>% filter(biospecimen=="blood" & Site=="University of Chicago Medicine")
 T12UC <- left_join(notcol_notes_table4, df3, by="d_820476880") #aDDING IN CONNECT id IS A PROBLEM, BUT i NEED A WAY TO DISTINGUISH PARTICIPANTS SO THEY'RE NOT COUNTED REPEATEDLY
 
-T12UC <- T12UC %>%  filter(!is.na(Site_location))
+df3$Collection_Location <- df3$UC_Sites
 
-research.notcolnotes_site <- T12UC %>% select(notcol.notes,Site_location) %>% 
+T12UC <- T12UC %>%  filter(!is.na(Collection_Location))
+
+research.notcolnotes_site <- T12UC %>% select(notcol.notes,Collection_Location) %>% 
   tbl_cross(  col = notcol.notes,
-                  row = Site_location,
+                  row = Collection_Location,
                    percent = "row",
                    digits= c(0,1),
-                   label= c(notcol.notes~ " ", Site_location ~ " "),
+                   label= c(notcol.notes~ " ", Collection_Location ~ " "),
                    missing="ifany",
                    missing_text="0 ( 0 %)")%>%
      modify_header() %>%
      modify_caption("Table 4. Reason Not Collected for Research Tubes Not Collected by Collection Location ") %>% 
   as_kable_extra() %>% kable_styling(latex_options = "scale_down")
 
-tbl_3_ncol
+#tbl_3_ncol
 research.notcolnotes_site 
 
 
@@ -1358,9 +1385,9 @@ research.notcolnotes_site
 
 
 tube_col_UC3 <- tube_col_UC %>% select(UC_Sites, Connect_ID, bldcol_max)
-All_UC3 <- biospeUC %>% select(Site_location, Connect_ID,  d_820476880,  d_299553921_d_825582494,  d_454453939_d_825582494, d_652357376_d_825582494, d_703954371_d_825582494,  d_838567176_d_825582494) #d_505347689_d_825582494,
-tube_col_UC3$Site_location <- tube_col_UC3$UC_Sites 
-df3 <- left_join(tube_col_UC3, All_UC3, by=c("Connect_ID", 'Site_location'))
+All_UC3 <- biospeUC %>% select(Collection_Location, Connect_ID,  d_820476880,  d_299553921_d_825582494,  d_454453939_d_825582494, d_652357376_d_825582494, d_703954371_d_825582494,  d_838567176_d_825582494) #d_505347689_d_825582494,
+tube_col_UC3$Collection_Location <- tube_col_UC3$UC_Sites 
+df3 <- left_join(tube_col_UC3, All_UC3, by=c("Connect_ID", 'Collection_Location'))
 
 df3 <- df3 %>% mutate(tube_type = case_when(!is.na(d_299553921_d_825582494) ~ "SS Tube1",
                                           !is.na(d_703954371_d_825582494) ~ "SS Tube2",
@@ -1369,17 +1396,17 @@ df3 <- df3 %>% mutate(tube_type = case_when(!is.na(d_299553921_d_825582494) ~ "S
                                           !is.na(d_652357376_d_825582494) ~ "ACD Tube1"))
 
 
-#df4 <- left_join(df3, All_UC3, by=c("Connect_ID", 'Site_location'))    
+#df4 <- left_join(df3, All_UC3, by=c("Connect_ID", 'Collection_Location'))    
 
 
 tbl_3 <- df3 %>%  filter(bldcol_max!=5 & bldcol_max!=0)
-tbl_3_ncol <- tbl_3 %>% dplyr::select(Site_location, tube_type )  %>% tbl_cross(
-  row = Site_location,
+tbl_3_ncol <- tbl_3 %>% dplyr::select(Collection_Location, tube_type )  %>% tbl_cross(
+  row = Collection_Location,
   col = tube_type, 
   digits=c(0,1),
   percent = "row",
-  label=list(Site_location ~ " ", tube_type ~ " "),
-  # label=list(Site_location,="",
+  label=list(Collection_Location ~ " ", tube_type ~ " "),
+  # label=list(Collection_Location,="",
   #            tube_type = ""),
   missing="ifany") %>%
   #bold_labels() %>%
@@ -1394,7 +1421,7 @@ tbl_3_ncol <- tbl_3 %>% dplyr::select(Site_location, tube_type )  %>% tbl_cross(
 T12__16 <- left_join(collection_long, T8UC, by= "Site")
 
 discard.tb <- T12__16  %>% filter(tube_discard == 353358909) %>% 
-  mutate(#Site_location=droplevels(Site_location),
+  mutate(#Collection_Location=droplevels(Collection_Location),
            tube_type = droplevels(tube_type))
 
 
@@ -1403,7 +1430,7 @@ collection_long_disc2 <- collection_long_disc %>% filter(Site=="University of Ch
 
 
 tube_disc5 <- collection_long_disc2 %>% select(Site, d_820476880) 
-All_UC5 <- biospeUC %>% select(Site, Site_location, Connect_ID,  d_820476880,  d_299553921_d_825582494,  d_454453939_d_825582494, d_652357376_d_825582494, d_703954371_d_825582494,  d_838567176_d_825582494, d_820476880, d_589588440_d_825582494, d_958646668_d_825582494, d_973670172_d_825582494) #d_505347689_d_825582494,
+All_UC5 <- biospeUC %>% select(Site, Collection_Location, Connect_ID,  d_820476880,  d_299553921_d_825582494,  d_454453939_d_825582494, d_652357376_d_825582494, d_703954371_d_825582494,  d_838567176_d_825582494, d_820476880, d_589588440_d_825582494, d_958646668_d_825582494, d_973670172_d_825582494) #d_505347689_d_825582494,
 df5 <- left_join(tube_disc5, All_UC5, by=c("Site", "d_820476880"))
 
 
@@ -1419,13 +1446,13 @@ df5_2 <- df5 %>% mutate(tube_type = case_when(!is.na(d_299553921_d_825582494) ~ 
 #sstube1, sstube2, sstube5 589588440, heptuube1, heptub2 958646668, edtatube1, acdtube1, urinetube1 973670172
 
 #17- by site
-discard.site5 <- df5_2 %>% dplyr::select(Site_location, tube_type )  %>% tbl_cross(
-    row = Site_location,
+discard.site5 <- df5_2 %>% dplyr::select(Collection_Location, tube_type )  %>% tbl_cross(
+    row = Collection_Location,
     col = tube_type, 
     digits=c(0,1),
     percent = "row",
-    label=list(Site_location ~ " ", tube_type ~ " "),
-    # label=list(Site_location,="",
+    label=list(Collection_Location ~ " ", tube_type ~ " "),
+    # label=list(Collection_Location,="",
     #            tube_type = ""),
     missing="ifany") %>%
     #bold_labels() %>%
@@ -1547,7 +1574,7 @@ sv.complete <- sv.complete %>% mutate(cumulative.Freq = ifelse(output.table.Perc
 
 
 bum_compl <- recrver1 %>%  select(d_265193023, Site, Connect_ID) %>% filter( Site=="University of Chicago Medicine")
-T8UC <- biospeUC %>%  select(Site_location, Site, Connect_ID)  
+T8UC <- biospeUC %>%  select(Collection_Location, Site, Connect_ID)  
 T14_UC <- left_join(bum_compl, T8UC, by= c("Site", "Connect_ID"))
 
 T14_UC <- T14_UC %>%  mutate(research.sv= case_when(d_265193023==972455046 ~ "Not Started",
@@ -1557,15 +1584,21 @@ T14_UC <- T14_UC %>%  mutate(research.sv= case_when(d_265193023==972455046 ~ "No
 
 #17- by site
 #test17 <- T14_UC %>%  filter( Site=="University of Chicago Medicine")
-Res_Survey_status <- T14_UC %>% dplyr::select(Site_location, research.sv )  %>% tbl_cross(
-  row = Site_location,
+T14_UC$Collection_Location[is.na(T14_UC$Collection_Location)]="Null Collection Location"
+T14_UC$Collection_Location <- factor(T14_UC$Collection_Location, levels = c('Ingalls Harvey', 'Orland Park', 'River East', 'South Loop', 'UC-DCAM', 'UCM Pop-Up', 'Null Collection Location'))
+
+Res_Survey_status <- T14_UC %>% dplyr::select(Collection_Location, research.sv )  %>% 
+  #arrange(factor(Collection_Location, levels = c('Ingalls Harvey', 'Orland Park', 'River East', 'South Loop', 'UC-DCAM', 'UCM Pop-Up', 'Null Collection Location	'))) %>%
+  tbl_cross(
+  row = Collection_Location,
   col = research.sv, 
   digits=c(0,1),
   percent = "row",
-  label=list(Site_location ~ " ", research.sv ~ " "),
-  # label=list(Site_location,="",
+  label=list(Collection_Location ~ " ", research.sv ~ " "),
+  # label=list(Collection_Location,="",
   #            research.sv = ""),
   missing="ifany") %>%
+   
   #bold_labels() %>%
   #italicize_levels() %>%
   modify_header() %>%
@@ -1622,12 +1655,12 @@ testing7b <- left_join(test17_b, T14_UC, by=c("Site", "research.sv", "Connect_ID
 testing7a <- left_join(test17_a, T14_UC, by=c("Site", "research.sv", "Connect_ID"))
 
 
-Table7A_combinedB <- testing7b %>% dplyr::select(Site_location, checktmvisit )  %>% tbl_cross(
-    row = Site_location,
+Table7A_combinedB <- testing7b %>% dplyr::select(Collection_Location, checktmvisit )  %>% tbl_cross(
+    row = Collection_Location,
     col = checktmvisit,
     digits=c(0,2),
     percent = "row",
-    label=list(Site_location ~ " ", checktmvisit ~ " "),
+    label=list(Collection_Location ~ " ", checktmvisit ~ " "),
     missing="ifany") %>%
     #bold_labels() %>%
     #italicize_levels() %>% 
@@ -1636,12 +1669,12 @@ Table7A_combinedB <- testing7b %>% dplyr::select(Site_location, checktmvisit )  
     as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
-Table7B_combinedA <- testing7a %>% dplyr::select(Site_location, checktmvisit )  %>% tbl_cross(
-    row = Site_location,
+Table7B_combinedA <- testing7a %>% dplyr::select(Collection_Location, checktmvisit )  %>% tbl_cross(
+    row = Collection_Location,
     col = checktmvisit,
     digits=c(0,2),
     percent = "row",
-    label=list(Site_location ~ " ", checktmvisit ~ " "),
+    label=list(Collection_Location ~ " ", checktmvisit ~ " "),
     missing="ifany") %>%
     #bold_labels() %>%
     #italicize_levels() %>% 
@@ -1662,7 +1695,7 @@ Table7B_combinedA <- testing7a %>% dplyr::select(Site_location, checktmvisit )  
 
 
 
-# T8UC <- biospeUC %>%  select(Site_location, Site)  
+# T8UC <- biospeUC %>%  select(Collection_Location, Site)  
 # T8AB_UC <- left_join(recrver1, T8UC, by= "Site")
 # 
 # test21r <- T8AB_UC %>%  filter(d_265193023==231311385 & !is.na(d_222161762) & !is.na(d_822499427)) 
@@ -1670,8 +1703,8 @@ Table7B_combinedA <- testing7a %>% dplyr::select(Site_location, checktmvisit )  
 # test21rb <-  test21r %>%  filter(d_222161762<as.Date("2023-07-05") & ctime>0)
 # test21ra <-  test21r %>%  filter(d_222161762>as.Date("2023-07-05"))
 # 
-# test21rb$Site_location <- droplevels(test21rb$Site_location)
-# test21ra$Site_location <- droplevels(test21ra$Site_location)
+# test21rb$Collection_Location <- droplevels(test21rb$Collection_Location)
+# test21ra$Collection_Location <- droplevels(test21ra$Collection_Location)
 
 test8 <- research.survey %>%  filter(Site=="University of Chicago Medicine" & d_265193023==231311385 & !is.na(d_222161762) & !is.na(d_822499427))
 # 
@@ -1700,7 +1733,7 @@ test21r__a <-  test8_all %>%  filter(d_222161762>=as.Date("2023-07-05") & ctime>
 #test21ra <-  test21r %>%  filter(d_222161762>=as.Date("2023-07-05"))
 
 
-Table8_Before = test21r__b %>% group_by(Site_location) %>% 
+Table8_Before = test21r__b %>% group_by(Collection_Location) %>% 
   dplyr::summarize(#'Number of Collection Visits'=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -1712,7 +1745,7 @@ Table8_Before = test21r__b %>% group_by(Site_location) %>%
                    Max = max(ctime))
 
 
-Table8_After = test21r__a %>% group_by(Site_location) %>% 
+Table8_After = test21r__a %>% group_by(Collection_Location) %>% 
   dplyr::summarize(#'Number of Collection Visits'=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -1733,7 +1766,7 @@ tab32a <- bind_rows(statics_biock)
 ##tab32a$`Outlier Present?` <- ifelse(rownames(statics_biock)==1,"no outliers","outlier")   ## I commented out--- wasn't running for me 
 research.vt.length <- testing8 %>%  mutate(time=as.numeric(time_biochk)) 
 #research.vt.length = research.vt.length %>%  filter(8<time) # & time<500) 
-research.vt.length9 = research.vt.length %>%group_by(Site_location) %>% #biochk_outlier,
+research.vt.length9 = research.vt.length %>%group_by(Collection_Location) %>% #biochk_outlier,
   dplyr::summarize(#'Number of Collection Visits'=n(),
                    Min = min(time,na.rm = TRUE),
                    Q1 = quantile(time, 0.25,na.rm = TRUE),
@@ -1749,7 +1782,7 @@ research.vt.length9 = research.vt.length %>%group_by(Site_location) %>% #biochk_
 
 
 
-```{r KnitrTables1_5, eval=TRUE,echo=FALSE, ,results='asis'}
+```{r KnitrTables1_4, eval=TRUE,echo=FALSE, ,results='asis'}
 options(knitr.table.format = "latex")
 options(kableExtra.auto_format = FALSE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
@@ -1764,12 +1797,14 @@ knitr::kable(bldcol_research_UC1, col.names=c("Collection Location","All Blood T
 tbl_3_ncol
 
 research.notcolnotes_site  ##missing a site or 0, 0% unneeded
+```
 
-discard.site5 %>% kable_styling(latex_options = "scale_down")
+\FloatBarrier
+```{r KnitrTables5, eval=TRUE,echo=FALSE, ,results='asis'}
+discard.site5 %>% kable_styling(latex_options = "HOLD_position")
+```
 
-# knitr::kable(discard.site5, caption='Table 5. Research Tube Types Discarded by Collection Location', row.names=FALSE,  
-#              #col.names=c("Site",  "SS Tube1", "SS Tube2", "SS Tube5", "Heparin Tube1", "Heparin Tube2", "EDTA Tubes", "ACD Tubes", "Urine Tubes", "Total Tubes"),
-#              align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
+```{r KnitrTables6_9, eval=TRUE,echo=FALSE, ,results='asis'}
 
 
 Res_Survey_status  ## this set up may be the easiest for all of these tables
