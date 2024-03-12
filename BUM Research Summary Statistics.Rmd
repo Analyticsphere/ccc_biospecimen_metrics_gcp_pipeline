@@ -18,7 +18,6 @@ output:
     fig_width: 7
     fig_height: 5
     fig_caption: true
-    latex_engine: xelatex
     df_print: paged
 ---
 
@@ -281,7 +280,7 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
     filter(!is.na(!!CID_SYM)) %>% ggplot(aes(x=!!CID_SYM))+
      xlab(Xlab) + ylab(Ylab) + geom_histogram()+  ggtitle(Title)+
     geom_histogram(color="black")+ scale_y_continuous(breaks=pretty_breaks()) +
-    geom_vline(aes(xintercept=mean(!!CID_SYM, na.rm=T)), colour="red", linetype="solid")
+    geom_vline(aes(xintercept=mean(!!CID_SYM, na.rm=T)), colour="#2973A5", linetype="solid")
   
 }
 
