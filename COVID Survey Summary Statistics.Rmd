@@ -89,8 +89,6 @@ knitr::opts_chunk$set(comment = NA)
 ##FUNCTIONS
 
 
-
-
 CVD_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Intersex or Other", "654207589"="Male",
                  "110092955"="The same day", "952212668"="The day before", "330461666"="More than a day before", "974230748"="Yes, in the past day",
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
@@ -106,7 +104,6 @@ CVD_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know",
                  "735136116"="In the Past 2-7 Days", "382679079"="In the last 2-4 weeks", "830677489"="More than 4 Weeks Ago", "349122068"="One",
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
-
 
 
 gt_functCVD <- function(CID, Title){  
@@ -1602,7 +1599,6 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 one_skip_funct(D_591826144, "Table 94: Still Experiencing the Other Symptoms Since COVID-19 Diagnosis", D_110872086_D_110872086, "707601969")
 
 
-
 # which_COV7= CVD_tib  %>%  filter(D_847578001_D_488415137=="724612102" & D_847578001_D_488415137=="178780048") %>%  
 #                     mutate(answer= case_when(D_114280729_D_374567479==111520945 ~ "Not at all",
 #                                              D_114280729_D_374567479==548628123 ~ "A little bit",
@@ -1640,6 +1636,7 @@ CVD_tib <- refactor_variables(CVD_tib, variable_pattern, levels)
 
 
 two_skip_funct(D_114280729_D_374567479, "Table 95: Length of Time Lost of Taste or Smell Experienced", D_847578001_D_488415137, "724612102", D_847578001_D_488415137, "178780048")
+
 
 #COV20A2
 two_skip_funct(D_114280729_D_966214244, "Table 96: Length of Time Feeling More Tired Experienced", D_847578001_D_730334054, "724612102", D_847578001_D_730334054, "178780048")
