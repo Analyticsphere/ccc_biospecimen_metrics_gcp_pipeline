@@ -88,6 +88,7 @@ knitr::opts_chunk$set(comment = NA)
 ```{r functions, include=FALSE}
 ##FUNCTIONS
 
+
 CVD_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Intersex or Other", "654207589"="Male",
                  "110092955"="The same day", "952212668"="The day before", "330461666"="More than a day before", "974230748"="Yes, in the past day",
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
@@ -104,6 +105,7 @@ CVD_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know",
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
+
 gt_functCVD <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
   dt_select <- CVD_tib %>%  select(Connect_ID, !!CID_SYM)
@@ -112,7 +114,7 @@ gt_functCVD <- function(CID, Title){
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -138,7 +140,7 @@ covid_once_funct <- function(CID, Title){
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -161,7 +163,7 @@ covid_twice_funct <- function(CID, Title){
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -184,7 +186,7 @@ covid_thrice_funct <- function(CID, Title){
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -210,7 +212,7 @@ one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){
   gt_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -237,7 +239,7 @@ two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_C
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -280,6 +282,25 @@ date_hist_funct <- function(CID,Title, Xlab, Ylab){
 }
 
 
+
+
+refactor_variables <- function(dataframe, variable_pattern, levels) {
+  selected_variables <- grep(variable_pattern, names(dataframe), value = TRUE)
+  for (variable_name in selected_variables) {
+    dataframe[[variable_name]] <- factor(dataframe[[variable_name]], levels = levels)
+  }
+  return(dataframe)
+}
+
+# Define variable pattern and levels once you get to the table
+# EX:
+# variable_pattern <- "^D_114280729_"
+# levels <- c(232063618, 948148236,  692824372, "Skipped this Question")
+# 
+# # Apply the function
+# CVD_tib <- refactor_variables(CVD_tib, variable_pattern, levels)
+
+
 ```
 
 
@@ -305,7 +326,7 @@ dt_COV1_summary <- which_COV1 %>% group_by(answer) %>%  summarize(n=n(), percent
   dt_COV1_summary %>% gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 50: Ever Have COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -351,7 +372,7 @@ dt_COV4_summary <- which_COV4 %>% group_by(answer) %>%  summarize(n=n(), percent
   dt_COV4_summary %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 51: Test Positive the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -373,7 +394,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 52: HealchCare Provider Confirm Diagnosis the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -411,7 +432,7 @@ dt_COV7_summary <- which_COV7 %>% group_by(answer) %>%  summarize(n=n(), percent
 dt_COV7_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 54: Worst Symptoms Interfere with Daily Activities the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
@@ -676,7 +697,7 @@ dt_cov8_2_summary <- which_sympt8  %>% dplyr::group_by(symptom) %>% dplyr::summa
 dt_cov8_2_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 55: Had Any Sypmtoms the First Time Having COVID-19")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -698,7 +719,7 @@ dt_COV9_summary <- which_COV9 %>% group_by(answer) %>%  summarize(n=n(), percent
   dt_COV9_summary %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 56: Experience Septic Shock the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -727,7 +748,7 @@ dt_COV10_summary <- which_COV10 %>% group_by(answer) %>%  summarize(n=n(), perce
   dt_COV10_summary %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Tabe 57: Diagnosed with Pneumonia the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -757,7 +778,7 @@ dt_COV11_summary <- which_COV11 %>% group_by(answer) %>%  summarize(n=n(), perce
   dt_COV11_summary %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 58: Diagnosed with Bood Clots the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -786,7 +807,7 @@ dt_COV12_summary <- which_COV12 %>% group_by(answer) %>%  summarize(n=n(), perce
   dt_COV12_summary %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 59: Overnight Hospital Stay the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -854,7 +875,7 @@ dt_COV4_summary <- which_COV4 %>% group_by(answer) %>%  summarize(n=n(), percent
   dt_COV4_summary %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 64: Test Positive the Second Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -878,7 +899,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 65: HealchCare Provider Confirm Diagnosis the Second Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -914,7 +935,7 @@ dt_COV7_summary <- which_COV7 %>% group_by(answer) %>%  summarize(n=n(), percent
 dt_COV7_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 67: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
@@ -1176,7 +1197,7 @@ dt_cov8_2_summary <-  which_sympt8_2  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_cov8_2_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 68: Had Any Sypmtoms the Second Time Having COVID-19")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1243,7 +1264,7 @@ dt_COV19A1_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19A1_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 77: Experienced Lost of Taste or Smell Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1260,7 +1281,7 @@ dt_COV19A2_summary <- which_symptA2  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19A2_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 78: Experienced Appetite Changes Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1277,7 +1298,7 @@ dt_COV19A3_summary <- which_symptA3  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19A3_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 79: Experienced Feeling More Tired than Usual Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1294,7 +1315,7 @@ dt_COV19A4_summary <- which_symptA4  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19A4_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 80: Experienced Trouble Remembering Things Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), percentage = md("**%**")) %>% 
   summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1311,7 +1332,7 @@ dt_COV19A5_summary <- which_symptA5  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19A5_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 81: Experienced Trouble Paying Attention Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1328,7 +1349,7 @@ dt_COV19A6_summary <- which_symptA6  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19A6_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 82: Experienced Trouble Thinking or Making Decisions Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1353,7 +1374,7 @@ dt_COV19B1_summary <- which_symptB1  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19B1_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 83: Experienced Shortness of Breath Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1372,7 +1393,7 @@ dt_COV19B2_summary <- which_symptB2  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19B2_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 84: Experienced Inability to Exercise at Normal Level Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1391,7 +1412,7 @@ dt_COV19B3_summary <- which_symptB3  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19B3_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 85: Experienced Inability to Return to School or Work Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1410,7 +1431,7 @@ dt_COV19B4_summary <- which_symptB4  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19B4_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 86: Experienced Inability to Return to Usual Activities Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1430,7 +1451,7 @@ dt_COV19B5_summary <- which_symptB5  %>% dplyr::group_by(symptom) %>% dplyr::sum
 dt_COV19B5_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 87: Experienced Feeling Weak, Tired, or Sick after Physical Activity Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1459,7 +1480,7 @@ dt_COV19C1_summary <- which_sympt1  %>% dplyr::group_by(symptom) %>% dplyr::summ
 dt_COV19C1_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 88: Experienced Feeling Lightheaded or Dizzy Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1479,7 +1500,7 @@ dt_COV19C2_summary <- which_sympt2  %>% dplyr::group_by(symptom) %>% dplyr::summ
 dt_COV19C2_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 89: Experienced Periods of Racing Heart Rate Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1499,7 +1520,7 @@ dt_COV19C3_summary <- which_sympt3  %>% dplyr::group_by(symptom) %>% dplyr::summ
 dt_COV19C3_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 90: Experienced Trouble Sleeping Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1519,7 +1540,7 @@ dt_COV19C4_summary <- which_sympt4  %>% dplyr::group_by(symptom) %>% dplyr::summ
 dt_COV19C4_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 91: Experienced Changes to Mood or Emotion Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1539,7 +1560,7 @@ dt_COV19C5_summary <- which_sympt5  %>% dplyr::group_by(symptom) %>% dplyr::summ
 dt_COV19C5_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 92: Experienced Muscle Aches Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -1559,7 +1580,7 @@ dt_select2 <- CVD_tib  %>%  filter(D_694503437_1_1=="353358909" | D_694503437_2_
   gt2_yn %>%  gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 93: Experienced Any Other Symptoms Since COVID-19 Diagnosis")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(
       stub.font.weight = "bold"
@@ -1578,9 +1599,6 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 one_skip_funct(D_591826144, "Table 94: Still Experiencing the Other Symptoms Since COVID-19 Diagnosis", D_110872086_D_110872086, "707601969")
 
 
-#GRID 
-#COV20A1
-two_skip_funct(D_114280729_D_374567479, "Table 95: Length of Time Lost of Taste or Smell Experienced", D_847578001_D_488415137, "724612102", D_847578001_D_488415137, "178780048")
 # which_COV7= CVD_tib  %>%  filter(D_847578001_D_488415137=="724612102" & D_847578001_D_488415137=="178780048") %>%  
 #                     mutate(answer= case_when(D_114280729_D_374567479==111520945 ~ "Not at all",
 #                                              D_114280729_D_374567479==548628123 ~ "A little bit",
@@ -1597,7 +1615,7 @@ two_skip_funct(D_114280729_D_374567479, "Table 95: Length of Time Lost of Taste 
 # dt_COV7_summary %>%  gt() %>%  
 #   fmt_number(columns = "percentage", decimals = 1) %>% 
 #   tab_header(title = md("Table 35: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19")) %>% 
-#   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+#   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 # grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
 #   tab_options(stub.font.weight = "bold") %>%
 #   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
@@ -1605,6 +1623,19 @@ two_skip_funct(D_114280729_D_374567479, "Table 95: Length of Time Lost of Taste 
 
 
 ```{r experiences, warning=FALSE, echo=FALSE,  message=FALSE}
+
+#GRID 
+#COV20A1
+
+
+variable_pattern <- "^D_114280729_"
+levels <- c(232063618, 948148236,  692824372, "Skipped this Question")
+
+# Apply the function
+CVD_tib <- refactor_variables(CVD_tib, variable_pattern, levels)
+
+
+two_skip_funct(D_114280729_D_374567479, "Table 95: Length of Time Lost of Taste or Smell Experienced", D_847578001_D_488415137, "724612102", D_847578001_D_488415137, "178780048")
 
 
 #COV20A2
@@ -1656,12 +1687,13 @@ two_skip_funct(D_114280729_D_986119909, "Table 110: Length of Time Muscle Aches 
 
 
 
-
-
-
-
 #COV20A17
 one_skip_funct(D_934384452, "Table 111: Length of Time Other Symptom Experienced", D_110872086_D_110872086, "707601969")
+
+```
+
+
+```{r recovery, warning=FALSE, echo=FALSE,  message=FALSE}
 
 #COV21
 one_skip_funct(D_273371161, "Table 112: Feel Like You Have Fully Recovered from COVID-19", D_110872086_D_110872086, "707601969")
@@ -1672,6 +1704,16 @@ COV22_Days=hist_funct(D_959877599_D_908044428, "Plot 18: Time to Fully Recover f
 grid.arrange(COV22_Months, COV22_Days, nrow=2)
 
 #GRID  COV23A1
+
+variable_pattern <- "^D_114280729_"
+levels <- c(232063618, 948148236,  692824372, "Skipped this Question")
+
+# Apply the function
+CVD_tib <- refactor_variables(CVD_tib, variable_pattern, levels)
+
+
+
+
 #COV23A1
    which_COV23A1= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631") %>%  
                      mutate(answer= case_when(D_813989715_D_874168085==770236544 ~ "No, I never experienced this",
@@ -1686,7 +1728,7 @@ grid.arrange(COV22_Months, COV22_Days, nrow=2)
    dt_COV23A1_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 113 Experienced Lost of Taste or Smell Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1716,7 +1758,7 @@ which_COV23A2= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23A2_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 114: Experienced Appetite Changes Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1745,7 +1787,7 @@ which_COV23A3= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23A3_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 115: Feeling More Tired than Usual Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1774,7 +1816,7 @@ which_COV23A4= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23A4_summary %>%  gt()  %>%   
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 116: Having Trouble Remebering Things Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1803,7 +1845,7 @@ which_COV23A5= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23A5_summary %>%  gt()  %>%   
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 117: Having Trouble Paying Attention Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1832,7 +1874,7 @@ which_COV23A6= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23A6_summary %>%  gt()  %>% 
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 118: Having Trouble Thinking or Making Decisions Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1864,7 +1906,7 @@ which_COV23B1= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23B1_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 119: Felt Dizziness or Shortness of Breath Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1893,7 +1935,7 @@ which_COV23B2= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23B2_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 120: Experienced Periods of Raching of Heart Rate Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1922,7 +1964,7 @@ which_COV23B3= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23B3_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 121: Experienced Shortness of Breath Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1951,7 +1993,7 @@ which_COV23B4= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23B4_summary %>%  gt()  %>% 
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 122: Experienced Feeling Weak, Tired, or Sick after Physical Activity Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -1980,7 +2022,7 @@ which_COV23B5= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23B5_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 123: Having Trouble Sleeping Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2009,7 +2051,7 @@ which_COV23B6= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23B6_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 124: Experienced Changes in Mood or Emotion Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2038,7 +2080,7 @@ which_COV23B7= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
    dt_COV23B7_summary %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 125: Experienced Muscle Aches Since 2020")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2083,7 +2125,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 127: Length of Time Experiencing Loss of Taste or Smell")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2106,7 +2148,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 128: Length of Time Experiencing Appetite Changes")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2128,7 +2170,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 129: Length of Time Feeling More Tired Than Usual")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2151,7 +2193,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 130: Length of Time Having Trouble Remembering Things")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2174,7 +2216,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 131: Length of Time Having Trouble Paying Attention")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2197,7 +2239,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 132: Length of Time Having Trouble Thinking or Making Decision")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2220,7 +2262,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 133: Length of Time Experiencing Feeling Lightheaded and Dizzy")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2243,7 +2285,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 134: Length of Time Experiencing Periods of Racing Heart Rate")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2266,7 +2308,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 135: Length of Time Experiencing Shortness of Breath")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2289,7 +2331,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 136: Length of Time Experiencing Feeling Weak, Tired or Sick after Physical Activity")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2312,7 +2354,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 137: Length of Time Having Trouble Sleeping")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2335,7 +2377,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 138: Length of Time Experiencing Changes in your Mood or Emotions")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2358,7 +2400,7 @@ dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::su
 dt_COV24A11_summary %>%  gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 139: Length of Time Experiencing Muscle Aches")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**%**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
@@ -2380,7 +2422,7 @@ gt2_yn <- COV25  %>% dplyr::group_by(D_890156588_V2) %>% dplyr::summarize(n=n(),
    gt2_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 141: Received COVID-19 Vaccination test 1")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2428,7 +2470,7 @@ COV28_1 <- CVD_tib  %>%  filter(D_890156588_V2=="353358909" & (D_877074400_V2>=1
    cov28_1_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 142: Brand of First COVID-19 Vaccine")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2452,7 +2494,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_2_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 143: Brand of Second COVID-19 Vaccine")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2476,7 +2518,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_3_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 144: Brand of Third COVID-19 Vaccine")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2500,7 +2542,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_4_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 145: Brand of Fourth COVID-19 Vaccine")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
@@ -2524,7 +2566,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_5_yn %>%  gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 146: Brand of Fifth COVID-19 Vaccine")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
+  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**%**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
    tab_options(
        stub.font.weight = "bold"
