@@ -3014,6 +3014,32 @@ avg_bldorder_present = bldorder_present %>%group_by(Site) %>% #biochk_outlier,
 ```
 
 
+```{r Table26_bldorder_present, include=FALSE, echo=FALSE, warning=FALSE}
+
+
+
+present.day <- Sys.time()
+
+bldorder_present <- recrver1 %>%  filter(d_878865966==104430631 & !is.na(d_173836415_d_266600170_d_769615780) & Site!='HealthPartners') %>%  
+  mutate(time = as.numeric(difftime(present.day,as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days")))
+
+avg_bldorder_present = bldorder_present %>%group_by(Site) %>% #biochk_outlier,
+  dplyr::summarize('Number of Collection'=n(),
+                   Min = round(min(time,na.rm = TRUE), digits=1),
+                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
+                   Median = round(median(time,na.rm = TRUE), digits=1),
+                   Mean = round(mean(time,na.rm = TRUE), digits=1),
+                   SD= round(sd(time,na.rm = TRUE), digits=1),
+                   Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
+                   Perc.80= quantile(time, 0.80,na.rm = TRUE),
+                   Perc.90= quantile(time, 0.90,na.rm = TRUE),
+                   Perc.95= quantile(time, 0.95,na.rm = TRUE),
+                   Max = round(max(time,na.rm = TRUE), digits=1))
+
+
+```
+
+
 
 
 ```{r Figures4, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
@@ -3969,6 +3995,7 @@ knitr::kable(avg_draw_order, caption='Table 25. Time (in Days) from Draw Order P
 
 
 knitr::kable(avg_bldorder_present, caption='Table 26. Time (in Days) from Draw Order Placement to Present Date by Site', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") 
+
 
 coll_bplt_knitr <- knitr::kable(crosstable.coll_bptl1, col.names=c("Site", "< 30 Days", "30 to <60 Days","60 to <90 Days", "90 to <180 Days", "180 to <270 Days", "270 Days or More", "Total"), caption='Table 27. Time (In Days) Since Verification Among Participants \n with No Baseline Biospecimen Collection by Site', row.names=FALSE, align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 coll_bplt_knitr
