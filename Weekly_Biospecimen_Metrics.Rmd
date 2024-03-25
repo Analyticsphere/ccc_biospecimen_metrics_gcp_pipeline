@@ -189,7 +189,9 @@ query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 #tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
 
+
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" "))) #removed "date", as it is no longer in the participants table
+
 
 recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
 ##below are the commone variables in the recruitment table on Biospecimen to apply for the analysis. In case any new variables popping up, i would like #to use the one above directly from the resources (master DD and recruitment table schema to get the most updated version on this biospecimen data
@@ -1667,12 +1669,14 @@ for (i in 1:length(notcol.ls)){
   #if(!grepl("tube_notcolnotes",colnames(notcol))){notcol$tube_notcolnotes <- NA}   
   #if(!grepl("tube_deviationnotes",colnames(notcol))){notcol$tube_deviationnotes <- NA} 
   
+
   notcol$tubeID <- notcol.ls[i]
   #notcol1 <- notcol[which(notcol$tubecol==104430631),] 
   notcol_tube <- dplyr::bind_rows(notcol_tube,notcol)
   #tubenotcol.ls[[i]] <- notcol1
   #collection_long <- dplyr::bind_rows(collection_long,notcol)
 } 
+
 
 #collection_long <- as.data.frame(do.call("rbind",notcol_tube))
 
@@ -1693,6 +1697,7 @@ for (i in 1:length(tube.ls)){
   colnames(col)[colnames(col)==tube_deviation] <- "tube_deviation"
   colnames(col)[colnames(col)==tube_discard] <- "tube_discard"
   
+
   col$tubeID <- tube.ls[i]
   collection_long <- dplyr::bind_rows(collection_long,col)
 } 
@@ -1729,6 +1734,7 @@ collection_long <- collection_long  %>%
                  #                                  d_827220437==303349821 ~ "Marshfield",
                  #                                  d_827220437==657167265 ~ "Sanford",
                  #                                  d_827220437==809703864 ~ "UChicago"))
+
 collection_long$tube_type <- factor(collection_long$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1", "STRECK Tube1", "Urine Tube1","MW Tube1" ) )   #make sure this doesn't break the code 
 
 Table17_option2 <- collection_long %>% mutate(deviation = dplyr::case_when(tube_deviation == 353358909 ~ "Any Deviation",
@@ -3042,6 +3048,7 @@ avg_bldorder_present = bldorder_present %>%group_by(Site) %>% #biochk_outlier,
 
 
 
+
 ```{r Figures4, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
 
 
@@ -3640,9 +3647,6 @@ final_fig1_table <- help2_1_fig1_inc %>%  group_by(col.Monday.date) %>%  dplyr::
                                                                                            All_Incomplete=100*(incomplete/all_collections),
                                                                                            Partial__Blood=100*(partial/all_collections),
                                                                                            No__Blood=100*(none_blood/all_collections))
-
-
-
 
 research.1_1 <- ggplot() +
   geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = All_Incomplete, color = "All_Incomplete"), na.rm = TRUE) + 
@@ -4563,6 +4567,7 @@ ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location))
 
 
 
+
 edited_fig3_1_Clin <- clinic.survey %>% filter(d_827220437==548392715) %>% 
   mutate(HF_Sites= case_when(d_173836415_d_266600170_d_185243482==1050010095 ~ "Wyandotte",
                              d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 ~ "Macomb",
@@ -5402,6 +5407,7 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
                "Deviation_OtherMWT1",
                "Deviation_OutContMWT1",
                "token")
+
 
 biospe1_final <- biospe1 %>% select(names_set)
 
