@@ -47,7 +47,7 @@ bum_research_survey_stats:
 
 covid_survey_stats:
   rmd_file_name: "COVID Survey Summary Statistics.Rmd"
-  report_file_name: COVID_Survey_Summary_Statistics.Rmd
+  report_file_name: COVID_Survey_Summary_Statistics.pdf
   box_folders:
     - "251314285484"
   gcp_info:
