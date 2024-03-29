@@ -3021,7 +3021,6 @@ avg_bldorder_present = bldorder_present %>%group_by(Site) %>% #biochk_outlier,
 
 
 
-
 ```{r Figures4, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
 
 
