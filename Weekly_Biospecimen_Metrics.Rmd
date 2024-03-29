@@ -189,7 +189,9 @@ query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 #tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
 
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
+
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" "))) #removed "date", as it is no longer in the participants table
+
 
 recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
 ##below are the commone variables in the recruitment table on Biospecimen to apply for the analysis. In case any new variables popping up, i would like #to use the one above directly from the resources (master DD and recruitment table schema to get the most updated version on this biospecimen data
@@ -316,6 +318,7 @@ mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 
 
 ```
+
 
 
 This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified by health provider site. This information pertains to verified participants as of the date above and collections that are final.
@@ -1666,12 +1669,14 @@ for (i in 1:length(notcol.ls)){
   #if(!grepl("tube_notcolnotes",colnames(notcol))){notcol$tube_notcolnotes <- NA}   
   #if(!grepl("tube_deviationnotes",colnames(notcol))){notcol$tube_deviationnotes <- NA} 
   
+
   notcol$tubeID <- notcol.ls[i]
   #notcol1 <- notcol[which(notcol$tubecol==104430631),] 
   notcol_tube <- dplyr::bind_rows(notcol_tube,notcol)
   #tubenotcol.ls[[i]] <- notcol1
   #collection_long <- dplyr::bind_rows(collection_long,notcol)
 } 
+
 
 #collection_long <- as.data.frame(do.call("rbind",notcol_tube))
 
@@ -1692,6 +1697,7 @@ for (i in 1:length(tube.ls)){
   colnames(col)[colnames(col)==tube_deviation] <- "tube_deviation"
   colnames(col)[colnames(col)==tube_discard] <- "tube_discard"
   
+
   col$tubeID <- tube.ls[i]
   collection_long <- dplyr::bind_rows(collection_long,col)
 } 
@@ -1719,6 +1725,16 @@ collection_long <- collection_long  %>%
                                        tubeID == "d_589588440"  ~ "SS Tube5",
                                        tubeID == "d_505347689"  ~ "STRECK Tube1",  #make sure this doesn't break the code
                                        tubeID == "d_958646668"  ~ "Heparin Tube2"))
+                 # Site = case_when(d_827220437==125001209 ~ "KP Colorado",
+                 #                                  d_827220437==327912200 ~ "KP Georgia",
+                 #                                  d_827220437==300267574 ~ "KP Hawaii",
+                 #                                  d_827220437==452412599 ~ "KP Northwest",
+                 #                                  d_827220437==548392715 ~ "Henry Ford",
+                 #                                  d_827220437==531629870 ~ "HealthPartners",
+                 #                                  d_827220437==303349821 ~ "Marshfield",
+                 #                                  d_827220437==657167265 ~ "Sanford",
+                 #                                  d_827220437==809703864 ~ "UChicago"))
+
 collection_long$tube_type <- factor(collection_long$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1", "STRECK Tube1", "Urine Tube1","MW Tube1" ) )   #make sure this doesn't break the code 
 
 Table17_option2 <- collection_long %>% mutate(deviation = dplyr::case_when(tube_deviation == 353358909 ~ "Any Deviation",
@@ -1761,6 +1777,14 @@ for(site in unique(dev_tube2$Site)){
   total <- as.numeric(nrow(dev_tube2[which(dev_tube2$Site==site),]))
   dev_count.site[[site]] <- site.sub
 }
+
+
+# for (i in 1:length(dev_count.site)){
+#   site <- names(dev_count.site[i])
+#   n <- i
+#   print(knitr::kable(dev_count.site[[site]], col.names=c("Deviation", "Number"), caption=paste("Table 14.",n, " Biospecimen Deviations Reported by ",site, sep=""), row.names=FALSE,
+#          format.args = list(big.mark = ","), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")) 
+# } 
 ```
 
 
@@ -2996,6 +3020,32 @@ avg_bldorder_present = bldorder_present %>%group_by(Site) %>% #biochk_outlier,
 ```
 
 
+```{r Table26_bldorder_present, include=FALSE, echo=FALSE, warning=FALSE}
+
+
+
+present.day <- Sys.time()
+
+bldorder_present <- recrver1 %>%  filter(d_878865966==104430631 & !is.na(d_173836415_d_266600170_d_769615780) & Site!='HealthPartners') %>%  
+  mutate(time = as.numeric(difftime(present.day,as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days")))
+
+avg_bldorder_present = bldorder_present %>%group_by(Site) %>% #biochk_outlier,
+  dplyr::summarize('Number of Collection'=n(),
+                   Min = round(min(time,na.rm = TRUE), digits=1),
+                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
+                   Median = round(median(time,na.rm = TRUE), digits=1),
+                   Mean = round(mean(time,na.rm = TRUE), digits=1),
+                   SD= round(sd(time,na.rm = TRUE), digits=1),
+                   Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
+                   Perc.80= quantile(time, 0.80,na.rm = TRUE),
+                   Perc.90= quantile(time, 0.90,na.rm = TRUE),
+                   Perc.95= quantile(time, 0.95,na.rm = TRUE),
+                   Max = round(max(time,na.rm = TRUE), digits=1))
+
+
+```
+
+
 
 
 
@@ -3598,9 +3648,6 @@ final_fig1_table <- help2_1_fig1_inc %>%  group_by(col.Monday.date) %>%  dplyr::
                                                                                            Partial__Blood=100*(partial/all_collections),
                                                                                            No__Blood=100*(none_blood/all_collections))
 
-
-
-
 research.1_1 <- ggplot() +
   geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = All_Incomplete, color = "All_Incomplete"), na.rm = TRUE) + 
   geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = Partial__Blood, color = "Partial__Blood"), na.rm = TRUE) + 
@@ -3896,7 +3943,7 @@ UC_Time <- ggplot(UC_Time_plot, aes(x=as.Date(col.Monday.date), y=n, color=Site_
   scale_y_continuous(name="# Minutes",limits=c(0,300)) +     #limits=c(0,100*round(max(UC_Time_plot$n/100,1)))) +          #, limits=c(0,30), breaks=seq(0,30,5)) +
   #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
   scale_color_manual(values=c("Ingalls Harvey"="#B1C7D9", "Orland Park"="#2973A5", "River East"="#FDBE19", 
-                              "South Loop"="#565C65", "UC-DCAM"="#3C989E", "UCM Pop−Up"="#CC7D15")) +
+                              "South Loop"="#565C65", "UC-DCAM"="#3C989E", "UCM Pop-Up"="#CC7D15")) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0)) +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 5. 'Weekly Research Biospecimen Collection Average Visit Length (in minutes) \n for Chicago Collection Locations'") +
@@ -4498,11 +4545,13 @@ print(research.vt_plotH)
 
 
 edited_fig3_1 <-  visit_wk_site.hybridHF %>%  filter(Site_location!="Hybrid")
-research.vt_plotHF <- ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
+ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_point(width = 0.2) + geom_line() + 
   scale_y_continuous(name="# Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-1)),expand=c(0,0))  +
-  scale_color_manual(values=c("HFH K-13 Research Clinic"="#164C71", "HFH Cancer Pavilion Research Clinic"="#FDBE19", "HFH Livonia Research Clinic"="#3C989E")) +
+   scale_color_manual(name = "Site Locations",
+                       values=c("HFH K-13 Research Clinic"="#164C71", "HFH Cancer Pavilion Research Clinic"="#FDBE19", "HFH Livonia Research Clinic"="#3C989E"),
+                      guide = guide_legend(nrow = 2, byrow = TRUE)) +
   #scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 16.1 Weekly Research Biospecimen Collections \n at Henry Ford by Collection Location") +
   #theme_ipsum() +
@@ -4513,7 +4562,8 @@ research.vt_plotHF <- ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n,
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
         axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold"))  
-research.vt_plotHF + guides(color = guide_legend(title = "Site Locations")) 
+#research.vt_plotHF + guides(color = guide_legend(title = "Site Locations")) 
+
 
 
 
@@ -4617,7 +4667,8 @@ research.vt_plotUC1 <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
   #scale_fill_brewer(palette="Dark2") +
   scale_color_manual(values=c("Ingalls Harvey"="#B1C7D9", "Orland Park"="#2973A5", "River East"="#FDBE19", 
-                              "South Loop"="#565C65", "UC-DCAM"="#3C989E", "UCM Pop−Up"="#CC7D15")) +
+                              "South Loop"="#565C65", "UC-DCAM"="#3C989E", "UCM Pop-Up"="#CC7D15"),
+                     guide = guide_legend(nrow = 2, byrow = TRUE)) +
   ggtitle(label="Figure 17.1 Weekly Biospecimen Collections at \n University of Chicago Medicine Locations") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
@@ -4660,8 +4711,9 @@ research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(col.Monday.date), y
   scale_y_continuous(name="# Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(Sys.Date())-3)),expand=c(0,0))  +
   #scale_fill_brewer(palette="Dark2") +
-  scale_color_manual(values=c("Lake Hallie"="#B1C7D9", "Marshfield"="#164C71", "MF Pop−Up"="#FDBE19", 
-                              "Minocqua"="#565C65", "Weston"="#3C989E", "Wisconsin Rapids"="#CC7D15")) +
+  scale_color_manual(values=c("Lake Hallie"="#B1C7D9", "Marshfield"="#164C71", "MF Pop-Up"="#FDBE19", 
+                              "Minocqua"="#565C65", "Weston"="#3C989E", "Wisconsin Rapids"="#CC7D15"),
+                     guide = guide_legend(nrow = 2, byrow = TRUE)) +
   ggtitle(label="Figure 18.1 Weekly Biospecimen Collections at \n Marshfield Clinic Health System Locations") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
@@ -4995,7 +5047,7 @@ biospe1 <- NULL
 select0 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
 select2 <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==2)]
 yes_no <- biospe2_CID_dd1$variable[which(biospe2_CID_dd1$category==1)]
-biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym","date",select0,select2))
+biospe1 <- subset(biospe2,select =c("Connect_ID","token","siteAcronym",select0,select2)) #removed "date", as it is no longer in the participants table
 n<- length(select0)
 colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe2_CID_dd1$new.varname[which(biospe2_CID_dd1$category==0 & !is.na(biospe2_CID_dd1$Variable.Name))]
 
@@ -5354,8 +5406,8 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
                "Deviation_NotFoundMWT1",
                "Deviation_OtherMWT1",
                "Deviation_OutContMWT1",
-               "token",
-               "date")
+               "token")
+
 
 biospe1_final <- biospe1 %>% select(names_set)
 
@@ -5623,7 +5675,7 @@ recrbio_1 <- recrbio1[!duplicated(names(recrbio1))]
 #new column order requested 11/22/23
 recrbio_1 <- recrbio_1[, c("Connect_ID","RcrtES_Site_v1r0","BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMouthCol_v1r0","BioSpm_BloodSettingBL_v1r0", "BioSpm_UrineSettingBL_v1r0","BioSpm_MWSettingBL_v1r0","BioChk_CompleteBL_v1r0","BioChk_TimeBL_v1r0","BioFin_CheckOutTmBL_v1r0","BioFin_ResearchBldTmBL_v1r0", "BioFin_ResearchUrnTmBL_v1r0","BioFin_BMTimeBL_v1r0","BioClin_SiteBldLocBL_v1r0","BioClin_SiteUrLocatBL_v1r0","BioClin_SntBloodAccIDBL_v1r0","BioClin_SntUrineAccIDBL_v1r0", "BioClin_PolyBloodIDBL_v1r0","BioClin_PolyUrineIDBL_v1r0","BioClin_SiteBloodCollBL_v1r0","BioClin_ClinBloodTmBL_v1r0","BioClin_SiteUrineCollBL_v1r0", "BioClin_ClinicalUrnTmBL_v1r0","BioClin_SiteBloodRRLBL_v1r0","BioClin_SiteBldRRLDtBL_v1r0","BioClin_SiteUrineRRLBL_v1r0","BioClin_SiteUrnRRLDtBL_v1r0", "BioClin_BldOrUrnPlcdBL_v1r0","BioClin_BldUrnPlcdTmBL_v1r0","BioClin_BldOrderPlcdBL_v1r0","BioClin_BldOrdPlacdDtBL_v1r0","BioClin_UrnOrdPlacedBL_v1r0", "BioClin_UrnOrdPlcdDtBL_v1r0","BioClin_DBBloodRRLBL_v1r0","BioClin_DBBloodRRLDtBL_v1r0","BioClin_DBUrineRRLBL_v1r0",
                            "BioClin_DBUrineRRLDtBL_v1r0","BioClin_AnySpecRRLBL_v1r0", "BioClin_AnySpecRRLTmBL_v1r0","BioClin_AnyBldUrnRecBL_v1r0","RcrtSI_RecruitType_v1r0","RcrtUP_Submitted_v1r0","RcrtV_Verification_v1r0","RcrtV_VerificationTm_V1R0", "SrvBLM_ResSrvCompl_v1r0","SrvBLM_TmComplete_v1r0","SrvBLM_TmStart_v1r0","SrvBlU_BaseComplete_v1r0","SrvBlU_TmComplete_v1r0","SrvBlU_TmStart_v1r0",
-                           "BioClin_BldAndUrnRef_v1r0", "HdRef_Baseblood_v1r0","HdRef_DateBaseblood_v1r0","date","token")]
+                           "BioClin_BldAndUrnRef_v1r0", "HdRef_Baseblood_v1r0","HdRef_DateBaseblood_v1r0","token")]
 #BioClin_DBUrineRRLBL_v1r0    showing as null but in the DD
 
 # #For some reason the yes/no of some columns are changing back to CIDs
