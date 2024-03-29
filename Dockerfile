@@ -71,6 +71,7 @@ COPY ["./Weekly_Biospecimen_Metrics.Rmd", "./Weekly_Biospecimen_Metrics.Rmd"]
 COPY ["./Biospe_Custom_QC_Accession_Dup.Rmd", "./Biospe_Custom_QC_Accession_Dup.Rmd"]
 COPY ["./BU Clinical Survey Summary Statistics.Rmd", "./BU Clinical Survey Summary Statistics.Rmd"]
 COPY ["./BUM Research Summary Statistics.Rmd", "./BUM Research Summary Statistics.Rmd"]
+COPY ["./COVID Survey Summary Statistics.Rmd", "./COVID Survey Summary Statistics.Rmd"]
 COPY ["./config.yml", "./config.yml"]
 
 # Run R code
