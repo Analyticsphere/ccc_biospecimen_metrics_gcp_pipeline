@@ -108,7 +108,7 @@ gt_functBUM <- function(CID, Title){
   dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM)
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt()  %>%  
+  gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -131,7 +131,7 @@ menstrual_funct <- function(CID, Title){
   dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$D_522008539==536341288)
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt()  %>%  
+  gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -155,7 +155,7 @@ covid_once_funct <- function(CID, Title){
   dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05") & (as.numeric(BUM_tib$D_860011428)>=1 | BUM_tib$D_494226443=="353358909"))
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt()  %>%  
+  gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -178,7 +178,7 @@ covid_twice_funct <- function(CID, Title){
   dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05") & as.numeric(BUM_tib$D_860011428)>=2)
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt()  %>%  
+  gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -201,7 +201,7 @@ covid_thrice_funct <- function(CID, Title){
   dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05")& as.numeric(BUM_tib$D_860011428)>=3)
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt()  %>%  
+  gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -227,7 +227,7 @@ one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){
   dt_select <- BUM_tib %>%  filter(!!CID_SYM_P==Previous_Answer) %>%  select(Connect_ID, !!CID_SYM) 
   gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   
-  gt_yn %>%  gt()  %>%  
+  gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -254,7 +254,7 @@ two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_C
   dt_select2 <- BUM_tib %>%  filter(!!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>%  select(Connect_ID, !!CID_SYM) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   
-  gt2_yn %>%  gt()  %>%  
+  gt2_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -329,7 +329,7 @@ which_sex$answer <- factor(which_sex$answer,levels=c("Female", "Male", "Intersex
 dt_sex_summary <- which_sex %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_sex_summary %>%  gt() %>%  
+dt_sex_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 1: Biological Sex at Birth")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -429,7 +429,7 @@ dt_SYMPTDAY_summary <- which_sympt %>% group_by(symptom) %>%  dplyr::summarize(n
 df_SYMPTDAY <- as.data.frame(dt_SYMPTDAY_summary)
 #knitr::kable(df_SYMPTDAY, caption="Table 2: Symptoms in the 24 hours Prior to Sample Donation", align=c("l","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
 
-df_SYMPTDAY  %>%  gt() %>%
+df_SYMPTDAY  %>%  gt::gt() %>%
   fmt_number(columns = "percentage", decimals = 1) %>%
   tab_header(title = md("Table 2: Symptoms in the 24 hours Prior to Sample Donation")) %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number**"), percentage = md("**Percentage**")) %>%
@@ -452,7 +452,7 @@ which_eattime$answer <- factor(which_eattime$answer,levels=c("The same day", "Th
 dt_eattime_summary <- which_eattime %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_eattime_summary %>%  gt() %>%  
+dt_eattime_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 3: When Last Food or Beverage Consumed")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -543,7 +543,7 @@ avg_coll$MW <- factor(avg_coll$MW, levels= c(  "Missing Time", "0 hrs to 3 hrs",
 MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) # %>% dplyr::ungroup() #------ why is it saying MW is not a column????
 #MW_time <- MW_time1 %>%  sort_by(Site) 
   
-MW_time1 %>%  gt()  %>%  
+MW_time1 %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 4. Time from Last Meal to Time of Mouthwash Collection")) %>% 
   cols_label(n= md("**Number**"), MW = md(" "), percentage = md("**Percent**")) %>%  
@@ -664,7 +664,7 @@ which_TYLENOL$answer <- factor(which_TYLENOL$answer,levels=c("No", "Yes, in the 
 dt_TYLENOL_summary <- which_TYLENOL %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_TYLENOL_summary %>%  gt() %>%  
+dt_TYLENOL_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 7: Tylenol Taken & Last Time Taken")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -689,7 +689,7 @@ which_NSAIDS$answer <- factor(which_NSAIDS$answer,levels=c("No", "Yes, in the pa
 dt_NSAIDS_summary <- which_NSAIDS %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_NSAIDS_summary %>%  gt() %>%  
+dt_NSAIDS_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 8: NSAIDS Taken & Last Time Taken")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -714,7 +714,7 @@ which_Acid$answer <- factor(which_Acid$answer,levels=c("No", "Yes, in the past d
 dt_Acid_summary <- which_Acid %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_Acid_summary %>%  gt() %>%  
+dt_Acid_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 9: Acid Reducers Taken & Last Time Taken")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -745,7 +745,7 @@ which_MENSTPRD$answer <- factor(which_MENSTPRD$answer,levels=c("No", "Yes","Skip
 dt_MENSTPRD_summary <- which_MENSTPRD %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-MENSTPRD_summary_gt <- dt_MENSTPRD_summary %>%  gt() %>%  
+MENSTPRD_summary_gt <- dt_MENSTPRD_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 10: Had Menstrual Period in the Last 12 Months")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -773,7 +773,7 @@ which_MENST60$answer <- factor(which_MENST60$answer,levels=c("No", "Yes", "Skipp
 dt_MENST60_summary <- which_MENST60 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-MENST60_summary_gt <- dt_MENST60_summary %>%  gt() %>%  
+MENST60_summary_gt <- dt_MENST60_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 11: Had Menstrual Period in the Last 60 Days")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -812,7 +812,7 @@ which_PREGNANT$answer <- factor(which_PREGNANT$answer,levels=c("No", "Yes","Skip
 dt_PREGNANT_summary <- which_PREGNANT %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-PREGNANT_summary_gt <- dt_PREGNANT_summary %>%  gt() %>%  
+PREGNANT_summary_gt <- dt_PREGNANT_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 12: Had Menstrual Period in the Last 12 Months")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -866,7 +866,7 @@ which_ORALHLTH$answer <- factor(which_ORALHLTH$answer,levels=c("Excellent", "Ver
 dt_ORALHLTH_summary <- which_ORALHLTH %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_ORALHLTH_summary %>%  gt() %>%  
+dt_ORALHLTH_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 18: Overall Health Ranking")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -946,7 +946,7 @@ dt_hygeine_summary <- hy_prod  %>% dplyr::group_by(products) %>% dplyr::summariz
 dt_hygeine_summary  <- dt_hygeine_summary %>%  add_row(products = "Total", n=sum(as.numeric(dt_hygeine_summary$n)), percentage= 100)
 df_hygeine <- as.data.frame(dt_hygeine_summary)
 
-# df_hygeine %>%  gt() %>%  
+# df_hygeine %>%  gt::gt() %>%  
 #   fmt_number(columns = "percentage", decimals = 1) %>% 
 #   tab_header(title = md("Table 122: Oral Health Products Used in the Last Month")) %>% 
 #   cols_label(products = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -974,7 +974,7 @@ which_BRUSH2$answer <- factor(which_BRUSH2$answer,levels=c("Never", "Less than o
 dt_BRUSH2_summary <- which_BRUSH2 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_BRUSH2_summary %>%  gt() %>%  
+dt_BRUSH2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 24: Frequency Using a Toothbrush in the Last Month")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1000,7 +1000,7 @@ which_FLOSS2$answer <- factor(which_FLOSS2$answer,levels=c("Never", "Less than o
 dt_FLOSS2_summary <- which_FLOSS2 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_FLOSS2_summary %>%  gt() %>%  
+dt_FLOSS2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 25: Frequency Using Floss in the Last Month")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1026,7 +1026,7 @@ which_WPICK2$answer <- factor(which_WPICK2$answer,levels=c("Never", "Less than o
 dt_WPICK2_summary <- which_WPICK2 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_WPICK2_summary %>%  gt() %>%  
+dt_WPICK2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 26: Frequency Using a Water Based Flosser or Pick in the Last Month")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1052,7 +1052,7 @@ which_TONGUE2$answer <- factor(which_TONGUE2$answer,levels=c("Never", "Less than
 dt_TONGUE2_summary <- which_TONGUE2 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_TONGUE2_summary %>%  gt() %>%  
+dt_TONGUE2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 27: Frequency Using a Tongue Scrubber in the Last Month")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1078,7 +1078,7 @@ which_WHITE2$answer <- factor(which_WHITE2$answer,levels=c("Never", "Less than o
 dt_WHITE2_summary <- which_WHITE2 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_WHITE2_summary %>%  gt() %>%  
+dt_WHITE2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 28: Frequency Using Teeth Whitener in the Last Month")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1106,7 +1106,7 @@ mw_prod= dt_MWUSE %>%  mutate(products= case_when(D_406270109_D_950773275==1 ~ "
 
 dt_MWUSE_summary <- mw_prod  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
 
-dt_MWUSE_summary %>%  gt() %>%  
+dt_MWUSE_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 29: Mouthwash Products Used in the Last Month")) %>% 
   cols_label(products = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1132,7 +1132,7 @@ which_MWALC$answer <- factor(which_MWALC$answer,levels=c("Never", "Less than onc
 dt_MWALC_summary <- which_MWALC %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWALC_summary %>%  gt() %>%  
+dt_MWALC_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 30: Frequency Using Alcohol Based Mouthwash")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1157,7 +1157,7 @@ which_MWALCFREE$answer <- factor(which_MWALCFREE$answer,levels=c("Never", "Less 
 dt_MWALCFREE_summary <- which_MWALCFREE %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWALCFREE_summary %>%  gt() %>%  
+dt_MWALCFREE_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 31: Frequency Using Alcohol Free Mouthwash")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1183,7 +1183,7 @@ which_MWCHLOR$answer <- factor(which_MWCHLOR$answer,levels=c("Never", "Less than
 dt_MWCHLOR_summary <- which_MWCHLOR %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWCHLOR_summary %>%  gt() %>%  
+dt_MWCHLOR_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 32: Frequency Using Chlorhexidine Mouthwash")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1208,7 +1208,7 @@ which_MWFLOURIDE$answer <- factor(which_MWFLOURIDE$answer,levels=c("Never", "Les
 dt_MWFLOURIDE_summary <- which_MWFLOURIDE %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWFLOURIDE_summary %>%  gt() %>%  
+dt_MWFLOURIDE_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 33: Frequency Using Flouride Mouthwash")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1233,7 +1233,7 @@ which_MWPEROX$answer <- factor(which_MWPEROX$answer,levels=c("Never", "Less than
 dt_MWPEROX_summary <- which_MWPEROX %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWPEROX_summary %>%  gt() %>%  
+dt_MWPEROX_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 34: Frequency Using Peroxide Mouthwash")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1258,7 +1258,7 @@ which_MWCETYL$answer <- factor(which_MWCETYL$answer,levels=c("Never", "Less than
 dt_MWCETYL_summary <- which_MWCETYL %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWCETYL_summary %>%  gt() %>%  
+dt_MWCETYL_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 35: Frequency Using Cetylpyridinium Cloride Mouthwash")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1283,7 +1283,7 @@ which_MWSENSITIVE$answer <- factor(which_MWSENSITIVE$answer,levels=c("Never", "L
 dt_MWSENSITIVE_summary <- which_MWSENSITIVE %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWSENSITIVE_summary %>%  gt() %>%  
+dt_MWSENSITIVE_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 36: Frequency Using Mouthwash for Sensitive Teeth")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1308,7 +1308,7 @@ which_MWDRY$answer <- factor(which_MWDRY$answer,levels=c("Never", "Less than onc
 dt_MWDRY_summary <- which_MWDRY %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_MWDRY_summary %>%  gt() %>%  
+dt_MWDRY_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 37: Frequency Using Mouthwash for Dry Mouth")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1347,7 +1347,7 @@ dt_PERMTTHLOST_summary <- lost  %>% dplyr::group_by(products) %>% dplyr::summari
 
 df_PERMTTHLOST <- as.data.frame(dt_PERMTTHLOST_summary)
 
-df_PERMTTHLOST %>%  gt() %>%  
+df_PERMTTHLOST %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 38 (V1): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")) %>% 
   cols_label(products = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1383,7 +1383,7 @@ dt_PERMTTHLOST_summary <- lost2  %>% dplyr::group_by(products2) %>% dplyr::summa
 
 df_PERMTTHLOST <- as.data.frame(dt_PERMTTHLOST_summary)
 
-df_PERMTTHLOST %>%  gt() %>%  
+df_PERMTTHLOST %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 39 (V2): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")) %>% 
   cols_label(products2 = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1406,7 +1406,7 @@ TEETHLOSTAI <- BUM_tib %>%  select(Connect_ID, D_724589244) %>%  filter((BUM_tib
   TEETHLOSTAI_yn$answer <- factor(TEETHLOSTAI_yn$answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this Question"))
   dt_TEETHLOSTAI_yn_summary <- TEETHLOSTAI_yn  %>% dplyr::group_by(answer) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(answer, n, percentage)
   
-  dt_TEETHLOSTAI_yn_summary %>%  gt()  %>%  
+  dt_TEETHLOSTAI_yn_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 40: Number of Teeth Lost from Accident or Injury")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1439,7 +1439,7 @@ TEETHLOSTD <- BUM_tib %>%  select(Connect_ID, D_957305523) %>%  filter((BUM_tib$
                                                                  "Don't Know", "Skipped this question"))
   dt_TEETHLOSTD_yn_summary <- TEETHLOSTD_yn  %>% dplyr::group_by(answer) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(answer, n, percentage)
   
-  dt_TEETHLOSTD_yn_summary %>%  gt()  %>%  
+  dt_TEETHLOSTD_yn_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 41: Number of Teeth Lost from Tooth Decay or Disease")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1471,7 +1471,7 @@ TEETHLOSTOTH <- BUM_tib %>%  select(Connect_ID, D_360678252) %>%  filter((BUM_ti
   TEETHLOSTOTH_yn$answer <- factor(TEETHLOSTOTH_yn$answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this question"))
   dt_TEETHLOSTOTH_yn_summary <- TEETHLOSTOTH_yn  %>% dplyr::group_by(answer) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(answer, n, percentage)
   
-  dt_TEETHLOSTOTH_yn_summary %>%  gt()  %>%  
+  dt_TEETHLOSTOTH_yn_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 42: Number of Teeth Lost from Other Incidents")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1502,7 +1502,7 @@ dnt= BUM_tib %>%  mutate(products= case_when(D_542661394_D_104430631==1 ~ "No", 
 dnt$products <- factor(dnt$products, levels= c("No", "Dental Bridges", "Partial Denture", "Full Dentures", "Dental Implants", "Other", "Uknown", "Skipped this question"))
 dt_DENTURES_summary <- dnt  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
 
-dt_DENTURES_summary %>%  gt() %>%  
+dt_DENTURES_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 43: Lost Permanent Adult Teeth, not Including your Wisdom Teeth")) %>% 
   cols_label(products = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1524,7 +1524,7 @@ dnt= BUM_tib %>%  mutate(products= case_when(D_339570897==317567178 ~ "In the pa
 dnt$products <- factor(dnt$products, levels= c("In the past month", "In the past 6 months", "In the past year", "In the past 2 years", "More than 2 years ago", "Unavailable/Unknown", "Skipped this question"))
 dt_DENTALCELAN_summary <- dnt  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
 
-dt_DENTALCELAN_summary %>%  gt() %>%  
+dt_DENTALCELAN_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 44: Last Professional Dental Cleaning")) %>% 
   cols_label(products = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1561,7 +1561,7 @@ ANTIBIOTIME= BUM_tib %>%  filter(D_736393021==353358909) %>%
 ANTIBIOTIME$products <- factor(ANTIBIOTIME$products, levels= c("Within the last 24 hours", "In the past week", "In the past 4 weeks", "More than 4 weeks ago", "Skipped this question"))
 dt_ANTIBIOTIME_summary <- dnt  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
 
-dt_ANTIBIOTIME_summary %>%  gt() %>%  
+dt_ANTIBIOTIME_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 49: Date Antiobiotic Last Taken")) %>% 
   cols_label(products = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1595,7 +1595,7 @@ which_COV1$answer <- factor(which_COV1$answer,levels=c("No", "Yes", "Do Not Know
 
 dt_COV1_summary <- which_COV1 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
-  dt_COV1_summary %>%  gt()  %>%  
+  dt_COV1_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 50: Ever Have COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1674,7 +1674,7 @@ which_COV4$answer <- factor(which_COV4$answer,levels=c("No", "Yes", "Do Not Know
 
 dt_COV4_summary <- which_COV4 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
-  dt_COV4_summary %>%  gt()  %>%  
+  dt_COV4_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 51: Test Positive the First Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1696,7 +1696,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   dt_select2 <- covid_section  %>%  filter((as.numeric(D_860011428)>=1| D_494226443=="353358909") & D_366980310_1_1!="353358909") %>%  select(Connect_ID, D_498462481_1_1) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_498462481_1_1) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(D_498462481_1_1, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   
-  gt2_yn %>%  gt()  %>%  
+  gt2_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 52: HealchCare Provider Confirm Diagnosis the First Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1734,7 +1734,7 @@ which_COV7$answer <- factor(which_COV7$answer,levels=c("Not at all", "A little b
 dt_COV7_summary <- which_COV7 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_COV7_summary %>%  gt() %>%  
+dt_COV7_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 54: Worst Symptoms Interfere with Daily Activities the First Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -1999,7 +1999,7 @@ which_sympt8= COVID_tib8 %>%  mutate(symptom= case_when( #as.numeric(multb2)>1 ~
 dt_cov8_2_summary <- which_sympt8  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
 
-dt_cov8_2_summary %>%  gt() %>%  
+dt_cov8_2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 55: Had Any Sypmtoms the First Time Having COVID-19")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2021,7 +2021,7 @@ which_COV9$answer <- factor(which_COV9$answer,levels=c("No", "Yes", "Do Not Know
 
 dt_COV9_summary <- which_COV9 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
-  dt_COV9_summary %>%  gt()  %>%  
+  dt_COV9_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 56: Experience Septic Shock the First Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2050,7 +2050,7 @@ which_COV10$answer <- factor(which_COV10$answer,levels=c("No", "Yes", "Do Not Kn
 
 dt_COV10_summary <- which_COV10 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
-  dt_COV10_summary %>%  gt()  %>%  
+  dt_COV10_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Tabe 57: Diagnosed with Pneumonia the First Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2080,7 +2080,7 @@ which_COV11$answer <- factor(which_COV11$answer,levels=c("No", "Yes", "Do Not Kn
 
 dt_COV11_summary <- which_COV11 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
-  dt_COV11_summary %>%  gt()  %>%  
+  dt_COV11_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 58: Diagnosed with Bood Clots the First Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2109,7 +2109,7 @@ which_COV12$answer <- factor(which_COV12$answer,levels=c("No", "Yes", "Do Not Kn
 
 dt_COV12_summary <- which_COV12 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
-  dt_COV12_summary %>%  gt()  %>%  
+  dt_COV12_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 59: Overnight Hospital Stay the First Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2211,7 +2211,7 @@ which_COV4$answer <- factor(which_COV4$answer,levels=c("No", "Yes", "Do Not Know
 
 dt_COV4_summary <- which_COV4 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
-  dt_COV4_summary %>%  gt()  %>%  
+  dt_COV4_summary %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md( "Table 64: Test Positive the Second Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2235,7 +2235,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   dt_select2 <- covid_section  %>%  filter((as.numeric(D_860011428)>=1 | D_494226443=="353358909") & D_366980310_2_2!="353358909") %>%  select(Connect_ID, D_498462481_2_2) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_498462481_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(D_498462481_2_2, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   
-  gt2_yn %>%  gt()  %>%  
+  gt2_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 65: HealchCare Provider Confirm Diagnosis the Second Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2271,7 +2271,7 @@ which_COV7$answer <- factor(which_COV7$answer,levels=c("Not at all", "A little b
 dt_COV7_summary <- which_COV7 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 
 
-dt_COV7_summary %>%  gt() %>%  
+dt_COV7_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 67: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2533,7 +2533,7 @@ which_sympt8_2= COVID_tib8 %>%  mutate(symptom= case_when( #as.numeric(multb2)>1
 
 dt_cov8_2_summary <-  which_sympt8_2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_cov8_2_summary %>%  gt() %>%  
+dt_cov8_2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 68: Had Any Sypmtoms the Second Time Having COVID-19")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2597,7 +2597,7 @@ which_symptA1= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_488415137=
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 dt_COV19A1_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19A1_summary %>%  gt() %>%  
+dt_COV19A1_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 77: Experienced Lost of Taste or Smell Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2614,7 +2614,7 @@ which_symptA2= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_167695804=
 which_symptA2$symptom <- factor(which_symptA2$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 dt_COV19A2_summary <- which_symptA2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19A2_summary %>%  gt() %>%  
+dt_COV19A2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 78: Experienced Appetite Changes Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2631,7 +2631,7 @@ which_symptA3= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_730334054=
 which_symptA3$symptom <- factor(which_symptA3$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 dt_COV19A3_summary <- which_symptA3  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19A3_summary %>%  gt() %>%  
+dt_COV19A3_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 79: Experienced Feeling More Tired than Usual Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2648,7 +2648,7 @@ which_symptA4= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_215996690=
 which_symptA4$symptom <- factor(which_symptA4$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 dt_COV19A4_summary <- which_symptA4  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, percentage)
 
-dt_COV19A4_summary %>%  gt() %>%  
+dt_COV19A4_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 80: Experienced Trouble Remembering Things Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2665,7 +2665,7 @@ which_symptA5= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_462737492=
 which_symptA5$symptom <- factor(which_symptA5$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 dt_COV19A5_summary <- which_symptA5  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19A5_summary %>%  gt() %>%  
+dt_COV19A5_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 81: Experienced Trouble Paying Attention Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2682,7 +2682,7 @@ which_symptA6= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_469675296=
 which_symptA6$symptom <- factor(which_symptA6$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 dt_COV19A6_summary <- which_symptA6  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19A6_summary %>%  gt() %>%  
+dt_COV19A6_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 82: Experienced Trouble Thinking or Making Decisions Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2707,7 +2707,7 @@ dt_COV19B1_summary <- which_symptB1  %>% dplyr::group_by(symptom) %>% dplyr::sum
 
 
 
-dt_COV19B1_summary %>%  gt() %>%  
+dt_COV19B1_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 83: Experienced Shortness of Breath Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2726,7 +2726,7 @@ dt_COV19B2_summary <- which_symptB2  %>% dplyr::group_by(symptom) %>% dplyr::sum
 
 
 
-dt_COV19B2_summary %>%  gt() %>%  
+dt_COV19B2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 84: Experienced Inability to Exercise at Normal Level Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2745,7 +2745,7 @@ dt_COV19B3_summary <- which_symptB3  %>% dplyr::group_by(symptom) %>% dplyr::sum
 
 
 
-dt_COV19B3_summary %>%  gt() %>%  
+dt_COV19B3_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 85: Experienced Inability to Return to School or Work Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2764,7 +2764,7 @@ dt_COV19B4_summary <- which_symptB4  %>% dplyr::group_by(symptom) %>% dplyr::sum
 
 
 
-dt_COV19B4_summary %>%  gt() %>%  
+dt_COV19B4_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 86: Experienced Inability to Return to Usual Activities Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2784,7 +2784,7 @@ dt_COV19B5_summary <- which_symptB5  %>% dplyr::group_by(symptom) %>% dplyr::sum
 
 
 
-dt_COV19B5_summary %>%  gt() %>%  
+dt_COV19B5_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 87: Experienced Feeling Weak, Tired, or Sick after Physical Activity Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2813,7 +2813,7 @@ which_sympt1$symptom <- factor(which_sympt1$symptom,levels=c("Never Felt", "Prev
 
 dt_COV19C1_summary <- which_sympt1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19C1_summary %>%  gt() %>%  
+dt_COV19C1_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 88: Experienced Feeling Lightheaded or Dizzy Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2833,7 +2833,7 @@ which_sympt2$symptom <- factor(which_sympt2$symptom,levels=c("Never Experienced"
 
 dt_COV19C2_summary <- which_sympt2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19C2_summary %>%  gt() %>%  
+dt_COV19C2_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 89: Experienced Periods of Racing Heart Rate Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2853,7 +2853,7 @@ which_sympt3$symptom <- factor(which_sympt3$symptom,levels=c("Never Experienced"
 
 dt_COV19C3_summary <- which_sympt3  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19C3_summary %>%  gt() %>%  
+dt_COV19C3_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 90: Experienced Trouble Sleeping Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2873,7 +2873,7 @@ which_sympt4$symptom <- factor(which_sympt4$symptom,levels=c("Never Experienced"
 
 dt_COV19C4_summary <- which_sympt4  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19C4_summary %>%  gt() %>%  
+dt_COV19C4_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 91: Experienced Changes to Mood or Emotion Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2893,7 +2893,7 @@ which_sympt5$symptom <- factor(which_sympt5$symptom,levels=c("Never Experienced"
 
 dt_COV19C5_summary <- which_sympt5  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV19C5_summary %>%  gt() %>%  
+dt_COV19C5_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 92: Experienced Muscle Aches Since COVID-19 Diagnosis")) %>% 
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2913,7 +2913,7 @@ dt_select2 <- covid_section  %>%  filter(D_694503437_1_1=="353358909" | D_694503
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_110872086_D_110872086) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
     dplyr::mutate(answer=dplyr::recode(D_110872086_D_110872086, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   
-  gt2_yn %>%  gt()  %>%  
+  gt2_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 93: Experienced Any Other Symptoms Since COVID-19 Diagnosis")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -2951,7 +2951,7 @@ two_skip_funct(D_114280729_D_374567479, "Table 95: Length of Time Lost of Taste 
 # dt_COV7_summary <- which_COV7 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
 # 
 # 
-# dt_COV7_summary %>%  gt() %>%  
+# dt_COV7_summary %>%  gt::gt() %>%  
 #   fmt_number(columns = "percentage", decimals = 1) %>% 
 #   tab_header(title = md("Table 35: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19")) %>% 
 #   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3037,7 +3037,7 @@ grid.arrange(COV22_Months, COV22_Days, nrow=2)
  
  dt_COV23A1_summary <- which_COV23A1 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23A1_summary %>%  gt()  %>%  
+   dt_COV23A1_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 113 Experienced Lost of Taste or Smell Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3067,7 +3067,7 @@ which_COV23A2= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23A2_summary <- which_COV23A2 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23A2_summary %>%  gt()  %>%  
+   dt_COV23A2_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 114: Experienced Appetite Changes Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3096,7 +3096,7 @@ which_COV23A3= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23A3_summary <- which_COV23A3 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23A3_summary %>%  gt()  %>%  
+   dt_COV23A3_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 115: Feeling More Tired than Usual Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3125,7 +3125,7 @@ which_COV23A4= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23A4_summary <- which_COV23A4 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23A4_summary %>%  gt()  %>%   
+   dt_COV23A4_summary %>%  gt::gt()  %>%   
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 116: Having Trouble Remebering Things Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3154,7 +3154,7 @@ which_COV23A5= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23A5_summary <- which_COV23A5 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23A5_summary %>%  gt()  %>%   
+   dt_COV23A5_summary %>%  gt::gt()  %>%   
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 117: Having Trouble Paying Attention Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3183,7 +3183,7 @@ which_COV23A6= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23A6_summary <- which_COV23A6 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23A6_summary %>%  gt()  %>% 
+   dt_COV23A6_summary %>%  gt::gt()  %>% 
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 118: Having Trouble Thinking or Making Decisions Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3215,7 +3215,7 @@ which_COV23B1= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23B1_summary <- which_COV23B1 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23B1_summary %>%  gt()  %>%  
+   dt_COV23B1_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 119: Felt Dizziness or Shortness of Breath Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3244,7 +3244,7 @@ which_COV23B2= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23B2_summary <- which_COV23B2 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23B2_summary %>%  gt()  %>%  
+   dt_COV23B2_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 120: Experienced Periods of Raching of Heart Rate Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3273,7 +3273,7 @@ which_COV23B3= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23B3_summary <- which_COV23B3 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23B3_summary %>%  gt()  %>%  
+   dt_COV23B3_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 121: Experienced Shortness of Breath Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3302,7 +3302,7 @@ which_COV23B4= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23B4_summary <- which_COV23B4 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23B4_summary %>%  gt()  %>% 
+   dt_COV23B4_summary %>%  gt::gt()  %>% 
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 122: Experienced Feeling Weak, Tired, or Sick after Physical Activity Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3331,7 +3331,7 @@ which_COV23B5= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23B5_summary <- which_COV23B5 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23B5_summary %>%  gt()  %>%  
+   dt_COV23B5_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 123: Having Trouble Sleeping Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3360,7 +3360,7 @@ which_COV23B6= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23B6_summary <- which_COV23B6 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23B6_summary %>%  gt()  %>%  
+   dt_COV23B6_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 124: Experienced Changes in Mood or Emotion Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3389,7 +3389,7 @@ which_COV23B7= covid_section  %>%  filter(D_494226443!="353358909" | D_498462481
  
  dt_COV23B7_summary <- which_COV23B7 %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
    
-   dt_COV23B7_summary %>%  gt()  %>%  
+   dt_COV23B7_summary %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 125: Experienced Muscle Aches Since 2020")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3434,7 +3434,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_527872064
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 128: Length of Time Experiencing Loss of Taste or Smell")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3457,7 +3457,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_691752394
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 129: Length of Time Experiencing Appetite Changes")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3479,7 +3479,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_143206081
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 130: Length of Time Feeling More Tired Than Usual")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3502,7 +3502,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_431203595
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 131: Length of Time Having Trouble Remembering Things")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3525,7 +3525,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_516899143
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 132: Length of Time Having Trouble Paying Attention")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3548,7 +3548,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_223008071
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 133: Length of Time Having Trouble Thinking or Making Decision")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3571,7 +3571,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_599862694
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 134: Length of Time Experiencing Feeling Lightheaded and Dizzy")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3594,7 +3594,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_860444009
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 135: Length of Time Experiencing Periods of Racing Heart Rate")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3617,7 +3617,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_246857412
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 136: Length of Time Experiencing Shortness of Breath")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3640,7 +3640,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_144819886
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 137: Length of Time Experiencing Feeling Weak, Tired or Sick after Physical Activity")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3663,7 +3663,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_304155106
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 138: Length of Time Having Trouble Sleeping")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3686,7 +3686,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_830581863
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 139: Length of Time Experiencing Changes in your Mood or Emotions")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3709,7 +3709,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_463689026
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 140: Length of Time Experiencing Muscle Aches")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3733,7 +3733,7 @@ which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_589004291==232063618 
 which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
 dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_COV24A11_summary %>%  gt() %>%  
+dt_COV24A11_summary %>%  gt::gt() %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 141: Length of Time Experiencing Other Symptom")) %>% 
   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -3751,7 +3751,7 @@ COV25 <- covid_section  %>%  filter(d_822499427<as.Date("2022-12-2") & d_2221617
 gt2_yn <- COV25  %>% dplyr::group_by(D_890156588) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_890156588, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
    
-   gt2_yn %>%  gt()  %>%  
+   gt2_yn %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 142: Received COVID-19 Vaccination test 1")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3776,7 +3776,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 gt2_yn <- COV25  %>% dplyr::group_by(D_890156588_V2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_890156588_V2, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
    
-   gt2_yn %>%  gt()  %>%  
+   gt2_yn %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 143: Received COVID-19 Vaccination test 1")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3903,7 +3903,7 @@ COV28_1 <- covid_section  %>%  filter(D_890156588=="353358909" & (D_877074400>=1
    cov28_1_yn <- COV28_1  %>% dplyr::group_by(D_220055064_1_1_D_220055064_1_1) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_1_1_D_220055064_1_1, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
    
-   cov28_1_yn %>%  gt()  %>%  
+   cov28_1_yn %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 144: Brand of First COVID-19 Vaccine")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3927,7 +3927,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_2_yn <- COV28_2  %>% dplyr::group_by(D_220055064_2_2_D_220055064_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_2_2_D_220055064_2_2, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
    
-   cov28_2_yn %>%  gt()  %>%  
+   cov28_2_yn %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 145: Brand of Second COVID-19 Vaccine")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3951,7 +3951,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_3_yn <- COV28_3  %>% dplyr::group_by(D_220055064_3_3_D_220055064_3_3) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_3_3_D_220055064_3_3, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
    
-   cov28_3_yn %>%  gt()  %>%  
+   cov28_3_yn %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 146: Brand of Third COVID-19 Vaccine")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3975,7 +3975,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_4_yn <- COV28_4  %>% dplyr::group_by(D_220055064_4_4_D_220055064_4_4) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_4_4_D_220055064_4_4, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
    
-   cov28_4_yn %>%  gt()  %>%  
+   cov28_4_yn %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 147: Brand of Fourth COVID-19 Vaccine")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -3999,7 +3999,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
    cov28_5_yn <- COV28_5  %>% dplyr::group_by(D_220055064_5_5_D_220055064_5_5) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
      dplyr::mutate(answer=dplyr::recode(D_220055064_5_5_D_220055064_5_5, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
    
-   cov28_5_yn %>%  gt()  %>%  
+   cov28_5_yn %>%  gt::gt()  %>%  
    fmt_number(columns = "percentage", decimals = 1) %>% 
    tab_header(title = md("Table 148: Brand of Fifth COVID-19 Vaccine")) %>% 
   cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
@@ -4109,7 +4109,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 <!--   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) -->
 <!--   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage) -->
 
-<!--   gt_yn %>%  gt(rowname_col = "row_lab")  %>%   -->
+<!--   gt_yn %>%  gt::gt(rowname_col = "row_lab")  %>%   -->
 <!--   fmt_number(columns = "percentage", decimals = 1) %>%  -->
 <!--   tab_header(title = md(Title)) %>%  -->
 <!--   cols_label(answer = md("**Answer**"), n= md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>%  -->
@@ -4158,7 +4158,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 <!-- #dt_SYMPTDAY_summary <- BUM_sympt %>% group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
 <!-- #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
 
-<!-- dt_SYMPTDAY_summary %>%  gt() %>% -->
+<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
 <!--   fmt_number(columns = "percentage", decimals = 1) %>% -->
 <!--   tab_header(title = md("Research Survey SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>% -->
 <!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% -->
@@ -4184,7 +4184,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 <!-- # dt_SYMPTDAY_summary <- BUM_sympt %>% group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE)  -->
 <!-- # gtm3_print <- gt(dt_SYMPTDAY_summary) -->
 <!-- #  -->
-<!-- # dt_SYMPTDAY_summary %>%  gt() %>%   -->
+<!-- # dt_SYMPTDAY_summary %>%  gt::gt() %>%   -->
 <!-- #   fmt_number(columns = "percentage", decimals = 1) %>%  -->
 <!-- #   tab_header(title = md("Research Survey SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>%  -->
 <!-- #   cols_label(symptom = md("**Answer**"), percentage = md("**Percentage of Participants**")) %>%  -->
@@ -4213,7 +4213,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 <!-- # dt_SYMPTDAY_summary <- BU_sympt %>% group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
 <!-- # #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
 <!-- #  -->
-<!-- # dt_SYMPTDAY_summary %>%  gt() %>% -->
+<!-- # dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
 <!-- #   fmt_number(columns = "percentage", decimals = 1) %>% -->
 <!-- #   tab_header(title = md("Clinical Survery SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>% -->
 <!-- #   cols_label(symptom = md("**Answer**"),  percentage = md("**Percentage of Participants**")) %>% -->
@@ -4238,7 +4238,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 <!-- dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
 
-<!-- dt_SYMPTDAY_summary %>%  gt() %>%   -->
+<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>%   -->
 <!--   fmt_number(columns = "percentage", decimals = 1) %>%  -->
 <!--   tab_header(title = md("Clinical Survey SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>%  -->
 <!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>%  -->
@@ -4301,7 +4301,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 <!-- #dt_SYMPTDAY_summary <- BUM_sympt1 %>% group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
 <!-- #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
 
-<!-- dt_SYMPTDAY_summary %>%  gt() %>% -->
+<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
 <!--   fmt_number(columns = "percentage", decimals = 1) %>% -->
 <!--   tab_header(title = md("Research Survey EATDRINKBEFORE (Completed Within 12 hours of Check-in): When Last Food or Beverage Consumed")) %>% -->
 <!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% -->
@@ -4321,7 +4321,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 <!-- #dt_SYMPTDAY_summary <- BUM_sympt1 %>% group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
 <!-- #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
 
-<!-- dt_SYMPTDAY_summary %>%  gt() %>% -->
+<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
 <!--   fmt_number(columns = "percentage", decimals = 1) %>% -->
 <!--   tab_header(title = md("Research Survey EATDRINKBEFORE (Completed Within 12 hours of Check-in): When Last Food or Beverage Consumed")) %>% -->
 <!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% -->
