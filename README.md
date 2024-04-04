@@ -70,7 +70,7 @@ bu_clinical_survey_stats:
   rmd_file_name: "BU Clinical Survey Summary Statistics.Rmd"
   report_file_name: BU_Clinical_Survey_Summary_Statistics.pdf
   box_folders:
-    - "208060008158"
+    - "251314285484"
   gcp_info:
     cloud_scheduler: ccc-bu-clinical-biospecimen-survey-stats
     frequency: "30 11 1 * *" # first of the Month at 11:30 AM"
@@ -79,10 +79,19 @@ bum_research_survey_stats:
   rmd_file_name: "BUM Research Summary Statistics.Rmd"
   report_file_name: BUM_Research_Summary_Statistics.pdf
   box_folders:
-    - "208060008158"
+    - "251314285484"
   gcp_info:
     cloud_scheduler: ccc-bum-research-biospecimen-survey-stats
     frequency: "0 12 1 * *"# first of the Month at 12 PM"
+
+covid_survey_stats:
+  rmd_file_name: "COVID Survey Summary Statistics.Rmd"
+  report_file_name: COVID_Survey_Summary_Statistics.Rmd
+  box_folders:
+    - "251314285484"
+  gcp_info:
+    cloud_scheduler: ccc-covid-survey-stats
+    frequency: "30 12 1 * *"# first of the Month at 12:30 PM"
 ```
 
 ## Running the API with Google Cloud Run and Cloud Scheduler

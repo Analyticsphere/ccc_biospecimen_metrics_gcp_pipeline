@@ -321,6 +321,7 @@ mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 
 
 
+
 This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified by health provider site. This information pertains to verified participants as of the date above and collections that are final.
 
 
@@ -1812,6 +1813,14 @@ for(site in unique(dev_tube2$Site)){
   total <- as.numeric(nrow(dev_tube2[which(dev_tube2$Site==site),]))
   dev_count.site[[site]] <- site.sub
 }
+
+
+# for (i in 1:length(dev_count.site)){
+#   site <- names(dev_count.site[i])
+#   n <- i
+#   print(knitr::kable(dev_count.site[[site]], col.names=c("Deviation", "Number"), caption=paste("Table 14.",n, " Biospecimen Deviations Reported by ",site, sep=""), row.names=FALSE,
+#          format.args = list(big.mark = ","), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")) 
+# } 
 ```
   
   
@@ -3335,6 +3344,7 @@ timelag1 <- knitr::kable(BU_TS_time_span, caption='Time Lag (in Days) from Clini
 BUM_TS <- biosurvTS %>%  filter(!is.na(d_222161762)  & (!is.na(d_173836415_d_266600170_d_561681068) | !is.na(d_173836415_d_266600170_d_847159717))) #& !is.na(d_678166505)
 
 
+
 BUM_TS <- BUM_TS %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),
                                                         min(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_561681068)), as.POSIXct(ymd_hms(d_173836415_d_266600170_d_847159717)), na.rm=T) ,units="days")))
 
@@ -3362,6 +3372,7 @@ timelag2
 
 
  
+
 ```{r Figures4, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
 ### ADD TO REPORT
 
@@ -4137,6 +4148,7 @@ help2_1_fig1_inc <- help2_1_fig1 %>%  select(col.Monday.date,  partial_blood, no
 
 
 final_fig1_table <- help2_1_fig1_inc %>%  group_by(col.Monday.date) %>%  dplyr::summarize( incomplete=sum(incomp_blood),
+
   partial=sum(partial_blood), none_blood=sum(no_blood), all_collections=sum(all_blood),  All_Incomplete=100*(incomplete/all_collections),
   Partial__Blood=100*(partial/all_collections),  No__Blood=100*(none_blood/all_collections))
 
@@ -5203,6 +5215,7 @@ research.vt_plotUC + guides(color = guide_legend(title = "Clinic Location"))
  
  
  
+
 research.vt_plMF= visit_wk_site_edited %>%  filter( Site=="Marshfield Clinic Health System")
 research.vt_plMF <- research.vt_plMF %>% group_by(col.Monday.date) %>% mutate(total_collections = sum(n))
 
