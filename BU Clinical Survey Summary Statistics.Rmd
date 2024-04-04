@@ -116,7 +116,7 @@ BU_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", 
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
                  "548628123"="A little bit", "567908725"="Somewhat", "760969884"="Quite a bit", "464631026"="Very Much", "707601969"="Yes, another",
                  "232063618"="Less than 1 month", "948148236"="Between 1 and 3 months", "692824372"="More than 3 months", "224099497"="Yes, mostly",
-                 "770236544"="No, I never experienced this", "931688701"="Yes, I am experiencing this now", "586272115"="Yes, in the past, but I am not experiencing it now",
+                 "770236544"="No, I never experienced this", "931688701"="Yes, I am experiencing this now", "586272115"="Yes, I experienced this in the past",
                  "661871565"="Moderna", "657978450"="Pfizer", "411943417"="Johnson & Johnson", "113838601"="AstraZeneca","503154121"="Novavax" ,
                 "807835037"="Other", 
                  "670680466"="Excellent", "927477599"="Very Good", "719933364"="Good", "131550264"="Fair", "138752522"="Poor", "648960871"="Never",
@@ -146,14 +146,15 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 }
 
 menstrual_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BU_tib$D_522008539==536341288)
   gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  gt_yn %>%  gt::gt()  %>%  
+  
+  gt_yn_table <- gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -168,7 +169,13 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  )
+  tab_footnote(
+  gt_yn_table,
+  md("This question was completed by participants that selected a biological sex of Female and selected 'Yes' for menstruation in the last 12 months."),
+  locations = cells_column_labels(columns = answer),
+  placement = c("left")
+)
 }
 
 
@@ -191,7 +198,7 @@ covid_once_funct <- function(CID, Title){
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 }
 
 covid_twice_funct <- function(CID, Title){  
@@ -213,7 +220,7 @@ covid_twice_funct <- function(CID, Title){
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 }
 
 covid_thrice_funct <- function(CID, Title){  
@@ -235,7 +242,7 @@ covid_thrice_funct <- function(CID, Title){
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 }
 
 
@@ -260,16 +267,18 @@ one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 }
 
 
 #Two skip logic (previous response)
+#did have covid questions 
 two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_CID2, Previous_Answer2){  
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
   CID_SYM_P2 <- rlang::ensym(Previous_CID2)
-  dt_select2 <- BU_tib %>%  filter(!!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>%  select(Connect_ID, !!CID_SYM) 
+  dt_select2 <- BU_tib %>%  filter( !!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>% 
+    select(Connect_ID, !!CID_SYM) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
   gt2_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -286,8 +295,10 @@ two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_C
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 }
+
+
 
 
 #Histogram Function
@@ -314,25 +325,8 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
 
 
 #SEX
-sex <- gt_functBU(D_522008539, "SEX: Biological Sex at Birth")
+gt_functBU(D_522008539, "SEX: Biological Sex at Birth")
 
-which_sex= BU_tib %>%  mutate(answer= case_when(D_522008539==536341288 ~ "Female",
-                                             D_522008539==654207589 ~ "Male",
-                                             D_522008539==576796184 ~ "Intersex or Other",
-                                             TRUE   ~ "Skipped this Question"))
-which_sex$answer <- factor(which_sex$answer,levels=c("Female", "Male", "Intersex or Other","Skipped this Question"))
-
-
-dt_sex_summary <- which_sex %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_sex_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 1: Biological Sex at Birth")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
 
 
 #SYMPTDAY
@@ -374,7 +368,7 @@ which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083
                                                         D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting",
                                                         D_470484596_D_406943303==1 ~ "Fever",
                                                         D_470484596_D_214414872==1 ~ "None of these", #THIS 2144 NOT IN DD BUT IN FLAT&RAW TABLES, possibly meant to be 535003378?
-                                                        TRUE   ~ "Skipped this question"))
+                                                        TRUE   ~ "Skipped this Question"))
 
 
 # which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when(as.numeric(multb2)>1 ~ "Multiple Symptoms",
@@ -385,9 +379,9 @@ which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083
 #                                              D_470484596_D_406943303==1 ~ "Fever",
 #                                              D_470484596_D_214414872==1 ~ "None of these",
 #                                              ()~ "Cough and Diarrhea"
-#                                              TRUE   ~ "Skipped this question"))
+#                                              TRUE   ~ "Skipped this Question"))
 
-# which_sympt$symptom <- factor(which_sympt$symptom,levels=c("Cough", "Diarrhea", "Nasal Congestion", "Sick to Your Stomach or Vomitting", "Fever", "Multiple Symptoms",  "None of these", "Skipped this question"))
+# which_sympt$symptom <- factor(which_sympt$symptom,levels=c("Cough", "Diarrhea", "Nasal Congestion", "Sick to Your Stomach or Vomitting", "Fever", "Multiple Symptoms",  "None of these", "Skipped this Question"))
 
 
 dt_SYMPTDAY_summary <- which_sympt %>% dplyr::group_by(symptom) %>%  dplyr::summarize(n=n(), percentage=round(100*n/nrow(.), digits=2)) %>%  dplyr::select(symptom, n, percentage)
@@ -410,30 +404,13 @@ df_SYMPTDAY  %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number**"), percentage = md("**Percentage**")) %>%
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 #EATDRINKBEFORE
-##EATDRINKBEFORE <- gt_functBU(D_867307558, "Table 3: When Last Food or Beverage Consumed")
+BU_tib$D_867307558 <- factor(BU_tib$D_867307558,levels=c(110092955, 952212668, 330461666, "Skipped this Question"))
+gt_functBU(D_867307558, "Table 3: When Last Food or Beverage Consumed")
 
-
-which_eattime= BU_tib %>%  mutate(answer= case_when(D_867307558==110092955 ~ "The same day", 
-                                             D_867307558==952212668 ~ "The day before", 
-                                             D_867307558==330461666 ~ "More than a day before",
-                                             TRUE   ~ "Skipped this Question"))
-which_eattime$answer <- factor(which_eattime$answer,levels=c("The same day", "The day before", "More than a day before","Skipped this Question"))
-
-
-dt_eattime_summary <- which_eattime %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_eattime_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 3: When Last Food or Beverage Consumed")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
 
 
 ```
@@ -611,82 +588,15 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 
 # Medications
 ```{r Meds, warning=FALSE, echo=FALSE,  message=FALSE}
-#gt_functBU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
+BU_tib$D_487532606_D_619765650 <- factor(BU_tib$D_487532606_D_619765650,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
+BU_tib$D_487532606_D_520755310 <- factor(BU_tib$D_487532606_D_520755310,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
+BU_tib$D_487532606_D_839329467 <- factor(BU_tib$D_487532606_D_839329467,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
 
-#gt_functBU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
+gt_functBU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
 
-#gt_functBU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken")
+gt_functBU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
 
-which_TYLENOL= BU_tib %>%  mutate(answer= case_when(D_487532606_D_619765650==104430631 ~ "No",
-                                             D_487532606_D_619765650==974230748 ~ "Yes, in the past day",
-                                             D_487532606_D_619765650==936042740 ~ "Yes, in the past two days",
-                                             D_487532606_D_619765650==731141335 ~ "Yes, in the past week",
-                                             D_487532606_D_619765650==591670915 ~ "Yes, in the past month",
-                                             TRUE   ~ "Skipped this Question"))
-which_TYLENOL$answer <- factor(which_TYLENOL$answer,levels=c("No", "Yes, in the past day", "Yes, in the past two days","Yes, in the past week", "Yes, in the past month","Skipped this Question"))
-
-
-dt_TYLENOL_summary <- which_TYLENOL %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_TYLENOL_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 7: Tylenol Taken & Last Time Taken")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
-
-
-
-
-
-
-which_NSAIDS= BU_tib %>%  mutate(answer= case_when(D_487532606_D_520755310==104430631 ~ "No",
-                                             D_487532606_D_520755310==974230748 ~ "Yes, in the past day",
-                                             D_487532606_D_520755310==936042740 ~ "Yes, in the past two days",
-                                             D_487532606_D_520755310==731141335 ~ "Yes, in the past week",
-                                             D_487532606_D_520755310==591670915 ~ "Yes, in the past month",
-                                             TRUE   ~ "Skipped this Question"))
-which_NSAIDS$answer <- factor(which_NSAIDS$answer,levels=c("No", "Yes, in the past day", "Yes, in the past two days","Yes, in the past week", "Yes, in the past month","Skipped this Question"))
-
-
-dt_NSAIDS_summary <- which_NSAIDS %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_NSAIDS_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 8: NSAIDS Taken & Last Time Taken")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
-
-
-
-
-
-
-which_Acid= BU_tib %>%  mutate(answer= case_when(D_487532606_D_839329467==104430631 ~ "No",
-                                             D_487532606_D_839329467==974230748 ~ "Yes, in the past day",
-                                             D_487532606_D_839329467==936042740 ~ "Yes, in the past two days",
-                                             D_487532606_D_839329467==731141335 ~ "Yes, in the past week",
-                                             D_487532606_D_839329467==591670915 ~ "Yes, in the past month",
-                                             TRUE   ~ "Skipped this Question"))
-which_Acid$answer <- factor(which_Acid$answer,levels=c("No", "Yes, in the past day", "Yes, in the past two days","Yes, in the past week", "Yes, in the past month","Skipped this Question"))
-
-
-dt_Acid_summary <- which_Acid %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_Acid_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 9: Acid Reducers Taken & Last Time Taken")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
-
+gt_functBU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken")
 
 
 ```
@@ -697,59 +607,12 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 ```{r ReproductiveHealth, warning=FALSE, echo=FALSE,  message=FALSE}
 
 #MENSTPRD
-#menstrual_funct(D_380603392, "MENSTPRD: Had Menstrual Period in the Last 12 Months")
-
-which_MENSTPRD= BU_tib %>%  filter(D_522008539==536341288) 
-which_MENSTPRD= which_MENSTPRD %>%  mutate(answer= case_when(D_380603392==104430631 ~ "No",
-                                             D_380603392==353358909 ~ "Yes",
-                                             TRUE   ~ "Skipped this Question"))
-which_MENSTPRD$answer <- factor(which_MENSTPRD$answer,levels=c("No", "Yes","Skipped this Question"))
-
-
-dt_MENSTPRD_summary <- which_MENSTPRD %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-MENSTPRD_summary_gt <- dt_MENSTPRD_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 10: Had Menstrual Period in the Last 12 Months")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
-tab_footnote(
-  MENSTPRD_summary_gt,
-  md("This question was completed by participants that selected a biological sex of 'Female'."),
-  locations = cells_column_labels(columns = answer),
-  placement = c("left")
-)
+menstrual_funct(D_380603392, "MENSTPRD: Had Menstrual Period in the Last 12 Months")
 
 
 #MENST60
-#one_skip_funct(D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days", D_380603392, "353358909") 
+one_skip_funct(D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days", D_380603392, "353358909") 
 
-which_MENST60= BU_tib %>%  filter(D_380603392=="353358909")
-which_MENST60 <- which_MENST60 %>% dplyr::mutate(answer= case_when(D_112151599==104430631 ~ "No",
-                                             D_112151599==353358909 ~ "Yes",
-                                             TRUE   ~ "Skipped this Question"))
-which_MENST60$answer <- factor(which_MENST60$answer,levels=c("No", "Yes", "Skipped this Question"))
-
-
-dt_MENST60_summary <- which_MENST60 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-MENST60_summary_gt <- dt_MENST60_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 11: Had Menstrual Period in the Last 60 Days")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
-tab_footnote(
-  MENST60_summary_gt,
-  md("This question was completed by participants that selected a biological sex of Female and selected 'Yes' for menstruation in the last 12 months."),
-  locations = cells_column_labels(columns = answer),
-  placement = c("left")
-)
 
 
 #MENSTART
@@ -764,31 +627,7 @@ pM + scale_x_date(date_labels = "%b %Y")
 
 
 #PREGNANT
-#menstrual_funct(D_518916981, "PREGNANT: Currently Pregnant")
-
-which_PREGNANT= BU_tib %>%  filter(D_522008539==536341288) 
-which_PREGNANT= which_PREGNANT %>%  mutate(answer= case_when(D_518916981==104430631 ~ "No",
-                                             D_518916981==353358909 ~ "Yes",
-                                             TRUE   ~ "Skipped this Question"))
-which_PREGNANT$answer <- factor(which_PREGNANT$answer,levels=c("No", "Yes","Skipped this Question"))
-
-
-dt_PREGNANT_summary <- which_PREGNANT %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-PREGNANT_summary_gt <- dt_PREGNANT_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 12: Had Menstrual Period in the Last 12 Months")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
-tab_footnote(
-  PREGNANT_summary_gt,
-  md("This question was completed by participants that selected a biological sex of 'Female'."),
-  locations = cells_column_labels(columns = answer),
-  placement = c("left")
-)
+menstrual_funct(D_518916981, "PREGNANT: Currently Pregnant")
 
 #PREG3MON
 one_skip_funct(D_234714655, "Table 13: Been Pregnant in the Last 3 Months", D_518916981, "104430631") 
@@ -822,33 +661,9 @@ BU <- BU %>% filter(d_764863765<as.Date("2023-07-05"))
 
 
 #COV1
-#gt_functBU(D_494226443, "Table 18: Ever Have COVID-19")
-  which_COV1= BU_tib %>% 
-                    mutate(answer= case_when(D_494226443==104430631 ~ "No",
-                                             D_494226443==353358909 ~ "Yes",
-                                             D_494226443==178420302 ~ "Do Not Know",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV1$answer <- factor(which_COV1$answer,levels=c("No", "Yes", "Do Not Know","Skipped this Question"))
+BU_tib$D_494226443 <- factor(BU_tib$D_494226443,levels=c(104430631, 353358909, 178420302,"Skipped this Question"))
+gt_functBU(D_494226443, "Table 18: Ever Have COVID-19")
 
-
-dt_COV1_summary <- which_COV1 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-  dt_COV1_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md( "Table 18: Ever Have COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
 
 
 #COV2
@@ -856,8 +671,8 @@ hist_funct(D_860011428, "Plot 2: Times Having COVID-19", "Times", "Frequency")
 
 
 ## First Time Having COVID 
+had_covid= BU %>%  filter((as.numeric(D_860011428)>=1 | D_494226443=="353358909") & d_764863765<as.Date("2023-07-05"))
 #COV3
-had_covid= BU %>%  filter((as.numeric(D_860011428)>=1 | D_494226443=="353358909"))
 COV3_1Mo= had_covid %>% filter(!is.na(D_980800222_1_1_D_173502329_1_1)) %>%  
   mutate(descr= ifelse(D_980800222_1_1_D_173502329_1_1=="01", "1",
                                       ifelse(D_980800222_1_1_D_173502329_1_1=="1", "1",
@@ -879,7 +694,7 @@ COV3_1Mo= had_covid %>% filter(!is.na(D_980800222_1_1_D_173502329_1_1)) %>%
                                                                                                                                                   ifelse(D_980800222_1_1_D_173502329_1_1=="9" ,"9",
                                                                                                                                                          ifelse(D_980800222_1_1_D_173502329_1_1=="10" ,"10",
                                                                                                                                                                 ifelse(D_980800222_1_1_D_173502329_1_1=="11" ,"11",
-                                                                                                                                                                       ifelse(D_980800222_1_1_D_173502329_1_1=="12" ,"12","Skipped This Question"))))))))))))))))))))))
+                                                                                                                                                                       ifelse(D_980800222_1_1_D_173502329_1_1=="12" ,"12","Skipped this Question"))))))))))))))))))))))
 
 COV3_1M= COV3_1Mo %>%  ggplot(aes(x=descr)) + geom_bar()+ ggtitle("Plot 3: Month at First Time Having COVID-19")+xlab("Month")+ylab("Count") +
   scale_x_discrete(labels=c("1"="January", 
@@ -900,33 +715,9 @@ grid.arrange(COV3_1M, COV3_1Y, nrow=2)
 
 
 #COV4
-#covid_once_funct(D_366980310_1_1, "Table 19: Test Positive the First Time Having COVID-19")
-  which_COV4= BU_tib %>%  filter( as.numeric(D_860011428)>=1) %>%  
-                    mutate(answer= case_when(D_366980310_1_1==104430631 ~ "No",
-                                             D_366980310_1_1==353358909 ~ "Yes",
-                                             D_366980310_1_1==178420302 ~ "Do Not Know",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV4$answer <- factor(which_COV4$answer,levels=c("No", "Yes", "Do Not Know","Skipped this Question"))
+BU_tib$D_366980310_1_1 <- factor(BU_tib$D_366980310_1_1,levels=c(104430631, 353358909, 178420302,"Skipped this Question"))
+covid_once_funct(D_366980310_1_1, "Table 19: Test Positive the First Time Having COVID-19")
 
-
-dt_COV4_summary <- which_COV4 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-  dt_COV4_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md( "Table 19: Test Positive the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
   
 
 #COV5
@@ -947,39 +738,21 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 
 
 #COV6
 covid_once_funct(D_694503437_1_1, "Table 21: Had Any Symptoms the First Time Having COVID-19")
 
 #COV7
-##one_skip_funct(D_451163824_1_1, "Table 22: Worst Symptoms Interfere with Daily Activities the First Time Having COVID-19", D_694503437_1_1, "353358909")
-which_COV7= BU_tib %>%  filter( D_694503437_1_1=="353358909") %>%  
-                    mutate(answer= case_when(D_451163824_1_1==111520945 ~ "Not at all",
-                                             D_451163824_1_1==548628123 ~ "A little bit",
-                                             D_451163824_1_1==567908725 ~ "Somewhat",
-                                             D_451163824_1_1==760969884 ~ "Quite a bit",
-                                             D_451163824_1_1==464631026 ~ "Very much",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV7$answer <- factor(which_COV7$answer,levels=c("Not at all", "A little bit", "Somewhat","Quite a bit", "Very much","Skipped this Question"))
+BU_tib$D_451163824_1_1 <- factor(BU_tib$D_451163824_1_1,levels=c(111520945, 548628123, 567908725, 760969884, 464631026,"Skipped this Question"))
+one_skip_funct(D_451163824_1_1, "Table 22: Worst Symptoms Interfere with Daily Activities the First Time Having COVID-19", D_694503437_1_1, "353358909")
 
-
-dt_COV7_summary <- which_COV7 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_COV7_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 22: Worst Symptoms Interfere with Daily Activities the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
 
 
 #COV8
 COVID_tib=as_tibble(had_covid)
-COVID_tib8= COVID_tib  %>% filter(d_764863765<as.Date("2023-07-05") & D_694503437_1_1=="353358909")
+COVID_tib8= COVID_tib  %>% filter(D_694503437_1_1=="353358909")
 
 # which_sympt8_1= COVID_tib8 %>%  mutate(multb2 = ifelse(D_705336878_1_1_D_705336878_1_1_D_406943303==1, 1, 0) + ifelse(D_705336878_1_1_D_705336878_1_1_D_760243464==1, 1, 0) + 
 #                                   ifelse(D_705336878_1_1_D_705336878_1_1_D_423283665==1, 1, 0) + ifelse(D_705336878_1_1_D_705336878_1_1_D_160627865==1, 1, 0) +
@@ -1222,10 +995,10 @@ which_sympt8= COVID_tib8 %>%  mutate(symptom= case_when( #as.numeric(multb2)>1 ~
                                              D_705336878_1_1_D_705336878_1_1_D_657566099==1 ~ "Rashes or Other Skin Changes",
                                              D_705336878_1_1_D_705336878_1_1_D_283776061==1 ~ "Conjunctivitis",
                                              D_705336878_1_1_D_705336878_1_1_D_807835037==1 ~ "Other",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
 
-#which_sympt8$symptom <- factor(which_sympt8$symptom,levels=c("Fever", "Body Chills", "Body or Muscle Aches", "Weakness or Fatigue", "Confusion", "Trouble Sleeping", "New Loss of Taste or Smell", "Nasal Congestion", "Sore Throat", "Cough", "Shortness of Breath","Chest Tightness", "Stomach Pain", "Dirrhea", "Nausea", "Vomiting",  "Rashes or Other Skin Changes", "Conjunctivitis", "Other", "Multiple Symptoms", "Skipped this question"))
+#which_sympt8$symptom <- factor(which_sympt8$symptom,levels=c("Fever", "Body Chills", "Body or Muscle Aches", "Weakness or Fatigue", "Confusion", "Trouble Sleeping", "New Loss of Taste or Smell", "Nasal Congestion", "Sore Throat", "Cough", "Shortness of Breath","Chest Tightness", "Stomach Pain", "Dirrhea", "Nausea", "Vomiting",  "Rashes or Other Skin Changes", "Conjunctivitis", "Other", "Multiple Symptoms", "Skipped this Question"))
 
 dt_cov8_2_summary <- which_sympt8  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -1236,127 +1009,30 @@ dt_cov8_2_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 
 #COV9
-#one_skip_funct(D_928530823_1_1, "Table 24: Experience Septic Shock the First Time Having COVID-19", D_694503437_1_1, "353358909")
-  which_COV9= BU_tib %>%  filter( D_694503437_1_1=="353358909") %>%  
-                    mutate(answer= case_when(D_928530823_1_1==104430631 ~ "No",
-                                             D_928530823_1_1==353358909 ~ "Yes",
-                                             D_928530823_1_1==178420302 ~ "Do Not Know",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV9$answer <- factor(which_COV9$answer,levels=c("No", "Yes", "Do Not Know","Skipped this Question"))
+BU_tib$D_928530823_1_1 <- factor(BU_tib$D_928530823_1_1,levels=c(104430631, 353358909, 178420302,"Skipped this Question"))
+one_skip_funct(D_928530823_1_1, "Table 24: Experience Septic Shock the First Time Having COVID-19", D_694503437_1_1, "353358909")
 
-
-dt_COV9_summary <- which_COV9 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-  dt_COV9_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md( "Table 24: Experience Septic Shock the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
 
 #COV10
-#one_skip_funct(D_108733102_1_1, "Tabe 25: Diagnosed with Pneumonia the First Time Having COVID-19", D_694503437_1_1, "353358909")
-    which_COV10= BU_tib %>%  filter( D_694503437_1_1=="353358909") %>%  
-                    mutate(answer= case_when(D_108733102_1_1==104430631 ~ "No",
-                                             D_108733102_1_1==353358909 ~ "Yes",
-                                             D_108733102_1_1==178420302 ~ "Do Not Know",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV10$answer <- factor(which_COV10$answer,levels=c("No", "Yes", "Do Not Know","Skipped this Question"))
+BU_tib$D_108733102_1_1 <- factor(BU_tib$D_108733102_1_1,levels=c(104430631, 353358909, 178420302,"Skipped this Question"))
+one_skip_funct(D_108733102_1_1, "Tabe 25: Diagnosed with Pneumonia the First Time Having COVID-19", D_694503437_1_1, "353358909")
 
-
-dt_COV10_summary <- which_COV10 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-  dt_COV10_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md( "Tabe 25: Diagnosed with Pneumonia the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
   
 
 #COV11
-#one_skip_funct(D_389465772_1_1, "Table 26: Diagnosed with Bood Clots the First Time Having COVID-19", D_694503437_1_1, "353358909")
-      which_COV11= BU_tib %>%  filter( D_694503437_1_1=="353358909") %>%  
-                    mutate(answer= case_when(D_389465772_1_1==104430631 ~ "No",
-                                             D_389465772_1_1==353358909 ~ "Yes",
-                                             D_389465772_1_1==178420302 ~ "Do Not Know",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV11$answer <- factor(which_COV11$answer,levels=c("No", "Yes", "Do Not Know","Skipped this Question"))
+BU_tib$D_389465772_1_1 <- factor(BU_tib$D_389465772_1_1,levels=c(104430631, 353358909, 178420302,"Skipped this Question"))
+one_skip_funct(D_389465772_1_1, "Table 26: Diagnosed with Bood Clots the First Time Having COVID-19", D_694503437_1_1, "353358909")
 
-
-dt_COV11_summary <- which_COV11 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-  dt_COV11_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md( "Table 26: Diagnosed with Bood Clots the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
-  
 
 #COV12
-#one_skip_funct(D_775313030_1_1, "Table 27: Overnight Hospital Stay the First Time Having COVID-19", D_694503437_1_1, "353358909")
-      which_COV12= BU_tib %>%  filter( D_694503437_1_1=="353358909") %>%  
-                    mutate(answer= case_when(D_775313030_1_1==104430631 ~ "No",
-                                             D_775313030_1_1==353358909 ~ "Yes",
-                                             D_775313030_1_1==178420302 ~ "Do Not Know",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV12$answer <- factor(which_COV12$answer,levels=c("No", "Yes", "Do Not Know","Skipped this Question"))
+BU_tib$D_775313030_1_1 <- factor(BU_tib$D_775313030_1_1,levels=c(104430631, 353358909, 178420302,"Skipped this Question"))
+one_skip_funct(D_775313030_1_1, "Table 27: Overnight Hospital Stay the First Time Having COVID-19", D_694503437_1_1, "353358909")
 
-
-dt_COV12_summary <- which_COV12 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-  dt_COV12_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md( "Table 27: Overnight Hospital Stay the First Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
   
 
 #COV13
@@ -1383,14 +1059,12 @@ hist_funct(D_803339020_1_1, "Plot 8: Days Treated with ICU monitoring the First 
 #COV17A
 one_skip_funct(D_893966847_1_1, "Table 31: Receive Dialysis Treatment in the Hospital the First Time Having COVID-19", D_775313030_1_1, "353358909")
 
-#COV17B
-hist_funct(D_169509213_1_1, "Plot 9: Days Treated with Dialysis the First Time Having COVID-19", "Days", "Count")
 
 
 
 
 ## Second Time Having COVID
-had_covid2= BU %>%  filter(d_764863765<as.Date("2023-07-05") & as.numeric(D_860011428)>=2)
+had_covid2= BU %>%  filter(as.numeric(D_860011428)>=2)
 #COV3_2
 COV3_2Mo= had_covid2 %>% filter(as.numeric(D_860011428)>=2 & !is.na(D_980800222_2_2_D_173502329_2_2)) %>%  mutate(descr= ifelse(D_980800222_2_2_D_173502329_2_2=="01", "1",
                                       ifelse(D_980800222_2_2_D_173502329_2_2=="1", "1",
@@ -1412,7 +1086,7 @@ COV3_2Mo= had_covid2 %>% filter(as.numeric(D_860011428)>=2 & !is.na(D_980800222_
                                                                                                                                                   ifelse(D_980800222_2_2_D_173502329_2_2=="9" ,"9",
                                                                                                                                                          ifelse(D_980800222_2_2_D_173502329_2_2=="10" ,"10",
                                                                                                                                                                 ifelse(D_980800222_2_2_D_173502329_2_2=="11" ,"11",
-                                                                                                                                                                       ifelse(D_980800222_2_2_D_173502329_2_2=="12" ,"12","Skipped This Question"))))))))))))))))))))))
+                                                                                                                                                                       ifelse(D_980800222_2_2_D_173502329_2_2=="12" ,"12","Skipped this Question"))))))))))))))))))))))
 
 COV3_2M= COV3_2Mo %>%  ggplot(aes(x=descr)) + geom_bar()+ ggtitle("Plot 10: Month at Second Time Having COVID-19")+xlab("Month")+ylab("Count") +
   scale_x_discrete(labels=c("1"="January", 
@@ -1435,59 +1109,23 @@ grid.arrange(COV3_2M, COV3_2Y, nrow=2)
 covid_twice_funct(D_366980310_2_2, "Table 32: Test Positive the Second Time Having COVID-19")
 
 #COV5
-#covid_once_funct(D_498462481_2_2, "COV5_2: HealchCare Provider Confirm Diagnosis the Second Time Having COVID-19")
+covid_once_funct(D_498462481_2_2, "COV5_2: HealchCare Provider Confirm Diagnosis the Second Time Having COVID-19")
 
-  dt_select2 <- BU_tib %>%  filter( (as.numeric(D_860011428)>=1 | D_494226443=="353358909") & D_366980310_2_2!="353358909") %>%  select(Connect_ID, D_498462481_2_2) 
-  gt2_yn <- dt_select2  %>% dplyr::group_by(D_498462481_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(D_498462481_2_2, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-  gt2_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 33: HealchCare Provider Confirm Diagnosis the Second Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
 
 
 #COV6
 covid_twice_funct(D_694503437_2_2, "Table 34: Had Any Symptoms the Second Time Having COVID-19")
 
 #COV7
-##one_skip_funct(D_451163824_2_2, "Table 35: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19", D_694503437_2_2, "353358909")
-which_COV7= BU_tib %>%  filter( D_694503437_2_2=="353358909") %>%  
-                    mutate(answer= case_when(D_451163824_2_2==111520945 ~ "Not at all",
-                                             D_451163824_2_2==548628123 ~ "A little bit",
-                                             D_451163824_2_2==567908725 ~ "Somewhat",
-                                             D_451163824_2_2==760969884 ~ "Quite a bit",
-                                             D_451163824_2_2==464631026 ~ "Very much",
-                                             TRUE   ~ "Skipped this Question"))
-which_COV7$answer <- factor(which_COV7$answer,levels=c("Not at all", "A little bit", "Somewhat","Quite a bit", "Very much","Skipped this Question"))
+BU_tib$D_451163824_2_2 <- factor(BU_tib$D_451163824_2_2,levels=c(111520945, 548628123, 567908725, 760969884, 464631026,"Skipped this Question"))
+one_skip_funct(D_451163824_2_2, "Table 35: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19", D_694503437_2_2, "353358909")
 
-
-dt_COV7_summary <- which_COV7 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_COV7_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 35: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
 
 
 
 #COV8
 COVID_tib=as_tibble(had_covid)
-COVID_tib8= COVID_tib  %>%  filter(d_764863765<as.Date("2023-07-05") & D_694503437_2_2=="353358909") 
+COVID_tib8= COVID_tib  %>%  filter(D_694503437_2_2=="353358909") 
 
 # which_sympt8_2= COVID_tib8 %>%  mutate(multb2 = ifelse(D_705336878_2_2_D_705336878_2_2_D_406943303==1, 1, 0) + ifelse(D_705336878_2_2_D_705336878_2_2_D_760243464==1, 1, 0) + 
 #                                   ifelse(D_705336878_2_2_D_705336878_2_2_D_423283665==1, 1, 0) + ifelse(D_705336878_2_2_D_705336878_2_2_D_160627865==1, 1, 0) +
@@ -1730,10 +1368,10 @@ which_sympt8_2= COVID_tib8 %>%  mutate(symptom= case_when( #as.numeric(multb2)>1
                                              D_705336878_2_2_D_705336878_2_2_D_657566099==1 ~ "Rashes or Other Skin Changes",
                                              D_705336878_2_2_D_705336878_2_2_D_283776061==1 ~ "Conjunctivitis",
                                              D_705336878_2_2_D_705336878_2_2_D_807835037==1 ~ "Other",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
 
-#which_sympt8_2$symptom <- factor(which_sympt8_2$symptom,levels=c("Fever", "Body Chills", "Body or Muscle Aches", "Weakness or Fatigue", "Confusion", "Trouble Sleeping", "New Loss of Taste or Smell", "Nasal Congestion", "Sore Throat", "Cough", "Shortness of Breath","Chest Tightness", "Stomach Pain", "Dirrhea", "Nausea", "Vomiting",  "Rashes or Other Skin Changes", "Conjunctivitis", "Other", "Multiple Symptoms", "Skipped this question"))
+#which_sympt8_2$symptom <- factor(which_sympt8_2$symptom,levels=c("Fever", "Body Chills", "Body or Muscle Aches", "Weakness or Fatigue", "Confusion", "Trouble Sleeping", "New Loss of Taste or Smell", "Nasal Congestion", "Sore Throat", "Cough", "Shortness of Breath","Chest Tightness", "Stomach Pain", "Dirrhea", "Nausea", "Vomiting",  "Rashes or Other Skin Changes", "Conjunctivitis", "Other", "Multiple Symptoms", "Skipped this Question"))
 
 dt_cov8_2_summary <-  which_sympt8_2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -1743,7 +1381,7 @@ dt_cov8_2_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 
@@ -1796,9 +1434,9 @@ dt_COV19A= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05")& (D_694503437_
 which_symptA1= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_488415137==244354126 ~ "Never Experienced",
                                                       D_847578001_D_488415137==724612102 ~ "Currently Experiencing",
                                                       D_847578001_D_488415137==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 dt_COV19A1_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
 dt_COV19A1_summary %>%  gt::gt() %>%  
@@ -1807,16 +1445,16 @@ dt_COV19A1_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ######
 which_symptA2= dt_COV19A %>%  filter(d_764863765<as.Date("2023-07-05")) %>%  
                                        mutate(symptom= case_when(D_847578001_D_167695804==244354126 ~ "Never Experienced",
                                                       D_847578001_D_167695804==724612102 ~ "Currently Experiencing",
                                                       D_847578001_D_167695804==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
-which_symptA2$symptom <- factor(which_symptA2$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+which_symptA2$symptom <- factor(which_symptA2$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 dt_COV19A2_summary <- which_symptA2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
 dt_COV19A2_summary %>%  gt::gt() %>%  
@@ -1825,16 +1463,16 @@ dt_COV19A2_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ######
 which_symptA3= dt_COV19A %>% filter(d_764863765<as.Date("2023-07-05")) %>% 
   mutate(symptom= case_when(D_847578001_D_730334054==244354126 ~ "Never Experienced",
                                                       D_847578001_D_730334054==724612102 ~ "Currently Experiencing",
                                                       D_847578001_D_730334054==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
-which_symptA3$symptom <- factor(which_symptA3$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+which_symptA3$symptom <- factor(which_symptA3$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 dt_COV19A3_summary <- which_symptA3  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
 dt_COV19A3_summary %>%  gt::gt() %>%  
@@ -1843,16 +1481,16 @@ dt_COV19A3_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ######
 which_symptA4= dt_COV19A %>%  filter(d_764863765<as.Date("2023-07-05")) %>% 
 mutate(symptom= case_when(D_847578001_D_215996690==244354126 ~ "Never Experienced",
                                                       D_847578001_D_215996690==724612102 ~ "Currently Experiencing",
                                                       D_847578001_D_215996690==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
-which_symptA4$symptom <- factor(which_symptA4$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+which_symptA4$symptom <- factor(which_symptA4$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 dt_COV19A4_summary <- which_symptA4  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n,  percentage)
 
 dt_COV19A4_summary %>%  gt::gt() %>%  
@@ -1861,16 +1499,16 @@ dt_COV19A4_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ######
 which_symptA5= dt_COV19A %>%  filter(d_764863765<as.Date("2023-07-05")) %>% 
   mutate(symptom= case_when(D_847578001_D_462737492==244354126 ~ "Never Experienced",
                                                       D_847578001_D_462737492==724612102 ~ "Currently Experiencing",
                                                       D_847578001_D_462737492==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
-which_symptA5$symptom <- factor(which_symptA5$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+which_symptA5$symptom <- factor(which_symptA5$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 dt_COV19A5_summary <- which_symptA5  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
 dt_COV19A5_summary %>%  gt::gt() %>%  
@@ -1879,16 +1517,16 @@ dt_COV19A5_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ######
 which_symptA6= dt_COV19A %>%  filter(d_764863765<as.Date("2023-07-05")) %>% 
   mutate(symptom= case_when(D_847578001_D_469675296==244354126 ~ "Never Experienced",
                                                       D_847578001_D_469675296==724612102 ~ "Currently Experiencing",
                                                       D_847578001_D_469675296==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
 
-which_symptA6$symptom <- factor(which_symptA6$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+which_symptA6$symptom <- factor(which_symptA6$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 dt_COV19A6_summary <- which_symptA6  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
 dt_COV19A6_summary %>%  gt::gt() %>%  
@@ -1897,20 +1535,20 @@ dt_COV19A6_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 
 #GRID COVID19B
-dt_COV19B= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05") & (D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909"))
+dt_COV19B= COVID_tib %>% filter((D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909"))
 
 
 
 which_symptB1= dt_COV19B %>%  mutate(symptom= case_when(D_136730307_D_962475128==244354126 ~ "Never Experienced",
                                                       D_136730307_D_962475128==724612102 ~ "Currently Experiencing",
                                                       D_136730307_D_962475128==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
-which_symptB1$symptom <- factor(which_symptB1$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
+which_symptB1$symptom <- factor(which_symptB1$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19B1_summary <- which_symptB1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -1922,15 +1560,15 @@ dt_COV19B1_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ########
 which_symptB2= dt_COV19B %>% filter(d_764863765<as.Date("2023-07-05")) %>% 
   mutate(symptom= case_when(D_136730307_D_989576239==244354126 ~ "Never Experienced",
                                                       D_136730307_D_989576239==724612102 ~ "Currently Experiencing",
                                                       D_136730307_D_989576239==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
-which_symptB2$symptom <- factor(which_symptB2$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
+which_symptB2$symptom <- factor(which_symptB2$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19B2_summary <- which_symptB2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -1942,15 +1580,15 @@ dt_COV19B2_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ########
 which_symptB3= dt_COV19B %>% filter(d_764863765<as.Date("2023-07-05")) %>% 
   mutate(symptom= case_when(D_136730307_D_338613869==244354126 ~ "Never Experienced",
                                                       D_136730307_D_338613869==724612102 ~ "Currently Experiencing",
                                                       D_136730307_D_338613869==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
-which_symptB3$symptom <- factor(which_symptB3$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
+which_symptB3$symptom <- factor(which_symptB3$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19B3_summary <- which_symptB3  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom,n,  percentage)
 
@@ -1962,15 +1600,15 @@ dt_COV19B3_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 ########
 which_symptB4= dt_COV19B %>%  filter(d_764863765<as.Date("2023-07-05")) %>% 
   mutate(symptom= case_when(D_136730307_D_126794793==244354126 ~ "Never Experienced",
                                                       D_136730307_D_126794793==724612102 ~ "Currently Experiencing",
                                                       D_136730307_D_126794793==178780048 ~ "Previously Experienced",
-                                             TRUE   ~ "Skipped this question"))
-which_symptB4$symptom <- factor(which_symptB4$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
+which_symptB4$symptom <- factor(which_symptB4$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19B4_summary <- which_symptB4  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -1982,7 +1620,7 @@ dt_COV19B4_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 ########
@@ -1990,8 +1628,8 @@ which_symptB5= dt_COV19B %>% filter(d_764863765<as.Date("2023-07-05")) %>%
   mutate(symptom= case_when(D_136730307_D_218793117==244354126 ~ "Never Felt",
                                                       D_136730307_D_218793117==724612102 ~ "Currently Feeling",
                                                       D_136730307_D_218793117==178780048 ~ "Previously Feeling",
-                                             TRUE   ~ "Skipped this question"))
-which_symptB5$symptom <- factor(which_symptB5$symptom,levels=c("Never Felt", "Previously Feeling",  "Currently Feeling", "Skipped this question"))
+                                             TRUE   ~ "Skipped this Question"))
+which_symptB5$symptom <- factor(which_symptB5$symptom,levels=c("Never Felt", "Previously Feeling",  "Currently Feeling", "Skipped this Question"))
 
 dt_COV19B5_summary <- which_symptB5  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -2003,7 +1641,7 @@ dt_COV19B5_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 
@@ -2014,15 +1652,15 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 
 #GRID COVID19C
-dt_COV19C= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05") & (D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909"))
+dt_COV19C= COVID_tib %>% filter((D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909"))
 
 
 which_sympt1= dt_COV19C %>%  mutate(symptom= case_when(D_751358419_D_524096053==244354126 ~ "Never Felt",
                                                    D_751358419_D_524096053==724612102 ~ "Currently Feeling",
                                                    D_751358419_D_524096053==178780048 ~ "Previously Felt",
-                                                      TRUE   ~ "Skipped this question"))
+                                                      TRUE   ~ "Skipped this Question"))
 
-which_sympt1$symptom <- factor(which_sympt1$symptom,levels=c("Never Felt", "Previously Felt", "Currently Feeling", "Skipped this question"))
+which_sympt1$symptom <- factor(which_sympt1$symptom,levels=c("Never Felt", "Previously Felt", "Currently Feeling", "Skipped this Question"))
 
 dt_COV19C1_summary <- which_sympt1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -2032,7 +1670,7 @@ dt_COV19C1_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 ######
@@ -2041,9 +1679,9 @@ which_sympt2= dt_COV19C %>%  filter(d_764863765<as.Date("2023-07-05")) %>%
   mutate(symptom= case_when(D_751358419_D_814101706==244354126 ~ "Never Experienced",
                                                    D_751358419_D_814101706==724612102 ~ "Currently Experiencing",
                                                    D_751358419_D_814101706==178780048 ~ "Previously Experienced", 
-                                                      TRUE   ~ "Skipped this question"))
+                                                      TRUE   ~ "Skipped this Question"))
 
-which_sympt2$symptom <- factor(which_sympt2$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this question"))
+which_sympt2$symptom <- factor(which_sympt2$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19C2_summary <- which_sympt2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -2053,7 +1691,7 @@ dt_COV19C2_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 ######
@@ -2062,9 +1700,9 @@ which_sympt3= dt_COV19C %>%  filter(d_764863765<as.Date("2023-07-05")) %>%
   mutate(symptom= case_when(D_751358419_D_635026188==244354126 ~ "Never Experienced",
                                                        D_751358419_D_635026188==724612102 ~ "Currently Experiencing",
                                                        D_751358419_D_635026188==178780048 ~ "Previously Experienced", 
-                                                       TRUE   ~ "Skipped this question"))
+                                                       TRUE   ~ "Skipped this Question"))
 
-which_sympt3$symptom <- factor(which_sympt3$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this question"))
+which_sympt3$symptom <- factor(which_sympt3$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19C3_summary <- which_sympt3  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -2074,7 +1712,7 @@ dt_COV19C3_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 ######
@@ -2083,9 +1721,9 @@ which_sympt4= dt_COV19C %>% filter(d_764863765<as.Date("2023-07-05")) %>%
 mutate(symptom= case_when(D_751358419_D_238135048==244354126 ~ "Never Experienced",
                                                        D_751358419_D_238135048==724612102 ~ "Currently Experiencing",
                                                        D_751358419_D_238135048==178780048 ~ "Previously Experienced", 
-                                                       TRUE   ~ "Skipped this question"))
+                                                       TRUE   ~ "Skipped this Question"))
 
-which_sympt4$symptom <- factor(which_sympt4$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this question"))
+which_sympt4$symptom <- factor(which_sympt4$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19C4_summary <- which_sympt4  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -2095,7 +1733,7 @@ dt_COV19C4_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 ######
@@ -2104,9 +1742,9 @@ which_sympt5= dt_COV19C %>%  filter(d_764863765<as.Date("2023-07-05")) %>%
   mutate(symptom= case_when(D_751358419_D_632714520==244354126 ~ "Never Experienced",
                                                        D_751358419_D_632714520==724612102 ~ "Currently Experiencing",
                                                        D_751358419_D_632714520==178780048 ~ "Previously Experienced", 
-                                                       TRUE   ~ "Skipped this question"))
+                                                       TRUE   ~ "Skipped this Question"))
 
-which_sympt5$symptom <- factor(which_sympt5$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this question"))
+which_sympt5$symptom <- factor(which_sympt5$symptom,levels=c("Never Experienced", "Previously Experienced", "Currently Experiencing", "Skipped this Question"))
 
 dt_COV19C5_summary <- which_sympt5  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
@@ -2116,7 +1754,7 @@ dt_COV19C5_summary %>%  gt::gt() %>%
   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% 
 grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
 
 
 
@@ -2125,7 +1763,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 
 #COV19C6A
-dt_select2 <- BU_tib %>%  filter(d_764863765<as.Date("2023-07-05") & (D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909")) %>% 
+dt_select2 <- BU_tib %>%  filter((D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909")) %>% 
   select(Connect_ID, D_110872086_D_110872086) 
   gt2_yn <- dt_select2  %>% dplyr::group_by(D_110872086_D_110872086) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
     dplyr::mutate(answer=dplyr::recode(D_110872086_D_110872086, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
@@ -2144,65 +1782,82 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
     locations = cells_body(
       columns = answer,
     )
-  ) %>% opt_row_striping()
+  ) 
 
 
 #COV19C6B
 one_skip_funct(D_591826144, "Table 62: Still Experiencing the Other Symptoms Since COVID-19 Diagnosis", D_110872086_D_110872086, "707601969")
 
 
-#GRID 
+#GRID-- only see if you DID have covid 
 #COV20A1
+BU_tib$D_114280729_D_374567479 <- factor(BU_tib$D_114280729_D_374567479,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_374567479, "Table 63: Length of Time Lost of Taste or Smell Experienced", D_847578001_D_488415137, "724612102", D_847578001_D_488415137, "178780048")
 
 #COV20A2
+BU_tib$D_114280729_D_966214244 <- factor(BU_tib$D_114280729_D_966214244,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_966214244, "Table 64: Length of Time Feeling More Tired Experienced", D_847578001_D_730334054, "724612102", D_847578001_D_730334054, "178780048")
 
 #COV20A3
+BU_tib$D_114280729_D_109223043 <- factor(BU_tib$D_114280729_D_109223043,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_109223043, "Table 65: Length of Time Having Trouble Remembering Things", D_847578001_D_215996690, "724612102", D_847578001_D_215996690, "178780048")
 
 #COV20A4
+BU_tib$D_114280729_D_368669706 <- factor(BU_tib$D_114280729_D_368669706,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_368669706, "Table 66: Length of Time Having Trouble Paying Attention", D_847578001_D_462737492, "724612102", D_847578001_D_462737492, "178780048")
 
 #COV20A5
+BU_tib$D_114280729_D_605818246 <- factor(BU_tib$D_114280729_D_605818246,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_605818246, "Table 67: Length of Time Having Trouble Thinking or Making Decisions", D_847578001_D_469675296, "724612102", D_847578001_D_469675296, "178780048")
 
 #COV20A6
+BU_tib$D_114280729_D_790860504 <- factor(BU_tib$D_114280729_D_790860504,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_790860504, "Table 68: Length of Time Appetite Changes Experienced", D_847578001_D_167695804, "724612102", D_847578001_D_167695804, "178780048")
 
 #COV20A7
+BU_tib$D_114280729_D_336856410 <- factor(BU_tib$D_114280729_D_336856410,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_336856410, "Table 69: Length of Time Feeling of Lightheadedness or Dizziness Experienced", D_751358419_D_524096053, "724612102", D_751358419_D_524096053, "178780048")
 
 #COV20A8
+BU_tib$D_114280729_D_518602598 <- factor(BU_tib$D_114280729_D_518602598,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_518602598, "Table 70: Length of Time Periods of Racing Heart Rate Experienced", D_751358419_D_814101706, "724612102", D_751358419_D_814101706, "178780048")
 
 #COV20A9
+BU_tib$D_114280729_D_770190369 <- factor(BU_tib$D_114280729_D_770190369,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_770190369, "Table 71: Length of Time Shortness of Breath Experienced", D_136730307_D_962475128, "724612102", D_136730307_D_962475128, "178780048")
 
 #COV20A10
+BU_tib$D_114280729_D_994153376 <- factor(BU_tib$D_114280729_D_994153376,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_994153376, "Table 72: Length of Time Inability to Exercise at Usual Level Experienced", D_136730307_D_989576239, "724612102", D_136730307_D_989576239, "178780048")
 
 #COV20A11
+BU_tib$D_114280729_D_481587023 <- factor(BU_tib$D_114280729_D_481587023,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_481587023, "Table 73: Length of Time Inability to Return to Work or School Experienced", D_136730307_D_338613869, "724612102", D_136730307_D_338613869, "178780048")
 
 #COV20A12
+BU_tib$D_114280729_D_590361055 <- factor(BU_tib$D_114280729_D_590361055,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_590361055, "Table 74: Length of Time Inability to Return to Work or School Experienced", D_136730307_D_126794793, "724612102", D_136730307_D_126794793, "178780048")
 
 #COV20A13
+BU_tib$D_114280729_D_108389123 <- factor(BU_tib$D_114280729_D_108389123,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_108389123, "Table 75: Length of Time Feeling Weak, Tired, or Sick after Physical Exercise Experienced", D_136730307_D_218793117, "724612102", D_136730307_D_218793117, "178780048")
 
 #COV20A14
+BU_tib$D_114280729_D_747085418 <- factor(BU_tib$D_114280729_D_747085418,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_747085418, "Table 76: Length of Time Trouble Sleeping Experienced", D_751358419_D_635026188, "724612102", D_751358419_D_635026188, "178780048")
 
 #COV20A15
+BU_tib$D_114280729_D_702905707 <- factor(BU_tib$D_114280729_D_702905707,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_702905707, "Table 77: Length of Time Changes in Mood and Emotions Experienced", D_751358419_D_238135048, "724612102", D_751358419_D_238135048, "178780048")
 
 #COV20A16
+BU_tib$D_114280729_D_986119909 <- factor(BU_tib$D_114280729_D_986119909,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 two_skip_funct(D_114280729_D_986119909, "Table 78: Length of Time Muscle Aches Experienced", D_751358419_D_632714520, "724612102", D_751358419_D_632714520, "178780048")
 
-
 #COV20A17
+BU_tib$D_934384452 <- factor(BU_tib$D_934384452,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 one_skip_funct(D_934384452, "Table 79: Length of Time Other Symptom Experienced", D_110872086_D_110872086, "707601969")
+
 
 #COV21
 one_skip_funct(D_273371161, "Table 80: Feel Like You Have Fully Recovered from COVID-19", D_110872086_D_110872086, "707601969")
@@ -2217,9 +1872,9 @@ grid.arrange(COV22_Months, COV22_Days, nrow=2)
    which_COV23A1= BU_tib %>%  filter( (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_813989715_D_874168085==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_874168085==931688701 ~ "Yes, I am experiencing this now",
-                                              D_813989715_D_874168085==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_813989715_D_874168085==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23A1$answer <- factor(which_COV23A1$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23A1$answer <- factor(which_COV23A1$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23A1_summary <- which_COV23A1 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2239,7 +1894,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 
 #COV23A2
@@ -2247,9 +1902,9 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 which_COV23A2= BU_tib %>%  filter( (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_813989715_D_283112988==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_283112988==931688701 ~ "Yes, I am experiencing this now",
-                                              D_813989715_D_283112988==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_813989715_D_283112988==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23A2$answer <- factor(which_COV23A2$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23A2$answer <- factor(which_COV23A2$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23A2_summary <- which_COV23A2 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2269,16 +1924,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23A3
 
 which_COV23A3= BU_tib %>%  filter( (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_813989715_D_580629349==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_580629349==931688701 ~ "Yes, I am experiencing this now",
-                                              D_813989715_D_580629349==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_813989715_D_580629349==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23A3$answer <- factor(which_COV23A3$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23A3$answer <- factor(which_COV23A3$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23A3_summary <- which_COV23A3 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2298,16 +1953,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23A4
    
 which_COV23A4= BU_tib %>%  filter( (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_813989715_D_151327643==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_151327643==931688701 ~ "Yes, I am experiencing this now",
-                                              D_813989715_D_151327643==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_813989715_D_151327643==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23A4$answer <- factor(which_COV23A4$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23A4$answer <- factor(which_COV23A4$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23A4_summary <- which_COV23A4 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2327,16 +1982,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23A5
    
 which_COV23A5= BU_tib %>%  filter( (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_813989715_D_440872808==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_440872808==931688701 ~ "Yes, I am experiencing this now",
-                                              D_813989715_D_440872808==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_813989715_D_440872808==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23A5$answer <- factor(which_COV23A5$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23A5$answer <- factor(which_COV23A5$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23A5_summary <- which_COV23A5 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2356,16 +2011,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23A6
    
 which_COV23A6= BU_tib %>%  filter( (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_813989715_D_874223830==770236544 ~ "No, I never experienced this",
                                               D_813989715_D_874223830==931688701 ~ "Yes, I am experiencing this now",
-                                              D_813989715_D_874223830==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_813989715_D_874223830==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23A6$answer <- factor(which_COV23A6$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23A6$answer <- factor(which_COV23A6$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23A6_summary <- which_COV23A6 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2385,7 +2040,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 
 
@@ -2395,9 +2050,9 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 which_COV23B1= BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_857165713_D_847529903==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_847529903==931688701 ~ "Yes, I am experiencing this now",
-                                              D_857165713_D_847529903==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_857165713_D_847529903==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23B1$answer <- factor(which_COV23B1$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23B1$answer <- factor(which_COV23B1$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23B1_summary <- which_COV23B1 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2417,16 +2072,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23B2
    
 which_COV23B2= BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_857165713_D_219358831==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_219358831==931688701 ~ "Yes, I am experiencing this now",
-                                              D_857165713_D_219358831==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_857165713_D_219358831==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23B2$answer <- factor(which_COV23B2$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23B2$answer <- factor(which_COV23B2$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23B2_summary <- which_COV23B2 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2446,16 +2101,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23B3
    
 which_COV23B3= BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_857165713_D_636367178==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_636367178==931688701 ~ "Yes, I am experiencing this now",
-                                              D_857165713_D_636367178==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_857165713_D_636367178==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23B3$answer <- factor(which_COV23B3$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23B3$answer <- factor(which_COV23B3$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23B3_summary <- which_COV23B3 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2475,16 +2130,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23B4
    
 which_COV23B4= BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_857165713_D_243443780==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_243443780==931688701 ~ "Yes, I am experiencing this now",
-                                              D_857165713_D_243443780==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_857165713_D_243443780==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23B4$answer <- factor(which_COV23B4$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23B4$answer <- factor(which_COV23B4$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23B4_summary <- which_COV23B4 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2504,16 +2159,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23B5
    
 which_COV23B5= BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_857165713_D_357462273==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_357462273==931688701 ~ "Yes, I am experiencing this now",
-                                              D_857165713_D_357462273==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_857165713_D_357462273==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23B5$answer <- factor(which_COV23B5$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23B5$answer <- factor(which_COV23B5$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23B5_summary <- which_COV23B5 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2533,16 +2188,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23B6
    
 which_COV23B6= BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_857165713_D_638380747==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_638380747==931688701 ~ "Yes, I am experiencing this now",
-                                              D_857165713_D_638380747==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_857165713_D_638380747==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23B6$answer <- factor(which_COV23B6$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23B6$answer <- factor(which_COV23B6$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23B6_summary <- which_COV23B6 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2562,16 +2217,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 #COV23B7
    
 which_COV23B7= BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& (D_494226443!="353358909" | D_498462481_1_1=="104430631"| D_694503437_1_1=="104430631")) %>%  
                      mutate(answer= case_when(D_857165713_D_187399900==770236544 ~ "No, I never experienced this",
                                               D_857165713_D_187399900==931688701 ~ "Yes, I am experiencing this now",
-                                              D_857165713_D_187399900==586272115 ~ "Yes, in the past, but I am not experiencing it now",
+                                              D_857165713_D_187399900==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
- which_COV23B7$answer <- factor(which_COV23B7$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, in the past, but I am not experiencing it now", "Skipped this Question"))
+ which_COV23B7$answer <- factor(which_COV23B7$answer, levels= c("No, I never experienced this", "Yes, I am experiencing this now", "Yes, I experienced this in the past", "Skipped this Question"))
  
  
  dt_COV23B7_summary <- which_COV23B7 %>% dplyr::group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
@@ -2591,14 +2246,13 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
      locations = cells_body(
        columns = answer,
      )
-   ) %>% opt_row_striping()
+   ) 
 
 
 
 
-#COV23B8A
-#gt_functBU(D_424718457_D_424718457, "Experienced any Other Symptom Since 2020")
-BU %>%  select(D_424718457_D_157417942) %>% filter(BU_tib$d_764863765<as.Date("2023-07-05")& !is.na(D_424718457_D_157417942)) %>% gt() %>% cols_label(D_424718457_D_157417942= md("**Table 94: Experienced What Other Symptom Since 2020**"))
+#COV23B8A-- too many open ended answers. Excluding from the report 
+#BU %>%  select(D_424718457_D_157417942) %>% filter(BU_tib$d_764863765<as.Date("2023-07-05")& !is.na(D_424718457_D_157417942)) %>% gt() %>% cols_label(D_424718457_D_157417942= md("**Table 94: Experienced What Other Symptom Since 2020**"))
 
 
 
@@ -2606,359 +2260,89 @@ BU %>%  select(D_424718457_D_157417942) %>% filter(BU_tib$d_764863765<as.Date("2
 one_skip_funct(D_368715875, "Table 95: Still Experiencing Said Other Symptom", D_424718457_D_424718457, "707601969")
 
 
-#GRID #all correct
+#GRID--- only see if you did NOT have covid 
 #COV24A1
-##two_skip_funct(D_749956170_D_527872064 , "Table 96: Length of Time Experiencing Loss of Taste or Smell", D_813989715_D_874168085,"931688701",D_813989715_D_874168085,"586272115")
-dt_COV24A1= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05")& (D_813989715_D_874168085=="931688701" | D_813989715_D_874168085=="586272115"))
+BU_tib$D_749956170_D_527872064 <- factor(BU_tib$D_749956170_D_527872064,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_527872064 , "Table 96: Length of Time Experiencing Loss of Taste or Smell", D_813989715_D_874168085,"931688701",D_813989715_D_874168085,"586272115")
 
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_527872064==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_527872064==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_527872064==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 96: Length of Time Experiencing Loss of Taste or Smell")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
 
 
 #COV24A2
-##two_skip_funct(D_749956170_D_691752394 , "Table 97: Length of Time Experiencing Appetite Changes", D_813989715_D_283112988,"931688701",D_813989715_D_283112988,"586272115")
-dt_COV24A1= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05") & (D_813989715_D_283112988=="931688701" | D_813989715_D_283112988=="586272115"))
+BU_tib$D_749956170_D_691752394 <- factor(BU_tib$D_749956170_D_691752394,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_691752394 , "Table 97: Length of Time Experiencing Appetite Changes", D_813989715_D_283112988,"931688701",D_813989715_D_283112988,"586272115")
 
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_691752394==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_691752394==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_691752394==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 97: Length of Time Experiencing Appetite Changes")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
 
 #COV24A3
-##two_skip_funct(D_749956170_D_143206081 , "Table 98: Length of Time Feeling More Tired Than Usual", D_813989715_D_580629349,"931688701",D_813989715_D_580629349,"586272115")
-dt_COV24A1= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05")& (D_813989715_D_580629349=="931688701" | D_813989715_D_580629349=="586272115"))
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_143206081==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_143206081==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_143206081==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 98: Length of Time Feeling More Tired Than Usual")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_143206081 <- factor(BU_tib$D_749956170_D_143206081,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_143206081 , "Table 98: Length of Time Feeling More Tired Than Usual", D_813989715_D_580629349,"931688701",D_813989715_D_580629349,"586272115")
 
 
 #COV24A4
-##two_skip_funct(D_749956170_D_431203595 , "Table 99: Length of Time Having Trouble Remembering Things", D_813989715_D_151327643,"931688701",D_813989715_D_151327643,"586272115")
-dt_COV24A1= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05") & (D_813989715_D_151327643=="931688701" | D_813989715_D_151327643=="586272115"))
+BU_tib$D_749956170_D_431203595 <- factor(BU_tib$D_749956170_D_431203595,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_431203595 , "Table 99: Length of Time Having Trouble Remembering Things", D_813989715_D_151327643,"931688701",D_813989715_D_151327643,"586272115")
 
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_431203595==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_431203595==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_431203595==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 99: Length of Time Having Trouble Remembering Things")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
 
 
 #COV24A5
-##two_skip_funct(D_749956170_D_516899143 , "Table 100: Length of Time Having Trouble Paying Attention", D_813989715_D_440872808,"931688701",D_813989715_D_440872808,"586272115")
-dt_COV24A1= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05")& (D_813989715_D_440872808=="931688701" | D_813989715_D_440872808=="586272115"))
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_516899143==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_516899143==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_516899143==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 100: Length of Time Having Trouble Paying Attention")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_516899143 <- factor(BU_tib$D_749956170_D_516899143,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_516899143 , "Table 100: Length of Time Having Trouble Paying Attention", D_813989715_D_440872808,"931688701",D_813989715_D_440872808,"586272115")
 
 
 #COV24A6
-##two_skip_funct(D_749956170_D_223008071 , "Table 101: Length of Time Having Trouble Thinking or Making Decision", D_813989715_D_874223830,"931688701",D_813989715_D_874223830,"586272115")
-dt_COV24A1= COVID_tib %>% filter(d_764863765<as.Date("2023-07-05") & (D_813989715_D_874223830=="931688701" | D_813989715_D_874223830=="586272115"))
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_223008071==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_223008071==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_223008071==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 101: Length of Time Having Trouble Thinking or Making Decision")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_223008071 <- factor(BU_tib$D_749956170_D_223008071,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_223008071 , "Table 101: Length of Time Having Trouble Thinking or Making Decision", D_813989715_D_874223830,"931688701",D_813989715_D_874223830,"586272115")
 
 
 #COV24A7
-##two_skip_funct(D_749956170_D_599862694 , "Table 102: Length of Time Experiencing Feeling Lightheaded and Dizzy", D_857165713_D_847529903,"931688701",D_857165713_D_847529903,"586272115")
-dt_COV24A1= COVID_tib %>% filter(D_857165713_D_847529903=="931688701" | D_857165713_D_847529903=="586272115")
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_599862694==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_599862694==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_599862694==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 102: Length of Time Experiencing Feeling Lightheaded and Dizzy")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_599862694 <- factor(BU_tib$D_749956170_D_599862694,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_599862694 , "Table 102: Length of Time Experiencing Feeling Lightheaded and Dizzy", D_857165713_D_847529903,"931688701",D_857165713_D_847529903,"586272115")
 
 
 #COV24A8
-##two_skip_funct(D_749956170_D_860444009 , "Table 103: Length of Time Experiencing Periods of Racing Heart Rate", D_857165713_D_219358831,"931688701",D_857165713_D_219358831,"586272115")
-dt_COV24A1= COVID_tib %>% filter(D_857165713_D_219358831=="931688701" | D_857165713_D_219358831=="586272115")
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_860444009==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_860444009==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_860444009==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 103: Length of Time Experiencing Periods of Racing Heart Rate")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_860444009 <- factor(BU_tib$D_749956170_D_860444009,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_860444009 , "Table 103: Length of Time Experiencing Periods of Racing Heart Rate", D_857165713_D_219358831,"931688701",D_857165713_D_219358831,"586272115")
 
 
 #COV24A9
-##two_skip_funct(D_749956170_D_246857412 , "Table 104: Length of Time Experiencing Shortness of Breath", D_857165713_D_636367178,"931688701",D_857165713_D_636367178,"586272115")
-dt_COV24A1= COVID_tib %>% filter(D_857165713_D_636367178=="931688701" | D_857165713_D_636367178=="586272115")
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_246857412==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_246857412==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_246857412==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 104: Length of Time Experiencing Shortness of Breath")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_246857412 <- factor(BU_tib$D_749956170_D_246857412,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_246857412 , "Table 104: Length of Time Experiencing Shortness of Breath", D_857165713_D_636367178,"931688701",D_857165713_D_636367178,"586272115")
 
 
 #COV24A10
-##two_skip_funct(D_749956170_D_144819886 , "Table 105: Length of Time Experiencing Feeling Weak, Tired or Sick after Physical Activity", D_857165713_D_243443780,"931688701",D_857165713_D_243443780,"586272115")
-dt_COV24A1= COVID_tib %>% filter(D_857165713_D_243443780=="931688701" | D_857165713_D_243443780=="586272115")
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_144819886==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_144819886==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_144819886==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 105: Length of Time Experiencing Feeling Weak, Tired or Sick after Physical Activity")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_144819886 <- factor(BU_tib$D_749956170_D_144819886,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_144819886 , "Table 105: Length of Time Experiencing Feeling Weak, Tired or Sick after Physical Activity", D_857165713_D_243443780,"931688701",D_857165713_D_243443780,"586272115")
 
 
 #COV24A11
-##two_skip_funct(D_749956170_D_304155106 , "Table 106: Length of Time Having Trouble Sleeping", D_857165713_D_357462273,"931688701",D_857165713_D_357462273,"586272115")
-dt_COV24A1= COVID_tib %>% filter(D_857165713_D_357462273=="931688701" | D_857165713_D_357462273=="586272115")
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_304155106==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_304155106==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_304155106==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 106: Length of Time Having Trouble Sleeping")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
+BU_tib$D_749956170_D_304155106 <- factor(BU_tib$D_749956170_D_304155106,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_304155106 , "Table 106: Length of Time Having Trouble Sleeping", D_857165713_D_357462273,"931688701",D_857165713_D_357462273,"586272115")
 
 
 #COV24A12
-##two_skip_funct(D_749956170_D_830581863 , "Table 107: Length of Time Experiencing Changes in your Mood or Emotions", D_857165713_D_638380747,"931688701",D_857165713_D_638380747,"586272115")
-dt_COV24A1= COVID_tib %>% filter(D_857165713_D_638380747=="931688701" | D_857165713_D_638380747=="586272115")
+BU_tib$D_749956170_D_830581863 <- factor(BU_tib$D_749956170_D_830581863,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_830581863 , "Table 107: Length of Time Experiencing Changes in your Mood or Emotions", D_857165713_D_638380747,"931688701",D_857165713_D_638380747,"586272115")
 
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_830581863==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_830581863==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_830581863==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 107: Length of Time Experiencing Changes in your Mood or Emotions")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
 
 
 #COV24A13
-##two_skip_funct(D_749956170_D_463689026 , "Table 108: Length of Time Experiencing Muscle Aches", D_857165713_D_187399900,"931688701",D_857165713_D_187399900,"586272115")
-dt_COV24A1= COVID_tib %>% filter(D_857165713_D_187399900=="931688701" | D_857165713_D_187399900=="586272115")
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_749956170_D_463689026==232063618 ~ "Less than 1 month",
-                                                      D_749956170_D_463689026==948148236 ~ "Between 1 and 3 months",
-                                                      D_749956170_D_463689026==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 108: Length of Time Experiencing Muscle Aches")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
-
-
-
-#COV24A14
-##one_skip_funct(D_589004291, "Table 109: Length of Time Experiencing Other Symptom", D_424718457_D_424718457, "707601969")
-dt_COV24A1= COVID_tib %>% filter(D_424718457_D_424718457=="707601969")
-
-
-
-which_symptA1= dt_COV24A1 %>%  mutate(symptom= case_when(D_589004291==232063618 ~ "Less than 1 month",
-                                                      D_589004291==948148236 ~ "Between 1 and 3 months",
-                                                      D_589004291==692824372 ~ "More than 3 months",
-                                             TRUE   ~ "Skipped this question"))
-
-which_symptA1$symptom <- factor(which_symptA1$symptom,levels=c("Less than 1 month", "Between 1 and 3 months",  "More than 3 months", "Skipped this question"))
-dt_COV24A11_summary <- which_symptA1  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
-
-dt_COV24A11_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 109: Length of Time Experiencing Other Symptom")) %>% 
-  cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping()
-
+BU_tib$D_749956170_D_463689026 <- factor(BU_tib$D_749956170_D_463689026,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
+two_skip_funct(D_749956170_D_463689026 , "Table 108: Length of Time Experiencing Muscle Aches", D_857165713_D_187399900,"931688701",D_857165713_D_187399900,"586272115")
 
 
 
 
 #COV24A14
+BU_tib$D_589004291 <- factor(BU_tib$D_589004291,levels=c(232063618, 948148236,  692824372, "Skipped this Question"))
 one_skip_funct(D_589004291, "Table 109: Length of Time Experiencing Other Symptom", D_424718457_D_424718457, "707601969")
+
 
 
 #COV25     
    
-#COV25 V2   
-   COV25 <- BU_tib  %>%  
-  select(Connect_ID, D_890156588_V2) %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05"))
-gt2_yn <- COV25  %>% dplyr::group_by(D_890156588_V2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
-     dplyr::mutate(answer=dplyr::recode(D_890156588_V2, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-   gt2_yn %>%  gt::gt()  %>%  
-   fmt_number(columns = "percentage", decimals = 1) %>% 
-   tab_header(title = md("Table 110: Received COVID-19 Vaccination test 1")) %>% 
-   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-   tab_options(
-       stub.font.weight = "bold"
-     ) %>%
-   tab_style(
-     style = list(
-       cell_text(weight = "bold")
-     ),
-     locations = cells_body(
-       columns = answer,
-     )
-   ) %>% opt_row_striping()
+#COV25 V2  
+BU_tib$D_890156588_V2 <- factor(BU_tib$D_890156588_V2,levels=c(104430631, 353358909, 178420302,"Skipped this Question"))
+gt_functBU(D_890156588_V2, "Table 110: Received COVID-19 Vaccination test 1")
+
 
    
 
@@ -3032,122 +2416,21 @@ p5 + scale_x_date(date_labels = "%b %Y")
 
 
 #COV28
+BU_tib$D_220055064_1_1_D_220055064_1_1 <- factor(BU_tib$D_220055064_1_1_D_220055064_1_1,levels=c(661871565,657978450, 411943417, 113838601, 807835037, 178420302,"Skipped this Question"))
+one_skip_funct(D_220055064_1_1_D_220055064_1_1, "COV28_1_1: Brand of First COVID-19 Vaccine", D_890156588_V2, "353358909")
 
-#one_skip_funct(D_220055064_1_1_D_220055064_1_1, "COV28_1_1: Brand of First COVID-19 Vaccine", D_890156588, "353358909")
+BU_tib$D_220055064_2_2_D_220055064_2_2 <- factor(BU_tib$D_220055064_2_2_D_220055064_2_2,levels=c(661871565,657978450, 411943417, 113838601, 807835037, 178420302,"Skipped this Question"))
+one_skip_funct(D_220055064_2_2_D_220055064_2_2, "COV28_2_2: Brand of Second COVID-19 Vaccine", D_890156588_V2, "353358909")
 
-COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D_877074400_V2>=1) %>%  #BU_tib$D_890156588=="353358909" & 
-  select(Connect_ID, D_220055064_1_1_D_220055064_1_1) 
-   cov28_1_yn <- COV28_1  %>% dplyr::group_by(D_220055064_1_1_D_220055064_1_1) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
-     dplyr::mutate(answer=dplyr::recode(D_220055064_1_1_D_220055064_1_1, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-   cov28_1_yn %>%  gt::gt()  %>%  
-   fmt_number(columns = "percentage", decimals = 1) %>% 
-   tab_header(title = md("Table 112: Brand of First COVID-19 Vaccine")) %>% 
-   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-   tab_options(
-       stub.font.weight = "bold"
-     ) %>%
-   tab_style(
-     style = list(
-       cell_text(weight = "bold")
-     ),
-     locations = cells_body(
-       columns = answer,
-     )
-   ) %>% opt_row_striping()
+BU_tib$D_220055064_3_3_D_220055064_3_3 <- factor(BU_tib$D_220055064_3_3_D_220055064_3_3,levels=c(661871565,657978450, 411943417, 113838601, 807835037, 178420302,"Skipped this Question"))   
+one_skip_funct(D_220055064_3_3_D_220055064_3_3, "COV28_3_3: Brand of Third COVID-19 Vaccine", D_890156588_V2, "353358909")
 
+BU_tib$D_220055064_4_4_D_220055064_4_4 <- factor(BU_tib$D_220055064_4_4_D_220055064_4_4,levels=c(661871565,657978450, 411943417, 113838601, 807835037, 178420302,"Skipped this Question"))   
+one_skip_funct(D_220055064_4_4_D_220055064_4_4, "COV28_4_4: Brand of Fourth COVID-19 Vaccine", D_890156588_V2, "353358909")
 
-#one_skip_funct(D_220055064_2_2_D_220055064_2_2, "COV28_2_2: Brand of Second COVID-19 Vaccine", D_890156588, "353358909")
-   COV28_2 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D_877074400_V2>=2) %>%  
-  select(Connect_ID, D_220055064_2_2_D_220055064_2_2) 
-   cov28_2_yn <- COV28_2  %>% dplyr::group_by(D_220055064_2_2_D_220055064_2_2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
-     dplyr::mutate(answer=dplyr::recode(D_220055064_2_2_D_220055064_2_2, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-   cov28_2_yn %>%  gt::gt()  %>%  
-   fmt_number(columns = "percentage", decimals = 1) %>% 
-   tab_header(title = md("Table 113: Brand of Second COVID-19 Vaccine")) %>% 
-   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-   tab_options(
-       stub.font.weight = "bold"
-     ) %>%
-   tab_style(
-     style = list(
-       cell_text(weight = "bold")
-     ),
-     locations = cells_body(
-       columns = answer,
-     )
-   ) %>% opt_row_striping()
-   
-   
-#one_skip_funct(D_220055064_3_3_D_220055064_3_3, "COV28_3_3: Brand of Third COVID-19 Vaccine", D_890156588, "353358909")
-      COV28_3 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D_877074400_V2>=3) %>%  
-  select(Connect_ID, D_220055064_3_3_D_220055064_3_3) 
-   cov28_3_yn <- COV28_3  %>% dplyr::group_by(D_220055064_3_3_D_220055064_3_3) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
-     dplyr::mutate(answer=dplyr::recode(D_220055064_3_3_D_220055064_3_3, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-   cov28_3_yn %>%  gt::gt()  %>%  
-   fmt_number(columns = "percentage", decimals = 1) %>% 
-   tab_header(title = md("Table 114: Brand of Third COVID-19 Vaccine")) %>% 
-   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-   tab_options(
-       stub.font.weight = "bold"
-     ) %>%
-   tab_style(
-     style = list(
-       cell_text(weight = "bold")
-     ),
-     locations = cells_body(
-       columns = answer,
-     )
-   ) %>% opt_row_striping()
-   
-   
-#one_skip_funct(D_220055064_4_4_D_220055064_4_4, "COV28_4_4: Brand of Fourth COVID-19 Vaccine", D_890156588, "353358909")
-      COV28_4 <- BU_tib %>%  filter( BU_tib$D_877074400_V2>=4) %>%  
-  select(Connect_ID, D_220055064_4_4_D_220055064_4_4) 
-   cov28_4_yn <- COV28_4  %>% dplyr::group_by(D_220055064_4_4_D_220055064_4_4) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
-     dplyr::mutate(answer=dplyr::recode(D_220055064_4_4_D_220055064_4_4, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-   cov28_4_yn %>%  gt::gt()  %>%  
-   fmt_number(columns = "percentage", decimals = 1) %>% 
-   tab_header(title = md("Table 115: Brand of Fourth COVID-19 Vaccine")) %>% 
-   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-   tab_options(
-       stub.font.weight = "bold"
-     ) %>%
-   tab_style(
-     style = list(
-       cell_text(weight = "bold")
-     ),
-     locations = cells_body(
-       columns = answer,
-     )
-   ) %>% opt_row_striping()
-   
-   
-#one_skip_funct(D_220055064_5_5_D_220055064_5_5, "COV28_5_5: Brand of Fifth COVID-19 Vaccine", D_890156588, "353358909")
-      COV28_5 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D_877074400_V2>=5) %>%  
-  select(Connect_ID, D_220055064_5_5_D_220055064_5_5) 
-   cov28_5_yn <- COV28_5  %>% dplyr::group_by(D_220055064_5_5_D_220055064_5_5) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% 
-     dplyr::mutate(answer=dplyr::recode(D_220055064_5_5_D_220055064_5_5, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-   cov28_5_yn %>%  gt::gt()  %>%  
-   fmt_number(columns = "percentage", decimals = 1) %>% 
-   tab_header(title = md("Table 116: Brand of Fifth COVID-19 Vaccine")) %>% 
-   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
-   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-   tab_options(
-       stub.font.weight = "bold"
-     ) %>%
-   tab_style(
-     style = list(
-       cell_text(weight = "bold")
-     ),
-     locations = cells_body(
-       columns = answer,
-     )
-   ) %>% opt_row_striping()
-   
+BU_tib$D_220055064_5_5_D_220055064_5_5 <- factor(BU_tib$D_220055064_5_5_D_220055064_5_5,levels=c(661871565,657978450, 411943417, 113838601, 807835037, 178420302,"Skipped this Question"))   
+one_skip_funct(D_220055064_5_5_D_220055064_5_5, "COV28_5_5: Brand of Fifth COVID-19 Vaccine", D_890156588_V2, "353358909")
+
 
 ```
 
@@ -3208,8 +2491,8 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!-- cat("Blood Urine Survey Completed:", dim(BU)[[1]]) -->
 <!-- #dim(BU) -->
 
-<!-- BUM_tib <- as_tibble(BUM) -->
-<!-- #dim(BUM_tib) -->
+<!-- BU_tib <- as_tibble(BUM) -->
+<!-- #dim(BU_tib) -->
 
 <!-- knitr::opts_chunk$set(comment = NA) -->
 
@@ -3235,7 +2518,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 
 <!-- gt_functBUM <- function(CID, Title){   -->
 <!--   CID_SYM <- rlang::ensym(CID) -->
-<!--   dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) -->
+<!--   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) -->
 <!--   gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage) -->
 
 
@@ -3255,7 +2538,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!--     locations = cells_body( -->
 <!--       columns = answer, -->
 <!--     ) -->
-<!--   ) %>% opt_row_striping() -->
+<!--   )  -->
 <!-- } -->
 
 
@@ -3269,13 +2552,13 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 
 
 
-<!-- BUM_sympt= BUM_tib %>%  mutate(symptom= case_when(D_470484596_D_756774083==1 ~ "Cough", -->
+<!-- BUM_sympt= BU_tib %>%  mutate(symptom= case_when(D_470484596_D_756774083==1 ~ "Cough", -->
 <!--                                              D_470484596_D_235386560==1 ~ "Diarrhea", -->
 <!--                                              D_470484596_D_955154600==1 ~ "Nasal Congestion", -->
 <!--                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
 <!--                                              D_470484596_D_406943303==1 ~ "Fever", -->
 <!--                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!--                                              TRUE   ~ "Skipped this question")) -->
+<!--                                              TRUE   ~ "Skipped this Question")) -->
 <!-- dt_SYMPTDAY_summary <- BUM_sympt %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
 <!-- #dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
 <!-- #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
@@ -3287,7 +2570,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!--   #summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
 <!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
 <!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping() -->
+<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
 
 
 <!-- # dt_SYMPTDAY= BU_tib %>%  mutate(freq=rep(1, dim(BU_tib)[[1]]))   -->
@@ -3301,7 +2584,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!-- #                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
 <!-- #                                              D_470484596_D_406943303==1 ~ "Fever", -->
 <!-- #                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!-- #                                              TRUE   ~ "Skipped this question")) -->
+<!-- #                                              TRUE   ~ "Skipped this Question")) -->
 <!-- #  -->
 <!-- # dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE)  -->
 <!-- # gtm3_print <- gt(dt_SYMPTDAY_summary) -->
@@ -3312,7 +2595,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!-- #   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>%  -->
 <!-- #   summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
 <!-- #   tab_options(stub.font.weight = "bold") %>% -->
-<!-- #   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping() -->
+<!-- #   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
 
 
 
@@ -3330,7 +2613,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!-- #                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
 <!-- #                                              D_470484596_D_406943303==1 ~ "Fever", -->
 <!-- #                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!-- #                                              TRUE   ~ "Skipped this question")) -->
+<!-- #                                              TRUE   ~ "Skipped this Question")) -->
 <!-- # #dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
 <!-- # dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
 <!-- # #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
@@ -3342,7 +2625,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!-- #   summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
 <!-- #   #grand_summary_rows(columns=c( percentage),fns = ~sum(.,na.rm = T))|> -->
 <!-- #   tab_options(stub.font.weight = "bold") %>% -->
-<!-- #   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping() -->
+<!-- #   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
 
 
 <!-- BU_sympt= BU_tib %>%  mutate(symptom= case_when(D_470484596_D_756774083==1 ~ "Cough", -->
@@ -3351,7 +2634,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!--                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
 <!--                                              D_470484596_D_406943303==1 ~ "Fever", -->
 <!--                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!--                                              TRUE   ~ "Skipped this question")) -->
+<!--                                              TRUE   ~ "Skipped this Question")) -->
 
 <!-- dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
 
@@ -3361,16 +2644,16 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>%  -->
 <!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
 <!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping() -->
+<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
 
 
 
 
 
 
-<!-- BUM_sg= BUM_sympt %>% dplyr::mutate(skip_symp=ifelse(symptom=="Skipped this question", 1, 0 ))  -->
+<!-- BUM_sg= BUM_sympt %>% dplyr::mutate(skip_symp=ifelse(symptom=="Skipped this Question", 1, 0 ))  -->
 
-<!-- BU_sg= BU_sympt %>% dplyr::mutate(skip_symp=ifelse(symptom=="Skipped this question", 1, 0 ))  -->
+<!-- BU_sg= BU_sympt %>% dplyr::mutate(skip_symp=ifelse(symptom=="Skipped this Question", 1, 0 ))  -->
 
 
 
@@ -3394,11 +2677,11 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!-- #gt_functBU(D_867307558, "Clinical Survey EATDRINKBEFORE: When Last Food or Beverage Consumed") -->
 
 
-<!-- BUM_sympt1 <- BUM_tib %>% dplyr::mutate(symptom= case_when(D_867307558==110092955 ~ "The same day", -->
+<!-- BUM_sympt1 <- BU_tib %>% dplyr::mutate(symptom= case_when(D_867307558==110092955 ~ "The same day", -->
 <!--                                              D_867307558==952212668 ~ "The day before", -->
 <!--                                              D_867307558==330461666 ~ "More than a day before", -->
-<!--                                              TRUE   ~ "Skipped this question")) -->
-<!-- BUM_sympt1$symptom <- factor(BUM_sympt1$symptom, levels= c("The same day", "The day before", "More than a day before", "Skipped this question")) -->
+<!--                                              TRUE   ~ "Skipped this Question")) -->
+<!-- BUM_sympt1$symptom <- factor(BUM_sympt1$symptom, levels= c("The same day", "The day before", "More than a day before", "Skipped this Question")) -->
 
 <!-- dt_SYMPTDAY_summary <- BUM_sympt1 %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
 <!-- #dt_SYMPTDAY_summary <- BUM_sympt1 %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
@@ -3411,14 +2694,14 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!--   #summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
 <!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
 <!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping() -->
+<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
 
 
 <!-- BU_sympt1 <- BU_tib %>% dplyr::mutate(symptom= case_when(D_867307558==110092955 ~ "The same day", -->
 <!--                                              D_867307558==952212668 ~ "The day before", -->
 <!--                                              D_867307558==330461666 ~ "More than a day before", -->
-<!--                                              TRUE   ~ "Skipped this question")) -->
-<!-- BU_sympt1$symptom <- factor(BU_sympt1$symptom, levels= c("The same day", "The day before", "More than a day before", "Skipped this question")) -->
+<!--                                              TRUE   ~ "Skipped this Question")) -->
+<!-- BU_sympt1$symptom <- factor(BU_sympt1$symptom, levels= c("The same day", "The day before", "More than a day before", "Skipped this Question")) -->
 
 <!-- dt_SYMPTDAY_summary <- BU_sympt1 %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
 <!-- #dt_SYMPTDAY_summary <- BUM_sympt1 %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
@@ -3431,12 +2714,12 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!--   #summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
 <!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
 <!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) %>% opt_row_striping() -->
+<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
 
 
 
 
-<!-- BUM_sg= BUM_tib %>% dplyr::mutate(skip_eat=ifelse(is.na(D_867307558), 1, 0 ))  -->
+<!-- BUM_sg= BU_tib %>% dplyr::mutate(skip_eat=ifelse(is.na(D_867307558), 1, 0 ))  -->
 
 <!-- BU_sg= BU_tib %>% dplyr::mutate(skip_eat=ifelse(is.na(D_867307558), 1, 0 ))  -->
 
@@ -3463,7 +2746,7 @@ COV28_1 <- BU_tib %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05")& BU_tib$D
 <!-- #reminders <- reminders %>%  mutate(verif= ifelse(as.numeric(str_sub(d_914594314,12,13))<20, d_914594314, paste(str_sub(d_914594314,1,8), (as.numeric(str_sub(d_914594314,9,10)) + 1), str_sub(d_914594314,11,24)))) -->
 <!-- #BU_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%  mutate(slptime <- ifelse(as.numeric(str_sub(d_556788178,12,13)>17), paste(str_sub(d_914594314,9,10), (as.numeric(str_sub(d_914594314,9,10)) + 1), str_sub(D_299417266_V2,1,5), #str_sub(d_914594314,9,10), str_sub(d_914594314,11,24) , ))) -->
 
-<!-- BUM_sig <- BUM_tib %>%  filter(!is.na(D_299417266_V2)) %>%  mutate(sleep = paste0(str_sub(d_556788178,1,11), str_sub(D_299417266_V2,1,5), str_sub(d_556788178,17,24))) -->
+<!-- BUM_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%  mutate(sleep = paste0(str_sub(d_556788178,1,11), str_sub(D_299417266_V2,1,5), str_sub(d_556788178,17,24))) -->
 <!-- #BUM_sig <- BUM_sig %>%  mutate(slptime= ifelse(as.numeric(str_sub(sleep,12,13)>17), (as.Date(sleep) -1), sleep)) -->
 <!-- BUM_sig <- BUM_sig %>%  mutate(slptime= case_when(as.numeric(str_sub(D_299417266_V2,1,2))>12 ~ paste0(as.Date(sleep) -1, "T", str_sub(sleep,12,24)), -->
 <!--                                                   as.numeric(str_sub(D_299417266_V2,1,2))<12  ~ paste0(as.Date(sleep), "T", str_sub(sleep,12,24)))) #question is time you went to bed the night BEFORE, so have to subtract a day if pm or same day for am -->
