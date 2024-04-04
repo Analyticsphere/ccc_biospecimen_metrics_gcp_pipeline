@@ -3430,6 +3430,7 @@ research.4_1 <- ggplot(visit_wk_site4__1, aes(x=as.Date(col.Monday.date), y=100*
   scale_y_continuous(name="Percent %",breaks=seq(0,100,25)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(Sys.Date())),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
+
   ggtitle(label="Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Henry Ford Health  ") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
