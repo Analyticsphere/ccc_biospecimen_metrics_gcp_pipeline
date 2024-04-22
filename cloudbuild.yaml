@@ -18,7 +18,7 @@ steps:
 
 tags:
   - reporting_pipeline
-  - biospecimen_reports   
+  - biospecimen_metrics   
 
 options:
   logging: CLOUD_LOGGING_ONLY
