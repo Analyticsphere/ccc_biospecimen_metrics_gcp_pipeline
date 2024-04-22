@@ -14,7 +14,7 @@ steps:
  # Deploy container image to Cloud Run
  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
    entrypoint: gcloud
-   args: ['run','deploy','ccc-biospecimen-metrics', '--image=gcr.io/nih-nci-dceg-connect-prod-6d04/ccc-biospecimen-metrics:$COMMIT_SHA', '--cpu=2','--memory=8192Mi', '--region=us-central1', '--service-account=qa-qc-prod@nih-nci-dceg-connect-prod-6d04.iam.gserviceaccount.com']
+   args: ['run','deploy','ccc-biospecimen-metrics', '--image=gcr.io/nih-nci-dceg-connect-prod-6d04/ccc-biospecimen-metrics:$COMMIT_SHA', '--cpu=2','--memory=8192Mi', '--region=us-central1', '--service-account=qa-qc-prod@nih-nci-dceg-connect-prod-6d04.iam.gserviceaccount.com', '--tags=reporting_pipeline,biospecimen_metrics']
           
 options:
   logging: CLOUD_LOGGING_ONLY
