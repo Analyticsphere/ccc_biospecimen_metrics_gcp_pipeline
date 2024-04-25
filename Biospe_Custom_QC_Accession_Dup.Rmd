@@ -631,11 +631,11 @@ colnames(UrineOrderPl_noHP) <- c("Site", "Connect ID", "BioClin_UrnOrdPlacedBL_v
 ```
 
 
-### 18. IF BioClin_BldOrderPlaced_v1r0 = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP Excluded
+### 18. IF BioClin_BldOrderPlaced_v1r0 = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP and SF Excluded
 ```{r HPExcluded5, echo=FALSE, warning=FALSE, message=FALSE}
 
 BloodDtTm_noHP <- bioqc %>%  filter(is.na(d_173836415_d_266600170_d_769615780) & d_173836415_d_266600170_d_530173840==353358909	& 
-                                         d_827220437!=531629870) %>% 
+                                         d_827220437!=531629870 & d_827220437!=657167265) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_769615780) %>%  sort_by(Site)
 
 colnames(BloodDtTm_noHP) <- c("Site", "Connect ID", "BioClin_BldOrderPlacdDt")
@@ -651,7 +651,7 @@ knitr::kable(BloodDtTm_noHP)
 ### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
 
 BloodDtTmVs_noHP <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_769615780) & d_173836415_d_266600170_d_530173840!=353358909	& 
-                                         d_827220437!=531629870) %>% 
+                                         d_827220437!=531629870 & d_827220437!=657167265) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_530173840) %>%  sort_by(Site)
 
 colnames(BloodDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_BldOrderPlaced")
@@ -661,11 +661,11 @@ colnames(BloodDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_BldOrderPlaced")
 
 
 
-### 19. IF BioClin_UrnOrdPlaced = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP Excluded
+### 19. IF BioClin_UrnOrdPlaced = 1, THEN BioClin_BldOrderPlacdDt_v1r0 must be populated. HP and SF Excluded
 ```{r HPExcluded3, echo=FALSE, warning=FALSE, message=FALSE}
 
 UrineDtTm_noHP <- bioqc %>%  filter(is.na(d_173836415_d_266600170_d_939818935) & d_173836415_d_266600170_d_860477844==353358909	& 
-                                         d_827220437!=531629870) %>% 
+                                         d_827220437!=531629870 & d_827220437!=657167265) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_939818935) %>%  sort_by(Site)
 
 colnames(UrineDtTm_noHP) <- c("Site", "Connect ID", "BioClin_BldOrderPlacdDt")
@@ -680,7 +680,7 @@ knitr::kable(UrineDtTm_noHP)
 ### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_UrnOrdPlaced must = 1. HP Excluded
 
 UrineDtTmVs_noHP <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_939818935) & d_173836415_d_266600170_d_860477844!=353358909	& 
-                                         d_827220437!=531629870) %>% 
+                                         d_827220437!=531629870 & d_827220437!=657167265) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_860477844) %>%  sort_by(Site)
 
 colnames(UrineDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_UrnOrdPlaced")
