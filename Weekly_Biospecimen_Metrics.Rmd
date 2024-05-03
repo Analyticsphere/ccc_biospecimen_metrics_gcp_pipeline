@@ -737,6 +737,8 @@ bioset[4,4] <- paste0(bioset[4,4], " (100%)")
 ##HF
 home_mw_counts_HF <-sum(as.numeric(site_home_mw$f0_[site_home_mw$d_827220437==548392715]))
 
+home_mw_counts_HF <-sum(as.numeric(site_home_mw$f0_[site_home_mw$d_827220437==548392715]))
+
 settings <- recrvar.bio[grepl("Setting",recrvar.bio$Variable.Label),]$column_name
 setting <- c("BL_BioSpm_BloodSetting_v1r0","BL_BioSpm_UrineSetting_v1r0","BL_BioSpm_MWSetting_v1r0")
 bio <- c("d_878865966","d_167958071","d_684635302")
@@ -790,7 +792,9 @@ bioset5_1[4,4] <- paste0(bioset5_1[4,4], " (100%)")
 
 
 
+
 ##HP
+
 home_mw_counts_HP <-sum(as.numeric(site_home_mw$f0_[site_home_mw$d_827220437==531629870]))
 
 settings <- recrvar.bio[grepl("Setting",recrvar.bio$Variable.Label),]$column_name
@@ -4307,6 +4311,7 @@ add_footnote(tab10_2, "Note: The expected total blood collection tubes vary by s
 
 tab8=knitr::kable(notcol_combo2_totals,caption='Table 2.10: Baseline Blood Tubes Collected Among Clinical Biospecimen Collections by Tube Type', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% column_spec(column = 2:ncol(notcol_combo2_totals),width = "4cm")  %>% column_spec(column = 1:ncol(notcol_combo2_totals),width = "5cm") %>%  landscape()
 add_footnote(tab8, "Note: The expected collected tube type varies by site and is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD. (6) HP: 2 SST, 1 Heparin, 1 EDTA, 1 STRECK. (7) SFH: 4 SST, 2 Heparin, 3 EDTA", notation = "none") 
+
 
 
 knitr::kable(Deviation_Freq[,c(7,5,6,4)],col.names=c("Site","Any Deviations","No Deviations", "Total Tubes Collected"), caption='Table 2.11: Baseline- Deviation Status Among Biospecimen Tubes Collected',row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE )
