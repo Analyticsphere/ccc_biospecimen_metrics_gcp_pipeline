@@ -3850,6 +3850,7 @@ add_footnote(tab5_1, "Note: Blood and urine specimens are not collected in the H
 tab5_2=knitr::kable(bioset5_2, col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 1.7: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, HealthPartners', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)   
 add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 
+
 # tab5_3=knitr::kable(bioset5_3, col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 1.8: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Sanford Health', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)
 # add_footnote(tab5_3, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 
@@ -4576,6 +4577,7 @@ ggplot(scatSF, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) +
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0))  +
   ggtitle(label="Figure 5.2: Baseline Collection-To-Receipt Time (in Hours), \n Sanford Health Research Setting")
+
 
 
 
@@ -5451,6 +5453,7 @@ Coll_Card_Status <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>% t
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
+
 #Table 7.4
 #d_265193023==231311385 --- had to remove, no one finished yet
 #all_completed2 <- left_join(table27_elg_distinct,kit_date, by=c("Connect_ID", "d_173836415_d_266600170_d_319972665_d_661940160", "Site", "Kit_Status", "d_143615646_d_826941471"))
@@ -5493,6 +5496,7 @@ Table7.5 = test31b %>% group_by(Site) %>%
 
 
 #Table 32
+
 
 
  conditions <- all_completed[,c("Connect_ID","d_173836415_d_266600170_d_319972665_d_221592017", "d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477",
@@ -5738,6 +5742,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 MW_Coll_Kits
 ```
 
+
 \FloatBarrier
 ```{r Fig7_2, eval=TRUE,echo=FALSE}
 #fig.height = 5, fig.width = 5, 
@@ -5809,6 +5814,7 @@ tab7_7 <- tab7_7 %>%
   row_spec(1:(num_rows - 1), extra_css = "text-indent: 20px;")
 
  kable_styling(tab7_7, latex_options = "scale_down")
+
 
 
 
@@ -5895,7 +5901,6 @@ tbl_7_9 <- table7_9 %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>% kable_styling(latex_options = "scale_down")
 add_footnote(tbl_7_9, "Note: Only includes data from mouthwash kits returned with completed Collection Card", notation = "none") 
 ```
-
 
 
 
@@ -6558,6 +6563,7 @@ write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentD
 
 
 
+
 ```{r recrbio_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
 
 
@@ -6693,6 +6699,7 @@ write.csv(recrbio_1,glue("{local_drive}Connect_prod_recr_veriBiospe_Formats_{cur
 
 
 ```
+
 
 
 
