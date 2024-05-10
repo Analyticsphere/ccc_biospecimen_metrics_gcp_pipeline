@@ -3647,7 +3647,7 @@ biospe_adhoc2= table2 %>%  filter(d_650516960==664882224 & d_410912345==35335890
                        d_173836415_d_266600170_d_185243482== 1010270015 |d_173836415_d_266600170_d_452847912 == 1010270015 ~ "NCO",
                        d_173836415_d_266600170_d_185243482==1010320019 | d_173836415_d_266600170_d_452847912==1010320019 ~ "Sterling Heights",
                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010114 |
-                         d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010114~ "K1 HFH Main",
+                         d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010193~ "K1 HFH Main",
                                         d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                         d_827220437==452412599 ~ "Kaiser Permanente Northwest",
                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
@@ -5255,7 +5255,8 @@ clc_both_vt.site.NW
 
 
  
-```{r HomeMW_DataPull, eval=TRUE,echo=FALSE,include=FALSE}
+
+```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
 #not dead of wd or refused
 kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_827220437, d_173836415_d_266600170_d_915179629, d_914594314,
 d_265193023, d_253883960 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and 
@@ -5303,7 +5304,8 @@ kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
 ```
 
  
-```{r retry7.1, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
+```{r retry7.1, include=FALSE, echo=FALSE, warning=FALSE}
 
 
 kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
@@ -5356,7 +5358,8 @@ status_elg_kn <- status_elg %>%
 ```
 
 
-```{r Table_new_7.2, eval=TRUE,echo=FALSE,results='hold'}
+
+```{r Table_new_7.2, include=FALSE, echo=FALSE, warning=FALSE}
 #,results='hold'
 
 all_shipped <- as.data.frame(table(table27_elg_distinct$Site[!is.na(table27_elg_distinct$d_173836415_d_266600170_d_319972665_d_661940160)]))
@@ -5400,7 +5403,8 @@ all_shipped2
 ```
 
 
-```{r new_Figs7.3, eval=TRUE,echo=FALSE, results='hold'}
+
+```{r new_Figs7.3, include=FALSE, echo=FALSE, warning=FALSE}
 
 
 fig7_3 <- ggplot(all_shipped, aes(x = Site)) +
@@ -5424,7 +5428,8 @@ fig7_3 <- ggplot(all_shipped, aes(x = Site)) +
 
 ```
 
-```{r Table7.3_7.6, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
+```{r Table7.3_7.6, include=FALSE, echo=FALSE, warning=FALSE}
 
 
 table27_elg_distinct$d_547363263 <- as.character(table27_elg_distinct$d_547363263)
@@ -5587,7 +5592,7 @@ table32_pct
 
 \FloatBarrier
 
-```{r FigMW1, eval=TRUE,echo=FALSE, include=FALSE}
+```{r FigMW1, include=FALSE, echo=FALSE, warning=FALSE}
 kit_set_col <- kit_set %>% select(Connect_ID, d_143615646_d_826941471)
 tube_col_plots2 <- tube_col_plots %>%  select(Connect_ID, col.Sunday.date,col.Sunday.week, col.Monday.date)
 kit_fig <- left_join(kit_table,  tube_col_plots2, by="Connect_ID") %>% left_join(kit_set_col, by="Connect_ID")
@@ -5628,6 +5633,11 @@ fig5_week_total <- fig5_new %>%
   summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)),
             total_received = sum(!is.na(d_143615646_d_826941471))) # Sum only for "Shipped" and "Received" statuses
 
+# Calculate total shipped for each week
+fig5_week_total <- fig5_new %>%
+  group_by(col.Monday.date) %>%
+  summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)),
+            total_received = sum(!is.na(d_143615646_d_826941471))) # Sum only for "Shipped" and "Received" statuses
 
 MW_Coll_Kits <- ggplot(fig5_week_total, aes(x = as.Date(col.Monday.date))) +
   geom_line(aes(y = total_shipped, color = "Total Shipped"), linetype = "dashed", size = 1) +
@@ -5653,10 +5663,10 @@ MW_Coll_Kits <- ggplot(fig5_week_total, aes(x = as.Date(col.Monday.date))) +
   guides(fill = guide_legend(nrow = 2, byrow = TRUE))
 
 
-MW_Coll_Kits
+
 ```
 
-```{r FigMW2, eval=TRUE,echo=FALSE, include=FALSE}
+```{r FigMW2, include=FALSE, echo=FALSE, warning=FALSE}
 
 # Group by col.Monday.date and calculate cumulative sums
 fig5_week_total2 <- fig5_week_total %>%
@@ -5711,14 +5721,13 @@ MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
         axis.title.y = element_text(size = 14, face = "bold", color = "black"),
         plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))
 
-MW_overtime
 
 ```
 
 
 
 \FloatBarrier
-```{r newTables7.1,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE, results='asis'}
+```{r newTables7.1,eval=TRUE,echo=FALSE,results='asis'} 
 #results='asis'
 
 add_footnote(status_elg_kn, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after April 1, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none") 
@@ -5727,7 +5736,7 @@ add_footnote(status_elg_kn, "Note: “Eligible participants” are those who had
 
 
 \FloatBarrier
-```{r KnitrTables7.2,echo=FALSE,error=FALSE,message=FALSE,results='asis',  warning=FALSE}
+```{r KnitrTables7.2,eval=TRUE,echo=FALSE,results='asis'}
 
 knitr::kable(all_shipped2,caption='Table 7.2 Baseline- Home Mouthwash Kit Return Rate',row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 #tbl_Kit__Status <- tbl_Kit_Status %>% kable_styling(latex_options = "HOLD_position")
@@ -5753,7 +5762,7 @@ MW_overtime
 
 
 \FloatBarrier
-```{r KnitrTables7.3,echo=FALSE,error=FALSE,message=FALSE,results='asis',  warning=FALSE}
+```{r KnitrTables7.3,eval=TRUE,echo=FALSE,results='asis'}
 
 Coll_Card_Status %>% kable_styling(latex_options = "HOLD_position")
 
@@ -5768,7 +5777,7 @@ fig7_3
 
 
 \FloatBarrier
-```{r KnitrTables7.4_7.6,echo=FALSE,error=FALSE,message=FALSE,  warning=FALSE, results='asis'}
+```{r KnitrTables7.4_7.6,eval=TRUE,echo=FALSE,results='asis'}
 
 
 
