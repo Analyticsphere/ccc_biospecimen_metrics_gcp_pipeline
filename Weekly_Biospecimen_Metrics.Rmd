@@ -1368,7 +1368,7 @@ bldcol_research_UC1 <- bldcol_research_UC[,c(9:12,4)]
 
 
 
-### Table 7.2- specifically for Henry Ford--- RESEARCH SITES
+### specifically for Henry Ford--- RESEARCH SITES
 biospe= biospe  %>% mutate(HF_Sites= case_when(d_951355211==736183094 ~ "HFH K-13 Research Clinic",
                                        d_951355211==886364332 ~ "HFH Cancer Pavilion Research Clinic",
                                        d_951355211==706927479 ~ "HFH Livonia Research Clinic",
@@ -5362,13 +5362,30 @@ status_elg_kn <- status_elg %>%
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, warning=FALSE}
 #,results='hold'
 
-allshipped <- as.data.frame(table(table27_elg_distinct$Site[!is.na(table27_elg_distinct$d_173836415_d_266600170_d_319972665_d_661940160)]))
-all_recvd <- as.data.frame(table(table27_elg_distinct$Site[table27_elg_distinct$Kit_Status=="Received"]))
+# allshipped <- as.data.frame(table(table27_elg_distinct$Site[!is.na(table27_elg_distinct$d_173836415_d_266600170_d_319972665_d_661940160)]))
+# all_recvd <- as.data.frame(table(table27_elg_distinct$Site[table27_elg_distinct$Kit_Status=="Received"]))
+# 
+# #all_shipped <- merge(all_shipped, all_recvd, by="Var1")
+# #all_shipped <- merge(allshipped, all_recvd, by = "Var1", suffixes = c("_shipped", "_recvd"))
+# 
+# all_shipped <- merge(allshipped, all_recvd, by.x = "Var1", by.y = "Var1", suffixes = c("_shipped", "_recvd"))
 
-#all_shipped <- merge(all_shipped, all_recvd, by="Var1")
-all_shipped <- merge(allshipped, all_recvd, by = "Var1", suffixes = c("_shipped", "_recvd"))
+
+filtered_data <- filter(table27_elg_distinct, Kit_Status %in% c("Received", "Shipped"))
+
+# Create a summary table
+summary_table <- filtered_data %>%
+  group_by(Site) %>%
+  summarise(Received = sum(Kit_Status == "Received"),
+            Shipped = sum(Kit_Status %in% c("Received", "Shipped")))
+
+all_shipped <- summary_table[,c(1,3,2)]
 
 colnames(all_shipped) <- c("Site", "Shipped", "Received")
+
+# test7.2 <- table(table27_elg_distinct$Site, table27_elg_distinct$Kit_Status)
+# test_7.2 <- test7.2[,c(4,5)]
+# test_7.2[,3] <- 
 
 all_shipped$Received <- as.numeric(all_shipped$Received)
 all_shipped$Shipped <- as.numeric(all_shipped$Shipped)
