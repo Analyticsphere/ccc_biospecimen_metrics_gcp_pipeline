@@ -5255,6 +5255,7 @@ clc_both_vt.site.NW
 
 
  
+
 ```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
 #not dead of wd or refused
 kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_827220437, d_173836415_d_266600170_d_915179629, d_914594314,
@@ -5303,6 +5304,7 @@ kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
 ```
 
  
+
 ```{r retry7.1, include=FALSE, echo=FALSE, warning=FALSE}
 
 
@@ -5356,6 +5358,7 @@ status_elg_kn <- status_elg %>%
 ```
 
 
+
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, warning=FALSE}
 #,results='hold'
 
@@ -5401,6 +5404,7 @@ all_shipped2
 ```
 
 
+
 ```{r new_Figs7.3, include=FALSE, echo=FALSE, warning=FALSE}
 
 
@@ -5424,6 +5428,7 @@ fig7_3 <- ggplot(all_shipped, aes(x = Site)) +
 
 
 ```
+
 
 ```{r Table7.3_7.6, include=FALSE, echo=FALSE, warning=FALSE}
 
@@ -5629,6 +5634,11 @@ fig5_week_total <- fig5_new %>%
   summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)),
             total_received = sum(!is.na(d_143615646_d_826941471))) # Sum only for "Shipped" and "Received" statuses
 
+# Calculate total shipped for each week
+fig5_week_total <- fig5_new %>%
+  group_by(col.Monday.date) %>%
+  summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)),
+            total_received = sum(!is.na(d_143615646_d_826941471))) # Sum only for "Shipped" and "Received" statuses
 
 MW_Coll_Kits <- ggplot(fig5_week_total, aes(x = as.Date(col.Monday.date))) +
   geom_line(aes(y = total_shipped, color = "Total Shipped"), linetype = "dashed", size = 1) +
@@ -5711,7 +5721,6 @@ MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
         axis.title.x = element_text(size = 14, face = "bold"),
         axis.title.y = element_text(size = 14, face = "bold", color = "black"),
         plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))
-
 
 
 ```
