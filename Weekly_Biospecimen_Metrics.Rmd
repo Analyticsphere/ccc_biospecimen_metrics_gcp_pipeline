@@ -5359,10 +5359,11 @@ status_elg_kn <- status_elg %>%
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, warning=FALSE}
 #,results='hold'
 
-all_shipped <- as.data.frame(table(table27_elg_distinct$Site[!is.na(table27_elg_distinct$d_173836415_d_266600170_d_319972665_d_661940160)]))
+allshipped <- as.data.frame(table(table27_elg_distinct$Site[!is.na(table27_elg_distinct$d_173836415_d_266600170_d_319972665_d_661940160)]))
 all_recvd <- as.data.frame(table(table27_elg_distinct$Site[table27_elg_distinct$Kit_Status=="Received"]))
 
-all_shipped <- merge(all_shipped, all_recvd, by="Var1")
+#all_shipped <- merge(all_shipped, all_recvd, by="Var1")
+all_shipped <- merge(allshipped, all_recvd, by = "Var1", suffixes = c("_shipped", "_recvd"))
 
 colnames(all_shipped) <- c("Site", "Shipped", "Received")
 
