@@ -5374,8 +5374,6 @@ status_elg_kn <- status_elg %>%
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, warning=FALSE,results='hold'}
 #,results='hold'
 
-
-
 filtered_data <- filter(table27_elg_distinct, Kit_Status %in% c("Received", "Shipped"))
 
 # Create a summary table
