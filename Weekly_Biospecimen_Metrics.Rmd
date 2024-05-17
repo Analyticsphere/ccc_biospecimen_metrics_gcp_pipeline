@@ -5626,7 +5626,7 @@ table32_pct
 
 
 #NOTE: MUST change currentDate to Mondays date in order for this to run correctly when testing for fixes
-#currentDate="2024-05-13"
+#currentDate= recent Monday date
 
 ##Received 
 kit_set_col_1 <- kit_set %>% select(Connect_ID, d_143615646_d_826941471)
