@@ -5714,8 +5714,6 @@ fig5_week_total2 <- fig5_week_final %>%
   mutate(cumulative_shipped = cumsum(total_shipped),
          cumulative_received = cumsum(total_received))
 
-
-
 fig5_week_total2 <- fig5_week_total2 %>%
   mutate(percentage_received_to_shipped = round(cumulative_received / cumulative_shipped * 100, digits=2))
 
