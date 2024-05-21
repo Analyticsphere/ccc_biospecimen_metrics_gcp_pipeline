@@ -617,6 +617,7 @@ one_skip_funct(D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days",
 
 #MENSTART
 BU_tibM <- BU_tib %>%  filter(!is.na(BU_tib$D_644459734) & BU_tib$D_112151599=="353358909")
+str_sub(BU_tibM$D_644459734,1,4)[str_sub(BU_tibM$D_644459734,1,4)=="0024"] = "2024"
 BU_tibM$Mdate <- as.Date(BU_tibM$D_644459734)
 
 BU_TimeM <- BU_tibM  %>% dplyr::group_by(Mdate) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(Mdate, n)
