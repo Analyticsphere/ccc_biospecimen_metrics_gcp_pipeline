@@ -5270,7 +5270,7 @@ clc_both_vt.site.NW
 ```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
 #not dead of wd or refused
 kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_827220437, d_173836415_d_266600170_d_915179629, d_914594314,
-d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and 
+d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_826941471 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and 
 d_987563196='104430631'"
 kitstatus_table <- bq_project_query(project, kitstatus)
 kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -5714,8 +5714,6 @@ fig5_week_total2 <- fig5_week_final %>%
   mutate(cumulative_shipped = cumsum(total_shipped),
          cumulative_received = cumsum(total_received))
 
-
-
 fig5_week_total2 <- fig5_week_total2 %>%
   mutate(percentage_received_to_shipped = round(cumulative_received / cumulative_shipped * 100, digits=2))
 
@@ -6085,8 +6083,8 @@ bio_tb2 <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-
 biospe2 <- bq_table_download(bio_tb2,bigint="integer64",n_max = Inf, page_size = 1000)
 
 
-biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
-biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
+#biospe2$d_646899796 <- biospe2$d_646899796_integer #regular variable coming in as an array
+#biospe2$d_928693120 <- biospe2$d_928693120_integer #regular variable coming in as an array
 
 
 cnames <- names(biospe2)
@@ -6617,15 +6615,22 @@ write.csv(biospe1_final,glue("{local_drive}Connect_prod_Biospe_Formats_{currentD
 
 
 ```{r recrbio_data,eval=TRUE,echo=FALSE,include=FALSE, warning=FALSE}
+#Adding mw variables to this csv
+mw_addons <- kit_table %>% select(Connect_ID, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_826941471)
 
+recr_mw <- left_join(recrver, mw_addons, by="Connect_ID")
+
+recr.bio$Connect_ID <- as.character(recr.bio$Connect_ID)
+mw_addons$Connect_ID <- as.character(mw_addons$Connect_ID)
+recr.bio_mw <- left_join(recr.bio, mw_addons, by="Connect_ID")
 
 y$conceptId.4 <- as.numeric(y$conceptId.4)
 
-recrver_CID <- as.data.frame(substring(sapply((strsplit(colnames(recrver),"d_")),tail,1),1,9))
+recrver_CID <- as.data.frame(substring(sapply((strsplit(colnames(recr_mw),"d_")),tail,1),1,9))
 
 colnames(recrver_CID)[1] <- "CID"
 
-recrver_CID$variable <- names(recr.bio)
+recrver_CID$variable <- names(recr.bio_mw)
 
 
 
@@ -6665,7 +6670,7 @@ select2 <- recrvar_CID_dd$variable[which(recrvar_CID_dd$category==2)]
 
 yes_no <- recrvar_CID_dd$variable[which(recrvar_CID_dd$category==1)]
 
-recrbio1 <- subset(recr.bio,select =c(select0,select2))
+recrbio1 <- subset(recr.bio_mw,select =c(select0,select2))
 
 colnames(recrbio1)[which(colnames(recrbio1) %in% select0)] <-  recrvar_CID_dd$Variable.Name[which(recrvar_CID_dd$category==0)]
 
@@ -6706,9 +6711,9 @@ for (i in 1:length(yes_no)){
   
   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
   
-  check <- as.data.frame(recr.bio[,grepl(x, colnames(recr.bio))])
+  check <- as.data.frame(recr.bio_mw[,grepl(x, colnames(recr.bio_mw))])
   
-  #check <-pull(recr.bio,varname)
+  #check <-pull(recr.bio_mw,varname)
   
   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
   
@@ -6735,7 +6740,8 @@ recrbio_1 <- recrbio_1[, c("Connect_ID","RcrtES_Site_v1r0","BioFin_BaseBloodCol_
                            "RcrtUP_Submitted_v1r0","RcrtV_Verification_v1r0","RcrtV_VerificationTm_V1R0", "SrvBLM_ResSrvCompl_v1r0","SrvBLM_TmComplete_v1r0","SrvBLM_TmStart_v1r0",
                            "SrvBlU_BaseComplete_v1r0","SrvBlU_TmComplete_v1r0","SrvBlU_TmStart_v1r0",
                            "BioClin_BldAndUrnRef_v1r0", "HdRef_Baseblood_v1r0","HdRef_DateBaseblood_v1r0",
-                           "SrvMtW_TmComplete_v1r0", "SrvMtW_TmStart_v1r0", "SrvMtW_BaseComplete_v1r0", "token")]
+                           "SrvMtW_TmComplete_v1r0", "SrvMtW_TmStart_v1r0", "SrvMtW_BaseComplete_v1r0", 
+                           "BioKit_KitTypeBL_v1r0" , "BioKit_KitStatusBL_v1r0", "BioKit_KitShipTmBL_v1r0", "BioKit_KitRecdTmBL_v1r0", "token")]
 #BioClin_DBUrineRRLBL_v1r0    showing as null but in the DD 
 #"BioClin_PolyBloodIDBL_v1r0" "BioClin_PolyUrineIDBL_v1r0" showing as not in this df but variable name hasn't changed in DD
 
