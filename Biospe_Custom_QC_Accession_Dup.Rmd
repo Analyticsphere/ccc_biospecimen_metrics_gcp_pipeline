@@ -57,7 +57,7 @@ if (use_test_box_folder) {
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 # bio <- "SELECT  Connect_ID, d_232343615_d_593843561, d_143615646_d_593843561, d_223999569_d_593843561,  d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_650516960, d_678166505,  d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, d_143615646_d_883732523, d_299553921_d_883732523, d_454453939_d_883732523, d_652357376_d_883732523, d_703954371_d_883732523, d_838567176_d_883732523, d_973670172_d_883732523, d_143615646_d_593843561, d_223999569_d_593843561, d_299553921_d_593843561, d_376960806_d_593843561, d_454453939_d_593843561, d_589588440_d_593843561, d_652357376_d_593843561, d_677469051_d_593843561, d_683613884_d_593843561, d_703954371_d_593843561, d_787237543_d_593843561, d_838567176_d_593843561, d_958646668_d_593843561, d_973670172_d_593843561, d_915838974, d_646899796, 
-# d_928693120_integer FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`  where Connect_ID IS NOT NULL"
+# d_928693120 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`  where Connect_ID IS NOT NULL"
 
 
 bio <- "WITH T AS (
@@ -69,8 +69,11 @@ INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Conn
 
 
 
-parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022
+parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
+
+
+
 
 parts_table <- bq_project_query(project, parts)
 
@@ -150,9 +153,9 @@ local_drive= ifelse(write_to_local_drive, "~/Biospecimen/data/", "")
 qc1 <- bioqc %>%  filter(d_827220437==300267574)
 
 #Blood
-qc1_blood <- qc1 %>%  filter(str_sub(d_173836415_d_266600170_d_341570479,1,11)!=str_sub(d_646899796_integer,1,11)) 
+qc1_blood <- qc1 %>%  filter(str_sub(d_173836415_d_266600170_d_341570479,1,11)!=str_sub(d_646899796,1,11)) 
 
-qc1_blood <- qc1_blood %>% select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796_integer ) %>%  sort_by(Site)
+qc1_blood <- qc1_blood %>% select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796 ) %>%  sort_by(Site)
 
 
 # qc1_blood %>%  gt() %>%  
@@ -171,15 +174,15 @@ colnames(qc1_blood) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Acc
 
 
 #Urine
-qc1_urine <- qc1 %>%  filter(str_sub(qc1$d_173836415_d_266600170_d_198261154,1,11)!=str_sub(qc1$d_928693120_integer,1,11)) 
+qc1_urine <- qc1 %>%  filter(str_sub(qc1$d_173836415_d_266600170_d_198261154,1,11)!=str_sub(qc1$d_928693120,1,11)) 
 
-qc1_urine$AID<- strtoi(qc1_urine$d_928693120_integer, base = 0L)
+qc1_urine$AID<- strtoi(qc1_urine$d_928693120, base = 0L)
 
-qc1_urine <- qc1_urine %>% select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120_integer ) %>%  sort_by(Site)
+qc1_urine <- qc1_urine %>% select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120 ) %>%  sort_by(Site)
 
 # qc1_urine %>%  gt() %>%  
 #   tab_header(title = md("KPHI Urine Accession ID Errors")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_173836415_d_266600170_d_198261154 = md("**KPHI Accession ID**"), d_928693120_integer= md("**Expected Accession ID**"))
+#   cols_label(Connect_ID = md("**Connect ID**"), d_173836415_d_266600170_d_198261154 = md("**KPHI Accession ID**"), d_928693120= md("**Expected Accession ID**"))
 
 colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID")
 #knitr::kable(qc1_urine)
@@ -206,7 +209,7 @@ colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Acc
 
 qcKP <- bioqc %>%  filter(d_827220437==125001209 | d_827220437==327912200 | d_827220437== 452412599) 
 
-qcKP_blood <- qcKP %>%  filter(d_173836415_d_266600170_d_341570479!=d_646899796_integer)  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796_integer ) %>%  sort_by(Site)
+qcKP_blood <- qcKP %>%  filter(d_173836415_d_266600170_d_341570479!=d_646899796)  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796 ) %>%  sort_by(Site)
 
 colnames(qcKP_blood) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID")
 
@@ -217,7 +220,7 @@ colnames(qcKP_blood) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Ac
 
 #Urine
 
-qcKP_urine <- qcKP %>%  filter(d_173836415_d_266600170_d_198261154!=d_928693120_integer) %>% select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120_integer ) %>%  sort_by(Site)
+qcKP_urine <- qcKP %>%  filter(d_173836415_d_266600170_d_198261154!=d_928693120) %>% select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120 ) %>%  sort_by(Site)
 
 colnames(qcKP_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID")
 
@@ -986,7 +989,7 @@ knitr::kable(bio_mw_setting_res)
 
 ```{r BioClin_PolyBloodID_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
-bioqc1 <- bioqc %>%  filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796_integer) &
+bioqc1 <- bioqc %>%  filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796) &
                         Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662) #HFH exclusions
 
 # bioqc1$str1 <- bioqc1$d_173836415_d_266600170_d_543608829
@@ -999,8 +1002,8 @@ PolyBloodID <- unlist(strsplit(gsub("\\[|\\]", "", str1), ","))
  
 
 
-bioqc1 <- bioqc1 %>%  #filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796_integer)) %>%  
-mutate(BioClin_DBBloodID_v1r0=paste0("L", d_646899796_integer))
+bioqc1 <- bioqc1 %>%  #filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796)) %>%  
+mutate(BioClin_DBBloodID_v1r0=paste0("L", d_646899796))
 
 #polyblood <- bioqc1 %>%  filter(!(BioClin_DBBloodID_v1r0 %in% as.list(d_173836415_d_266600170_d_543608829))) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>%
 
@@ -1016,7 +1019,7 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
 
 ```{r PolyUrineID, echo=FALSE, warning=FALSE, message=FALSE}
 
-bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120_integer) &
+bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120) &
 
                         Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 &
                           Connect_ID!=6473532641 & Connect_ID!=4435276749 ) #HFH exclusions)
@@ -1028,7 +1031,7 @@ PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ","))
  
 
 bioqc2 <- bioqc2 %>%  
-mutate(BioClin_DBUrineID_v1r0=paste0("L", d_928693120_integer))
+mutate(BioClin_DBUrineID_v1r0=paste0("L", d_928693120))
 
 
 polyurine <- bioqc2 %>%  filter(!(bioqc2$BioClin_DBUrineID_v1r0 %in% PolyUrineID)) %>%  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, d_173836415_d_266600170_d_110349197) %>% sort_by(Site)
@@ -1037,6 +1040,287 @@ knitr::kable(polyurine) %>% kable_styling(latex_options = "scale_down")
 
 
 ```
+
+
+
+
+```{r home_collections, include=FALSE}
+
+
+MW <- "SELECT  Connect_ID, d_143615646_d_593843561, d_143615646_d_825582494, d_820476880 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`  where Connect_ID IS NOT NULL"
+
+
+MW_table <- bq_project_query(project, MW)
+MW_data <- bq_table_download(MW_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
+
+
+kit <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID is not null"
+
+kit_table <- bq_project_query(project, kit)
+
+kit_data <- bq_table_download(kit_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+
+
+MW_data$Connect_ID <- as.numeric(MW_data$Connect_ID)
+kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
+
+
+HMW= left_join(parts_data, kit_data, by="Connect_ID" ) 
+
+
+HMW <- HMW %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartners",
+                                                 d_827220437==548392715 ~ "Henry Ford Health System",
+                                                 d_827220437==303349821 ~ "Marshfield Clinical Health System",
+                                                 d_827220437==657167265 ~ "Sanford Health",
+                                                 d_827220437==809703864 ~ "University of Chicago Medicine",
+                                                d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+                                                 d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+                                                 d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
+
+
+Bio_HMW <- HMW %>%  left_join(MW_data,  by="Connect_ID") 
+
+
+```
+
+
+```{r pending, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 31. If kit status is Pending, then date/time kit pending should populate
+
+#IF BioKit_KitStatus_v1r0 (221592017) = 0 THEN BioKit_KitDatePend_v1r0 (341636034) = populate
+
+pend <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_221592017==517216441 & is.na(d_341636034)) %>% 
+  select(Site, Connect_ID, d_341636034) %>%  sort_by(Site)
+
+colnames(pend) <- c("Site", "Connect ID", "BioKit_KitDatePend")
+knitr::kable(pend) %>% kable_styling(latex_options = "HOLD_position")
+
+```
+
+
+
+```{r all_populate, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 32. If kit type is Mouthwash, then return kit tracking number, supply kit ID, return kit ID, collection cup ID, and collection card ID should populate.
+
+#IF BioKit_KitType_v1r0 (379252329) = 0 THEN BioKit_ReturnKitTrack_v1r0 (972453354), BioKit_SupplyKitID_v1r0 (690210658), BioKit_ReturnKitID_v1r0 (194252513), BioKit_MWCupID_v1r0 (259846815), and BioKit_MWCardID_v1r0 (786397882) = populate
+
+
+all_populate <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_379252329==976461859 & 
+                                  (d_173836415_d_266600170_d_319972665_d_221592017==241974920 | 
+                                     d_173836415_d_266600170_d_319972665_d_221592017==277438316 |
+                                     d_173836415_d_266600170_d_319972665_d_221592017==375535639) &
+                                  (is.na(d_972453354) | is.na(d_690210658) | is.na(d_194252513) | is.na(d_259846815) | is.na(d_786397882) )) %>% 
+  select(Site, Connect_ID, d_972453354, d_690210658, d_194252513, d_259846815, d_786397882) %>%  sort_by(Site)
+
+colnames(all_populate) <- c("Site", "Connect ID", "ReturnKitTrack", "SupplyKitID", "ReturnKitID", "MWCupID", "MWCardID")
+knitr::kable(all_populate) %>% kable_styling(latex_options = "HOLD_position")
+
+```
+
+
+
+```{r HC_Rules1, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 33. If kit type is Mouthwash, then supply kit ID should be equal to return kit ID 
+
+hmw1 <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_379252329==976461859 & d_690210658!=d_194252513) %>% 
+  select(Site, Connect_ID, d_690210658) %>%  sort_by(Site)
+
+colnames(hmw1) <- c("Site", "Connect ID", "Supply Kit ID")
+knitr::kable(hmw1) %>% kable_styling(latex_options = "HOLD_position")
+```
+
+
+
+```{r HC_Rules2, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 34.  If kit type is Mouthwash, then collection cup ID should be equal to collection card ID
+
+hmw2 <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_379252329==976461859 & d_259846815!=d_786397882) %>% 
+  select(Site, Connect_ID, d_259846815) %>%  sort_by(Site)
+
+colnames(hmw2) <- c("Site", "Connect ID", "Collection Cup ID")
+knitr::kable(hmw2) %>% kable_styling(latex_options = "HOLD_position")
+```
+
+
+
+```{r assigned, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# 35. If kit status is Assigned, then supply kit tracking number should populate
+
+#IF BioKit_KitStatus_v1r0 (221592017) = 2 THEN BioKit_SupplyKitTrack_v1r0 (531858099) = populate
+
+asgn <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_221592017==241974920 & is.na(d_531858099)) %>% 
+  select(Site, Connect_ID, d_531858099) %>%  sort_by(Site)
+
+colnames(asgn) <- c("Site", "Connect ID", "BioKit_SupplyKitTrack")
+knitr::kable(asgn) %>% kable_styling(latex_options = "HOLD_position")
+
+```
+
+
+
+```{r shipped, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 36. If kit status is Shipped, then supply kit tracking number and date/time kit shipped should populate
+
+#IF BioKit_KitStatus_v1r0 (221592017) = 3 THEN BioKit_SupplyKitTrack_v1r0 (531858099) and BioKit_KitShipTm_v1r0 (661940160) = populate
+# BioKit_SupplyKitTrack_v1r0  is all null here, but 39 rows in prod
+
+shipt <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160))) %>% 
+  select(Site, Connect_ID, d_531858099, d_173836415_d_266600170_d_319972665_d_661940160) %>%  sort_by(Site)
+
+colnames(shipt) <- c("Site", "Connect ID", "BioKit_SupplyKitTrack", "BioKit_KitShipTm")
+knitr::kable(shipt) %>% kable_styling(latex_options = "HOLD_position")
+
+```
+
+
+
+```{r recvd, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 37. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received should populate
+
+#IF BioKit_KitStatus_v1r0 (221592017) = 4 THEN BioKit_SupplyKitTrack_v1r0 (531858099), BioKit_KitShipTm_v1r0 (661940160), BioKit_KitRecdTm_v1r0 (826941471), and BioKit_CollCardRet_v1r0 (137401245) = populate
+
+recvd <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_221592017==375535639 & (is.na(d_531858099) | is.na(d_661940160) |
+                                                                        is.na(d_826941471) |  is.na(d_137401245))) %>% 
+  select(Site, Connect_ID, d_531858099, d_661940160, d_826941471, d_137401245) %>%  sort_by(Site)
+
+colnames(recvd) <- c("Site", "Connect ID", "SupplyKitTrack", "KitShipTm", "KitRecdTm", "CollCardRet")
+knitr::kable(recvd) %>% kable_styling(latex_options = "HOLD_position")
+
+```
+
+
+
+
+```{r collected, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# 38. If kit status is Received, then the mouthwash sample is collected.
+
+# IF BioKit_KitStatus_v1r0 (221592017) = 4 THEN MWTube1_BioCol_TubeCollected_v1r0 (d_143615646_d_593843561) = 1
+
+collctd <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_266600170_d_319972665_d_221592017==375535639 & (is.na(d_143615646_d_593843561) |
+                                                                                        d_143615646_d_593843561==104430631)) %>% 
+  select(Site, Connect_ID, d_143615646_d_593843561) %>%  sort_by(Site)
+
+colnames(collctd) <- c("Site", "Connect ID", "MWTube1_BioCol_TubeCollected")
+knitr::kable(collctd) %>% kable_styling(latex_options = "HOLD_position")
+ 
+```
+
+
+
+
+```{r mwtubeid, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# 39. If kit status is Received, then the mouthwash sample tube ID should populate.
+
+#IF BioKit_KitStatus_v1r0 (221592017) = 4 THEN MWTube1_BioCol_TubeID_v1r0 (d_143615646_d_825582494) = populate
+
+mwtubeid <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_266600170_d_319972665_d_221592017==375535639 & is.na(d_143615646_d_825582494)) %>% 
+  select(Site, Connect_ID, d_143615646_d_825582494) %>%  sort_by(Site)
+
+colnames(mwtubeid) <- c("Site", "Connect ID", "MWTube1_BioCol_TubeID")
+knitr::kable(mwtubeid) %>% kable_styling(latex_options = "HOLD_position")
+
+```
+
+
+
+
+```{r HC_Rules3, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# 40.a If kit status (from the participants table) is Received, and kit type is Mouthwash, then the populated mouthwash sample tube ID (full specimen ID) should equal the populated collection cup ID.
+
+#IF BioKit_KitStatus_v1r0 from the particpants table (221592017) = 4  AND BioKit_KitType_v1r0 (379252329) = 0, THEN MWTube1_BioCol_TubeID_v1r0 (d_143615646_d_825582494) = BioKit_MWCupID_v1r0 (259846815)
+hmw3 <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_266600170_d_319972665_d_221592017==375535639 & d_173836415_d_266600170_d_319972665_d_379252329==976461859 & d_143615646_d_825582494!=d_259846815) %>% 
+  select(Site, Connect_ID, d_143615646_d_825582494) %>%  sort_by(Site)
+
+colnames(hmw3) <- c("Site", "Connect ID", "Mouthwash Sample Tube ID (Full Specimen ID)")
+knitr::kable(hmw3) %>% kable_styling(latex_options = "HOLD_position")
+
+```
+
+
+
+
+```{r HC_Rules4, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+# 40.b If kit status (from the kit assembly table) is Received, and kit type is Mouthwash, then the populated mouthwash sample tube ID (full specimen ID) should equal the populated collection cup ID.
+
+#IF BioKit_KitStatus_v1r0 from the kit assembly table (221592017) = 4  AND BioKit_KitType_v1r0 (379252329) = 0, THEN MWTube1_BioCol_TubeID_v1r0 (d_143615646_d_825582494) = BioKit_MWCupID_v1r0 (259846815)
+hmw4 <-  Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_221592017==375535639 & d_173836415_d_266600170_d_319972665_d_379252329==976461859 & d_143615646_d_825582494!=d_259846815) %>% 
+  select(Site, Connect_ID, d_143615646_d_825582494) %>%  sort_by(Site)
+
+colnames(hmw4) <- c("Site", "Connect ID", "Mouthwash Sample Tube ID (Full Specimen ID)")
+knitr::kable(hmw4) %>% kable_styling(latex_options = "HOLD_position")
+
+
+```
+
+
+
+
+```{r homsetting, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 41. If kit status is Received, and the kit type is Mouthwash, then the mouthwash collection setting is Home.
+
+# IF BioKit_KitStatus_v1r0 (221592017) = 4 AND BioKit_KitType_v1r0 (379252329) = 0 THEN BioSpm_MWSettingBL_v1r0 (915179629) = 2
+homsetting <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_221592017==375535639 & d_173836415_d_266600170_d_319972665_d_379252329==976461859 & d_173836415_d_266600170_d_915179629!=103209024) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_915179629) %>%  sort_by(Site)
+
+colnames(homsetting) <- c("Site", "Connect ID", "BioSpm_MWSettingBL")
+knitr::kable(homsetting) %>% kable_styling(latex_options = "HOLD_position")
+
+
+```
+
+
+
+```{r bl_mw, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 42. If the mouthwash collection setting is Home, and the mouthwash sample is collected, then baseline mouthwash is collected.
+
+# If BioSpm_MWSettingBL_v1r0 (915179629) = 2 AND MWTube1_BioCol_TubeCollected_v1r0 (d_143615646_d_593843561) = 1 THEN BioFin_BaseMouthCol_v1r0 (684635302) = 1
+bl_mw <-  Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_266600170_d_915179629==103209024 & d_143615646_d_593843561==353358909 & 
+                           (d_684635302==104430631 | is.na(d_684635302)) ) %>% 
+  select(Site, Connect_ID, d_684635302) %>%  sort_by(Site)
+
+colnames(bl_mw) <- c("Site", "Connect ID", "BioFin_BaseMouthCol")
+knitr::kable(bl_mw) %>% kable_styling(latex_options = "HOLD_position")
+
+
+```
+
+
+
+
+```{r mw_dt, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+
+# 43. If the mouthwash collection setting is Home, and the mouthwash sample is collected, then the mouthwash date/time collected should populate.
+
+# If BioSpm_MWSettingBL_v1r0 (915179629) = 2 AND MWTube1_BioCol_TubeCollected_v1r0 (d_143615646_d_593843561) = 1 THEN BioFin_BMTimeBL_v1r0 (448660695) = populate
+mw_dt <-  Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_266600170_d_915179629==103209024 & d_143615646_d_593843561==353358909 & 
+                           is.na(d_173836415_d_266600170_d_448660695)) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_448660695) %>%  sort_by(Site)
+
+colnames(mw_dt) <- c("Site", "Connect ID", "BioFin_BMTimeBL")
+knitr::kable(mw_dt) %>% kable_styling(latex_options = "HOLD_position")
+
+
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1231,14 +1515,14 @@ bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartne
 #qc1 <- bioqc %>%  filter(d_827220437==300267574)
 
 #Blood
-qc1_blood <- bioqc %>%  filter(str_sub(d_173836415_d_266600170_d_341570479,1,11)!=str_sub(d_646899796_integer,1,11)) 
+qc1_blood <- bioqc %>%  filter(str_sub(d_173836415_d_266600170_d_341570479,1,11)!=str_sub(d_646899796,1,11)) 
 
-qc1_blood <- qc1_blood %>% select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796_integer, d_556788178 ) %>%  sort_by(Site)
+qc1_blood <- qc1_blood %>% select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796, d_556788178 ) %>%  sort_by(Site)
 
 
 # qc1_blood %>%  gt() %>%  
 #   tab_header(title = md("KPHI Blood Accession ID Errors")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_173836415_d_266600170_d_341570479 = md("**KPHI Accession ID**"), d_646899796_integer= md("**Expected Accession ID**"))
+#   cols_label(Connect_ID = md("**Connect ID**"), d_173836415_d_266600170_d_341570479 = md("**KPHI Accession ID**"), d_646899796= md("**Expected Accession ID**"))
 
 colnames(qc1_blood) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID", "Collection Date/Time")
 #knitr::kable(qc1_blood)
@@ -1261,15 +1545,15 @@ write.csv(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs{currentDat
 
 
 #Urine
-qc1_urine <- bioqc %>%  filter(str_sub(d_173836415_d_266600170_d_198261154,1,11)!=str_sub(d_928693120_integer,1,11)) 
+qc1_urine <- bioqc %>%  filter(str_sub(d_173836415_d_266600170_d_198261154,1,11)!=str_sub(d_928693120,1,11)) 
 
-qc1_urine$AID<- strtoi(qc1_urine$d_928693120_integer, base = 0L)
+qc1_urine$AID<- strtoi(qc1_urine$d_928693120, base = 0L)
 
-qc1_urine <- qc1_urine %>% select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120_integer, d_556788178 ) %>%  sort_by(Site)
+qc1_urine <- qc1_urine %>% select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120, d_556788178 ) %>%  sort_by(Site)
 
 # qc1_urine %>%  gt() %>%  
 #   tab_header(title = md("KPHI Urine Accession ID Errors")) %>% 
-#   cols_label(Connect_ID = md("**Connect ID**"), d_173836415_d_266600170_d_198261154 = md("**KPHI Accession ID**"), d_928693120_integer= md("**Expected Accession ID**"))
+#   cols_label(Connect_ID = md("**Connect ID**"), d_173836415_d_266600170_d_198261154 = md("**KPHI Accession ID**"), d_928693120= md("**Expected Accession ID**"))
 
 colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID" , "Expected Accession ID", "Collection Date/Time")
 #knitr::kable(qc1_urine)
@@ -1404,16 +1688,6 @@ write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections
 
 
 ```
-
-
-
-
-
-
-
-
-
-
 
 
 
