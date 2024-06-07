@@ -6410,10 +6410,10 @@ biospe1 <- biospe1[,order(colnames(biospe1))]
 # the rest part on ordering of the variables is still the same as before or what you shared with me last Friday.
 #I don't have any problem running this part
 names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setting_v1r0","BioSpm_Location_v1r0","BioSpm_ColIDScan_v1r0",
-               "BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0",#"BioClin_DBBloodID_v1r0",
+               "BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0",
                "BioClin_DBBloodRRLBL_v1r0",
                "BioClin_DBBloodRRLDtBL_v1r0",
-               #"BioClin_DBUrineID_v1r0",
+               "BioClin_DBUrineID_v1r0",
                "BioClin_DBUrineRRLBL_v1r0",
                "BioClin_DBUrineRRLDtBL_v1r0",
                "BioCol_PhlebInitials_v1r0",
