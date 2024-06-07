@@ -717,7 +717,7 @@ add_Site_location <- function(table1_4_locations, csv_file_path) {
   return(table1_4_locations)
 }
 
-table1_4_locations <- add_Site_location(table1_4_locations, "~/GitHub/ccc_biospecimen_metrics_gcp_pipeline/Sanford_Clincal_Locations.csv")
+table1_4_locations <- add_Site_location(table1_4_locations, "Sanford_Clincal_Locations.csv")
 table1_4_locations <- table1_4_locations %>% filter(!is.na(Site_location))
 
 
