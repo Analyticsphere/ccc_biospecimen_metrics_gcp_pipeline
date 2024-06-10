@@ -98,15 +98,16 @@ knitr::opts_chunk$set(comment = NA)
 
 
 
-bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartners",
-                                                 d_827220437==548392715 ~ "Henry Ford Health System",
-                                                 d_827220437==303349821 ~ "Marshfield Clinical Health System",
-                                                 d_827220437==657167265 ~ "Sanford Health",
-                                                 d_827220437==809703864 ~ "University of Chicago Medicine",
-                                                d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                                                 d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                                                 d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
+bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott & White Health",
+                                          d_827220437==531629870 ~ "HealthPartners",
+                                          d_827220437==548392715 ~ "Henry Ford Health System",
+                                          d_827220437==303349821 ~ "Marshfield Clinical Health System",
+                                          d_827220437==657167265 ~ "Sanford Health",
+                                          d_827220437==809703864 ~ "University of Chicago Medicine",
+                                          d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+                                          d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+                                          d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+                                          d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
 
 
@@ -1001,9 +1002,7 @@ PolyBloodID <- unlist(strsplit(gsub("\\[|\\]", "", str1), ","))
 
  
 
-
-bioqc1 <- bioqc1 %>%  #filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796)) %>%  
-mutate(BioClin_DBBloodID_v1r0=paste0("L", d_646899796))
+bioqc1 <- bioqc1 %>% mutate(BioClin_DBBloodID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_646899796), d_646899796))
 
 #polyblood <- bioqc1 %>%  filter(!(BioClin_DBBloodID_v1r0 %in% as.list(d_173836415_d_266600170_d_543608829))) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>%
 
@@ -1030,8 +1029,7 @@ PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ","))
 
  
 
-bioqc2 <- bioqc2 %>%  
-mutate(BioClin_DBUrineID_v1r0=paste0("L", d_928693120))
+bioqc2 <- bioqc2 %>%   mutate(BioClin_DBUrineID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_928693120),d_928693120))
 
 
 polyurine <- bioqc2 %>%  filter(!(bioqc2$BioClin_DBUrineID_v1r0 %in% PolyUrineID)) %>%  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, d_173836415_d_266600170_d_110349197) %>% sort_by(Site)
@@ -1070,14 +1068,15 @@ HMW= left_join(parts_data, kit_data, by="Connect_ID" )
 
 
 HMW <- HMW %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartners",
-                                                 d_827220437==548392715 ~ "Henry Ford Health System",
-                                                 d_827220437==303349821 ~ "Marshfield Clinical Health System",
-                                                 d_827220437==657167265 ~ "Sanford Health",
-                                                 d_827220437==809703864 ~ "University of Chicago Medicine",
-                                                d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                                                 d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                                                 d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
+                                      d_827220437 == 548392715 ~ "Henry Ford Health System",
+                                      d_827220437 == 303349821 ~ "Marshfield Clinical Health System",
+                                      d_827220437 == 657167265 ~ "Sanford Health",
+                                      d_827220437 == 809703864 ~ "University of Chicago Medicine",
+                                      d_827220437 == 125001209 ~ "Kaiser Permanente Colorado",
+                                      d_827220437 == 327912200 ~ "Kaiser Permanente Georgia",
+                                      d_827220437 == 300267574 ~ "Kaiser Permanente Hawaii",
+                                      d_827220437 == 452412599 ~ "Kaiser Permanente Northwest",
+                                      d_827220437 == 472940358 ~ "Baylor Scott & White Health"))
 
 
 Bio_HMW <- HMW %>%  left_join(MW_data,  by="Connect_ID") 
