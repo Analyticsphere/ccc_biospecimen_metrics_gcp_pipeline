@@ -648,9 +648,6 @@ table2_status <- table2 %>%
     missing="ifany",
     margin_text="Total")
 
-
-
-
 table2_totals <- as.data.frame(table2_status)
 table2_totals <- table2_totals[-1, ]
 
@@ -783,6 +780,7 @@ final_col_num_1.5$C30 <- paste0(final_col_num_1.5$Count_30days, " (", final_col_
 
 
 
+
 ## Issue: for whatever reason some people have a null BL_BioSpm_BloodSetting_v1r0/Urine/MW value, so the extra '| d_650516960==' is added
 #but 650516960 won't apply correctly to mouthwas all the time
 
@@ -799,10 +797,16 @@ mutate(
     Mouthwash_Home = ifelse(BioFin_BaseMWCol_v1r0 == "Any mouthwash collected" & BL_BioSpm_MWSetting_v1r0=="Home", 1, 0)
   )
 
+derived_cols <- coll_set_spec %>%
+  select(starts_with("Blood"), starts_with("Urine"), starts_with("Mouthwash"))
+
 
 
 derived_cols <- coll_set_spec %>%
   select(starts_with("Blood"), starts_with("Urine"), starts_with("Mouthwash"))
+
+sites <- unique(table2_hybrid$Site)
+site_results <- list()
 
 
 long_format <- derived_cols %>%
@@ -1074,6 +1078,7 @@ site.sub <- site.sub %>% filter(`Specimens Collected` != "Mouthwash" & `Specimen
 unique(site.sub$`Specimens Collected`)
 
 site.sub$`Specimens Collected` <- factor(site.sub$`Specimens Collected`, levels = c('Blood & Urine (All)', 'Blood Only', 'Urine Only', 'No Specimens Collected'))
+
 
 table4_redone__C <- site.sub %>%
   filter(Setting == "Clinical Collections")
@@ -2621,7 +2626,6 @@ verif_BSL_colctD = BSL_colctD %>%group_by(Site) %>%
 ## New table 23
 
 
-
 baseline_colct <- tab22 %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) & d_650516960==664882224) # new-- clinical only, will need research also separately later 
 
     ## BEFORE 2/1/23
@@ -2728,7 +2732,6 @@ BSL_after24 <- baseline_24_after %>%  mutate(time = as.numeric(difftime(as.POSIX
                                      #              #d_827220437.x==517700004 ~ "NCI"),
                                      campaign = case_when( (state_d_667474224==348281054 | state_d_667474224==324692899)  ~ "Upcoming Appointment" ,
                                                             TRUE ~ "All Other Campaigns"))
-
 
 
 verif_baseline_Af = BSL_after24 %>%group_by(Site) %>% 
@@ -3255,7 +3258,6 @@ crosstable.coll_bptl28a$n_pct_3_Day <-  paste(format(crosstable.coll_bptl28a[,4]
 crosstable.coll_bptl28a$n_pct_4_Day <-  paste(format(crosstable.coll_bptl28a[,5],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,11],1),"%)",sep=" ")
 crosstable.coll_bptl28a$n_pct_4_plus_days =  paste(format(crosstable.coll_bptl28a[,1],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,7],1),"%)",sep=" ")
 crosstable.coll_bptl28a$Total_Pct <- paste(crosstable.coll_bptl28a$Total, " (100%)")
-
 
          
 #crosstable.coll_bptl28a <- crosstable.coll_bptl28a %>%  select("Site","n_pct_1_Day", "n_pct_2_Day","n_pct_3_Day","n_pct_4_Day","n_pct_4_plus_days", "Total_Pct")
@@ -3854,7 +3856,6 @@ research.1_2
 ```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
 knitr::kable(clin_bldcnt_HF2, col.names=c("Clinic Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Clinical Collections"), caption='Table 2.6: Baseline Blood Collection Completeness Among Clinical Collections \n by Clinic Location, \n Henry Ford Health', row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") #"No Blood Tubes Collected",
-
 
 tab2_7= knitr::kable(research.coltube_totals, caption='Table 2.7: Baseline- Total Blood Tubes Collected Among Research Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c", "c"), booktabs = TRUE) %>%  add_indent(seq(1, nrow(research.coltube_totals) - 1))  %>% kable_styling(latex_options = "scale_down")
 add_footnote(tab2_7, "Note: Research collections are expected to have a total of 5 blood tubes collected.", notation = "none") 
