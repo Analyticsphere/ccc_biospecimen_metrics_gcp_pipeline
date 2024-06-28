@@ -409,7 +409,7 @@ biospe_locations<-biospe %>% mutate(Site_location = case_when(d_951355211==77764
                                                       d_951355211==567969985 ~ "MF Pop-Up",
                                                       d_951355211==319518299 ~ "UCM Pop-Up",
                                                       d_951355211==940329442 ~ "Orland Park"),
-                                    Site=case_when(siteAcronym=="BSW" ~ "Baylor Scott & White Health", #guessing
+                                    Site=case_when(siteAcronym=="BSW" ~ "Baylor Scott & White Health",
                                                    siteAcronym=="HFHS" ~ "Henry Ford Health System",
                                                    siteAcronym=="HP" ~ "HealthPartners",
                                                    siteAcronym=="KPCO" ~ "Kaiser Permanente Colorado",
@@ -512,7 +512,8 @@ biospe_site<-biospe %>% filter(d_650516960== 664882224) %>%
                                                    siteAcronym=="KPGA" ~ "Kaiser Permanente Georgia",
                                                    siteAcronym=="KPHI" ~ "Kaiser Permanente Hawaii",
                                                    siteAcronym=="KPNW" ~ "Kaiser Permanente Northwest",
-                                                   siteAcronym=="SFH" ~ "Sanford Health"))
+                                                   siteAcronym=="SFH" ~ "Sanford Health",
+                                                  siteAcronym=="UCM" ~ "University of Chicago Medicine"))
 
 
 Clin_Site_Loc <- recrver1 %>% select(Site, Connect_ID, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_452847912)
@@ -525,11 +526,9 @@ table1_2_locs$biocol.appoint[table1_2_locs$biocol.appoint=="Baseline Collection"
 table1_2_locations <-  table1_2_locs %>% filter(biocol.appoint=="Number of Clinical Collections")
 table1_2_locations <- table1_2_locations %>%  distinct(Connect_ID, .keep_all = TRUE) #testing this out
 
-table1_2__locations <- table1_2_locations %>% mutate(Site_location=case_when(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
-                                                                             d_173836415_d_266600170_d_185243482 == 2 |
-                                                                               d_173836415_d_266600170_d_452847912 == 2 ~ "Elk River",
-                                                                             d_173836415_d_266600170_d_185243482 == 3 |
-                                                                               d_173836415_d_266600170_d_452847912 == 3 ~ "Chanhassen",
+table1_2__locations <- table1_2_locations %>% mutate(Site_location=case_when(#d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
+                                                                             Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 2 | d_173836415_d_266600170_d_452847912 == 2) ~ "Elk River",
+                                                                             Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 3 | d_173836415_d_266600170_d_452847912 == 3) ~ "Chanhassen",
                                                                              d_173836415_d_266600170_d_185243482 == 1050010095 |
                                                                                d_173836415_d_266600170_d_452847912 == 1050010095 ~ "Wyandotte",
                                                                              d_173836415_d_266600170_d_185243482 == 1060010063 |
@@ -566,8 +565,13 @@ table1_2__locations <- table1_2_locations %>% mutate(Site_location=case_when(d_1
                                                                              d_173836415_d_266600170_d_185243482 == 1010200009 |
                                                                                d_173836415_d_266600170_d_452847912 == 1010200009 ~ "Ford Road",
                                                                              d_173836415_d_266600170_d_185243482 == 1010270015 |
-                                                                               d_173836415_d_266600170_d_452847912 == 1010270015 ~ "NCO"))
-
+                                                                               d_173836415_d_266600170_d_452847912 == 1010270015 ~ "NCO",
+Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1) ~ "South Loop",
+Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2) ~ "Orland Park",
+Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3) ~ "Kenwood",
+Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==4 | d_173836415_d_266600170_d_452847912==4) ~ "River East",
+Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==5 | d_173836415_d_266600170_d_452847912==5) ~ "Dearborn Station",
+d_173836415_d_266600170_d_185243482 == 1050020026 | d_173836415_d_266600170_d_452847912 == 1050020026 ~ "Brownstown"))
  col_num <- table(table1_2__locations$Site_location, table1_2__locations$biocol.appoint)
 
 col_num_1.2 <- as.data.frame(col_num)
@@ -578,8 +582,10 @@ rownames(col_num_1.2) <- col_num_1.2$`Collection Location`
 
 col_num_1.2 <- col_num_1.2 %>%
   mutate(Site_Group = case_when(
-    `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO") ~ "Henry Ford Health System",
-    `Collection Location` %in% c("NSC", "Elk River", "Chanhassen") ~ "HealthPartners",
+    `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
+                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown") ~ "Henry Ford Health System", 
+    `Collection Location` %in% c("Elk River", "Chanhassen") ~ "HealthPartners", #"NSC", 
+    `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station") ~ "University of Chicago Medicine",
     TRUE ~ "Other"
   ))
 
@@ -716,6 +722,7 @@ add_Site_location <- function(table1_4_locations, csv_file_path) {
   
   return(table1_4_locations)
 }
+
 
 table1_4_locations <- add_Site_location(table1_4_locations, "Sanford_Clincal_Locations.csv")
 table1_4_locations <- table1_4_locations %>% filter(!is.na(Site_location))
@@ -1017,6 +1024,55 @@ bioset5_3[4,2] <- paste0(bioset5_3[4,2] , " (100%)")
 bioset5_3[4,3] <- paste0(bioset5_3[4,3], " (100%)")
 bioset5_3[4,4] <- paste0(bioset5_3[4,4], " (100%)")
 
+
+##UC
+home_mw_counts_HP <-sum(as.numeric(site_home_mw$f0_[site_home_mw$d_827220437==809703864]))
+
+settings <- recrvar.bio[grepl("Setting",recrvar.bio$Variable.Label),]$column_name
+setting <- c("BL_BioSpm_BloodSetting_v1r0","BL_BioSpm_UrineSetting_v1r0","BL_BioSpm_MWSetting_v1r0")
+bio <- c("d_878865966","d_167958071","d_684635302")
+col_set5 <- list()
+for (i in 1:3){
+  recrver1_5_4 <- recrver1 %>%  filter(Site=="University of Chicago Medicine") #& BL_BioSpm_BloodSetting_v1r0=="Clinical" & BL_BioSpm_UrineSetting_v1r0=="Clinical" & BL_BioSpm_MWSetting_v1r0=="Clinical"
+tmp <-eval(parse(text=paste("pct_tb(recrver1_5_4$",setting[i],",recrver1_5_4$",bio[i],")",sep="")))
+#tmp <- tmp %>%
+tmp <- tmp %>% select(contains("n_Any")) %>%  mutate(Setting = trimws(rownames(tmp)))
+col_set5[[i]] <- tmp
+}
+biosettings5_4 <- col_set5 %>% reduce(full_join,by="Setting")
+biosettings5_4[4,c(1:4)] <- c("0", "Home",  "0", as.numeric(home_mw_counts_HP))
+biosettings5_4[1,4] <- "0"
+biosettings5_4 <- biosettings5_4[order(biosettings5_4$Setting),c(2,1,3,4)]
+colnames(biosettings5_4)[2:4] <- gsub("n_","",colnames(biosettings5_4)[2:4])
+
+biosettings5_4[4,4] <- as.numeric(biosettings5_4[1,4]) + as.numeric(biosettings5_4[2,4]) + as.numeric(biosettings5_4[3,4])
+bioset5_4 <- biosettings5_4
+
+a5<- round(as.numeric(as.character(bioset5_4[1,2]))/ as.numeric(as.character(bioset5_4[4,2])), digits=3)*100
+b5 <- round(as.numeric(as.character(bioset5_4[1,3]))/ as.numeric(as.character(bioset5_4[4,3])), digits=3)*100
+c5 <- round(as.numeric(as.character(bioset5_4[1,4]))/ as.numeric(as.character(bioset5_4[4,4])), digits=3)*100
+d5 <- round(as.numeric(as.character(bioset5_4[2,2]))/ as.numeric(as.character(bioset5_4[4,2])), digits=3) *100
+e5<- round(as.numeric(as.character(bioset5_4[2,3]))/ as.numeric(as.character(bioset5_4[4,3])), digits=3)*100
+f5 <- round(as.numeric(as.character(bioset5_4[2,4]))/ as.numeric(as.character(bioset5_4[4,4])), digits=3)*100
+g5 <- round(as.numeric(as.character(bioset5_4[3,2]))/ as.numeric(as.character(bioset5_4[4,2])), digits=3)*100
+h5 <- round(as.numeric(as.character(bioset5_4[3,3]))/ as.numeric(as.character(bioset5_4[4,3])), digits=3)*100
+i5 <- round(as.numeric(as.character(bioset5_4[3,4]))/ as.numeric(as.character(bioset5_4[4,4])), digits=3)*100
+
+
+bioset5_4[1,2] <- paste0(bioset5_4[1,2], " (", a5, "%)")
+bioset5_4[1,3]  <- paste0(bioset5_4[1,3], " (", b5, "%)")
+bioset5_4[1,4]  <- paste0(bioset5_4[1,4], " (", c5, "%)")
+bioset5_4[2,2] <- paste0(bioset5_4[2,2], " (", d5, "%)")
+bioset5_4[2,3]  <- paste0(bioset5_4[2,3], " (", e5, "%)")
+bioset5_4[2,4]  <- paste0(bioset5_4[2,4], " (", f5, "%)")
+bioset5_4[3,2] <- paste0(bioset5_4[3,2], " (", g5, "%)")
+bioset5_4[3,3] <- paste0(bioset5_4[3,3], " (", h5, "%)")
+bioset5_4[3,4]  <- paste0(bioset5_4[3,4], " (", i5, "%)")
+
+bioset5_4[4,2] <- paste0(bioset5_4[4,2] , " (100%)")
+bioset5_4[4,3] <- paste0(bioset5_4[4,3], " (100%)")
+bioset5_4[4,4] <- paste0(bioset5_4[4,4], " (100%)")
+
 ```
 
 
@@ -1186,12 +1242,6 @@ coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected'
     missing="ifany",
     margin_text="Total")
 
-# coll_completenessC <- coll_completenessC%>%
-#   #bold_labels() %>%
-#   #italicize_levels() %>% 
-#   modify_header(stat_0 = "Total") %>%
-#   modify_caption("Table 2.2: Baseline Clinical Biospecimen Collection Completeness by Specimen Type") %>%
-#   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
 
@@ -1538,10 +1588,14 @@ biospe7= left7  %>%
                              d_173836415_d_266600170_d_185243482==1010320019 ~ "Sterling Heights",
                              d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_185243482==1010010114 ~ "Main - K1",
                              d_173836415_d_266600170_d_185243482==1010270015 ~ "NCO",
-                             d_173836415_d_266600170_d_185243482==1010200009 ~ "Ford Road",
-                             TRUE ~ "Other"))    #to avoid errors when new sites come in without a heads up
+                             d_173836415_d_266600170_d_185243482==1050020026 ~ "Brownstown",
+                             d_173836415_d_266600170_d_185243482==1010200009 ~ "Ford Road"))
+                             
 
-biospe7 <- biospe7 %>% filter(!is.na(HF_Sites))
+biospe7 <- biospe7 %>% filter(!is.na(HF_Sites)) #to avoid errors when new sites come in without a heads up
+#Make list of HF Sites consistent 
+biospe7$HF_Sites <- factor(biospe7$HF_Sites,levels=c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "Main - K1","Sterling Heights","Columbus", 
+                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown")) 
 
 tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>%
   #filter(HF_Sites=="HF Wyandotte Hospital" | HF_Sites=="HF Macomb Medical Pavilion" |  HF_Sites=="HF West Bloomfield Hospital") %>%
@@ -3039,7 +3093,7 @@ verif_BSL_colctB = BSL_colctB %>%group_by(Site) %>%
   #recrver1, d_914594314 , d_173836415_d_266600170_d_769615780, d_827220437     &        biospe,  biocol_Setting== "Clinical",
 
 
-ver_draw <- tab22 %>%  filter(biocol_Setting== "Clinical" & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2023-02-01")  & Site!='HealthPartners' & Site!='Sanford Health') 
+ver_draw <- tab22 %>%  filter(biocol_Setting== "Clinical" & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2023-02-01")  & Site!='HealthPartners' & Site!='Sanford Health' & Site!='University of Chicago Medicine') 
 ##won't receive a draw order from HP--Github issue 72
 
 verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
@@ -3203,11 +3257,11 @@ clc.both.vt.NW <- clc.both.vt.KP %>%  filter(clc.both.vt.KP$Site=="Kaiser Perman
  clc_both_vt.site.CO<- clc.both.wk_site.CO  %>% ggplot( aes(x=as_date(clc.both.wk_site.CO$Monday.date.start), y=n)) + 
    geom_line() + 
   geom_point(width = 0.2) +
-  scale_y_continuous(name="Number of Collections") + #, minor_breaks=0) + #, limits=c(0,max(clc.both.wk_site.CO$visit.wk))) + #, limits=c(0,5)) +
+  scale_y_continuous(name="Number of Collections") + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(Sys.Date())-7),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
 
-  ggtitle(label="Figure 6.14: Baseline- Weekly Biospecimen Collections,  \n Kaiser Permanente Colorado") +
+  ggtitle(label="Figure 6.16: Baseline- Weekly Biospecimen Collections,  \n Kaiser Permanente Colorado") +
 
   #theme_ipsum() +
   theme(panel.background = element_blank(),
@@ -3227,10 +3281,10 @@ clc.both.wk_site.GA <- clc.both.vt.GA %>% arrange(Site,BU.Sunday.week,Monday.dat
 clc_both_vt.site.GA<- clc.both.wk_site.GA  %>% ggplot( aes(x=as_date(clc.both.wk_site.GA$Monday.date.start), y=n)) + 
   geom_line() + 
   geom_point(width = 0.2) +
-  scale_y_continuous(name="Number of Collections") + #, limits=c(0,5)) +
+  scale_y_continuous(name="Number of Collections") + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(currentDate)-7),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="Figure 6.15: Baseline- Weekly Biospecimen Collections,  \n Kaiser Permanente Georgia") +
+  ggtitle(label="Figure 6.17: Baseline- Weekly Biospecimen Collections,  \n Kaiser Permanente Georgia") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -3249,10 +3303,10 @@ clc.both.wk_site.HI <- clc.both.vt.HI %>% arrange(Site,BU.Sunday.week,Monday.dat
 clc_both_vt.site.HI<- clc.both.wk_site.HI %>% ggplot( aes(x=as_date(clc.both.wk_site.HI$Monday.date.start), y=n)) +
   geom_line() + 
   geom_point(width = 0.2) +
-  scale_y_continuous(name="Number of Collections") + #, limits=c(0,5)) +
+  scale_y_continuous(name="Number of Collections") + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(currentDate)-7),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="Figure 6.16: Baseline- Weekly Biospecimen Collections, \n Kaiser Permanente Hawaii") +
+  ggtitle(label="Figure 6.18: Baseline- Weekly Biospecimen Collections, \n Kaiser Permanente Hawaii") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -3274,7 +3328,7 @@ clc_both_vt.site.NW<- clc.both.wk_site.NW  %>% ggplot( aes(x=as_date(clc.both.wk
   scale_y_continuous(name="Number of Collections") + #, limits=c(0,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-01-16"),as.Date(currentDate)-7),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") + 
-  ggtitle(label="Figure 6.17: Baseline- Weekly Biospecimen Collections,  \n Kaiser Permanente Northwest") +
+  ggtitle(label="Figure 6.19: Baseline- Weekly Biospecimen Collections,  \n Kaiser Permanente Northwest") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=7),
@@ -3398,7 +3452,7 @@ Table_bld_draw <- blood_placed %>% dplyr::select(Site, bld_placed)  %>% tbl_cros
 ```{r Table25, include=FALSE, echo=FALSE, warning=FALSE}
 
 
-avg_coll <- clinic.survey %>%  filter(d_173836415_d_266600170_d_982213346>=as.Date("2023-02-01") & Site!='HealthPartners' & Site!="Sanford Health") ##won't receive a draw order from HP--Github issue 72
+avg_coll <- clinic.survey %>%  filter(d_173836415_d_266600170_d_982213346>=as.Date("2023-02-01") & Site!='HealthPartners' & Site!="Sanford Health" & Site!='University of Chicago Medicine') ##won't receive a draw order from HP--Github issue 72
 avg_coll <- avg_coll %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days")))
 
 avg_draw_order = avg_coll %>%group_by(Site) %>% #biochk_outlier,
@@ -3721,27 +3775,29 @@ biospe_adhoc2= table2 %>%  filter(d_650516960==664882224 & d_410912345==35335890
                                 !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) | !is.na(d_652357376_d_926457119) |
                                 !is.na(d_677469051_d_926457119) | !is.na(d_683613884_d_926457119) | !is.na(d_703954371_d_926457119) | !is.na(d_838567176_d_926457119) |
                                 !is.na(d_958646668_d_926457119) | !is.na(d_973670172_d_926457119))) %>%  
-                     mutate(Site_location = case_when(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
-                                                      d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
-                                                      d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen",
+                     mutate(Site_location = case_when(#d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
+                                                      d_827220437=="531629870" & d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
+                                                      d_827220437=="531629870" & d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen",
                                                       d_173836415_d_266600170_d_185243482==22 | d_173836415_d_266600170_d_452847912==22 |
-                                                      d_173836415_d_266600170_d_185243482==24 | d_173836415_d_266600170_d_452847912==24 |
-                                                      d_173836415_d_266600170_d_185243482==28 | d_173836415_d_266600170_d_452847912==28 |
-                                                      d_173836415_d_266600170_d_185243482==33 | d_173836415_d_266600170_d_452847912==33 |
-                                                      d_173836415_d_266600170_d_185243482==34 | d_173836415_d_266600170_d_452847912==34 |
-                                                      d_173836415_d_266600170_d_185243482==35 | d_173836415_d_266600170_d_452847912==35 |
-                                                      d_173836415_d_266600170_d_185243482==38 | d_173836415_d_266600170_d_452847912==38 |
-                                                      d_173836415_d_266600170_d_185243482==40 | d_173836415_d_266600170_d_452847912==40 |
-                                                      d_173836415_d_266600170_d_185243482==55 | d_173836415_d_266600170_d_452847912==55 |
-                                                      d_173836415_d_266600170_d_185243482==71 | d_173836415_d_266600170_d_452847912==71 ~ "Oahu Clinics",
-                                                      d_173836415_d_266600170_d_185243482==23 | d_173836415_d_266600170_d_452847912==23 |
-                                                      d_173836415_d_266600170_d_185243482==26 | d_173836415_d_266600170_d_452847912==26 |
-                                                      d_173836415_d_266600170_d_185243482==27 | d_173836415_d_266600170_d_452847912==27 |
-                                                      d_173836415_d_266600170_d_185243482==32 | d_173836415_d_266600170_d_452847912==32 |
-                                                      d_173836415_d_266600170_d_185243482==37 | d_173836415_d_266600170_d_452847912==37 |
-                                                      d_173836415_d_266600170_d_185243482==49 | d_173836415_d_266600170_d_452847912==49 |
-                                                      d_173836415_d_266600170_d_185243482==56 | d_173836415_d_266600170_d_452847912==56 |
-                                                      d_173836415_d_266600170_d_185243482==69 | d_173836415_d_266600170_d_452847912==69 ~ "Non-Oahu Clinics",
+                                                        d_173836415_d_266600170_d_185243482==24 | d_173836415_d_266600170_d_452847912==24 |
+                                                        d_173836415_d_266600170_d_185243482==28 | d_173836415_d_266600170_d_452847912==28 |
+                                                        d_173836415_d_266600170_d_185243482==33 | d_173836415_d_266600170_d_452847912==33 |
+                                                        d_173836415_d_266600170_d_185243482==34 | d_173836415_d_266600170_d_452847912==34 |
+                                                        d_173836415_d_266600170_d_185243482==35 | d_173836415_d_266600170_d_452847912==35 |
+                                                        d_173836415_d_266600170_d_185243482==38 | d_173836415_d_266600170_d_452847912==38 |
+                                                        d_173836415_d_266600170_d_185243482==40 | d_173836415_d_266600170_d_452847912==40 |
+                                                        d_173836415_d_266600170_d_185243482==55 | d_173836415_d_266600170_d_452847912==55 |
+                                                        d_173836415_d_266600170_d_185243482==71 | d_173836415_d_266600170_d_452847912==71 ~ "Oahu Clinics",
+                                                    d_173836415_d_266600170_d_185243482==23 | d_173836415_d_266600170_d_452847912==23 |
+                                                        d_173836415_d_266600170_d_185243482==26 | d_173836415_d_266600170_d_452847912==26 |
+                                                        d_173836415_d_266600170_d_185243482==27 | d_173836415_d_266600170_d_452847912==27 |
+                                                        d_173836415_d_266600170_d_185243482==32 | d_173836415_d_266600170_d_452847912==32 |
+                                                        d_173836415_d_266600170_d_185243482==37 | d_173836415_d_266600170_d_452847912==37 |
+                                                        d_173836415_d_266600170_d_185243482==49 | d_173836415_d_266600170_d_452847912==49 |
+                                                        d_173836415_d_266600170_d_185243482==56 | d_173836415_d_266600170_d_452847912==56 |
+                                                        d_173836415_d_266600170_d_185243482==69 | d_173836415_d_266600170_d_452847912==69 |
+                                                        d_173836415_d_266600170_d_185243482==74 | d_173836415_d_266600170_d_452847912==74 |
+                                                        d_173836415_d_266600170_d_185243482==76 | d_173836415_d_266600170_d_452847912==76 ~ "Non-Oahu Clinics",
                        d_173836415_d_266600170_d_185243482==1050010095 | d_173836415_d_266600170_d_452847912==1050010095 ~ "Wyandotte",
                        d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 |
                          d_173836415_d_266600170_d_452847912==1060010063 | d_173836415_d_266600170_d_452847912==1060170018~ "Macomb",
@@ -3761,6 +3817,12 @@ biospe_adhoc2= table2 %>%  filter(d_650516960==664882224 & d_410912345==35335890
                        d_173836415_d_266600170_d_185243482==1010320019 | d_173836415_d_266600170_d_452847912==1010320019 ~ "Sterling Heights",
                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010114 |
                          d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010193~ "K1 HFH Main",
+                      d_173836415_d_266600170_d_185243482==1050020026 | d_173836415_d_266600170_d_452847912==1050020026 ~ "Brownstown",
+                      d_827220437=="809703864" & (d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1) ~ "South Loop",
+                      d_827220437=="809703864" & (d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2) ~ "Orland Park",
+                      d_827220437=="809703864" & (d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3) ~ "Kenwood",
+                      d_827220437=="809703864" & (d_173836415_d_266600170_d_185243482==4 | d_173836415_d_266600170_d_452847912==4) ~ "River East",
+                      d_827220437=="809703864" & (d_173836415_d_266600170_d_185243482==5 | d_173836415_d_266600170_d_452847912==5) ~ "Dearborn Station",
                                         d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                         d_827220437==452412599 ~ "Kaiser Permanente Northwest",
                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
@@ -3774,11 +3836,14 @@ biospe_adhoc2= table2 %>%  filter(d_650516960==664882224 & d_410912345==35335890
                                         d_827220437==452412599 ~ "Kaiser Permanente Northwest",
                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
                                         d_827220437==657167265 ~ "Sanford Health",
+                                        d_827220437==809703864 ~ "University of Chicago Medicine",
                                         TRUE ~ "Remove"))
 biospe_adhoc2 <- biospe_adhoc2 %>%  filter(Site_location!="Remove" & Site!="Remove")
-biospe_adhoc2$Site_location <- factor(biospe_adhoc2$Site_location,levels=c("Macomb","West Bloomfield","Wyandotte","Fairlane (Dearborn)","Plymouth", "Royal Oak","Troy", "Taylor",
-                                                  "K1 HFH Main","Sterling Heights","Columbus", "Livonia" ,"Ford Road", "NCO","Chanhassen", "Elk River", "Kaiser Permanente Colorado", 
-                                                  "Kaiser Permanente Georgia", "Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest", "Sanford Health"))
+biospe_adhoc2$Site_location <- factor(biospe_adhoc2$Site_location,levels=c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights",
+                                                                           "Columbus",  "Livonia","Taylor", "Ford Road", "NCO", "Brownstown", #"NSC", 
+                                                                           "Chanhassen", "Elk River", "Kaiser Permanente Colorado",
+                                                                           "Kaiser Permanente Georgia", "Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest", "Sanford Health",
+                                                                           "South Loop","Orland Park","Kenwood","River East","Dearborn Station")) 
 
 
 coll_bptl_diff2 <- biospe_adhoc2  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
@@ -3797,9 +3862,10 @@ crosstable.coll_bptl29a <- ctable(coll_bptl_diff2$Site,coll_bptl_diff2$coll_days
 crosstable.coll_bptl29a <- as.data.frame(cbind(crosstable.coll_bptl29a$cross_table,crosstable.coll_bptl29a$proportions))
 #crosstable.coll_bptl29a$UC_Sites <-trimws(rownames(crosstable.coll_bptl29a))
 #crosstable.coll_bptl28$UC_Sites<- droplevels(crosstable.coll_bptl28$UC_Sites)
-crosstable.coll_bptl29a <- crosstable.coll_bptl29a[c(1:7),]
+#crosstable.coll_bptl29a <- crosstable.coll_bptl29a[c(1:7),]
+crosstable.coll_bptl29a <- crosstable.coll_bptl29a[c(1:(nrow(crosstable.coll_bptl29a)-1)),]
 crosstable.coll_bptl29a$Site <- list("HealthPartners", "Henry Ford Health", "Kaiser Permanente Colorado", "Kaiser Permanente Georgia",
-                                     "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest", "Sanford Health")
+                                     "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest", "Sanford Health", "University of Chicago Medicine")
 
 #crosstable.coll_bptl29a <- crosstable.coll_bptl29a %>%  filter9
 
@@ -3815,7 +3881,7 @@ crosstable.coll_bptl29a$Total <- paste(crosstable.coll_bptl29a$Total, " (100%)")
 crosstable.coll_bptl29a <- crosstable.coll_bptl29a[,c(13:18,6)]
 
 
-crosstable.coll_bptl29a[8,] <- list('Total', sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,2], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
+crosstable.coll_bptl29a[9,] <- list('Total', sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,2], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,3], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,4], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl29a[,5], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
@@ -3824,12 +3890,12 @@ crosstable.coll_bptl29a[8,] <- list('Total', sum(as.numeric(gsub(",", "", str_ex
 
 
 
-crosstable.coll_bptl29a[8,2] <- paste(crosstable.coll_bptl29a[8,2], "(",round(100*as.numeric(crosstable.coll_bptl29a[8,2])/as.numeric(crosstable.coll_bptl29a[8,7]), digits=1), "%)")
-crosstable.coll_bptl29a[8,3] <- paste(crosstable.coll_bptl29a[8,3], "(",round(100*as.numeric(crosstable.coll_bptl29a[8,3])/as.numeric(crosstable.coll_bptl29a[8,7]), digits=1), "%)")
-crosstable.coll_bptl29a[8,4] <- paste(crosstable.coll_bptl29a[8,4], "(",round(100*as.numeric(crosstable.coll_bptl29a[8,4])/as.numeric(crosstable.coll_bptl29a[8,7]), digits=1), "%)")
-crosstable.coll_bptl29a[8,5] <- paste(crosstable.coll_bptl29a[8,5], "(",round(100*as.numeric(crosstable.coll_bptl29a[8,5])/as.numeric(crosstable.coll_bptl29a[8,7]), digits=1), "%)")
-crosstable.coll_bptl29a[8,6] <- paste(crosstable.coll_bptl29a[8,6], "(",round(100*as.numeric(crosstable.coll_bptl29a[8,6])/as.numeric(crosstable.coll_bptl29a[8,7]), digits=1), "%)")
-crosstable.coll_bptl29a[8,7] <- paste(crosstable.coll_bptl29a[8,7], " (100%)")
+crosstable.coll_bptl29a[9,2] <- paste(crosstable.coll_bptl29a[9,2], "(",round(100*as.numeric(crosstable.coll_bptl29a[9,2])/as.numeric(crosstable.coll_bptl29a[9,7]), digits=1), "%)")
+crosstable.coll_bptl29a[9,3] <- paste(crosstable.coll_bptl29a[9,3], "(",round(100*as.numeric(crosstable.coll_bptl29a[9,3])/as.numeric(crosstable.coll_bptl29a[9,7]), digits=1), "%)")
+crosstable.coll_bptl29a[9,4] <- paste(crosstable.coll_bptl29a[9,4], "(",round(100*as.numeric(crosstable.coll_bptl29a[9,4])/as.numeric(crosstable.coll_bptl29a[9,7]), digits=1), "%)")
+crosstable.coll_bptl29a[9,5] <- paste(crosstable.coll_bptl29a[9,5], "(",round(100*as.numeric(crosstable.coll_bptl29a[9,5])/as.numeric(crosstable.coll_bptl29a[9,7]), digits=1), "%)")
+crosstable.coll_bptl29a[9,6] <- paste(crosstable.coll_bptl29a[9,6], "(",round(100*as.numeric(crosstable.coll_bptl29a[9,6])/as.numeric(crosstable.coll_bptl29a[9,7]), digits=1), "%)")
+crosstable.coll_bptl29a[9,7] <- paste(crosstable.coll_bptl29a[9,7], " (100%)")
 
 
 ```
@@ -3927,11 +3993,6 @@ Hrs_bptl_col <- coll_bptl_diff %>% group_by(Site_location) %>% dplyr::summarise(
 #Hrs_bptl_col <- Hrs_bptl_col[c(5,2:4,7,9,8,10,16,17,12,1,6,11,13,14,15),]
 
 
-
-
-
-
-
 ```
 
 
@@ -3950,8 +4011,6 @@ Hrs_bptl_col4 <- coll_bptl_diff2 %>% group_by(Site_location) %>% dplyr::summaris
 
 
 #Hrs_bptl_col4 <- Hrs_bptl_col4[c(8,15,16,2,11,12,14,3,13,1,7,4,5,10,9,6), ]
-
-
 
 
 #coll_bptl_diff$Connect_ID[coll_bptl_diff$hrs_past>quantile(coll_bptl_diff$hrs_past, 0.99)]
@@ -4023,8 +4082,11 @@ add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the H
 tab5_3=knitr::kable(bioset5_3, col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 1.9: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Sanford Health', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)
 add_footnote(tab5_3, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 
+tab5_4=knitr::kable(bioset5_4, col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 1.10: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, University of Chicago Medicine', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)
+add_footnote(tab5_4, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
+
 #Change from 1.8 to 1.9
-Bld_urn_cli = knitr::kable(newtable_4, caption='Table 1.10: Baseline- Data System Status Among Clinical Biospecimen Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "hold_position") 
+Bld_urn_cli = knitr::kable(newtable_4, caption='Table 1.11: Baseline- Data System Status Among Clinical Biospecimen Collections by Specimen Type', row.names=FALSE,align=c("l","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "hold_position") 
 add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later than Biospecimen Dashboard data. 'Site Data Only' is assumed to be '0 (0%)' when not listed.", notation = "none")
 ```
 
@@ -4041,7 +4103,7 @@ add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later
 knitr::kable(coll_completenessR_totals , caption='Table 2.1: Baseline Research Biospecimen Collection Completeness by Specimen Type', row.names=FALSE,align=c("l","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 
-knitr::kable(coll_completenessC_totals , caption='Table 2.2: Baseline Clinical Biospecimen Collection Completeness by Specimen Type', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") 
+knitr::kable(coll_completenessC_totals , caption='Table 2.2: Baseline Clinical Biospecimen Collection Completeness by Specimen Type', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down") 
 
 
 ```
@@ -4103,29 +4165,6 @@ final_fig1_table <- help2_1_fig1_inc %>%  group_by(col.Monday.date) %>%  dplyr::
                                                                                            Partial__Blood=100*(partial/all_collections),  
                                                                                            No__Blood=100*(none_blood/all_collections))
 
-# research.1_1 <- ggplot() +
-#   geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = All_Incomplete, color = "All_Incomplete"), na.rm = TRUE) + 
-#   geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = Partial__Blood, color = "Partial__Blood"), na.rm = TRUE) + 
-#   geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = No__Blood, color = "No__Blood"), na.rm = TRUE) + 
-#   geom_point(width = 0.2) +
-#   scale_y_continuous(name = "Percent %", limits = c(0, 100), expand = c(0, 0), breaks = seq(0, 100, 25)) +  
-#   scale_x_date(name = "Date", date_labels = "%y-%m-%d", date_breaks = "2 weeks", 
-#                limits = c(as.Date("2022-06-20"), (as.Date(currentDate) - 1)), expand = c(0, 0))  +
-#   scale_color_manual(name = "Incompletion Level",
-#                      values = c("All_Incomplete" = "#FDBE19", "No__Blood" = "#3C989E", "Partial__Blood" = "#164C71"),
-#                      labels = c("Total","No Blood",  "Partial Blood"),
-#                      guide = guide_legend(nrow = 2, byrow = TRUE)) +
-#   ggtitle(label = "Figure 2.1: Baseline- Weekly Percent of Incomplete Blood Collections, \n University of Chicago Medicine") +
-#   labs(color = "Incompletion Level") +
-#   theme(panel.background = element_blank(),
-#         legend.position = "bottom",
-#         axis.line = element_line(size = 0.2),
-#         axis.text.x = element_text(angle = 60, hjust = 1), 
-#         axis.title.x = element_text(size = 14, face = "bold"), 
-#         axis.title.y = element_text(size = 14, face = "bold", color = "black"),
-#         plot.title = element_text(hjust = 0.5, size = 12, face = "bold")) +
-#   labs(caption = "Note: NCI notified UChicago of incomplete blood draws on January 26, 2023.") +
-#   theme(plot.caption = element_text(hjust = 0))
 
 research.1_1 <- ggplot() +
   geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = All_Incomplete, color = "All_Incomplete"), na.rm = TRUE) + 
@@ -4251,11 +4290,11 @@ add_footnote(tab2_8, "Note: Research collections are expected to include 2 SSTs,
 
 #Switched order of 9 and 10, so now 10 is first 
 tab10_2= knitr::kable(tube_completeness_totals, caption='Table 2.9: Baseline- Total Blood Tubes Collected Among Clinical Biospecimen Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c", "c"), booktabs = TRUE) %>%  add_indent(seq(1, nrow(tube_completeness_totals) - 1))  %>% kable_styling(latex_options = "scale_down")
-add_footnote(tab10_2, "Note: The expected total blood collection tubes vary by site and are as follows: KPHI-9, KPGA-7, KPNW-9, KPCO-8, HFH-5, HP-5, SFH-9", notation = "none") 
+add_footnote(tab10_2, "Note: The expected total blood collection tubes vary by site and are as follows: KPHI-9, KPGA-7, KPNW-9, KPCO-8, HFH-5, HP-5, SFH-9, UChicago- 4", notation = "none") 
 
 
 tab8=knitr::kable(notcol_combo2_totals,caption='Table 2.10: Baseline Blood Tubes Collected Among Clinical Biospecimen Collections by Tube Type', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% column_spec(column = 2:ncol(notcol_combo2_totals),width = "4cm")  %>% column_spec(column = 1:ncol(notcol_combo2_totals),width = "5cm") %>%  landscape()
-add_footnote(tab8, "Note: The expected collected tube type varies by site and is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD. (6) HP: 2 SST, 1 Heparin, 1 EDTA, 1 STRECK. (7) SFH: 4 SST, 2 Heparin, 3 EDTA", notation = "none") 
+add_footnote(tab8, "Note: The expected collected tube type varies by site and is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD. (6) HP: 2 SST, 1 Heparin, 1 EDTA, 1 STRECK. (7) SFH: 4 SST, 2 Heparin, 3 EDTA. (8) UChicago- 2 SST, 1 Heparin, 1 EDTA", notation = "none") 
 
 
 
@@ -4378,7 +4417,7 @@ research.3.1
 
 ```{r KnitrTables15_16,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
-knitr::kable(Table16_combined_totals, caption='Table 3.2: Baseline Biospecimen Survey Status Among Clinical Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
+knitr::kable(Table16_combined_totals, caption='Table 3.2: Baseline Biospecimen Survey Status Among Clinical Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 
 tbl19a <-knitr::kable(Table17_combinedB_totals, caption='Table 3.3: Baseline Biospecimen Survey Completion Time from Research Collection Visit Check In \n (Pre-COVID- 19 Questions Removal)', row.names=FALSE,align=c("l","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
@@ -4404,7 +4443,7 @@ research.4_3
 \FloatBarrier
 ```{r KnitrTables17_20,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
-knitr::kable(Table18_combined_totals, caption='Table 3.5: Baseline Biospecimen Survey Completion Time from Clinical Collection Dashboard Entry', row.names=FALSE,align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
+knitr::kable(Table18_combined_totals, caption='Table 3.5: Baseline Biospecimen Survey Completion Time from Clinical Collection Dashboard Entry', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 
 
@@ -4449,8 +4488,7 @@ UC_Time_plot <- research.vt.length.UC %>%  group_by(col.Monday.date, Site_locati
 
 UC_Time <- ggplot(UC_Time_plot, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="Average Number of Minutes",limits=c(0,300)) +   
-  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-1)),expand=c(0,0))  +
+  scale_y_continuous(name="Average Number of Minutes",limits=c(0,300)) +
 scale_color_manual(values=c("Ingalls Harvey"="#B1C7D9", "Orland Park"="#2973A5", "River East"="#FDBE19", 
                               "South Loop"="#565C65", "UC-DCAM"="#3C989E", "UCM Pop-Up"="#CC7D15")) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-1)),expand=c(0,0)) +
@@ -4504,11 +4542,11 @@ add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment
 
 tabl27 <- knitr::kable(verif_draw_order,caption='Table 4.8: Baseline- Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
-add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
+add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
 
 
 tab4_9 <- knitr::kable(avg_draw_order, caption='Table 4.9: Baseline- Time (in Days) from Draw Order Placement to Clinical Collection', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape()
-add_footnote(tab4_9, "Note: HealthPartners and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
+add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
 
 tab4_10 <- knitr::kable(avg_bldorder_present, caption='Table 4.10: Baseline- Time (in Days) from Draw Order Placement to Present Date by Site', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape()
 add_footnote(tab4_10, "Note: Table includes information for Kaiser sites only, other clinical collection sites are excluded.", notation="none")
@@ -4572,37 +4610,42 @@ coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Henry Ford Health",
   start_row = 1,
-  end_row = 14)
+  end_row = 15)
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "HealthPartners",
-  start_row = 15,
-  end_row = 16)
+  start_row = 16,
+  end_row = 17)
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Kaiser Permanente Colorado",
-  start_row = 17,
-  end_row = 17) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Georgia",
   start_row = 18,
   end_row = 18) 
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Hawaii",
+  group_label = "Kaiser Permanente Georgia",
   start_row = 19,
-  end_row = 20) 
+  end_row = 19) 
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Kaiser Permanente Hawaii",
+  start_row = 20,
+  end_row = 21) 
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Kaiser Permanente Northwest",
-  start_row = 21,
-  end_row = 21)
+  start_row = 22,
+  end_row = 22)
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Sanford Health",
-  start_row = 22,
-  end_row = 22)
+  start_row = 23,
+  end_row = 23)
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "University of Chicago Medicine",
+  start_row = 24,
+  end_row = 28)
 
 coll_bplt_knitr2
 
@@ -4696,6 +4739,11 @@ coll_bplt_knitr4 <- group_rows(
   group_label = "Sanford Health",
   start_row = 22,
   end_row = 22)
+coll_bplt_knitr4 <- group_rows(
+  coll_bplt_knitr4,
+  group_label = "University of Chicago Medicine",
+  start_row = 23,
+  end_row = as.numeric(nrow(Hrs_bptl_col4)))
 
 
 coll_bplt_knitr4
@@ -4735,6 +4783,10 @@ scatCHF <- coll_bptl_diff2 %>%  filter(Site=="Henry Ford")
 
 scatCSF <- coll_bptl_diff2 %>%  filter(Site=="Sanford Health")
 scatCSF$coldate <- scatCSF$clin_coll_bu
+
+scatCUC <- coll_bptl_diff2 %>%  filter(Site=="University of Chicago Medicine")
+scatCUC$coldate <- scatCUC$clin_coll_bu
+
 
 weekday_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
 
@@ -4781,7 +4833,7 @@ ggplot(scatSF, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) +
 
 
 
-#SF-- waiting on collection data
+#SF
 scatCSF$coldate <- scatCSF$clin_coll_bu
 
 C_plotSF <- ggplot(scatCSF, aes(x = as.Date(coldate), y = hrs_past, color = factor(weekdays(as.Date(coldate))))) +
@@ -4818,7 +4870,29 @@ ggplot(scatUC, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) +
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0))  +
-  ggtitle(label="Figure 5.4: Baseline Collection-To-Receipt Time (in Hours),  \n University of Chicago Medicine")
+  ggtitle(label="Figure 5.4: Baseline Collection-To-Receipt Time (in Hours),  \n University of Chicago Medicine Research Setting")
+
+
+scatCUC$coldate <- scatCUC$clin_coll_bu
+
+C_plotUC <- ggplot(scatCUC, aes(x = as.Date(coldate), y = hrs_past, color = factor(weekdays(as.Date(coldate))))) +
+  geom_point() +
+  scale_x_date(name="Collection Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2024-03-25"),(as.Date(currentDate)-7)), expand=c(0,0)) +
+  scale_y_continuous(name="Number of Hours",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
+  labs(color = "Weekdays") +
+   scale_color_manual(values=c("Sunday"="#B1C7D9", "Monday"="#164C71", "Tuesday"="#FDBE19", "Wednesday"="#FBE5B5",
+                       "Thursday"="#565C65", "Friday"="#3C989E", "Saturday"="#CC7D15"), limits = weekday_order) +
+     theme(panel.background = element_blank(),
+         legend.title = element_text(size=7),
+         legend.position = "bottom",
+         axis.line = element_line(size=0.2),
+         axis.text.x=element_text(angle=60, hjust=1),
+         axis.title.x = element_text( size = 14, face = "bold") ,
+         axis.title.y = element_text(size = 14, face = "bold",color="black"),
+         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +
+   theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
+   ggtitle(label="Figure 5.5: Baseline- Collection-To-Receipt Time (in Hours), \n University of Chicago Medicine Clinical Setting")
+ C_plotUC
 
 ggplot(scatKPCO, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Collection Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-10-10"),as.Date(currentDate)-7), expand=c(0,0)) + 
@@ -4834,7 +4908,7 @@ ggplot(scatKPCO, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) +
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0))  +
-  ggtitle(label="Figure 5.5: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Colorado")
+  ggtitle(label="Figure 5.6: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Colorado")
 
 ggplot(scatKPGA, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Collection Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-10-10"),as.Date(currentDate)-7), expand=c(0,0)) + 
@@ -4850,7 +4924,7 @@ ggplot(scatKPGA, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) +
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0))  +
-  ggtitle(label="Figure 5.6: Baseline Collection-To-Receipt Time (in Hours), \n Kaiser Permanente Georgia")
+  ggtitle(label="Figure 5.7: Baseline Collection-To-Receipt Time (in Hours), \n Kaiser Permanente Georgia")
 
 ggplot(scatKPHI, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Collection Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-10-10"),as.Date(currentDate)-7), expand=c(0,0)) + 
@@ -4866,7 +4940,7 @@ ggplot(scatKPHI, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) +
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0))  +
-  ggtitle(label="Figure 5.7: Baseline Collection-To-Receipt Time (in Hours), \n Kaiser Permanente Hawaii")
+  ggtitle(label="Figure 5.8: Baseline Collection-To-Receipt Time (in Hours), \n Kaiser Permanente Hawaii")
 
 ggplot(scatKPNW, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) + 
     geom_point() + scale_x_date(name="Collection Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-10-10"),as.Date(currentDate)-7), expand=c(0,0)) + 
@@ -4882,7 +4956,7 @@ ggplot(scatKPNW, aes(x=as.Date(clin_coll_bu), y=hrs_past, color = Weekdays)) +
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0))  +
-  ggtitle(label="Figure 5.8: Baseline Collection-To-Receipt Time (in Hours), \n Kaiser Permanente Northwest")
+  ggtitle(label="Figure 5.9: Baseline Collection-To-Receipt Time (in Hours), \n Kaiser Permanente Northwest")
 
 
 
@@ -4906,7 +4980,7 @@ R_plotHP <- ggplot(scatRHP, aes(x = as.Date(coldate), y = hrs_past,  color = fac
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
-  ggtitle(label="Figure 5.9: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Research Setting")
+  ggtitle(label="Figure 5.10: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Research Setting")
 R_plotHP
 
 
@@ -4927,7 +5001,7 @@ C_plotHP <- ggplot(scatCHP, aes(x = as.Date(coldate), y = hrs_past, color = fact
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
-  ggtitle(label="Figure 5.10: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Clinical Setting")
+  ggtitle(label="Figure 5.11: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Clinical Setting")
 C_plotHP
 
 #HF
@@ -4956,7 +5030,7 @@ combined_plotHF2 <- ggplot(scatRHF, aes(x = as.Date(coldate), y = hrs_past,  col
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
-  ggtitle(label="Figure 5.11: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Research Setting")
+  ggtitle(label="Figure 5.12: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Research Setting")
 
 combined_plotHF2
 
@@ -4979,7 +5053,7 @@ combined_plotHF1 <- ggplot(scatCHF, aes(x = as.Date(coldate), y = hrs_past,  col
         axis.title.y = element_text(size = 14, face = "bold",color="black"),         
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +     
   theme(plot.caption = element_text(hjust=0), legend.title = element_text(size = 8.5))  +
-  ggtitle(label="Figure 5.12: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Clinical Setting")
+  ggtitle(label="Figure 5.13: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Clinical Setting")
 
 combined_plotHF1
 ```
@@ -5015,8 +5089,7 @@ visit_wk_site1 <- fig2_1 %>% arrange(col.Sunday.week,col.Monday.date) %>% group_
 
 research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(col.Monday.date), y=n)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="Number of Collections",limits=c(0,100*round(max(visit_wk_site1$n/100,1)))) + #, limits=c(0,30), breaks=seq(0,30,5)) +
-  #scale_x_date(name="Date", date_labels = function(date) ifelse(as.numeric(format(date, "%U")) %% 2 == 0, "", format(date, "%y-%m-%d")), #date_labels = "%y-%m-%d",  date_breaks = "1 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)),expand=c(0,0))  +
+  scale_y_continuous(name="Number of Collections",limits=c(0,100*round(max(visit_wk_site1$n/100,1)))) + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-7),expand=c(0,0)) +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 6.1: Baseline- Weekly Total Biospecimen Collections") +
@@ -5052,7 +5125,7 @@ VWS <- left_join(research.surveyVW, VW_biospe, by="Connect_ID")
 
  
  
- research.survey.hybrid <- Hybrid_VWS %>% filter(Site=="Henry Ford Health System" | Site=="HealthPartners"| Site=="Sanford Health") #<- change to site=HF, color=d_650516960
+ research.survey.hybrid <- Hybrid_VWS %>% filter(Site=="Henry Ford Health System" | Site=="HealthPartners"| Site=="Sanford Health" | Site=="University of Chicago Medicine") #<- change to site=HF, color=d_650516960
 
 research.survey.hybrid<-research.survey.hybrid %>% mutate(#weekday = weekdays(ymd_hms(collection.tm)),
                                     #chicago = ifelse(d_827220437.y == 809703864, "Chicago","non Chicago"),
@@ -5158,6 +5231,7 @@ edited_fig3_1 <- visit_wk_site.hybridHF %>%  filter(Site_location!="Hybrid")
                        d_173836415_d_266600170_d_185243482==1010320019 | d_173836415_d_266600170_d_452847912==1010320019 ~ "Sterling Heights",
                        d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010114 |
                          d_173836415_d_266600170_d_185243482==1010010193 | d_173836415_d_266600170_d_452847912==1010010114~ "K1 HFH Main",
+                       #d_173836415_d_266600170_d_185243482 == 1050020026 | d_173836415_d_266600170_d_452847912 == 1050020026 ~ "Brownstown",
                              TRUE ~ "Remove"))
   edited_fig3_1_Clin <- edited_fig3_1_Clin %>% filter(edited_fig3_1_Clin$HF_Sites !="Remove")
 edited_fig3_1_Clin_tally <- edited_fig3_1_Clin %>% arrange(HF_Sites, col.Sunday.week,col.Monday.date) %>% group_by(HF_Sites, col.Sunday.week,col.Monday.date) %>% tally()
@@ -5167,13 +5241,14 @@ edited_fig3_1_Clin_tally <- edited_fig3_1_Clin %>% arrange(HF_Sites, col.Sunday.
    scale_y_continuous(name="Number of Collections") +
    scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-05-22"),as.Date(currentDate)-7),expand=c(0,0))  +
      scale_color_manual(values=c("Wyandotte"="#B1C7D9", "Macomb"="#164C71", "West Bloomfield"="#FDBE19", "Royal Oak"="#F8D991", 
-                              "Fairlane (Dearborn)"="#565C65", "Columbus"= "#3C989E", "Plymouth"="#CC7D15", "Troy"="#DAB384", 
-                              "Livonia"="#BBBEC1", "Sterling Heights"="#309EBD", "K1 HFH Main"="#97C4D5")) +
+                              "Fairlane (Dearborn)"="#565C65", "Columbus"= "#3C989E", "Plymouth"="#CC7D15", "Troy"="#DAB384", "Taylor"="#7C94A8","Brownstown"="#2973A5",
+                              "Livonia"="#BBBEC1", "Ford Road"="#99C0C4", "NCO"="#B9D7E3", "Sterling Heights"="#309EBD", "K1 HFH Main"="#97C4D5")) + 
    ggtitle(label="Figure 6.4: Baseline- Weekly Clinical Biospecimen Collections \n by Clinic Location, Henry Ford Health") +
     labs(color = "Clinic Location") +
    theme(panel.background = element_blank(),
-         #legend.title = element_text(text="Site Location"),
+         legend.title = element_text(size=8.5),
          legend.position = "bottom",
+         legend.text = element_text(size = 8),
          axis.line = element_line(size=0.2),
          axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
          axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
@@ -5237,6 +5312,27 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site,Site_location,Setting,col.Sunda
          plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
  print(research.vt_plotUC)
 
+ 
+    visit_wk_site.hybridUC= visit_wk_site.hybrid %>%  filter( Site=="University of Chicago Medicine")
+    visit_wk_site.hybrid_UC <- visit_wk_site.hybridUC %>%  group_by(Setting, col.Monday.date) %>%  summarise(totals=sum(n))
+ clinical.vt_plotUC <- ggplot(visit_wk_site.hybrid_UC, aes(x=as.Date(col.Monday.date), y=totals, color=Setting )) + 
+   geom_line() + geom_point(width = 0.2) +
+   scale_y_continuous(name="Number of Collections") +
+   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-7),expand=c(0,0))  +
+   scale_color_manual(values=c("Clinical"="#164C71", "Research"="#FDBE19")) +
+   ggtitle(label="Figure 6.6: Baseline- Weekly Biospecimen Collections by Collection Setting, \n University of Chicago Medicine") +
+   labs(color = "Collection Setting") +
+   theme(panel.background = element_blank(),
+         #legend.title = element_text(size=7),
+         legend.position = "bottom",
+         axis.line = element_line(size=0.2),
+         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
+         axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
+         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
+ print(clinical.vt_plotUC)
+ 
+ 
+ #will be 6.7
  research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
  research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
@@ -5245,7 +5341,7 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site,Site_location,Setting,col.Sunda
      scale_color_manual(values=c("Ingalls Harvey"="#B1C7D9", "Orland Park"="#2973A5", "River East"="#FDBE19", 
                               "South Loop"="#565C65", "UC-DCAM"="#3C989E", "UCM Pop-Up"="#CC7D15"),
                         guide = guide_legend(nrow = 2, byrow = TRUE)) +
-   ggtitle(label="Figure 6.6: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, University of Chicago Medicine ") +
+   ggtitle(label="Figure 6.7: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, University of Chicago Medicine ") +
    labs(color = "Collection Location") +
    theme(panel.background = element_blank(),
          #legend.title = element_text(text="Site Location"),
@@ -5254,10 +5350,40 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site,Site_location,Setting,col.Sunda
          axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
          axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
          plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
-research.vt_plotUC + guides(color = guide_legend(title = "Clinic Location")) 
+research.vt_plotUC + guides(color = guide_legend(title = "Collection Location")) 
  
  
- 
+
+
+ clinical.vt_plUC_locations <- clinic.survey %>% filter(Site=="University of Chicago Medicine") %>%
+  # filter(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 | 
+  #          d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 | 
+  #          d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 |
+  #          d_173836415_d_266600170_d_185243482==4 | d_173836415_d_266600170_d_452847912==4 |
+  #          d_173836415_d_266600170_d_185243482==5 | d_173836415_d_266600170_d_452847912==5) %>%
+  mutate(UC_cl_locs = case_when(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "South Loop",
+                             d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Orland Park",
+                             d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Kenwood",
+                             d_173836415_d_266600170_d_185243482==4 | d_173836415_d_266600170_d_452847912==4 ~ "River East",
+                             d_173836415_d_266600170_d_185243482==5 | d_173836415_d_266600170_d_452847912==5 ~ "Dearborn Station"))
+edited_fig11_1_Clin_tally <- clinical.vt_plUC_locations %>% arrange(UC_cl_locs, col.Sunday.week,col.Monday.date) %>% group_by(UC_cl_locs, col.Sunday.week,col.Monday.date) %>% tally()
+
+clinical.vt_plotUC_locs <- ggplot(edited_fig11_1_Clin_tally, aes(x=as.Date(col.Monday.date), y=n, color=UC_cl_locs)) +  
+  geom_line() + geom_point(width = 0.2) +
+  scale_y_continuous(name="Number of Collections") + #, limit= c(0, max(edited_fig11_1_Clin_tally$n))) +
+  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2024-05-20"),as.Date(currentDate)-7),expand=c(0,0))  +
+  scale_color_manual(values=c("Orland Park"="#2973A5", "River East"="#FDBE19", 
+                              "South Loop"="#565C65", "Kenwood"="#3C989E", "Dearborn Station"="#CC7D15")) +
+  ggtitle(label="Figure 6.8: Baseline- Weekly Clinical Biospecimen Collections by Clinic Location, \n University of Chicago Medicine") +
+  labs(color = "Clinic Location") +
+  theme(panel.background = element_blank(),
+        #legend.title = element_text(size=7),
+        legend.position = "bottom",
+        axis.line = element_line(size=0.2),
+        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
+        axis.title.y = element_text(size = 14,color="black"),   #, face = "bold"
+        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
+clinical.vt_plotUC_locs + guides(color = guide_legend(title = "Clinic Location")) 
  
  
  
@@ -5270,7 +5396,7 @@ research.vt_plotMF <- ggplot(research.vt_plMF, aes(x=as.Date(col.Monday.date), y
   scale_y_continuous(name="Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 6.7 Baseline- Weekly Biospecimen Collections, \n Marshfield Clinic Health System") +
+  ggtitle(label="Figure 6.9 Baseline- Weekly Biospecimen Collections, \n Marshfield Clinic Health System") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -5285,13 +5411,13 @@ print(research.vt_plotMF)
 research.vt_plMF1= visit_wk_site_edited %>%  filter( Site=="Marshfield Clinic Health System")
 research.vt_plotMF1 <- ggplot(research.vt_plMF1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="Number Collections", limits=c(0,30), breaks=seq(0,30,5)) +
+  scale_y_continuous(name="Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   #scale_fill_brewer(palette="Dark2") +
   scale_color_manual(values=c("Lake Hallie"="#B1C7D9", "Marshfield"="#164C71", "MF Pop-Up"="#FDBE19", 
                               "Minocqua"="#565C65", "Weston"="#3C989E", "Wisconsin Rapids"="#CC7D15"),
                      guide = guide_legend(nrow = 2, byrow = TRUE)) +
-  ggtitle(label="Figure 6.8: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Marshfield Clinic Health System") +
+  ggtitle(label="Figure 6.10: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Marshfield Clinic Health System") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(text="Site Location"),
@@ -5318,7 +5444,7 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y
   scale_y_continuous(name="Number of Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-7),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 6.9: Baseline- Weekly Biospecimen Collections, \n Sanford Health") +
+  ggtitle(label="Figure 6.11: Baseline- Weekly Biospecimen Collections, \n Sanford Health") +
   labs(color = "Collection Location") +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -5336,7 +5462,7 @@ new_SF_plot <- ggplot(visit_wk_site.hybridSF, aes(x=as.Date(col.Monday.date), y=
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   scale_color_manual(values=c("Clinical"="#164C71", "Research"="#FDBE19")) +
   #scale_fill_brewer(palette="Dark2") +
-  ggtitle(label=paste("Figure 6.10 Baseline- Weekly Biospecimen Collections by Collection Setting \n  Sanford Health")) +
+  ggtitle(label=paste("Figure 6.12 Baseline- Weekly Biospecimen Collections by Collection Setting \n  Sanford Health")) +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -5348,7 +5474,7 @@ new_SF_plot <- ggplot(visit_wk_site.hybridSF, aes(x=as.Date(col.Monday.date), y=
 print(new_SF_plot)
 
 
-#Moved from 6.10 to 6.11
+
 research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
 research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + 
   geom_line() + geom_point(width = 0.2) +
@@ -5356,7 +5482,7 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   #scale_fill_brewer(palette="Dark2") +
   scale_color_manual(values=c("Fargo South University"="#3C989E", "Sioux Falls Imagenetics"="#CC7D15")) + 
-  ggtitle(label="Figure 6.11: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Sanford Health") +
+  ggtitle(label="Figure 6.13: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Sanford Health") +
   #theme_ipsum() +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -5369,7 +5495,6 @@ research.vt_plotSH + guides(color = guide_legend(title = "Collection Location"))
 
 
 
-#Moved from 6.11 to 6.12
 
 research.vt_plHP= visit_wk_site.hybrid %>%  filter( Site=="HealthPartners")
 research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(col.Monday.date), y=n, color=Setting)) + 
@@ -5377,7 +5502,7 @@ research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(col.Monday.date), y
   scale_y_continuous(name="Number of Collections") + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-7),expand=c(0,0))  +
   scale_color_manual(values=c("Clinical"="#164C71", "Research"="#FDBE19")) +
-  ggtitle(label="Figure 6.12: Baseline- Weekly Biospecimen Collections \n by Collection Setting, HealthPartners") +
+  ggtitle(label="Figure 6.14: Baseline- Weekly Biospecimen Collections \n by Collection Setting, HealthPartners") +
   labs(color = "Collection Setting") +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -5388,9 +5513,9 @@ research.vt_plotHP <- ggplot(research.vt_plHP, aes(x=as.Date(col.Monday.date), y
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) #guides(fill=guide_legend(nrow=2,byrow=TRUE))
 print(research.vt_plotHP)
 
-#6.13 new
 
-#Moved from 6.12 to 6.14
+
+
 research.vt_plHP_locations <- clinic.survey %>% filter(Site=="HealthPartners") %>%
   filter(d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 | d_173836415_d_266600170_d_185243482==2 |
            d_173836415_d_266600170_d_452847912==2 | d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3) %>%
@@ -5404,7 +5529,7 @@ research.vt_plotHP_locs <- ggplot(edited_fig11_1_Clin_tally, aes(x=as.Date(col.M
   scale_y_continuous(name="Number of Collections", breaks = seq(min(edited_fig11_1_Clin_tally$n), max(edited_fig11_1_Clin_tally$n), by = 1)) + #, limits=c(0,30), breaks=seq(0,30,5)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-11-20"),as.Date(currentDate)-7),expand=c(0,0))  +
   scale_color_manual(values=c("NSC"="#99C0C4", "Elk River"="#565C65", "Chanhassen"="#CC7D15")) +
-  ggtitle(label="Figure 6.13: Baseline- Weekly Clinical Biospecimen Collections \n  by Clinic Location, HealthPartners ") +
+  ggtitle(label="Figure 6.15: Baseline- Weekly Clinical Biospecimen Collections \n  by Clinic Location, HealthPartners ") +
   labs(color = "Clinic Location") +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
@@ -5921,7 +6046,7 @@ geom_text(data = fig5_week_total2 %>% filter(col.Monday.date == max(col.Monday.d
                limits = c(as.Date("2024-03-25"), as.Date(currentDate-7)), expand = c(0,0)) +
   scale_y_continuous(name = "# Kits Shipped") +
   scale_fill_manual(name = "", values = c("Total Shipped" = "#CC7D15", "Return Rate" = "#0072B2")) +
-  ggtitle(label = "Figure 7.3 Update title to: Baseline− Home Mouthwash Kit Return Rate \n for Kits Shipped Up To 1 Week Ago") +
+  ggtitle(label = "Figure 7.3: Baseline− Home Mouthwash Kit Return Rate \n for Kits Shipped Up To 1 Week Ago") +
   labs(caption = paste("Note: Shipped data are current through",as.Date(currentDate)-7, ".")) +
   theme(panel.background = element_blank(),
         legend.position = "bottom",
