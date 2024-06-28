@@ -3245,6 +3245,7 @@ coll_bptl_diff$Connect_ID <- as.numeric(coll_bptl_diff$`as.character(Connect_ID)
 
 table.coll_bptl_28a <- ctable(coll_bptl_diff$Site,coll_bptl_diff$coll_days_diff)
 crosstable.coll_bptl28a <- as.data.frame(cbind(table.coll_bptl_28a$cross_table,table.coll_bptl_28a$proportions))
+crosstable.coll_bptl28a$Site <- list("Baylor Scott & White Health","HealthPartners","Henry Ford Health","Marshfield","Sanford Health","University of Chicago", "Total")
 
 crosstable.coll_bptl28a$n_pct_1_Day <-  paste(format(crosstable.coll_bptl28a[,2],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,8],1),"%)",sep=" ")
 crosstable.coll_bptl28a$n_pct_2_Day <-  paste(format(crosstable.coll_bptl28a[,3],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,9],1),"%)",sep=" ")
@@ -3257,7 +3258,7 @@ crosstable.coll_bptl28a$Total_Pct <- paste(crosstable.coll_bptl28a$Total, " (100
          
 #crosstable.coll_bptl28a <- crosstable.coll_bptl28a %>%  select("Site","n_pct_1_Day", "n_pct_2_Day","n_pct_3_Day","n_pct_4_Day","n_pct_4_plus_days", "Total_Pct")
 
-crosstable.coll_bptl28a <- crosstable.coll_bptl28a[,c(13:18,6)]
+crosstable.coll_bptl28a <- crosstable.coll_bptl28a[,c(13:19)]
 # crosstable.coll_bptl28a[7,] <- list('Total', sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,2], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
 #                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,3], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
 #                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,4], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
