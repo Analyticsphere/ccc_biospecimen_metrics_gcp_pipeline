@@ -849,6 +849,7 @@ allsites_crosstab <- bind_rows(cross_tab, total_row)
 
 ```{r Coll_Sett_Hyrbids, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
+##need to check this. Wasn't merged correctly in the merge conlflict on Github
 table2_hybrid <- table2 %>%  filter(Site=="Henry Ford Health System" | Site=="HealthPartners" | Site=="Sanford Health" | Site=="University of Chicago Medicine")
 
 sites <- unique(table2_hybrid$Site)
