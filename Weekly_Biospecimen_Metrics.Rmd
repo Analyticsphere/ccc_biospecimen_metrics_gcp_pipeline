@@ -802,11 +802,7 @@ derived_cols <- coll_set_spec %>%
 
 
 
-derived_cols <- coll_set_spec %>%
-  select(starts_with("Blood"), starts_with("Urine"), starts_with("Mouthwash"))
 
-sites <- unique(table2_hybrid$Site)
-site_results <- list()
 
 
 long_format <- derived_cols %>%
