@@ -417,6 +417,7 @@ biospe_locations<-table1 %>% filter(d_650516960== 534621077) %>%
   )
 #TRUE ~ "Missing"))
 
+
                   
                    
 
@@ -499,6 +500,7 @@ col_num_1.1_gt <- col_num_1.1_gt %>%  summary_rows(
 
 
 
+
 table1_2_locs<-table1 %>% filter(d_650516960== 664882224) 
 
 
@@ -555,6 +557,7 @@ Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==4
 Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==5 | d_173836415_d_266600170_d_452847912==5) ~ "Dearborn Station"))
  
 col_num <- table(table1_2__locations$Site_location, table1_2__locations$biocol.appoint)
+
 
 col_num_1.2 <- as.data.frame(col_num)
 col_num_1.2 <- col_num_1.2[, c(1,3)]
@@ -926,6 +929,55 @@ mutate(
 }
 
 site_results["Henry Ford Health System"]
+
+
+##UC
+home_mw_counts_HP <-sum(as.numeric(site_home_mw$f0_[site_home_mw$d_827220437==809703864]))
+
+settings <- recrvar.bio[grepl("Setting",recrvar.bio$Variable.Label),]$column_name
+setting <- c("BL_BioSpm_BloodSetting_v1r0","BL_BioSpm_UrineSetting_v1r0","BL_BioSpm_MWSetting_v1r0")
+bio <- c("d_878865966","d_167958071","d_684635302")
+col_set5 <- list()
+for (i in 1:3){
+  recrver1_5_4 <- recrver1 %>%  filter(Site=="University of Chicago Medicine") #& BL_BioSpm_BloodSetting_v1r0=="Clinical" & BL_BioSpm_UrineSetting_v1r0=="Clinical" & BL_BioSpm_MWSetting_v1r0=="Clinical"
+tmp <-eval(parse(text=paste("pct_tb(recrver1_5_4$",setting[i],",recrver1_5_4$",bio[i],")",sep="")))
+#tmp <- tmp %>%
+tmp <- tmp %>% select(contains("n_Any")) %>%  mutate(Setting = trimws(rownames(tmp)))
+col_set5[[i]] <- tmp
+}
+biosettings5_4 <- col_set5 %>% reduce(full_join,by="Setting")
+biosettings5_4[4,c(1:4)] <- c("0", "Home",  "0", as.numeric(home_mw_counts_HP))
+biosettings5_4[1,4] <- "0"
+biosettings5_4 <- biosettings5_4[order(biosettings5_4$Setting),c(2,1,3,4)]
+colnames(biosettings5_4)[2:4] <- gsub("n_","",colnames(biosettings5_4)[2:4])
+
+biosettings5_4[4,4] <- as.numeric(biosettings5_4[1,4]) + as.numeric(biosettings5_4[2,4]) + as.numeric(biosettings5_4[3,4])
+bioset5_4 <- biosettings5_4
+
+a5<- round(as.numeric(as.character(bioset5_4[1,2]))/ as.numeric(as.character(bioset5_4[4,2])), digits=3)*100
+b5 <- round(as.numeric(as.character(bioset5_4[1,3]))/ as.numeric(as.character(bioset5_4[4,3])), digits=3)*100
+c5 <- round(as.numeric(as.character(bioset5_4[1,4]))/ as.numeric(as.character(bioset5_4[4,4])), digits=3)*100
+d5 <- round(as.numeric(as.character(bioset5_4[2,2]))/ as.numeric(as.character(bioset5_4[4,2])), digits=3) *100
+e5<- round(as.numeric(as.character(bioset5_4[2,3]))/ as.numeric(as.character(bioset5_4[4,3])), digits=3)*100
+f5 <- round(as.numeric(as.character(bioset5_4[2,4]))/ as.numeric(as.character(bioset5_4[4,4])), digits=3)*100
+g5 <- round(as.numeric(as.character(bioset5_4[3,2]))/ as.numeric(as.character(bioset5_4[4,2])), digits=3)*100
+h5 <- round(as.numeric(as.character(bioset5_4[3,3]))/ as.numeric(as.character(bioset5_4[4,3])), digits=3)*100
+i5 <- round(as.numeric(as.character(bioset5_4[3,4]))/ as.numeric(as.character(bioset5_4[4,4])), digits=3)*100
+
+
+bioset5_4[1,2] <- paste0(bioset5_4[1,2], " (", a5, "%)")
+bioset5_4[1,3]  <- paste0(bioset5_4[1,3], " (", b5, "%)")
+bioset5_4[1,4]  <- paste0(bioset5_4[1,4], " (", c5, "%)")
+bioset5_4[2,2] <- paste0(bioset5_4[2,2], " (", d5, "%)")
+bioset5_4[2,3]  <- paste0(bioset5_4[2,3], " (", e5, "%)")
+bioset5_4[2,4]  <- paste0(bioset5_4[2,4], " (", f5, "%)")
+bioset5_4[3,2] <- paste0(bioset5_4[3,2], " (", g5, "%)")
+bioset5_4[3,3] <- paste0(bioset5_4[3,3], " (", h5, "%)")
+bioset5_4[3,4]  <- paste0(bioset5_4[3,4], " (", i5, "%)")
+
+bioset5_4[4,2] <- paste0(bioset5_4[4,2] , " (100%)")
+bioset5_4[4,3] <- paste0(bioset5_4[4,3], " (100%)")
+bioset5_4[4,4] <- paste0(bioset5_4[4,4], " (100%)")
 
 ```
 
@@ -3662,6 +3714,7 @@ add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the H
 tab5_3=knitr::kable(site_results["Sanford Health"], col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 1.9: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Sanford Health', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)
 add_footnote(tab5_3, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 
+
 tab5_4=knitr::kable(site_results["University of Chicago Medicine"], col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 1.10: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, University of Chicago Medicine', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)
 add_footnote(tab5_4, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 
@@ -4202,6 +4255,7 @@ coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Henry Ford Health",
   start_row = 1,
+
   end_row = 16)
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
@@ -4238,6 +4292,7 @@ coll_bplt_knitr2 <- group_rows(
   group_label = "University of Chicago Medicine",
   start_row = 25,
   end_row = 29)
+
 
 coll_bplt_knitr2
 
@@ -4906,7 +4961,6 @@ visit_wk_site_edited <- VWS_var %>% arrange(Site,Site_location,Setting,col.Sunda
  print(clinical.vt_plotUC)
  
  
-
  research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
  research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
    geom_line() + geom_point(width = 0.2) +
