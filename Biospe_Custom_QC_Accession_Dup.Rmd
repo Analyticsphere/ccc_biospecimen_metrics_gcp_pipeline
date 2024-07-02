@@ -95,7 +95,7 @@ knitr::opts_chunk$set(comment = NA)
 
 
 
-bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott & White Health",
+bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
                                           d_827220437==531629870 ~ "HealthPartners",
                                           d_827220437==548392715 ~ "Henry Ford Health System",
                                           d_827220437==303349821 ~ "Marshfield Clinical Health System",
@@ -882,7 +882,7 @@ HMW <- HMW %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartners",
                                       d_827220437 == 327912200 ~ "Kaiser Permanente Georgia",
                                       d_827220437 == 300267574 ~ "Kaiser Permanente Hawaii",
                                       d_827220437 == 452412599 ~ "Kaiser Permanente Northwest",
-                                      d_827220437 == 472940358 ~ "Baylor Scott & White Health"))
+                                      d_827220437 == 472940358 ~ "Baylor Scott and White Health"))
 
 
 Bio_HMW <- HMW %>%  left_join(MW_data,  by="Connect_ID") 

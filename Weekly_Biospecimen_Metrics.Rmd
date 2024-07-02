@@ -232,7 +232,7 @@ recrver1 <- expss::apply_labels(recrver,
                                                 "Duplicate"=922622075 , 
                                                 "Outreach timed out"= 160161595),
                                 d_827220437 = "Site",#RcrtES_Site_v1r0
-                                d_827220437 = c("Baylor Scott & White Health"=472940358,"HealthPartners"= 531629870, "Henry Ford Health System"=548392715,"Marshfield Clinic Health System" = 303349821,"Sanford Health" = 657167265, "University of Chicago Medicine" = 809703864,"Kaiser Permanente Colorado" = 125001209,"Kaiser Permanente Georgia" = 327912200,"Kaiser Permanente Hawaii" = 300267574,"Kaiser Permanente Northwest" = 452412599,"National Cancer Institute" = 517700004,"National Cancer Institute" = 13,"Other" = 181769837),
+                                d_827220437 = c("Baylor Scott and White Health"=472940358,"HealthPartners"= 531629870, "Henry Ford Health System"=548392715,"Marshfield Clinic Health System" = 303349821,"Sanford Health" = 657167265, "University of Chicago Medicine" = 809703864,"Kaiser Permanente Colorado" = 125001209,"Kaiser Permanente Georgia" = 327912200,"Kaiser Permanente Hawaii" = 300267574,"Kaiser Permanente Northwest" = 452412599,"National Cancer Institute" = 517700004,"National Cancer Institute" = 13,"Other" = 181769837),
                                 d_914594314 = "Verification status time",   #RcrtV_VerificationTm_V1R0
                                 d_878865966 = "Baseline blood sample collected", #BioFin_BaseBloodCol_v1r0
                                 d_878865966 = c("Any blood collected"=353358909, "No blood collected"=104430631),
@@ -277,7 +277,7 @@ recrver1$BL_BioSpm_MWSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_9
 recrver1$BL_BioSpm_UrineSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_718172863, levels=c("Clinical","Research","Home"))  
 recrver1$BL_BioSpm_BloodSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_592099155,levels=c("Clinical","Research","Home"))  
 recrver1$BL_BioChk_Complete_v1r0 <- factor(recrver1$d_331584571_d_266600170_d_135591601,exclude=NULL)
-recrver1$Site <-factor(recrver1$d_827220437,levels=c("Baylor Scott & White Health","HealthPartners", "Henry Ford Health System",
+recrver1$Site <-factor(recrver1$d_827220437,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health System",
                                                      "Marshfield Clinic Health System",
                                                      "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado",
                                                      "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest",
@@ -849,6 +849,7 @@ allsites_crosstab <- bind_rows(cross_tab, total_row)
 
 ```{r Coll_Sett_Hyrbids, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
+##need to check this. Wasn't merged correctly in the merge conlflict on Github
 table2_hybrid <- table2 %>%  filter(Site=="Henry Ford Health System" | Site=="HealthPartners" | Site=="Sanford Health" | Site=="University of Chicago Medicine")
 
 sites <- unique(table2_hybrid$Site)
@@ -1209,9 +1210,9 @@ pct_tb <- function(x,y){
 ##Table6_bysite. the research blood collection completions
 ##for blood collection based on the biospecimen data individually
 biospe<- expss::apply_labels(biospe,d_827220437 = "Site",#RcrtES_Site_v1r0
-                     d_827220437 = c("Baylor Scott & White Health"=472940358, "HealthPartners"= 531629870, "Henry Ford Health System"=548392715,"Marshfield Clinic Health System" = 303349821,"Sanford Health" = 657167265, "University of Chicago Medicine" = 809703864, "Kaiser Permanente Colorado" = 125001209,"Kaiser Permanente Georgia" = 327912200,"Kaiser Permanente Hawaii" = 300267574,"Kaiser Permanente Northwest" = 452412599,"National Cancer Institute" = 517700004,"National Cancer Institute" = 13,"Other" = 181769837))
+                     d_827220437 = c("Baylor Scott and White Health"=472940358, "HealthPartners"= 531629870, "Henry Ford Health System"=548392715,"Marshfield Clinic Health System" = 303349821,"Sanford Health" = 657167265, "University of Chicago Medicine" = 809703864, "Kaiser Permanente Colorado" = 125001209,"Kaiser Permanente Georgia" = 327912200,"Kaiser Permanente Hawaii" = 300267574,"Kaiser Permanente Northwest" = 452412599,"National Cancer Institute" = 517700004,"National Cancer Institute" = 13,"Other" = 181769837))
 
-biospe$Site <- factor(biospe$d_827220437, levels= c("Baylor Scott & White Health", "HealthPartners", "Henry Ford Health System","Marshfield Clinic Health System","Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado","Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest")) 
+biospe$Site <- factor(biospe$d_827220437, levels= c("Baylor Scott and White Health", "HealthPartners", "Henry Ford Health System","Marshfield Clinic Health System","Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado","Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest")) 
 
 
 biospe <- biospe %>% arrange(Site)
@@ -1588,14 +1589,14 @@ table(biospe$tubecol)
 table(biospe$tubedev)
 biospe$d_827220437 <- as.numeric(biospe$d_827220437)
 biospe <- apply_labels(biospe,d_827220437 = "Site",#RcrtES_Site_v1r0
-                       d_827220437 = c("Baylor Scott & White Health"=472940358, "HealthPartners"= 531629870, 
+                       d_827220437 = c("Baylor Scott and White Health"=472940358, "HealthPartners"= 531629870, 
                                        "Henry Ford Health System"=548392715, "Kaiser Permanente Colorado" = 125001209,
                                       "Kaiser Permanente Georgia" = 327912200,"Kaiser Permanente Hawaii" = 300267574,
                                       "Kaiser Permanente Northwest" = 452412599, "Marshfield Clinic Health System" = 303349821,
                                       "Sanford Health" = 657167265, "University of Chicago Medicine" = 809703864,
                                       "National Cancer Institute" = 517700004,"National Cancer Institute" = 13,"Other" = 181769837))
 
-biospe$Site <-factor(biospe$d_827220437,levels=c("Baylor Scott & White Health","HealthPartners", "Henry Ford Health System",
+biospe$Site <-factor(biospe$d_827220437,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health System",
                                                      "Marshfield Clinic Health System",
                                                      "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado",
                                                      "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest",
@@ -1868,7 +1869,7 @@ Tb.research.coltube <- tube_col %>% filter(d_650516960==534621077) %>%  mutate(S
 Tb.research.coltube$bldcol_tubes <- factor(Tb.research.coltube$bldcol_max,levels=c(0:5))
 Tb.research.coltube$bldcol_tubes <- droplevels(Tb.research.coltube$bldcol_tubes)
 
-Tb.research.coltube$Site <-factor(Tb.research.coltube$Site,levels=c("Baylor Scott & White Health","HealthPartners", "Henry Ford Health System",
+Tb.research.coltube$Site <-factor(Tb.research.coltube$Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health System",
                                                      "Marshfield Clinic Health System",
                                                      "Sanford Health", "University of Chicago Medicine"))
 
@@ -1911,7 +1912,7 @@ research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tub
     
 research__blood <- research__blood %>% filter(!is.na(tube_type))
 
-research__blood$Site <-factor(research__blood$Site,levels=c("Baylor Scott & White Health","HealthPartners", "Henry Ford Health System",
+research__blood$Site <-factor(research__blood$Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health System",
                                                      "Marshfield Clinic Health System",
                                                      "Sanford Health", "University of Chicago Medicine"))
         
@@ -2226,7 +2227,7 @@ research.surveyUC <- research.survey %>%  filter(Site=="University of Chicago Me
 
 
 #17- by site
-test17 <- research.survey %>%  filter(Site=="HealthPartners" |  Site=="Henry Ford Health System" | Site=="Marshfield Clinic Health System" | Site=="Sanford Health" | Site=="University of Chicago Medicine" | Site=="Baylor Scott & White Health")
+test17 <- research.survey %>%  filter(Site=="HealthPartners" |  Site=="Henry Ford Health System" | Site=="Marshfield Clinic Health System" | Site=="Sanford Health" | Site=="University of Chicago Medicine" | Site=="Baylor Scott and White Health")
 test17$Site<- droplevels(test17$Site)
 Table15_combined <- test17 %>% dplyr::select(Site, research.sv )  %>% tbl_cross(
   row = research.sv,
@@ -2715,7 +2716,7 @@ baseline_24 <- tab24 %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) &
 baseline_24_after <- baseline_24 %>%  filter(d_914594314>=as.Date("2022-06-01") ) 
 
 BSL_after24 <- baseline_24_after %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
-                                     # Site = case_when(d_827220437.x==472940358 ~ "Baylor Scott & White Health",
+                                     # Site = case_when(d_827220437.x==472940358 ~ "Baylor Scott and White Health",
                                      #                  d_827220437.x==125001209 ~ "KP Colorado",
                                      #              d_827220437.x==327912200 ~ "KP Georgia",
                                      #              d_827220437.x==300267574 ~ "KP Hawaii",
@@ -3214,7 +3215,7 @@ biospe_adhoc= biospe %>%  filter(d_650516960==534621077 & d_410912345==353358909
                                                       d_951355211==567969985 ~ "MF Pop-Up",
                                                       d_951355211==319518299 ~ "UCM Pop-Up",
                                                       d_951355211==940329442 ~ "Orland Park"),
-                            Site = case_when(d_827220437==472940358 ~ "Baylor Scott & White Health",
+                            Site = case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
                                              d_827220437==548392715 ~ "Henry Ford Health",
                                              d_827220437 == 531629870 ~ "HealthPartners",
                                              d_827220437 == 303349821 ~ "Marshfield",
@@ -3230,7 +3231,7 @@ biospe_adhoc$Site_location <- factor(biospe_adhoc$Site_location,levels=c("HP Res
                                                                          "Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
                                                                          "Colby Abbotsford","Minocqua","Merrill","Sioux Falls Imagenetics","Fargo South University",
                                                                          "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park")) 
-biospe_adhoc$Site<- factor(biospe_adhoc$Site, levels=c("Baylor Scott & White Health","HealthPartners","Henry Ford Health","Marshfield","Sanford Health","University of Chicago"))
+biospe_adhoc$Site<- factor(biospe_adhoc$Site, levels=c("Baylor Scott and White Health","HealthPartners","Henry Ford Health","Marshfield","Sanford Health","University of Chicago"))
 
 coll_bptl_diff <- biospe_adhoc  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
   mutate(any_collection = min(d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, 
@@ -3246,7 +3247,7 @@ coll_bptl_diff$Connect_ID <- as.numeric(coll_bptl_diff$`as.character(Connect_ID)
 
 table.coll_bptl_28a <- ctable(coll_bptl_diff$Site,coll_bptl_diff$coll_days_diff)
 crosstable.coll_bptl28a <- as.data.frame(cbind(table.coll_bptl_28a$cross_table,table.coll_bptl_28a$proportions))
-crosstable.coll_bptl28a$Site <- list("Baylor Scott & White Health","HealthPartners","Henry Ford Health","Marshfield","Sanford Health","University of Chicago", "Total")
+crosstable.coll_bptl28a$Site <- list("Baylor Scott and White Health","HealthPartners","Henry Ford Health","Marshfield","Sanford Health","University of Chicago", "Total")
 
 crosstable.coll_bptl28a$n_pct_1_Day <-  paste(format(crosstable.coll_bptl28a[,2],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,8],1),"%)",sep=" ")
 crosstable.coll_bptl28a$n_pct_2_Day <-  paste(format(crosstable.coll_bptl28a[,3],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,9],1),"%)",sep=" ")
@@ -3379,7 +3380,7 @@ biospe_adhoc2= table5.2 %>%  filter(d_650516960==664882224 & d_410912345==353358
                                         d_827220437==125001209 ~ "Kaiser Permanente Colorado",
                        d_827220437==657167265 ~ "Sanford Health",
                        TRUE ~ "Remove"),
-                       Site = case_when(#d_827220437==472940358 ~ "Baylor Scott & White Health", #not yet clinical
+                       Site = case_when(#d_827220437==472940358 ~ "Baylor Scott and White Health", #not yet clinical
                                         d_827220437==548392715 ~ "Henry Ford",
                                         d_827220437==531629870 ~ "HealthPartners",
                                         d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
@@ -5138,36 +5139,6 @@ knitr::kable(OrlandAH, caption='Ad Hoc UChicago Orland Park Visit Count Per Week
 
 
 
-```{r AdHoc2, eval=TRUE,echo=FALSE, warning=FALSE, include=FALSE}
-Livonia_ad_hoc <- visit_wk_site.hybrid %>% filter(as.Date(col.Monday.date)>="2023-12-11" & Site_location=="HFH Livonia Research Clinic")
-
- Livonia_adhoc <- Livonia_ad_hoc[,c(5,6)]
-
-sorted_adhoc <- Livonia_adhoc %>%
-  arrange(col.Monday.date)
-
-total_sum <- sum(sorted_adhoc$n, na.rm = TRUE)
-
-# Create a new row with the total sum
-sorted_adhoc$col.Monday.date <- as.character(sorted_adhoc$col.Monday.date)
-
-
-# Convert col.Monday.date to character for the new row
-total_row <- data.frame(col.Monday.date = as.character("Total"), n = total_sum)
-
-# Bind the total row to the original dataframe
-sorted_adhoc_with_total <- bind_rows(sorted_adhoc, total_row)
-
-colnames(sorted_adhoc_with_total) <- c("Week", "Collection Count")
-
-
-LivoniaAH_totals <- as.data.frame(sorted_adhoc_with_total)
-LivoniaAH <- LivoniaAH_totals[-1, ]
-
-knitr::kable(LivoniaAH, caption='Ad Hoc HFH Livonia Research Clinic Visit Count Per Week', row.names=FALSE,align=c("l","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "HOLD_position")
-```
-
-
 
 
 ```{r Fig21_24, eval=TRUE,echo=FALSE}
@@ -5222,7 +5193,7 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
                                                   d_827220437==531629870 ~ "HealthPartners",
                                                   d_827220437==303349821 ~ "Marshfield",
                                                   d_827220437==809703864 ~ "University of Chicago Medicine",
-                                                  d_827220437==472940358 ~ "Baylor Scott & White Health"),
+                                                  d_827220437==472940358 ~ "Baylor Scott and White Health"),
                                  Kit_Status = case_when(#d_173836415_d_266600170_d_319972665_d_221592017==517216441	~"Pending", -- no one will have this
                                          d_173836415_d_266600170_d_319972665_d_221592017==849527480	~"Address Printed",
                                          d_173836415_d_266600170_d_319972665_d_221592017==241974920	~ "Assigned",
