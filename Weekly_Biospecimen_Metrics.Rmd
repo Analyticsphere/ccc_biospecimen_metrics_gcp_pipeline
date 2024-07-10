@@ -3214,23 +3214,27 @@ biospe_adhoc= biospe %>%  filter(d_650516960==534621077 & d_410912345==353358909
                                                       d_951355211==467088902 ~ "Fargo South University",
                                                       d_951355211==567969985 ~ "MF Pop-Up",
                                                       d_951355211==319518299 ~ "UCM Pop-Up",
-                                                      d_951355211==940329442 ~ "Orland Park"),
+                                                      d_951355211==940329442 ~ "Orland Park",
+                                                      d_951355211==723351427 ~ "HWC, BC",
+                                                      d_951355211==807443231 ~ "All Saints (FW)",
+                                                      TRUE ~ "Remove"),
                             Site = case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
                                              d_827220437==548392715 ~ "Henry Ford Health",
                                              d_827220437 == 531629870 ~ "HealthPartners",
                                              d_827220437 == 303349821 ~ "Marshfield",
                                              d_827220437 == 657167265 ~ "Sanford Health",
                                              d_827220437 == 809703864 ~ "University of Chicago", 
-                                             TRUE ~ "Remove")) %>%  filter(Site!="Remove")
-
+                                             TRUE ~ "Remove")) %>%  filter(Site!="Remove" & Site_location!="Remove")
+#723351427 807443231
 #biospe_adhoc$Site_location<- droplevels(biospe_adhoc$Site_location)
-biospe_adhoc$Site_location <- factor(biospe_adhoc$Site_location,levels=c("HP Research Clinic", #"HP Park Nicollet",
-                                                                         "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic", 
-                                                                         "HFH Livonia Research Clinic", "HFH Pop-Up",
-                                                                         "Marshfield", "MF Pop-Up",
-                                                                         "Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
-                                                                         "Colby Abbotsford","Minocqua","Merrill","Sioux Falls Imagenetics","Fargo South University",
-                                                                         "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park")) 
+biospe_adhoc$Site_location <- factor(biospe_adhoc$Site_location,
+                                     levels=c("HWC, BC","All Saints (FW)","HP Research Clinic", #"HP Park Nicollet",
+                                              "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
+                                              "HFH Livonia Research Clinic", "HFH Pop-Up",
+                                              "Marshfield", "MF Pop-Up","Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
+                                              "Colby Abbotsford","Minocqua","Merrill",
+                                              "Sioux Falls Imagenetics","Fargo South University",
+                                              "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park")) 
 biospe_adhoc$Site<- factor(biospe_adhoc$Site, levels=c("Baylor Scott and White Health","HealthPartners","Henry Ford Health","Marshfield","Sanford Health","University of Chicago"))
 
 coll_bptl_diff <- biospe_adhoc  %>% group_by(as.character(Connect_ID),Site, Site_location) %>% 
@@ -3256,24 +3260,9 @@ crosstable.coll_bptl28a$n_pct_4_Day <-  paste(format(crosstable.coll_bptl28a[,5]
 crosstable.coll_bptl28a$n_pct_4_plus_days =  paste(format(crosstable.coll_bptl28a[,1],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,7],1),"%)",sep=" ")
 crosstable.coll_bptl28a$Total_Pct <- paste(crosstable.coll_bptl28a$Total, " (100%)")
 
-         
-#crosstable.coll_bptl28a <- crosstable.coll_bptl28a %>%  select("Site","n_pct_1_Day", "n_pct_2_Day","n_pct_3_Day","n_pct_4_Day","n_pct_4_plus_days", "Total_Pct")
+
 
 crosstable.coll_bptl28a <- crosstable.coll_bptl28a[,c(13:19)]
-# crosstable.coll_bptl28a[7,] <- list('Total', sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,2], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
-#                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,3], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
-#                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,4], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
-#                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,5], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
-#                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,6], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))),
-#                                     sum(as.numeric(gsub(",", "", str_extract(crosstable.coll_bptl28a[,7], "\\b\\d{1,4}(,\\d{3})*(?=\\s*\\()")))))
-# 
-# crosstable.coll_bptl28a[7,2] <- paste(crosstable.coll_bptl28a[7,2], "(",round(100*as.numeric(crosstable.coll_bptl28a[7,2])/as.numeric(crosstable.coll_bptl28a[7,7]), digits=1), "%)")
-# crosstable.coll_bptl28a[7,3] <- paste(crosstable.coll_bptl28a[7,3], "(",round(100*as.numeric(crosstable.coll_bptl28a[7,3])/as.numeric(crosstable.coll_bptl28a[7,7]), digits=1), "%)")
-# crosstable.coll_bptl28a[7,4] <- paste(crosstable.coll_bptl28a[7,4], "(",round(100*as.numeric(crosstable.coll_bptl28a[7,4])/as.numeric(crosstable.coll_bptl28a[7,7]), digits=1), "%)")
-# crosstable.coll_bptl28a[7,5] <- paste(crosstable.coll_bptl28a[7,5], "(",round(100*as.numeric(crosstable.coll_bptl28a[7,5])/as.numeric(crosstable.coll_bptl28a[7,7]), digits=1), "%)")
-# crosstable.coll_bptl28a[7,6] <- paste(crosstable.coll_bptl28a[7,6], "(",round(100*as.numeric(crosstable.coll_bptl28a[7,6])/as.numeric(crosstable.coll_bptl28a[7,7]), digits=1), "%)")
-# crosstable.coll_bptl28a[7,7] <- paste(crosstable.coll_bptl28a[7,7], " (100%)")
-
 
 
 ```
@@ -3321,34 +3310,35 @@ biospe_adhoc2= table5.2 %>%  filter(d_650516960==664882224 & d_410912345==353358
                                    #(!is.na(d_173836415_d_266600170_d_185243482) | !is.na(d_173836415_d_266600170_d_452847912)) & 
                                    #ClinBloodTmBL/ ClinUrnieTmBL
                                    (!is.na(d_173836415_d_266600170_d_822274939) | !is.na(d_173836415_d_266600170_d_139245758)) &
-                                   #BioBPTL_DateRec_v1r0 blood or urine
-                             (!is.na(d_232343615_d_926457119) | !is.na(d_299553921_d_926457119) | !is.na(d_376960806_d_926457119) |
-                                !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) | !is.na(d_652357376_d_926457119) |
-                                !is.na(d_677469051_d_926457119) | !is.na(d_683613884_d_926457119) | !is.na(d_703954371_d_926457119) | !is.na(d_838567176_d_926457119) |
-                                !is.na(d_958646668_d_926457119) | !is.na(d_973670172_d_926457119))) %>%
+                                     #BioBPTL_DateRec_v1r0 blood or urine
+                                     (!is.na(d_232343615_d_926457119) | !is.na(d_299553921_d_926457119) | !is.na(d_376960806_d_926457119) |
+                                        !is.na(d_454453939_d_926457119) | !is.na(d_505347689_d_926457119) | !is.na(d_589588440_d_926457119) |
+                                        !is.na(d_652357376_d_926457119) | !is.na(d_677469051_d_926457119) | !is.na(d_683613884_d_926457119) |
+                                        !is.na(d_703954371_d_926457119) |!is.na(d_838567176_d_926457119) | !is.na(d_958646668_d_926457119) |
+                                        !is.na(d_973670172_d_926457119))) %>%
                      mutate(Site_location = case_when(#d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1 ~ "NSC",
-                                                      d_827220437=="531629870" & d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
-                                                      d_827220437=="531629870" & d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen",
-                                                      d_173836415_d_266600170_d_185243482==22 | d_173836415_d_266600170_d_452847912==22 |
-                                                        d_173836415_d_266600170_d_185243482==24 | d_173836415_d_266600170_d_452847912==24 |
-                                                        d_173836415_d_266600170_d_185243482==28 | d_173836415_d_266600170_d_452847912==28 |
-                                                        d_173836415_d_266600170_d_185243482==33 | d_173836415_d_266600170_d_452847912==33 |
-                                                        d_173836415_d_266600170_d_185243482==34 | d_173836415_d_266600170_d_452847912==34 |
-                                                        d_173836415_d_266600170_d_185243482==35 | d_173836415_d_266600170_d_452847912==35 |
-                                                        d_173836415_d_266600170_d_185243482==38 | d_173836415_d_266600170_d_452847912==38 |
-                                                        d_173836415_d_266600170_d_185243482==40 | d_173836415_d_266600170_d_452847912==40 |
-                                                        d_173836415_d_266600170_d_185243482==55 | d_173836415_d_266600170_d_452847912==55 |
-                                                        d_173836415_d_266600170_d_185243482==71 | d_173836415_d_266600170_d_452847912==71 ~ "Oahu Clinics",
-                                                    d_173836415_d_266600170_d_185243482==23 | d_173836415_d_266600170_d_452847912==23 |
-                                                        d_173836415_d_266600170_d_185243482==26 | d_173836415_d_266600170_d_452847912==26 |
-                                                        d_173836415_d_266600170_d_185243482==27 | d_173836415_d_266600170_d_452847912==27 |
-                                                        d_173836415_d_266600170_d_185243482==32 | d_173836415_d_266600170_d_452847912==32 |
-                                                        d_173836415_d_266600170_d_185243482==37 | d_173836415_d_266600170_d_452847912==37 |
-                                                        d_173836415_d_266600170_d_185243482==49 | d_173836415_d_266600170_d_452847912==49 |
-                                                        d_173836415_d_266600170_d_185243482==56 | d_173836415_d_266600170_d_452847912==56 |
-                                                        d_173836415_d_266600170_d_185243482==69 | d_173836415_d_266600170_d_452847912==69 |
-                                                        d_173836415_d_266600170_d_185243482==74 | d_173836415_d_266600170_d_452847912==74 |
-                                                        d_173836415_d_266600170_d_185243482==76 | d_173836415_d_266600170_d_452847912==76 ~ "Non-Oahu Clinics",
+                       d_827220437=="531629870" & d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2 ~ "Elk River",
+                       d_827220437=="531629870" & d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3 ~ "Chanhassen",
+                       d_173836415_d_266600170_d_185243482==22 | d_173836415_d_266600170_d_452847912==22 |
+                         d_173836415_d_266600170_d_185243482==24 | d_173836415_d_266600170_d_452847912==24 |
+                         d_173836415_d_266600170_d_185243482==28 | d_173836415_d_266600170_d_452847912==28 |
+                         d_173836415_d_266600170_d_185243482==33 | d_173836415_d_266600170_d_452847912==33 |
+                         d_173836415_d_266600170_d_185243482==34 | d_173836415_d_266600170_d_452847912==34 |
+                         d_173836415_d_266600170_d_185243482==35 | d_173836415_d_266600170_d_452847912==35 |
+                         d_173836415_d_266600170_d_185243482==38 | d_173836415_d_266600170_d_452847912==38 |
+                         d_173836415_d_266600170_d_185243482==40 | d_173836415_d_266600170_d_452847912==40 |
+                         d_173836415_d_266600170_d_185243482==55 | d_173836415_d_266600170_d_452847912==55 |
+                         d_173836415_d_266600170_d_185243482==71 | d_173836415_d_266600170_d_452847912==71 ~ "Oahu Clinics",
+                       d_173836415_d_266600170_d_185243482==23 | d_173836415_d_266600170_d_452847912==23 |
+                         d_173836415_d_266600170_d_185243482==26 | d_173836415_d_266600170_d_452847912==26 |
+                         d_173836415_d_266600170_d_185243482==27 | d_173836415_d_266600170_d_452847912==27 |
+                         d_173836415_d_266600170_d_185243482==32 | d_173836415_d_266600170_d_452847912==32 |
+                         d_173836415_d_266600170_d_185243482==37 | d_173836415_d_266600170_d_452847912==37 |
+                         d_173836415_d_266600170_d_185243482==49 | d_173836415_d_266600170_d_452847912==49 |
+                         d_173836415_d_266600170_d_185243482==56 | d_173836415_d_266600170_d_452847912==56 |
+                         d_173836415_d_266600170_d_185243482==69 | d_173836415_d_266600170_d_452847912==69 |
+                         d_173836415_d_266600170_d_185243482==74 | d_173836415_d_266600170_d_452847912==74 |
+                         d_173836415_d_266600170_d_185243482==76 | d_173836415_d_266600170_d_452847912==76 ~ "Non-Oahu Clinics",
                        d_173836415_d_266600170_d_185243482==1050010095 | d_173836415_d_266600170_d_452847912==1050010095 ~ "Wyandotte",
                        d_173836415_d_266600170_d_185243482==1060010063 | d_173836415_d_266600170_d_185243482==1060170018 |
                          d_173836415_d_266600170_d_452847912==1060010063 | d_173836415_d_266600170_d_452847912==1060170018~ "Macomb",
@@ -4126,29 +4116,34 @@ needle5_2 <- knitr::kable(crosstable.coll_bptl28, col.names=c("Collection Locati
 
 needle5_2 <- group_rows(
   needle5_2,
-  group_label = "HealthPartners",
+  group_label = "Baylor Scott and White Health",
   start_row = 1,
-  end_row = 1)  
+  end_row = 2) 
+needle5_2 <- group_rows(
+  needle5_2,
+  group_label = "HealthPartners",
+  start_row = 3,
+  end_row = 3)  
 needle5_2 <- group_rows(
   needle5_2,
   group_label = "Henry Ford Health",
-  start_row = 2,
-  end_row = 5) 
+  start_row = 4,
+  end_row = 7) 
 needle5_2 <- group_rows(
   needle5_2,
   group_label = "Marshfield",
-  start_row = 6,
-  end_row = 14) 
+  start_row = 8,
+  end_row = 16) 
 needle5_2 <- group_rows(
   needle5_2,
   group_label = "Sanford Health",
-  start_row = 15,
-  end_row = 16)
+  start_row = 17,
+  end_row = 18)
 needle5_2 <- group_rows(
   needle5_2,
   group_label = "University of Chicago",
-  start_row = 17,
-  end_row = 22)
+  start_row = 19,
+  end_row = 24)
 
 needle5_2
 
@@ -4204,42 +4199,41 @@ coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Henry Ford Health",
   start_row = 1,
-
-  end_row = 16)
+  end_row = 15)
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "HealthPartners",
-  start_row = 17,
-  end_row = 18)
+  start_row = 16,
+  end_row = 17)
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Kaiser Permanente Colorado",
+  start_row = 18,
+  end_row = 18) 
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Kaiser Permanente Georgia",
   start_row = 19,
   end_row = 19) 
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
-  group_label = "Kaiser Permanente Georgia",
-  start_row = 20,
-  end_row = 20) 
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
   group_label = "Kaiser Permanente Hawaii",
-  start_row = 21,
-  end_row = 22) 
+  start_row = 20,
+  end_row = 21) 
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "Kaiser Permanente Northwest",
+  start_row = 22,
+  end_row = 22)
+coll_bplt_knitr2 <- group_rows(
+  coll_bplt_knitr2,
+  group_label = "Sanford Health",
   start_row = 23,
   end_row = 23)
 coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
-  group_label = "Sanford Health",
-  start_row = 24,
-  end_row = 24)
-coll_bplt_knitr2 <- group_rows(
-  coll_bplt_knitr2,
   group_label = "University of Chicago Medicine",
-  start_row = 25,
+  start_row = 24,
   end_row = 29)
 
 
@@ -4261,32 +4255,36 @@ kable_styling(table_ct5_4, latex_options = "HOLD_position")
 coll_bplt_knitr3 <- knitr::kable(Hrs_bptl_col, col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), caption='Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location', row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 
-
+coll_bplt_knitr3 <- group_rows(
+  coll_bplt_knitr3,
+  group_label = "Baylor Scott and White Health",
+  start_row = 1,
+  end_row = 2) 
 coll_bplt_knitr3 <- group_rows(
   coll_bplt_knitr3,
   group_label = "HealthPartners",
-  start_row = 1,
-  end_row = 1)  
+  start_row = 3,
+  end_row = 3)  
 coll_bplt_knitr3 <- group_rows(
   coll_bplt_knitr3,
   group_label = "Henry Ford Health",
-  start_row = 2,
-  end_row = 5) 
+  start_row = 4,
+  end_row = 7) 
 coll_bplt_knitr3 <- group_rows(
   coll_bplt_knitr3,
   group_label = "Marshfield",
-  start_row = 6,
-  end_row = 11) 
+  start_row = 8,
+  end_row = 13) 
 coll_bplt_knitr3 <- group_rows(
   coll_bplt_knitr3,
   group_label = "Sanford Health",
-  start_row = 12,
-  end_row = 13)
+  start_row = 14,
+  end_row = 15)
 coll_bplt_knitr3 <- group_rows(
   coll_bplt_knitr3,
   group_label = "University of Chicago",
-  start_row = 14,
-  end_row = 19)
+  start_row = 16,
+  end_row = 21)
 
 
 add_footnote(coll_bplt_knitr3, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation = "none")
