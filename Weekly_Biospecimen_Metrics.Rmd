@@ -3260,8 +3260,6 @@ crosstable.coll_bptl28a$n_pct_4_Day <-  paste(format(crosstable.coll_bptl28a[,5]
 crosstable.coll_bptl28a$n_pct_4_plus_days =  paste(format(crosstable.coll_bptl28a[,1],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,7],1),"%)",sep=" ")
 crosstable.coll_bptl28a$Total_Pct <- paste(crosstable.coll_bptl28a$Total, " (100%)")
 
-
-
 crosstable.coll_bptl28a <- crosstable.coll_bptl28a[,c(13:19)]
 
 
