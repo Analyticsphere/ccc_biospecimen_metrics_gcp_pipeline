@@ -327,7 +327,7 @@ mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified by health provider site. This information pertains to verified participants as of the date above and collections that are final.
 
 
-```{r Tables1_2, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Tables1.1_1.5, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 # \newpage
 # \FloatBarrier
 # # Tables
@@ -338,7 +338,7 @@ This Weekly Metrics report contains tables and plots for the Connect Biospecimen
 
 
 # mouthwash or blood or urine collected
-recrver1 <- recrver1 %>% mutate(BiospeCollection = ifelse((recrver1$d_684635302 == 353358909 | recrver1$d_878865966 == 353358909| recrver1$d_167958071 == 353358909), "Any biospecimen Collections","No biospecimen collections"))
+recrver1 <- recrver1 %>% mutate(BiospeCollection = ifelse((recrver1$d_878865966 == 353358909| recrver1$d_167958071 == 353358909), "Any biospecimen Collections","No biospecimen collections")) 
 
 recrver1$Site<- droplevels(recrver1$Site)
 
@@ -359,7 +359,6 @@ biocol.tb <- base::merge(recrver1[,c("Connect_ID","Site","BiospeCollection","d_8
 table1 <- biocol.tb %>% #filter(recrver1$d_821247024==197316935) %>%
   mutate(#appointment = ifelse((d_410912345!= 353358909 | is.na(d_410912345)), 104430631, 353358909),
          biocol.appoint = case_when(BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 ~ "Baseline Collection",
-                                    #BiospeCollection == "No biospecimen collections" & (d_410912345!= 353358909 | is.na(d_410912345)) ~ "No Baseline Collection"
                                     TRUE ~ "No Baseline Collection")) 
 tab___1 <- table1 %>%  
   mutate(biocol.appoint = factor(biocol.appoint, levels=c("Baseline Collection","No Baseline Collection"))) %>% dplyr::select(Site, biocol.appoint )  %>% 
@@ -651,7 +650,7 @@ table2_status <- table2 %>%
 table2_totals <- as.data.frame(table2_status)
 table2_totals <- table2_totals[-1, ]
 
-biospe.bld <- knitr::kable(table2_totals ,col.names=c("Site", "Any Baseline Blood Collected","No Baseline Blood Collected", "Total Baseline Collections"), caption='Table 1.5: Baseline Blood Collection Status Among Biospecimen Collections', row.names=FALSE,align=c("l","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
+biospe.bld <- knitr::kable(table2_totals ,col.names=c("Site", "Any Baseline \n Blood Collected","No Baseline \n Blood Collected", "Total Baseline \n Collections"), caption='Table 1.5: Baseline Blood Collection Status Among Biospecimen Collections', row.names=FALSE,align=c("l","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 
 
@@ -776,15 +775,14 @@ final_col_num_1.5$C30 <- paste0(final_col_num_1.5$Count_30days, " (", final_col_
 
 
 
-```{r Coll_Sett_AllSites, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Coll_Sett_AllSites, eval=TRUE,echo=FALSE,warning=FALSE,include=FALSE,results='hold'}
 
 
 
 
 ## Issue: for whatever reason some people have a null BL_BioSpm_BloodSetting_v1r0/Urine/MW value, so the extra '| d_650516960==' is added
-#but 650516960 won't apply correctly to mouthwas all the time
-
-coll_set_spec <- table2 %>%
+#but 650516960 won't apply correctly to mouthwash all the time
+coll_set_spec <- table2 %>% 
 mutate(
     Blood_Clinical = ifelse(BioFin_BaseBloodCol_v1r0 == "Any blood collected" & (BL_BioSpm_BloodSetting_v1r0=="Clinical" | d_650516960=="664882224"), 1, 0),
     Blood_Research = ifelse(BioFin_BaseBloodCol_v1r0 == "Any blood collected" & (BL_BioSpm_BloodSetting_v1r0=="Research" | d_650516960=="534621077"), 1, 0),
@@ -1560,6 +1558,8 @@ colnames(newtable_4) <- c(md("Data System"), md("Blood Collected"), md("Urine Co
 
 ```{r Table11, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
+
+recrver1 <- recrver1 %>% mutate(BiospeCollection = ifelse((recrver1$d_684635302 == 353358909 | recrver1$d_878865966 == 353358909| recrver1$d_167958071 == 353358909), "Any biospecimen Collections","No biospecimen collections"))
 
 #Participants who checked in for a baseline biospecimen visit but did not give any samples
 dd[grepl("BioChk",dd$`Variable Name`),]
@@ -3630,14 +3630,17 @@ col_num_1.2_gt #%>% kable_styling(latex_options = "scale_down")
 ```
 
 \FloatBarrier
-```{r KnitrTables2_4, eval=TRUE,echo=FALSE,results='asis'}
+```{r KnitrTables1.4, eval=TRUE,echo=FALSE,results='asis'}
 
 knitr::kable(final_col_num_1.5[, c(1,2,8,9)], col.names=c("Collection Location", "Total Clinical Collections", "Clinical Collections \n in Past 7 days",  "Clinical Collections \n in Past 30 days"), caption='Table 1.4: Baseline Clinical Biospecimen Collections at Sanford Health by Clinic Location', row.names=FALSE, align=c("l","c"), format.args = list(big.mark = ","), booktabs = TRUE) %>% 
   column_spec(3:4, width = "4cm")
+```
 
+```{r KnitrTables1.5, eval=TRUE,echo=FALSE,results='asis'}
 biospe.bld %>% kable_styling(latex_options = "scale_down")
+```
 
-
+```{r KnitrTables1.6_1.11, eval=TRUE,echo=FALSE,results='asis'}
 tab5=knitr::kable(allsites_crosstab, col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), caption='Table 1.6: Baseline Collection Setting Among Biospecimen Collections by Specimen Type', row.names=FALSE, align=c("l","c","c","c"), format.args = list(big.mark = ","), booktabs = TRUE)   
 add_footnote(tab5, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", notation = "none")
 #footnote(tab5, "Note: Some cells are not applicable. Blood and Urine Samples cannot be collected in a Home Setting. Mouthwash cannot be collected in a Clinical Setting.",fixed_small_size=T)
@@ -3990,7 +3993,7 @@ research.4_3
 \FloatBarrier
 ```{r KnitrTables17_20,echo=FALSE,error=FALSE,message=FALSE,results='asis'}
 
-knitr::kable(Table18_combined_totals, caption='Table 3.5: Baseline Biospecimen Survey Completion Time from Clinical Collection Dashboard Entry', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
+knitr::kable(Table18_combined_totals, caption='Table 3.5: Baseline Clinical Biospecimen Survey Complete Time from Collection Time', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 
 
@@ -5102,7 +5105,7 @@ research.vt_plotHP_locs + guides(color = guide_legend(title = "Clinic Location")
 
 
 
-```{r AdHoc1, eval=TRUE,echo=FALSE, warning=FALSE, include=FALSE}
+```{r AdHoc1, eval=TRUE,echo=FALSE, warning=FALSE}
 Orland_ad_hoc <- research.vt_plUC %>% filter(as.Date(col.Monday.date)>="2023-12-11" & Site_location=="Orland Park")
 
  Orland_adhoc <- Orland_ad_hoc[,c(5,6)]
