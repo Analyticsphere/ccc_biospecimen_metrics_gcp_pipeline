@@ -31,7 +31,7 @@ library(knitr)
 library(kableExtra)
 library(glue)
 bq_auth()
-2
+
 
 ### Set Box folders for output CSV files #######################################
 use_test_box_folder <- FALSE # Local user sets this (Jake or Kelsey)
@@ -66,7 +66,7 @@ INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Conn
 
 
 
-parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160
+parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
@@ -814,7 +814,7 @@ bioqc1 <- bioqc1 %>% mutate(BioClin_DBBloodID_v1r0=ifelse(Site=="Henry Ford Heal
 
 polyblood <- bioqc1 %>%  filter(!(bioqc1$BioClin_DBBloodID_v1r0 %in% PolyBloodID)) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>% sort_by(Site)
 colnames(polyblood) <- c("Site", "Connect ID", "BioClin_DBBloodID_v1r0", "BioClin_PolyBloodID_v1r0")
-knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(polyblood) %>% kable_styling(latex_options = "HOLD_position") %>% row_spec(1:nrow(polyblood), font_size = 3)
 
 
 ```
@@ -824,23 +824,25 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "scale_down")
 
 ```{r PolyUrineID, echo=FALSE, warning=FALSE, message=FALSE}
 
-bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120) &
+#bioqc2 <- bioqc %>% mutate(urineID = ifelse(is.numeric(d_928693120), is.numeric(d_928693120), is.numeric(d_928693120_integer)))
+
+bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120_integer) &
 
                         Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 &
                           Connect_ID!=6473532641 & Connect_ID!=4435276749 ) #HFH exclusions)
 
-
+#PolyUrineID <- bioqc2$d_173836415_d_266600170_d_110349197
 str2 <- bioqc2$d_173836415_d_266600170_d_110349197
 PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ",")) 
 
- 
 
-bioqc2 <- bioqc2 %>%   mutate(BioClin_DBUrineID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_928693120),d_928693120))
+
+bioqc2 <- bioqc2 %>%   mutate(BioClin_DBUrineID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_928693120_integer),d_928693120_integer))
 
 
 polyurine <- bioqc2 %>%  filter(!(bioqc2$BioClin_DBUrineID_v1r0 %in% PolyUrineID)) %>%  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, d_173836415_d_266600170_d_110349197) %>% sort_by(Site)
 colnames(polyurine) <- c("Site", "Connect ID", "BioClin_DBUrineID_v1r0", "BioClin_PolyUrineID_v1r0")
-knitr::kable(polyurine) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(polyurine) %>% kable_styling(latex_options =  "scale_down") %>% row_spec(1:nrow(polyurine), font_size = 3)
 
 
 ```
@@ -1114,8 +1116,18 @@ knitr::kable(mw_dt) %>% kable_styling(latex_options = "HOLD_position")
 ```
 
 
+# 44. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 5 days ago, BioKit_KitStatusBL_v1r0 should be Received
+```{r kit_recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
+kits_recvd <- bioqc %>%  filter(d_173836415_d_266600170_d_915179629==103209024 &  
+                                  as.numeric(round(difftime(currentDate, d_195145666, units="days"), digits=0)) > 5 & 
+                                  d_173836415_d_266600170_d_319972665_d_221592017!=375535639) %>% 
+  select(Site, Connect_ID, d_195145666, d_173836415_d_266600170_d_319972665_d_221592017) %>%  sort_by(Site)
 
+colnames(kits_recvd) <- c("Site", "Connect ID", "SrvMtW_TmComplete_v1r0", "BioKit_KitStatusBL_v1r0")
+knitr::kable(kits_recvd) %>% kable_styling(latex_options = "HOLD_position")
+
+```
 
 
 
@@ -1212,8 +1224,8 @@ write.csv(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs{currentDat
 
 #Urine
 qc1_urine <- bioqc %>%  
-  filter(str_sub(d_173836415_d_266600170_d_198261154, 1, 11) != str_sub(d_928693120, 1, 11)) %>%
-  select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120, d_556788178) %>%
+  filter(str_sub(d_173836415_d_266600170_d_198261154, 1, 11) != str_sub(d_928693120_integer, 1, 11)) %>%
+  select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120_integer, d_556788178) %>%
   arrange(Site)
 
 qc1_urine$d_556788178 <- as.POSIXct(ymd_hms(qc1_urine$d_556788178))
@@ -1222,7 +1234,7 @@ colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID", "Expected Acce
 
 qc1_urine <- qc1_urine %>% arrange(Site, `Collection Date/Time`)
 
-View(qc1_urine)
+#View(qc1_urine)
 
 
 
@@ -1241,7 +1253,7 @@ View(qc1_urine)
 # #knitr::kable(qc1_urine)
 # 
 # 
-# write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 
 
 ```
