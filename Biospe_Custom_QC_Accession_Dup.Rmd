@@ -1235,8 +1235,6 @@ colnames(qc1_urine) <- c("Site", "Connect ID", "KP Accession ID", "Expected Acce
 
 qc1_urine <- qc1_urine %>% arrange(Site, `Collection Date/Time`)
 
-#View(qc1_urine)
-
 
 
 # #Urine
@@ -1358,7 +1356,6 @@ colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection 
                         "SST1_Tube_Collected", "SST2_Tube_Collected", "SST3_Tube_Collected", "SST4_Tube_Collected",
                         "SST5_Tube_Collected", "HeparinT1_Tube_Collected", "HeparinT2_Tube_Collected", "EDTAT1_Tube_Collected",
                         "EDTAT2_Tube_Collected", "EDTAT3_Tube_Collected", "ACD_Tube_Collected", "STRECK_Tube_Collected","Urine_Tube_Collected", "MW_Tube_Collected")
-View(dup_list)
 
 
 ```
