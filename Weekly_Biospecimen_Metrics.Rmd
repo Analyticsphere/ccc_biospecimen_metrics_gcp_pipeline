@@ -1037,7 +1037,7 @@ coll_completenessR <- table4_redone__R %>% dplyr::select('Specimens Collected', 
     row = 'Specimens Collected',
     col = Site,
     digits=c(0,1),
-    percent = "col",
+    percent = "column",
     label=list(Site="Site"),
     missing="ifany",
     margin_text="Total")
@@ -1093,7 +1093,7 @@ colnames(coll_completenessR_totals) <- current_colnames
 #     row = 'Specimens Collected',
 #     col = Site,
 #     digits=c(0,1),
-#     percent = "col",
+#     percent = "column",
 #     label=list(Site="Site"),
 #     missing="ifany",
 #     margin_text="Total")
@@ -1148,7 +1148,7 @@ coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected'
     row = 'Specimens Collected',
     col = Site,
     digits=c(0,1),
-    percent = "col",
+    percent = "column",
     label=list(Site="Site"),
     missing="ifany",
     margin_text="Total")
@@ -1984,7 +1984,7 @@ Total_research_blood <- research__blood %>%
   tbl_cross(
     col = tube_type, 
     row = Site,
-    percent = "col",
+    percent = "column",
     label= list(tube_type ~ ' ', Site~'Site'), 
     missing="ifany",
     missing_text="0",
@@ -2036,7 +2036,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
     tbl_cross(
         col = tube_types, 
         row = Site,
-        percent = "col",
+        percent = "column",
         label= list(tube_types ~ ' ', Site~'Site'),     
         missing="ifany",
         missing_text="0",
@@ -5876,7 +5876,12 @@ add_footnote(table7_2before, "Note: Kits were returned using USPS prior to 6/17/
 ```
 
 
+knitr::kable(all_shipped_2,caption='Table 7.2 Baseline- Total Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago',row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
+
+```
+
 \FloatBarrier
+
 ```{r KnitrTables7.2after,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
 
 table7_2after <- knitr::kable(all_shipped_after,caption='Table 7.4 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped after 6/17/2024)',row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
@@ -5884,6 +5889,7 @@ table7_2after <- knitr::kable(all_shipped_after,caption='Table 7.4 Baseline- Hom
 add_footnote(table7_2after, "Note: Kits were returned using FedEx after 6/17/2024", notation = "none")
 
 ```
+
 
 
 \FloatBarrier
