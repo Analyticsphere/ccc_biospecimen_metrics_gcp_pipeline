@@ -154,7 +154,7 @@ menstrual_funct <- function(CID, Title){
   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BU_tib$D_522008539==536341288)
   gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn_table <- gt_yn %>%  gt::gt()  %>%  
+  gt_yn %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md(Title)) %>% 
   cols_label(answer = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% 
@@ -170,12 +170,6 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
       columns = answer,
     )
   )
-  tab_footnote(
-  gt_yn_table,
-  md("This question was completed by participants that selected a biological sex of Female and selected 'Yes' for menstruation in the last 12 months."),
-  locations = cells_column_labels(columns = answer),
-  placement = c("left")
-)
 }
 
 
