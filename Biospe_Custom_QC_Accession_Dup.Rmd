@@ -798,7 +798,8 @@ knitr::kable(bio_mw_setting_res)
 ```{r BioClin_PolyBloodID_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 bioqc1 <- bioqc %>%  filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796) &
-                        Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662) #HFH exclusions
+                        Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 & #HFH exclusions
+                          Connect_ID!=4782195164) #UC exclusion
 
 # bioqc1$str1 <- bioqc1$d_173836415_d_266600170_d_543608829
 # 
@@ -1268,6 +1269,7 @@ write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDat
 
 dup <- "WITH T AS (
   SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+  where d_820476880 LIKE 'CXA%'
   GROUP BY Connect_ID
   HAVING COUNT(Connect_ID) > 1) 
 SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
@@ -1296,7 +1298,67 @@ bio_dup <- bio_dup %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HP",
                                                  d_827220437==452412599 ~ "KPNW"),
                                Finalized= case_when(d_410912345==104430631 ~ "No",
                                                     d_410912345==353358909 ~ "Yes",
-                                                    TRUE ~ "Not Enterted"))
+                                                    TRUE ~ "Null"),
+                               Setting = case_when(d_650516960== "664882224" ~ "Clinical",
+                                                   d_650516960== "534621077" ~ "Research",
+                                                   d_650516960== "103209024" ~ "Home",
+                                                   is.na(d_650516960) ~ "Null"),
+                               SST1_Tube_Collected= case_when(d_299553921_d_593843561==353358909 ~ "Yes",
+                                                              TRUE ~ "No"),
+                               SST2_Tube_Collected= case_when(d_703954371_d_593843561==353358909 ~ "Yes",
+                                                              TRUE ~ "No"),
+                               SST3_Tube_Collected= case_when(d_376960806_d_593843561==353358909 ~ "Yes",
+                                                              TRUE ~ "No"),
+                               SST4_Tube_Collected= case_when(d_232343615_d_593843561==353358909 ~ "Yes",
+                                                              TRUE ~ "No"),
+                               SST5_Tube_Collected= case_when(d_589588440_d_593843561==353358909 ~ "Yes",
+                                                              TRUE ~ "No"),
+                               HeparinT1_Tube_Collected= case_when(d_838567176_d_593843561==353358909 ~ "Yes",
+                                                                   TRUE ~ "No"),
+                               HeparinT2_Tube_Collected= case_when(d_958646668_d_593843561==353358909 ~ "Yes",
+                                                                   TRUE ~ "No"),
+                               EDTAT1_Tube_Collected= case_when(d_454453939_d_593843561==353358909 ~ "Yes",
+                                                                TRUE ~ "No"),
+                               EDTAT2_Tube_Collected= case_when(d_677469051_d_593843561==353358909 ~ "Yes",
+                                                                TRUE ~ "No"),
+                               EDTAT3_Tube_Collected= case_when(d_683613884_d_593843561==353358909 ~ "Yes",
+                                                                TRUE ~ "No"),
+                               ACD_Tube_Collected= case_when(d_652357376_d_593843561==353358909 ~ "Yes",
+                                                             TRUE ~ "No"),
+                               STRECK_Tube_Collected= case_when(d_505347689_d_593843561==353358909 ~ "Yes",
+                                                                TRUE ~ "No"),
+                               Urine_Tube_Collected= case_when(d_973670172_d_593843561==353358909 ~ "Yes",
+                                                               TRUE ~ "No"),
+                               MW_Tube_Collected= case_when(d_143615646_d_593843561==353358909 ~ "Yes",
+                                                            TRUE ~ "No"))
+
+
+finalized_counts <- bio_dup %>%
+  group_by(Connect_ID) %>%
+  summarize(Finalized_Count = sum(Finalized == "Yes"))
+
+#Add the new column indicating if the count is more than 1
+finalized_counts <- finalized_counts %>%
+  mutate(Finalized_Status = ifelse(Finalized_Count > 1, "Yes", "No"))
+
+# Step 4: Join back with the original data to get the Finalized_Status for all participants
+bio_dup_with_status <- bio_dup %>%
+  left_join(finalized_counts %>% select(Connect_ID, Finalized_Status), by = "Connect_ID")
+
+
+dup_list <- bio_dup_with_status %>%
+  select(Connect_ID, Site, Setting, d_820476880, d_556788178, Finalized, Finalized_Status,
+         SST1_Tube_Collected, SST2_Tube_Collected, SST3_Tube_Collected, SST4_Tube_Collected,
+         SST5_Tube_Collected, HeparinT1_Tube_Collected, HeparinT2_Tube_Collected, EDTAT1_Tube_Collected,
+         EDTAT2_Tube_Collected, EDTAT3_Tube_Collected, ACD_Tube_Collected, STRECK_Tube_Collected,
+         Urine_Tube_Collected, MW_Tube_Collected) %>%
+  arrange(Connect_ID)
+
+colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection ID", "Collection Date/Time", "Collection Finalized", "True Duplicate",
+                        "SST1_Tube_Collected", "SST2_Tube_Collected", "SST3_Tube_Collected", "SST4_Tube_Collected",
+                        "SST5_Tube_Collected", "HeparinT1_Tube_Collected", "HeparinT2_Tube_Collected", "EDTAT1_Tube_Collected",
+                        "EDTAT2_Tube_Collected", "EDTAT3_Tube_Collected", "ACD_Tube_Collected", "STRECK_Tube_Collected","Urine_Tube_Collected", "MW_Tube_Collected")
+View(dup_list)
 
 
 ```
@@ -1304,14 +1366,8 @@ bio_dup <- bio_dup %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HP",
 
 ```{r DupCsv, echo=FALSE, warning=FALSE, message=FALSE}
 
-dup_list <- bio_dup %>%  select(Site, Connect_ID, d_820476880, d_556788178, Finalized)
-colnames(dup_list) <- c("Site", "Connect ID", "Collection ID", "Collection Date/Time", "Collection Finalized")
-#knitr::kable(dup_list)
-
-
-write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
-
-
+#write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+write_labelled_xlsx(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"))
 
 ```
 
