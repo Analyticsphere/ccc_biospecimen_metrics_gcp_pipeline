@@ -1037,7 +1037,7 @@ coll_completenessR <- table4_redone__R %>% dplyr::select('Specimens Collected', 
     row = 'Specimens Collected',
     col = Site,
     digits=c(0,1),
-    percent = "col",
+    percent = "column",
     label=list(Site="Site"),
     missing="ifany",
     margin_text="Total")
@@ -1093,7 +1093,7 @@ colnames(coll_completenessR_totals) <- current_colnames
 #     row = 'Specimens Collected',
 #     col = Site,
 #     digits=c(0,1),
-#     percent = "col",
+#     percent = "column",
 #     label=list(Site="Site"),
 #     missing="ifany",
 #     margin_text="Total")
@@ -1148,7 +1148,7 @@ coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected'
     row = 'Specimens Collected',
     col = Site,
     digits=c(0,1),
-    percent = "col",
+    percent = "column",
     label=list(Site="Site"),
     missing="ifany",
     margin_text="Total")
@@ -1984,7 +1984,7 @@ Total_research_blood <- research__blood %>%
   tbl_cross(
     col = tube_type, 
     row = Site,
-    percent = "col",
+    percent = "column",
     label= list(tube_type ~ ' ', Site~'Site'), 
     missing="ifany",
     missing_text="0",
@@ -2036,7 +2036,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
     tbl_cross(
         col = tube_types, 
         row = Site,
-        percent = "col",
+        percent = "column",
         label= list(tube_types ~ ' ', Site~'Site'),     
         missing="ifany",
         missing_text="0",
