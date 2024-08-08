@@ -4314,7 +4314,7 @@ coll_bplt_knitr2 <- group_rows(
   coll_bplt_knitr2,
   group_label = "University of Chicago Medicine",
   start_row = 24,
-  end_row = 29)
+  end_row = 28)
 
 
 coll_bplt_knitr2
