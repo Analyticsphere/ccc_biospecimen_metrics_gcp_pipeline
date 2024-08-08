@@ -364,7 +364,7 @@ tab___1 <- table1 %>%
   mutate(biocol.appoint = factor(biocol.appoint, levels=c("Baseline Collection","No Baseline Collection"))) %>% dplyr::select(Site, biocol.appoint )  %>% 
   tbl_cross(
     row = Site,
-    column = biocol.appoint,
+    col = biocol.appoint,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -643,7 +643,7 @@ table2_status <- table2 %>%
   dplyr::select(Site, BioFin_BaseBloodCol_v1r0 )  %>%
   tbl_cross(
     row = Site,
-    column = BioFin_BaseBloodCol_v1r0,
+    col = BioFin_BaseBloodCol_v1r0,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -1035,7 +1035,7 @@ table4_redone__R$'Specimens Collected' <- droplevels(table4_redone__R$'Specimens
 coll_completenessR <- table4_redone__R %>% dplyr::select('Specimens Collected', Site )  %>% 
   tbl_cross(
     row = 'Specimens Collected',
-    column = Site,
+    col = Site,
     digits=c(0,1),
     percent = "column",
     label=list(Site="Site"),
@@ -1091,7 +1091,7 @@ colnames(coll_completenessR_totals) <- current_colnames
 # coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Site )  %>% 
 #   tbl_cross(
 #     row = 'Specimens Collected',
-#     column = Site,
+#     col = Site,
 #     digits=c(0,1),
 #     percent = "column",
 #     label=list(Site="Site"),
@@ -1146,7 +1146,7 @@ table4_redone__C$'Specimens Collected' <- droplevels(table4_redone__C$'Specimens
 coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Site )  %>% 
   tbl_cross(
     row = 'Specimens Collected',
-    column = Site,
+    col = Site,
     digits=c(0,1),
     percent = "column",
     label=list(Site="Site"),
@@ -1465,7 +1465,7 @@ tube_research_HF2$bld.complt <- factor(tube_research_HF2$bld.complt, levels = c(
 clin_bldcnt_HF2_cross <- tube_research_HF2 %>% 
   tbl_cross(
     row = HF_Sites,
-    column = bld.complt,
+    col = bld.complt,
     digits=c(0,1),
     percent = "row",
     label=list(HF_Sites="Clinical Location",
@@ -1540,7 +1540,7 @@ tube_clinic$Site <-factor(tube_clinic$Site,levels=c("HealthPartners", "Henry For
 tube_completeness <- tube_clinic %>% 
   dplyr::select(bldcol_tubes, Site)  %>% 
   tbl_cross(
-    column = bldcol_tubes, 
+    col = bldcol_tubes, 
     row = Site,
     percent = "row",
     label= list(bldcol_tubes ~ ' ', Site~'Site'),  
@@ -1939,7 +1939,7 @@ Tb.research.coltube$Site <-factor(Tb.research.coltube$Site,levels=c("Baylor Scot
 Total.research.coltube <- Tb.research.coltube %>% 
   dplyr::select(bldcol_tubes, Site)  %>% 
   tbl_cross(
-    column = bldcol_tubes, 
+    col = bldcol_tubes, 
     row = Site,
     percent = "row",
     label= list(bldcol_tubes ~ ' ', Site~'Site'),         #list(Site~"Site", bldcol_tubes ~ 'Number of Tubes'),
@@ -1982,7 +1982,7 @@ research__blood$Site <-factor(research__blood$Site,levels=c("Baylor Scott and Wh
 Total_research_blood <- research__blood %>% 
   dplyr::select(tube_type, Site)  %>% 
   tbl_cross(
-    column = tube_type, 
+    col = tube_type, 
     row = Site,
     percent = "column",
     label= list(tube_type ~ ' ', Site~'Site'), 
@@ -2034,7 +2034,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
  notcol_combo2 <- clinic.coltube %>% 
     dplyr::select(tube_types, Site)  %>% 
     tbl_cross(
-        column = tube_types, 
+        col = tube_types, 
         row = Site,
         percent = "column",
         label= list(tube_types ~ ' ', Site~'Site'),     
@@ -2129,7 +2129,7 @@ notcol.reasons.research <- rbind(reseachnotes.notcol,reseachnotes.coltype)
 
 
 research.notcolnotes_site <- research.notcol %>% select(notcol.notes,Site) %>% 
-  tbl_cross(  column = notcol.notes,
+  tbl_cross(  col = notcol.notes,
                   row = Site,
                    percent = "row",
                    digits= c(0,1),
@@ -2153,7 +2153,7 @@ colnames(research.notcolnotes_site_totals) <- current_colnames
 
 
 research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type) %>%
-  tbl_cross(  column = notcol.notes,
+  tbl_cross(  col = notcol.notes,
                   row = tube_type,
                    percent = "row",
                    digits= c(0,1),
@@ -2294,7 +2294,7 @@ test17 <- research.survey %>%  filter(Site=="HealthPartners" |  Site=="Henry For
 test17$Site<- droplevels(test17$Site)
 Table15_combined <- test17 %>% dplyr::select(Site, research.sv )  %>% tbl_cross(
   row = research.sv,
-  column = Site,
+  col = Site,
   digits=c(0,1),
   percent = "column",
   label=list(Site ~ " ", research.sv ~ " "),
@@ -2362,7 +2362,7 @@ test18$Site<- droplevels(test18$Site)
 
 Table16_combined <- test18 %>% dplyr::select(Site, clinical.sv )  %>% tbl_cross(
   row = clinical.sv,
-  column = Site,
+  col = Site,
   digits=c(0,1),
   percent = "column",
   label=list(Site ~ " ", clinical.sv ~ " "),
@@ -2419,7 +2419,7 @@ test17_a$checktmvisit<- droplevels(test17_a$checktmvisit)
 
 Table17_combinedB <- test17_b %>% dplyr::select(Site, checktmvisit )  %>% tbl_cross(
     row = checktmvisit,
-    column = Site,
+    col = Site,
     digits=c(0,2),
     percent = "column",
     label=list(Site ~ " ", checktmvisit ~ " "),
@@ -2451,7 +2451,7 @@ colnames(Table17_combinedB_totals) <- current_colnames
 
 Table17_combinedA <- test17_a %>% dplyr::select(Site, checktmvisit )  %>% tbl_cross(
     row = checktmvisit,
-    column = Site,
+    col = Site,
     digits=c(0,2),
     percent = "column",
     label=list(Site ~ " ", checktmvisit ~ " "),
@@ -2494,7 +2494,7 @@ test18a_B$checktmvisit<- droplevels(test18a_B$checktmvisit)
 
 Table18_combined <- test18a_B %>% dplyr::select(Site, checktmvisit )  %>% tbl_cross(
   row = checktmvisit,
-  column = Site,
+  col = Site,
   digits=c(0,2),
   percent = "column",
   label=list(Site ~ " ", checktmvisit ~ " "),
@@ -3053,7 +3053,7 @@ blood_placed= blood_placed %>%  mutate(bld_placed= case_when(d_173836415_d_26660
 
 Table_bld_draw <- blood_placed %>% dplyr::select(Site, bld_placed)  %>% tbl_cross(
   row = Site,
-  column = bld_placed,
+  col = bld_placed,
   percent = "row",
   digits=c(0,1),
   label=list(Site~"Site", bld_placed~" "), 
@@ -3589,7 +3589,7 @@ coll_bptl_diff5_4$Connect_ID <- as.numeric(coll_bptl_diff5_4$`as.character(Conne
 crosstable_coll_bptl5_4 <- coll_bptl_diff5_4 %>%
   tbl_cross(
     row = Site_location,
-    column = coll_days_diff,
+    col = coll_days_diff,
     percent = "row",
         label=list(Site_location="Collection Location",
                Kit_Status = " "))   # This option keeps the row percentages
@@ -5369,7 +5369,7 @@ status_elg <- table27_elg_distinct %>%
   distinct(Connect_ID, .keep_all = TRUE) %>%
   tbl_cross(
     row = Site,
-    column = Kit_Status,
+    col = Kit_Status,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -5561,7 +5561,7 @@ Coll_Card_Table <- all_completed %>% filter(d_173836415_d_266600170_d_319972665_
 
 Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>% tbl_cross(
   row = Site,
-  column = Card_Status, 
+  col = Card_Status, 
   digits=c(0,1),
   percent = "row",
   label=list(Site ~ "Site", Card_Status ~ " "),
@@ -5961,7 +5961,7 @@ table7_7 <- all_completed %>% filter(Kit_Status=="Shipped") %>%
   mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>% 
   tbl_cross(
     row = Site,
-    column = MWSrvy_status,
+    col = MWSrvy_status,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -5998,7 +5998,7 @@ table7_8 <- all_completed %>%  filter(Kit_Status=="Received") %>%
   mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>% 
   tbl_cross(
     row = Site,
-    column = MWSrvy_status,
+    col = MWSrvy_status,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -6051,7 +6051,7 @@ table7_9 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==10443
                                                       "3 Days after Collection", "4+ Days after Collection"))) %>% dplyr::select(Site, MW_comp_diff)  %>%
   tbl_cross(
     row = Site,
-    column = MW_comp_diff,
+    col = MW_comp_diff,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -6100,7 +6100,7 @@ table7_10 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==1044
                                                       "3 Days after Collection", "4+ Days after Collection"))) %>% dplyr::select(Site, MW_comp_diff)  %>%
   tbl_cross(
     row = Site,
-    column = MW_comp_diff,
+    col = MW_comp_diff,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
