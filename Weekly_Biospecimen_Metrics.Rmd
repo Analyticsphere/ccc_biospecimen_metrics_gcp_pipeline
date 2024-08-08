@@ -364,7 +364,7 @@ tab___1 <- table1 %>%
   mutate(biocol.appoint = factor(biocol.appoint, levels=c("Baseline Collection","No Baseline Collection"))) %>% dplyr::select(Site, biocol.appoint )  %>% 
   tbl_cross(
     row = Site,
-    col = biocol.appoint,
+    column = biocol.appoint,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -485,7 +485,7 @@ col_num_1.1 <- col_num_1.1 %>%
 
 col_num_1.1_gt <- col_num_1.1 %>%
 
-  gt::gt(groupname_col = "Site_Group") 
+  gt::gt(groupname_column = "Site_Group") 
 
 
 
@@ -619,7 +619,7 @@ col_num_1.2 <- col_num_1.2 %>%
 
 col_num_1.2_gt <- col_num_1.2 %>%
 
-  gt::gt(groupname_col = "Site_Group") 
+  gt::gt(groupname_column = "Site_Group") 
 
 
 
@@ -643,7 +643,7 @@ table2_status <- table2 %>%
   dplyr::select(Site, BioFin_BaseBloodCol_v1r0 )  %>%
   tbl_cross(
     row = Site,
-    col = BioFin_BaseBloodCol_v1r0,
+    column = BioFin_BaseBloodCol_v1r0,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -1035,7 +1035,7 @@ table4_redone__R$'Specimens Collected' <- droplevels(table4_redone__R$'Specimens
 coll_completenessR <- table4_redone__R %>% dplyr::select('Specimens Collected', Site )  %>% 
   tbl_cross(
     row = 'Specimens Collected',
-    col = Site,
+    column = Site,
     digits=c(0,1),
     percent = "column",
     label=list(Site="Site"),
@@ -1091,7 +1091,7 @@ colnames(coll_completenessR_totals) <- current_colnames
 # coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Site )  %>% 
 #   tbl_cross(
 #     row = 'Specimens Collected',
-#     col = Site,
+#     column = Site,
 #     digits=c(0,1),
 #     percent = "column",
 #     label=list(Site="Site"),
@@ -1146,7 +1146,7 @@ table4_redone__C$'Specimens Collected' <- droplevels(table4_redone__C$'Specimens
 coll_completenessC <- table4_redone__C %>%   dplyr::select('Specimens Collected', Site )  %>% 
   tbl_cross(
     row = 'Specimens Collected',
-    col = Site,
+    column = Site,
     digits=c(0,1),
     percent = "column",
     label=list(Site="Site"),
@@ -1307,10 +1307,10 @@ for(i in 1:length(bld.ls)){
   
 }
 table(biospe$d_650516960,biospe$bldcol)
-biospe <- biospe %>% mutate(bloodcomplete = ifelse((d_650516960==534621077 & bldcol == 5) | (d_650516960==664882224 & bldcol == 11), "Blood.Completion" ,#blood collection completion
+biospe <- biospe %>% mutate(bloodcomplete = ifelse((d_650516960==534621077 & bldcolumn == 5) | (d_650516960==664882224 & bldcolumn == 11), "Blood.Completion" ,#blood collection completion
                                           ifelse( (d_650516960==534621077 & (bldcol<5 & bldcol>0)) | (d_650516960==664882224 & (bldcol <  11 & bldcol < 0)),"Blood.Incompleted","NoBlood")),
-                            Urine_col = ifelse(d_973670172_d_593843561==353358909, 1, ifelse(d_973670172_d_593843561==104430631,0,0)),
-                            MW_col = ifelse(d_143615646_d_593843561==353358909,1,ifelse(d_143615646_d_593843561==104430631,0,0)),
+                            Urine_column = ifelse(d_973670172_d_593843561==353358909, 1, ifelse(d_973670172_d_593843561==104430631,0,0)),
+                            MW_column = ifelse(d_143615646_d_593843561==353358909,1,ifelse(d_143615646_d_593843561==104430631,0,0)),
                             biocol_Setting = case_when(d_650516960==534621077  ~"Research",
                                                         d_650516960==664882224 ~ "Clinical",
                                                          d_650516960 ==103209024 ~ "Home")) 
@@ -1465,7 +1465,7 @@ tube_research_HF2$bld.complt <- factor(tube_research_HF2$bld.complt, levels = c(
 clin_bldcnt_HF2_cross <- tube_research_HF2 %>% 
   tbl_cross(
     row = HF_Sites,
-    col = bld.complt,
+    column = bld.complt,
     digits=c(0,1),
     percent = "row",
     label=list(HF_Sites="Clinical Location",
@@ -1540,7 +1540,7 @@ tube_clinic$Site <-factor(tube_clinic$Site,levels=c("HealthPartners", "Henry For
 tube_completeness <- tube_clinic %>% 
   dplyr::select(bldcol_tubes, Site)  %>% 
   tbl_cross(
-    col = bldcol_tubes, 
+    column = bldcol_tubes, 
     row = Site,
     percent = "row",
     label= list(bldcol_tubes ~ ' ', Site~'Site'),  
@@ -1814,8 +1814,8 @@ notcol.ls <- sapply(strsplit(notcol_tubes, "_d"),"[[",1)
    collection_long <- collection_long  %>% 
      dplyr:: mutate(deviation = case_when(tube_deviation == 353358909 ~ "Any Deviation",
                                           tube_deviation == 104430631 ~ "No Deviation"),
-                    Collected = case_when(tubecol ==353358909 ~ "Collected",
-                                          tubecol == 104430631 ~ "Not  Collected"),
+                    Collected = case_when(tubecolumn ==353358909 ~ "Collected",
+                                          tubecolumn == 104430631 ~ "Not  Collected"),
                     Discarded = case_when(tube_discard == 353358909 ~ "Any Discard",
                                           tube_discard == 104430631 ~ "No Discard"),
                     biospecimen=ifelse(tubeID=="d_973670172", "urine",
@@ -1869,12 +1869,12 @@ for(site in unique(dev_tube2$Site)){
   
 ```{r Table8, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
   
-  research.coltube<- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 104430631) %>%     
+  research.coltube<- collection_long %>% filter(biocol_Setting == "Research" & tubecolumn == 104430631) %>%     
     mutate(Site=droplevels(Site),
            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","STRECK Tube1", "Urine Tube1","MW Tube1" )))
   
   
-    research.coltube.bld.only<- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 104430631) %>% 
+    research.coltube.bld.only<- collection_long %>% filter(biocol_Setting == "Research" & tubecolumn == 104430631) %>% 
     mutate(Site=droplevels(Site),
            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "STRECK Tube1")))  #make sure this doesn't break the code
     research.coltube.bld.only<- research.coltube.bld.only %>%  mutate(tube_type=droplevels(tube_type))
@@ -1939,7 +1939,7 @@ Tb.research.coltube$Site <-factor(Tb.research.coltube$Site,levels=c("Baylor Scot
 Total.research.coltube <- Tb.research.coltube %>% 
   dplyr::select(bldcol_tubes, Site)  %>% 
   tbl_cross(
-    col = bldcol_tubes, 
+    column = bldcol_tubes, 
     row = Site,
     percent = "row",
     label= list(bldcol_tubes ~ ' ', Site~'Site'),         #list(Site~"Site", bldcol_tubes ~ 'Number of Tubes'),
@@ -1968,7 +1968,7 @@ research.coltube_totals
 
 
 
-research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 353358909) %>% 
+research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tubecolumn == 353358909) %>% 
     mutate(Site=droplevels(Site),
            tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "STRECK Tube1")))  
     research.coltube.bld.only<- research.coltube.bld.only %>%  mutate(tube_type=droplevels(tube_type))
@@ -1982,7 +1982,7 @@ research__blood$Site <-factor(research__blood$Site,levels=c("Baylor Scott and Wh
 Total_research_blood <- research__blood %>% 
   dplyr::select(tube_type, Site)  %>% 
   tbl_cross(
-    col = tube_type, 
+    column = tube_type, 
     row = Site,
     percent = "column",
     label= list(tube_type ~ ' ', Site~'Site'), 
@@ -2026,7 +2026,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
                                                                     tube_type=="Urine Tube1" ~ "Urine 1",
                                                                     tube_type=="MW Tube1" ~ "Mouthwash"))
 
-  clinic.coltube<- clinic.coltube %>% filter(biocol_Setting == "Clinical" & tubecol == 353358909 & tube_types!="Urine 1") %>% # & tube_type!="MW Tube1") %>% #added, need to test 
+  clinic.coltube<- clinic.coltube %>% filter(biocol_Setting == "Clinical" & tubecolumn == 353358909 & tube_types!="Urine 1") %>% # & tube_type!="MW Tube1") %>% #added, need to test 
     mutate(Site=droplevels(Site),
            tube_type = factor(tube_types,levels=c("SS T1", "SS T2","SS T3", "SS T4", "SS T5", "Heparin 1","Heparin 2","EDTA 1","EDTA 2","EDTA 3","ACD 1","STRECK 1")))
   
@@ -2034,7 +2034,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
  notcol_combo2 <- clinic.coltube %>% 
     dplyr::select(tube_types, Site)  %>% 
     tbl_cross(
-        col = tube_types, 
+        column = tube_types, 
         row = Site,
         percent = "column",
         label= list(tube_types ~ ' ', Site~'Site'),     
@@ -2064,17 +2064,17 @@ notcol_combo2_totals[, c("Site", "SS T1", "SS T2","SS T3", "SS T4", "SS T5", "He
 ## Table 15  
 ##Table X: Reason not collected by tube type and by site for research collections only
   a<- collection_long[which(collection_long$tubecol==104430631),]
-  b <- notcol_tube[which(notcol_tube$tubecol == 104430631),]
+  b <- notcol_tube[which(notcol_tube$tubecolumn == 104430631),]
   notcol_notes <- base::merge(a, b[,c("tubeID","d_820476880","tube_notcol")], by=c("tubeID","d_820476880"),all.x=TRUE)
 notcol_notes <- notcol_notes %>% 
-  mutate(notcol.notes = case_when(tubecol == 104430631 & tube_notcol==181769837 ~ "Other",
-                                  tubecol == 104430631 & tube_notcol==234139565 ~ "Short Draw",
-                                  tubecol == 104430631 & tube_notcol==681745422 ~ "Participant Refusal",
-                                  tubecol == 104430631 & tube_notcol==745205161 ~ "Participant Attempted",
-                                  tubecol == 104430631 & tube_notcol==889386523 ~ "Supply Unavailable",
-                                  tubecol == 104430631 & is.na(tube_notcol) ~ "Missing Reasons"),
-         Collected = case_when(tubecol ==353358909 ~ "Collected",
-                               tubecol == 104430631 ~ "Not  Collected"),
+  mutate(notcol.notes = case_when(tubecolumn == 104430631 & tube_notcol==181769837 ~ "Other",
+                                  tubecolumn == 104430631 & tube_notcol==234139565 ~ "Short Draw",
+                                  tubecolumn == 104430631 & tube_notcol==681745422 ~ "Participant Refusal",
+                                  tubecolumn == 104430631 & tube_notcol==745205161 ~ "Participant Attempted",
+                                  tubecolumn == 104430631 & tube_notcol==889386523 ~ "Supply Unavailable",
+                                  tubecolumn == 104430631 & is.na(tube_notcol) ~ "Missing Reasons"),
+         Collected = case_when(tubecolumn ==353358909 ~ "Collected",
+                               tubecolumn == 104430631 ~ "Not  Collected"),
                     biospecimen=ifelse(tubeID=="d_973670172", "urine",
                                   ifelse(tubeID=="d_143615646","Mouthwash","blood")),
                     tube_type = case_when(tubeID == "d_973670172"  ~ "Urine Tube1",
@@ -2129,7 +2129,7 @@ notcol.reasons.research <- rbind(reseachnotes.notcol,reseachnotes.coltype)
 
 
 research.notcolnotes_site <- research.notcol %>% select(notcol.notes,Site) %>% 
-  tbl_cross(  col = notcol.notes,
+  tbl_cross(  column = notcol.notes,
                   row = Site,
                    percent = "row",
                    digits= c(0,1),
@@ -2153,7 +2153,7 @@ colnames(research.notcolnotes_site_totals) <- current_colnames
 
 
 research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type) %>%
-  tbl_cross(  col = notcol.notes,
+  tbl_cross(  column = notcol.notes,
                   row = tube_type,
                    percent = "row",
                    digits= c(0,1),
@@ -2294,7 +2294,7 @@ test17 <- research.survey %>%  filter(Site=="HealthPartners" |  Site=="Henry For
 test17$Site<- droplevels(test17$Site)
 Table15_combined <- test17 %>% dplyr::select(Site, research.sv )  %>% tbl_cross(
   row = research.sv,
-  col = Site,
+  column = Site,
   digits=c(0,1),
   percent = "column",
   label=list(Site ~ " ", research.sv ~ " "),
@@ -2362,7 +2362,7 @@ test18$Site<- droplevels(test18$Site)
 
 Table16_combined <- test18 %>% dplyr::select(Site, clinical.sv )  %>% tbl_cross(
   row = clinical.sv,
-  col = Site,
+  column = Site,
   digits=c(0,1),
   percent = "column",
   label=list(Site ~ " ", clinical.sv ~ " "),
@@ -2419,7 +2419,7 @@ test17_a$checktmvisit<- droplevels(test17_a$checktmvisit)
 
 Table17_combinedB <- test17_b %>% dplyr::select(Site, checktmvisit )  %>% tbl_cross(
     row = checktmvisit,
-    col = Site,
+    column = Site,
     digits=c(0,2),
     percent = "column",
     label=list(Site ~ " ", checktmvisit ~ " "),
@@ -2451,7 +2451,7 @@ colnames(Table17_combinedB_totals) <- current_colnames
 
 Table17_combinedA <- test17_a %>% dplyr::select(Site, checktmvisit )  %>% tbl_cross(
     row = checktmvisit,
-    col = Site,
+    column = Site,
     digits=c(0,2),
     percent = "column",
     label=list(Site ~ " ", checktmvisit ~ " "),
@@ -2494,7 +2494,7 @@ test18a_B$checktmvisit<- droplevels(test18a_B$checktmvisit)
 
 Table18_combined <- test18a_B %>% dplyr::select(Site, checktmvisit )  %>% tbl_cross(
   row = checktmvisit,
-  col = Site,
+  column = Site,
   digits=c(0,2),
   percent = "column",
   label=list(Site ~ " ", checktmvisit ~ " "),
@@ -3053,7 +3053,7 @@ blood_placed= blood_placed %>%  mutate(bld_placed= case_when(d_173836415_d_26660
 
 Table_bld_draw <- blood_placed %>% dplyr::select(Site, bld_placed)  %>% tbl_cross(
   row = Site,
-  col = bld_placed,
+  column = bld_placed,
   percent = "row",
   digits=c(0,1),
   label=list(Site~"Site", bld_placed~" "), 
@@ -3589,7 +3589,7 @@ coll_bptl_diff5_4$Connect_ID <- as.numeric(coll_bptl_diff5_4$`as.character(Conne
 crosstable_coll_bptl5_4 <- coll_bptl_diff5_4 %>%
   tbl_cross(
     row = Site_location,
-    col = coll_days_diff,
+    column = coll_days_diff,
     percent = "row",
         label=list(Site_location="Collection Location",
                Kit_Status = " "))   # This option keeps the row percentages
@@ -5369,7 +5369,7 @@ status_elg <- table27_elg_distinct %>%
   distinct(Connect_ID, .keep_all = TRUE) %>%
   tbl_cross(
     row = Site,
-    col = Kit_Status,
+    column = Kit_Status,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -5561,7 +5561,7 @@ Coll_Card_Table <- all_completed %>% filter(d_173836415_d_266600170_d_319972665_
 
 Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>% tbl_cross(
   row = Site,
-  col = Card_Status, 
+  column = Card_Status, 
   digits=c(0,1),
   percent = "row",
   label=list(Site ~ "Site", Card_Status ~ " "),
@@ -5961,7 +5961,7 @@ table7_7 <- all_completed %>% filter(Kit_Status=="Shipped") %>%
   mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>% 
   tbl_cross(
     row = Site,
-    col = MWSrvy_status,
+    column = MWSrvy_status,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -5998,7 +5998,7 @@ table7_8 <- all_completed %>%  filter(Kit_Status=="Received") %>%
   mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>% 
   tbl_cross(
     row = Site,
-    col = MWSrvy_status,
+    column = MWSrvy_status,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -6051,7 +6051,7 @@ table7_9 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==10443
                                                       "3 Days after Collection", "4+ Days after Collection"))) %>% dplyr::select(Site, MW_comp_diff)  %>%
   tbl_cross(
     row = Site,
-    col = MW_comp_diff,
+    column = MW_comp_diff,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
@@ -6100,7 +6100,7 @@ table7_10 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==1044
                                                       "3 Days after Collection", "4+ Days after Collection"))) %>% dplyr::select(Site, MW_comp_diff)  %>%
   tbl_cross(
     row = Site,
-    col = MW_comp_diff,
+    column = MW_comp_diff,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
