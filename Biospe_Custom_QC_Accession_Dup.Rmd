@@ -1239,8 +1239,6 @@ colnames(qc1_urine) <- c("Site", "Connect ID", "Accession ID sent from site", "A
 
 qc1_urine <- qc1_urine %>% arrange(Site, `Collection Date/Time`)
 
-#View(qc1_urine)
-
 
 
 # #Urine

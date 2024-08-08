@@ -5876,7 +5876,12 @@ add_footnote(table7_2before, "Note: Kits were returned using USPS prior to 6/17/
 ```
 
 
+knitr::kable(all_shipped_2,caption='Table 7.2 Baseline- Total Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago',row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
+
+```
+
 \FloatBarrier
+
 ```{r KnitrTables7.2after,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
 
 table7_2after <- knitr::kable(all_shipped_after,caption='Table 7.4 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped after 6/17/2024)',row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
@@ -5884,6 +5889,7 @@ table7_2after <- knitr::kable(all_shipped_after,caption='Table 7.4 Baseline- Hom
 add_footnote(table7_2after, "Note: Kits were returned using FedEx after 6/17/2024", notation = "none")
 
 ```
+
 
 
 \FloatBarrier
