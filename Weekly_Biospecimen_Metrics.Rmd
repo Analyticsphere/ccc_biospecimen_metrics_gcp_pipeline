@@ -1474,9 +1474,9 @@ clin_bldcnt_HF2_cross <- tube_research_HF2 %>%
     missing_text="0 ( 0 %)",
     margin_text="Total") 
 
-clin_bldcnt_HF2_df <- as.data.frame(clin_bldcnt_HF2_cross$table_body)
+clin_bldcnt_HF2_df <- as.data.frame(clin_bldcnt_HF2_cross)
 
-clin_bldcnt_HF2 <- clin_bldcnt_HF2_df[c(2:nrow(clin_bldcnt_HF2_df)),c(5:9)]
+clin_bldcnt_HF2 <- clin_bldcnt_HF2_df[c(2:nrow(clin_bldcnt_HF2_df)),]
 
 ```
 
@@ -3922,7 +3922,7 @@ research.1_2
 
 ```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
-knitr::kable(clin_bldcnt_HF2, col.names=c("Clinic Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Clinical Collections"), caption='Table 2.6: Baseline Blood Collection Completeness Among Clinical Collections \n by Clinic Location, \n Henry Ford Health', row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") #"No Blood Tubes Collected",
+knitr::kable(clin_bldcnt_HF2, col.names=c("Clinic Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Clinical Collections"), caption='Table 2.6: Baseline Blood Collection Completeness Among Clinical Collections \n by Clinic Location, \n Henry Ford Health', row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") %>%  add_indent(seq(1, nrow(clin_bldcnt_HF2) - 1))
 
 tab2_7= knitr::kable(research.coltube_totals, caption='Table 2.7: Baseline- Total Blood Tubes Collected Among Research Collections', row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c", "c"), booktabs = TRUE) %>%  add_indent(seq(1, nrow(research.coltube_totals) - 1))  %>% kable_styling(latex_options = "scale_down")
 add_footnote(tab2_7, "Note: Research collections are expected to have a total of 5 blood tubes collected.", notation = "none") 
