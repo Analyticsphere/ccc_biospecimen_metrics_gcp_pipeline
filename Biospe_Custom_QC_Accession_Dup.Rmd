@@ -1125,7 +1125,7 @@ knitr::kable(mw_dt) %>% kable_styling(latex_options = "HOLD_position")
 ```{r kit_recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
 kits_recvd <- bioqc %>%  filter(#d_173836415_d_266600170_d_915179629==103209024 &  
-                                  as.numeric(round(difftime(currentDate, d_195145666, units="days"), digits=0)) > 5 & 
+                                  as.numeric(round(difftime(currentDate, d_195145666, units="days"), digits=0)) > 10 & 
                                   d_173836415_d_266600170_d_319972665_d_221592017!=375535639) %>% 
   select(Site, Connect_ID, d_195145666, d_173836415_d_266600170_d_319972665_d_221592017) %>%  sort_by(Site)
 
@@ -1270,12 +1270,16 @@ write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDat
 ```{r Duplicates, include=FALSE}
 
 dup <- "WITH T AS (
-  SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-  where d_820476880 LIKE 'CXA%'
+  SELECT Connect_ID 
+  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+  WHERE d_820476880 LIKE 'CXA%' 
+  AND d_820476880 NOT LIKE 'CHA%'
   GROUP BY Connect_ID
-  HAVING COUNT(Connect_ID) > 1) 
-SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Connect_ID = T.Connect_ID ;"
+  HAVING COUNT(Connect_ID) > 1
+) 
+SELECT * 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+WHERE Connect_ID IN (SELECT Connect_ID FROM T) and d_820476880 NOT LIKE 'CHA%'"
 
 
 dup_table <- bq_project_query(project, dup)
