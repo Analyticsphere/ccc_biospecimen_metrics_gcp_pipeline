@@ -11,13 +11,13 @@ header-includes:
 
 output:
   pdf_document:
-  extra_dependencies: ["float"]
-  toc: true
-  keep_tex: yes
-  fig_width: 7
-  fig_height: 5
-  fig_caption: true
-  df_print: paged 
+      extra_dependencies: ["float"]
+      toc: true
+      keep_tex: yes
+      fig_width: 7
+      fig_height: 5
+      fig_caption: true
+      df_print: paged 
 ---
   
   
