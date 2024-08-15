@@ -1710,6 +1710,7 @@ notcol.ls <- sapply(strsplit(notcol_tubes, "_d"),"[[",1)
 notcol_tube <- NULL
 tubenotcol.ls <-list()
 
+
 for (i in 1:length(notcol.ls)){
   
   tubecol <- paste(notcol.ls[i],"d_593843561",sep="_")
@@ -1834,8 +1835,6 @@ nocol.type <- as.data.frame(cbind(ctable$t,ctable$prop.col))
 
 count <- as.data.frame.matrix(ctable$t) # to convert the S3 table into the same dimention table via as.data.frame.matrix
 perc <- as.data.frame.matrix(ctable$prop.col)
-
-
 
 
 
@@ -2085,9 +2084,9 @@ colnames(research.notcolnotes_tube_totals) <- current_colnames
 research.notcolnotes <- research.notcol %>% select(notcol.notes,Site, tube_type) %>% crosstable(c(Site, tube_type),by=notcol.notes,showNA="ifany", total="row",margin=c("row", "col"),
                                                                                                 percent_digits=1, percent_pattern="{n} ({p_col})") %>% as_flextable() #%>% as_flex_table()  
 clinicnotes.notcol <- notcol_notes %>% filter(biocol_Setting=="Clinical" & tubecol==104430631 & notcol_notes$biospecimen!="Mouthwash"  )%>%    mutate(Site=droplevels(Site),
-                                                                                                                                                      tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2",
-                                                                                                                                                                                            "EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","STRECK Tube1","Urine Tube1" )))
-
+           tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2",
+                                                 "EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","STRECK Tube1","Urine Tube1" )))
+          
 clinicnotes.notcol$notcol.notes <- factor(clinicnotes.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
 clinicnotes.notcol$notcol.notes <- droplevels(clinicnotes.notcol$notcol.notes)
 clinicnotes.notcol$tube_type = droplevels(clinicnotes.notcol$tube_type)
@@ -4370,7 +4369,6 @@ table_ct5_4 <- knitr::kable(ct5_4 ,
                             row.names=FALSE,align=c("l","c","c","c","c"), booktabs = TRUE)
 table_ct5_4 <- table_ct5_4 %>% row_spec(1:(nrow(ct5_4) - 1), extra_css = "text-indent: 20px;")
 kable_styling(table_ct5_4, latex_options = "HOLD_position")
-
 
 
 
