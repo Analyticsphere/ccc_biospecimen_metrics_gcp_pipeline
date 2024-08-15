@@ -22,8 +22,8 @@ function() {
 #* Runs Kelsey's markdown file
 #* @param report:string Which report to run
 #* @param testing:boolean Whether we're testing or not
-#* @get /run-module-metrics
-#* @post /run-module-metrics
+#* @get /run-biospecimen-metrics
+#* @post /run-biospecimen-metrics
 function(report, testing = FALSE) {
   testing <- as.logical(testing)
   report <- as.character(report)
