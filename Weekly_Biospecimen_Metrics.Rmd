@@ -390,8 +390,8 @@ tab___1 <- table1 %>%
     missing="ifany",
     margin_text="Total") 
  
- 
 
+ 
 
 table1_totals <- as.data.frame(tab___1)
 table1_totals <- table1_totals[-1, ]
