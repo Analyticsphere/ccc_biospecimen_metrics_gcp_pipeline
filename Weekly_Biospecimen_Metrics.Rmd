@@ -1,28 +1,27 @@
-
 ---
-  title: "Biospecimen Weekly Metrics RMD"
+title: "Biospecimen Weekly Metrics RMD"
 author: "Kelsey Sanchez"
 date: "Data Extracted and Report Ran: `r Sys.Date()`"
 header-includes:  
-  \usepackage[labelformat=empty]{caption}
-\usepackage{placeins}
-\usepackage{booktabs}
-\usepackage{pdflscape}
+    \usepackage[labelformat=empty]{caption}
+    \usepackage{placeins}
+    \usepackage{booktabs}
+    \usepackage{pdflscape}
 
 
 output:
   pdf_document:
   extra_dependencies: ["float"]
-toc: true
-keep_tex: yes
-fig_width: 7
-fig_height: 5
-fig_caption: true
-df_print: paged 
+  toc: true
+  keep_tex: yes
+  fig_width: 7
+  fig_height: 5
+  fig_caption: true
+  df_print: paged 
 ---
   
   
-  ```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
+```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
 
 #    latex_engine: xelatex -- this was in the set up previously, but caused issues when running locally so it was removed 
 
