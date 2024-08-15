@@ -2084,9 +2084,10 @@ colnames(research.notcolnotes_tube_totals) <- current_colnames
 
 research.notcolnotes <- research.notcol %>% select(notcol.notes,Site, tube_type) %>% crosstable(c(Site, tube_type),by=notcol.notes,showNA="ifany", total="row",margin=c("row", "col"),
                                                                                                 percent_digits=1, percent_pattern="{n} ({p_col})") %>% as_flextable() #%>% as_flex_table()  
-clinicnotes.notcol <- notcol_notes %>% filter(biocol_Setting=="Clinical" & tubecol==104430631 & notcol_notes$biospecimen!="Mouthwash"  )%>%    mutate(Site=droplevels(Site),
-                                                                                                                                                      tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2",
-                                                                                                                                                                                            "EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","STRECK Tube1","Urine Tube1" )))
+clinicnotes.notcol <- notcol_notes %>% filter(biocol_Setting=="Clinical" & tubecol==104430631 & notcol_notes$biospecimen!="Mouthwash"  )%>%    
+  mutate(Site=droplevels(Site),
+         tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2",
+                                               "EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","STRECK Tube1","Urine Tube1" )))
 
 clinicnotes.notcol$notcol.notes <- factor(clinicnotes.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
 clinicnotes.notcol$notcol.notes <- droplevels(clinicnotes.notcol$notcol.notes)
