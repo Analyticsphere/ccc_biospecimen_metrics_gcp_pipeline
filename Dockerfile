@@ -73,6 +73,7 @@ COPY ["./BU Clinical Survey Summary Statistics.Rmd", "./BU Clinical Survey Summa
 COPY ["./BUM Research Summary Statistics.Rmd", "./BUM Research Summary Statistics.Rmd"]
 COPY ["./COVID Survey Summary Statistics.Rmd", "./COVID Survey Summary Statistics.Rmd"]
 COPY ["./Sanford_Clincal_Locations.csv", "./Sanford_Clincal_Locations.csv"]
+COPY ["./Weekly Biospecimen CSV Outputs.R", "./Weekly Biospecimen CSV Outputs.R"]
 COPY ["./config.yml", "./config.yml"]
 
 # Run R code

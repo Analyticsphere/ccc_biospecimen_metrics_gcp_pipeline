@@ -10,7 +10,7 @@ default:
     cloud_run: ccc-biospecimen-metrics
 
 weekly_biospecimen_metrics:
-  rmd_file_name: Weekly_Biospecimen_Metrics.Rmd
+  r_file_name: Weekly_Biospecimen_Metrics.Rmd
   report_file_name: Weekly_Biospecimen_Metrics.pdf
   box_folders:
     - "204235111776" 
@@ -19,7 +19,7 @@ weekly_biospecimen_metrics:
     frequency: "0 11 * * 1" # every Monday at 11 AM"
 
 weekly_biospecimen_metrics_csvs:
-  rmd_file_name: "Weekly Biospecimen CSV Outputs.R"
+  r_file_name: "Weekly Biospecimen CSV Outputs.R"
   report_file_name: ""
   box_folders:
     - "204235111776" 
@@ -28,7 +28,7 @@ weekly_biospecimen_metrics_csvs:
     frequency: "15 11 * * 1" # every Monday at 11:15 AM"
 
 biospecimen_qc_metrics:
-  rmd_file_name: Biospe_Custom_QC_Accession_Dup.Rmd
+  r_file_name: Biospe_Custom_QC_Accession_Dup.Rmd
   report_file_name: Biospe_Custom_QC_Accession_Dup.pdf
   box_folders:
     - "221297686961" 
@@ -37,7 +37,7 @@ biospecimen_qc_metrics:
     frequency: "30 11 * * 1" # every Monday at 11:30 AM"
     
 bu_clinical_survey_stats:
-  rmd_file_name: "BU Clinical Survey Summary Statistics.Rmd"
+  r_file_name: "BU Clinical Survey Summary Statistics.Rmd"
   report_file_name: BU_Clinical_Survey_Summary_Statistics.pdf
   box_folders:
     - "251314285484"
@@ -46,7 +46,7 @@ bu_clinical_survey_stats:
     frequency: "30 11 1 * *" # first of the Month at 11:30 AM"
     
 bum_research_survey_stats:
-  rmd_file_name: "BUM Research Summary Statistics.Rmd"
+  r_file_name: "BUM Research Summary Statistics.Rmd"
   report_file_name: BUM_Research_Summary_Statistics.pdf
   box_folders:
     - "251314285484"
@@ -55,7 +55,7 @@ bum_research_survey_stats:
     frequency: "0 12 1 * *"# first of the Month at 12 PM"
 
 covid_survey_stats:
-  rmd_file_name: "COVID Survey Summary Statistics.Rmd"
+  r_file_name: "COVID Survey Summary Statistics.Rmd"
   report_file_name: COVID_Survey_Summary_Statistics.pdf
   box_folders:
     - "251314285484"
