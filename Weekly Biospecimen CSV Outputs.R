@@ -225,11 +225,11 @@ factor_cid <-function(var,data){
 
 
 
-cnames <- names(biospe_all)
+cnames <- names(biospe)
 for (i in 1: length(cnames)){
   varname <- cnames[i]
-  var<-pull(biospe_all,varname)
-  biospe_all[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
+  var<-pull(biospe,varname)
+  biospe[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
 }
 
 
@@ -237,17 +237,17 @@ for (i in 1: length(cnames)){
 
 
 
-biospe_all_CID <- as.data.frame(sapply((strsplit(colnames(biospe_all),"d_")),tail,1))
-colnames(biospe_all_CID)[1] <- "CID"
+biospe_CID <- as.data.frame(sapply((strsplit(colnames(biospe),"d_")),tail,1))
+colnames(biospe_CID)[1] <- "CID"
 
-biospe_all_CID$variable <- names(biospe_all)
+biospe_CID$variable <- names(biospe)
 y$conceptId.3 <- as.character(y$conceptId.3)
 y$conceptId.4 <- as.numeric(y$conceptId.4)
 
-biospe_all_CID_dd <- base::merge(biospe_all_CID, y[,c("Formula.for.Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+biospe_CID_dd <- base::merge(biospe_CID, y[,c("Formula.for.Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 
-biospe_all_CID_dd <- biospe_all_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
+biospe_CID_dd <- biospe_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
                                                                  is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
                                             firstCID = sapply(strsplit(variable,"_"),"[",2),
@@ -270,40 +270,40 @@ biospe_all_CID_dd <- biospe_all_CID_dd %>% mutate(category = case_when(conceptId
                                                                   sapply(strsplit(variable,"_"),"[",2) == "505347689"  ~ "STRECKTube1" ))
 
 
-biospe_all_CID_dd$matched <- ifelse(nchar(biospe_all_CID_dd$variable) <12 , 1, ifelse(nchar(biospe_all_CID_dd$variable) >12 & biospe_all_CID_dd$conceptId.1 == biospe_all_CID_dd$firstCID, 1, 0))
+biospe_CID_dd$matched <- ifelse(nchar(biospe_CID_dd$variable) <12 , 1, ifelse(nchar(biospe_CID_dd$variable) >12 & biospe_CID_dd$conceptId.1 == biospe_CID_dd$firstCID, 1, 0))
 
 
-biospe_all_CID_dd <- biospe_all_CID_dd %>% arrange(CID, variable,desc(matched),Formula.for.Index)
+biospe_CID_dd <- biospe_CID_dd %>% arrange(CID, variable,desc(matched),Formula.for.Index)
 
 
 
-biospe_all_CID_dd1 <- biospe_all_CID_dd[!duplicated(biospe_all_CID_dd[,c("CID","variable")]),]
-biospe_all_CID_dd1$new.varname <- ifelse(biospe_all_CID_dd1$matched==1, biospe_all_CID_dd1$Variable.Name, paste(gsub("SST1","",biospe_all_CID_dd1$Variable.Name),biospe_all_CID_dd1$label.1st,sep="_"))
-biospe_all_CID_dd1$new.varname[which(biospe_all_CID_dd1$variable=="d_926457119")] <- "BioBPTL_DateRec_v1r0"
-biospe_all_CID_dd1$variable[is.na(biospe_all_CID_dd1$new.varname)]
+biospe_CID_dd1 <- biospe_CID_dd[!duplicated(biospe_CID_dd[,c("CID","variable")]),]
+biospe_CID_dd1$new.varname <- ifelse(biospe_CID_dd1$matched==1, biospe_CID_dd1$Variable.Name, paste(gsub("SST1","",biospe_CID_dd1$Variable.Name),biospe_CID_dd1$label.1st,sep="_"))
+biospe_CID_dd1$new.varname[which(biospe_CID_dd1$variable=="d_926457119")] <- "BioBPTL_DateRec_v1r0"
+biospe_CID_dd1$variable[is.na(biospe_CID_dd1$new.varname)]
 
 biospe1 <- NULL
-select0 <- biospe_all_CID_dd1$variable[which(biospe_all_CID_dd1$category==0 & !is.na(biospe_all_CID_dd1$Variable.Name))]
-select2 <- biospe_all_CID_dd1$variable[which(biospe_all_CID_dd1$category==2)]
-yes_no <- biospe_all_CID_dd1$variable[which(biospe_all_CID_dd1$category==1)]
-biospe1 <- subset(biospe_all,select =c("Connect_ID","token","siteAcronym",select0,select2)) #removed "date", as it is no longer in the participants table
+select0 <- biospe_CID_dd1$variable[which(biospe_CID_dd1$category==0 & !is.na(biospe_CID_dd1$Variable.Name))]
+select2 <- biospe_CID_dd1$variable[which(biospe_CID_dd1$category==2)]
+yes_no <- biospe_CID_dd1$variable[which(biospe_CID_dd1$category==1)]
+biospe1 <- subset(biospe,select =c("Connect_ID","token","siteAcronym",select0,select2)) #removed "date", as it is no longer in the participants table
 n<- length(select0)
-colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe_all_CID_dd1$new.varname[which(biospe_all_CID_dd1$category==0 & !is.na(biospe_all_CID_dd1$Variable.Name))]
+colnames(biospe1)[which(colnames(biospe1) %in% select0)] <-  biospe_CID_dd1$new.varname[which(biospe_CID_dd1$category==0 & !is.na(biospe_CID_dd1$Variable.Name))]
 
 
 
 for (i in 1: length(select2)){
   eval(parse(text=paste("biospe1$",select2[i],"<-factor_cid(biospe1$",select2[i],")",sep="")))
 }
-colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe_all_CID_dd1$new.varname[which(biospe_all_CID_dd1$category==2)]
+colnames(biospe1)[which(colnames(biospe1) %in% select2)] <-  biospe_CID_dd1$new.varname[which(biospe_CID_dd1$category==2)]
 
 for (i in 1:length(yes_no)){
   x <- yes_no[i]
   
-  varname <- biospe_all_CID_dd1[grepl(yes_no[i],biospe_all_CID_dd1$variable) & biospe_all_CID_dd1$category==1,]$new.varname
+  varname <- biospe_CID_dd1[grepl(yes_no[i],biospe_CID_dd1$variable) & biospe_CID_dd1$category==1,]$new.varname
   
   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-  check <- as.data.frame(biospe_all[,x])
+  check <- as.data.frame(biospe[,x])
   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
   colnames(check)[2] <- varname
   biospe1 <-   cbind(biospe1,subset(check,select=varname))
