@@ -18,9 +18,8 @@ project <- "nih-nci-dceg-connect-prod-6d04"
 
 
 ##Select the Biospecimen Data
-bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`') #used in csv files
-biospe_all <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
-biospe <- biospe_all %>%  filter(!is.na(d_410912345))
+bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null') #used in csv files
+biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
