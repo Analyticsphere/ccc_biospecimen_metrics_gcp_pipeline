@@ -1412,9 +1412,9 @@ bldcol_research_HF1 <- bldcol_research_HF[,c(9:12,4)]
 ```{r HF_BloodColl, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 
-biocounts <- biospe %>%  select(Connect_ID, bldcol, d_556788178, Site_location)
-left7 <- left_join(table1_2__locations, biocounts, by="Connect_ID")
-biospe7= left7  %>%   filter(Site=="Henry Ford Health") 
+biocounts <- biospe %>%  select(Connect_ID, bldcol, d_556788178, d_650516960)
+HFSITES <- table1_2__locations %>%  filter(Site=="Henry Ford Health") %>% select(Connect_ID, Site_location )
+left7 <- left_join(HFSITES, biocounts, by="Connect_ID")
 biospe7$HF_Sites <- biospe7$Site_location                             
 
 tube_col_HF2 <- biospe7  %>% group_by(Connect_ID,HF_Sites,d_650516960) %>%
