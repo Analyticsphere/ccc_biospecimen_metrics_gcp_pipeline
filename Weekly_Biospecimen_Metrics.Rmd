@@ -1424,9 +1424,9 @@ tube_col_HF2$Connect_ID <- as.numeric(tube_col_HF2$`as.character(Connect_ID)`)
 
 tube_research_HF2 <- tube_col_HF2 %>% filter(d_650516960==664882224) %>%
   mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max==5, bldcol_max==4),"All Blood Collected",
-                             ifelse(bldcol_max==0, "No Blood Collected","Partial Blood Collected"))) 
+                             ifelse(bldcol_max==0, "No Blood Collected","Partial Blood Collected")),
+         bld.complt = factor(bld.complt, levels = c("All Blood Collected","Partial Blood Collected",  "No Blood Collected" ))) 
 
-tube_research_HF2$bld.complt <- factor(tube_research_HF2$bld.complt, levels = c("All Blood Collected","Partial Blood Collected",  "No Blood Collected" ))
 
 clin_bldcnt_HF2_cross <- tube_research_HF2 %>% 
   tbl_cross(
@@ -1438,11 +1438,12 @@ clin_bldcnt_HF2_cross <- tube_research_HF2 %>%
                bld.complt = " "),
     missing="ifany",
     missing_text="0 ( 0 %)",
-    margin_text="Total") 
+    margin_text="Total")
 
 clin_bldcnt_HF2_df <- as.data.frame(clin_bldcnt_HF2_cross$table_body)
-
+ 
 clin_bldcnt_HF2 <- clin_bldcnt_HF2_df[c(2:nrow(clin_bldcnt_HF2_df)),c(5:9)]
+
 
 ```
 
@@ -3830,12 +3831,11 @@ research.1_2
 
 ```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
-knitr::kable(clin_bldcnt_HF2, 
-             col.names=c("Clinic Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Clinical Collections"), 
+knitr::kable(clin_bldcnt_HF2,
+             col.names=c("Clinic Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Clinical Collections"),
              caption='Table 2.6: Baseline Blood Collection Completeness Among Clinical Collections \n by Clinic Location, \n Henry Ford Health',
-             row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>% 
-  kable_styling(latex_options = "scale_down") %>%  
-  add_indent(seq(1, nrow(clin_bldcnt_HF2) - 1))
+             row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down") 
 
 
 
@@ -5281,6 +5281,10 @@ research.vt_plotHP_locs + guides(color = guide_legend(title = "Clinic Location")
 
 
 ```{r AdHoc1, eval=TRUE,echo=FALSE, warning=FALSE, include=FALSE}
+
+## Need to run chunks: Table6, Table14, Figures16_18, 
+
+
 Orland_ad_hoc <- research.vt_plUC %>% filter(as.Date(col.Monday.date)>="2023-12-11" & Site_location=="Orland Park")
 
 Orland_adhoc <- Orland_ad_hoc[,c(5,6)]
