@@ -1415,12 +1415,10 @@ left7 <- left_join(table1_2__locations, biocounts, by="Connect_ID")
 biospe7= left7  %>%   filter(Site=="Henry Ford Health") 
 biospe7$HF_Sites <- biospe7$Site_location                             
 
-tube_col_HF2 <- biospe7  %>% group_by(as.character(Connect_ID),HF_Sites,d_650516960) %>%
+tube_col_HF2 <- biospe7  %>% group_by(Connect_ID,HF_Sites,d_650516960) %>%
   dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
                    collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE))
 
-
-tube_col_HF2$Connect_ID <- as.numeric(tube_col_HF2$`as.character(Connect_ID)`)
 
 tube_research_HF2 <- tube_col_HF2 %>% filter(d_650516960==664882224) %>%
   mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max==5, bldcol_max==4),"All Blood Collected",
