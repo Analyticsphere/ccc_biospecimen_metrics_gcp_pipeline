@@ -1121,15 +1121,15 @@ knitr::kable(mw_dt) %>% kable_styling(latex_options = "HOLD_position")
 ```
 
 
-# 44. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 5 days ago, BioKit_KitStatusBL_v1r0 should be Received
+# 44. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 10 days ago, BioKit_KitStatusBL_v1r0 should be Received
 ```{r kit_recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
 kits_recvd <- bioqc %>%  filter(#d_173836415_d_266600170_d_915179629==103209024 &  
                                   as.numeric(round(difftime(currentDate, d_195145666, units="days"), digits=0)) > 10 & 
                                   d_173836415_d_266600170_d_319972665_d_221592017!=375535639) %>% 
-  select(Site, Connect_ID, d_195145666, d_173836415_d_266600170_d_319972665_d_221592017) %>%  sort_by(Site)
+  select(Site, Connect_ID, d_195145666) %>%  sort_by(Site)
 
-colnames(kits_recvd) <- c("Site", "Connect ID", "SrvMtW_TmComplete_v1r0", "BioKit_KitStatusBL_v1r0")
+colnames(kits_recvd) <- c("Site", "Connect ID", "SrvMtW_TmComplete_v1r0")
 knitr::kable(kits_recvd) %>% kable_styling(latex_options = "HOLD_position")
 
 ```

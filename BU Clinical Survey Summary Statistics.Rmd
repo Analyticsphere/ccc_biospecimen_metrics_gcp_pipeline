@@ -326,79 +326,35 @@ gt_functBU(D_522008539, "SEX: Biological Sex at Birth")
 #SYMPTDAY
 
 dt_SYMPTDAY= BU_tib %>%  mutate(multb2 = ifelse(D_470484596_D_756774083==1, 1, 0) + ifelse(D_470484596_D_235386560==1, 1, 0) + ifelse(D_470484596_D_955154600==1, 1, 0) + 
-                                             ifelse(D_470484596_D_811126581==1, 1, 0) + ifelse(D_470484596_D_406943303==1, 1, 0) + ifelse(D_470484596_D_214414872==1, 1, 0))
+                                             ifelse(D_470484596_D_811126581==1, 1, 0) + ifelse(D_470484596_D_406943303==1, 1, 0)) 
 
 
-                                                          
-which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when((D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "All Symptoms Listed",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1) ~ "Cough, Diarrhea, Nasal Congestion, and Sick to Stomach or Vomiting",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Cough, Diarrhea, Nasal Congestion, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Cough, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Cough, Diarrhea, Sick to Stomach or Vomiting, and Fever",
-                                                        (D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, Sick to Stomach or Vomiting, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_955154600==1)~ "Cough, Diarrhea, Nasal Congestion",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_811126581==1)~ "Cough, Diarrhea, Sick to Stomach or Vomiting",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1)~ "Cough, Nasal Congestion, Sick to Stomach or Vomiting",
-                                                        (D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_811126581==1)~ "Diarrhea, Nasal Congestion, Sick to Stomach or Vomiting",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1 & D_470484596_D_406943303==1) ~ "Cough, Diarrhea, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Cough, Nasal Congestion, and Fever",
-                                                        (D_470484596_D_235386560==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Nasal Congestion, and Fever",
-                                                        (D_470484596_D_811126581==1 & D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Sick to Your Stomach or Vomitting, Nasal Congestion, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_811126581==1  & D_470484596_D_406943303==1)~ "Cough,Sick to Stomach or Vomiting, and Fever",
-                                                        (D_470484596_D_235386560==1 & D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Diarrhea, Sick to Your Stomach or Vomitting, and Fever",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_955154600==1)~ "Cough, Nasal Congestion",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_235386560==1)~ "Cough, Diarrhea",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_811126581==1)~ "Cough and Sick to Stomach or Vomiting",
-                                                        (D_470484596_D_756774083==1 & D_470484596_D_406943303==1) ~ "Cough and Fever",
-                                                        (D_470484596_D_235386560==1 & D_470484596_D_955154600==1) ~ "Diarrhea and Nasal Congestion",
-                                                        (D_470484596_D_235386560==1 & D_470484596_D_811126581==1)~ "Diarrhea and Sick to Stomach or Vomiting",
-                                                        (D_470484596_D_235386560==1 & D_470484596_D_406943303==1) ~ "Diarrhea and Fever",
-                                                        (D_470484596_D_955154600==1 & D_470484596_D_811126581==1) ~ "Nasal Congestion and Sick to Stomach or Vomiting",
-                                                        (D_470484596_D_955154600==1 & D_470484596_D_406943303==1) ~ "Nasal Congestion and Fever",
-                                                        (D_470484596_D_811126581==1 & D_470484596_D_406943303==1) ~ "Sick to Your Stomach or Vomitting and Fever",
+
+which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when(as.numeric(multb2)>1 ~ "Multiple Symptoms",
                                                         D_470484596_D_756774083==1 ~ "Cough",
                                                         D_470484596_D_235386560==1 ~ "Diarrhea",
                                                         D_470484596_D_955154600==1 ~ "Nasal Congestion",
                                                         D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting",
                                                         D_470484596_D_406943303==1 ~ "Fever",
-                                                        D_470484596_D_214414872==1 ~ "None of these", #THIS 2144 NOT IN DD BUT IN FLAT&RAW TABLES, possibly meant to be 535003378?
+                                                        D_470484596_D_535003378==1 ~ "None of these",
                                                         TRUE   ~ "Skipped this Question"))
 
-
-# which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when(as.numeric(multb2)>1 ~ "Multiple Symptoms",
-#                                                         D_470484596_D_756774083==1 ~ "Cough",
-#                                              D_470484596_D_235386560==1 ~ "Diarrhea",
-#                                              D_470484596_D_955154600==1 ~ "Nasal Congestion",
-#                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting",
-#                                              D_470484596_D_406943303==1 ~ "Fever",
-#                                              D_470484596_D_214414872==1 ~ "None of these",
-#                                              ()~ "Cough and Diarrhea"
-#                                              TRUE   ~ "Skipped this Question"))
-
-# which_sympt$symptom <- factor(which_sympt$symptom,levels=c("Cough", "Diarrhea", "Nasal Congestion", "Sick to Your Stomach or Vomitting", "Fever", "Multiple Symptoms",  "None of these", "Skipped this Question"))
+which_sympt$symptom <- factor(which_sympt$symptom,levels=c("Multiple Symptoms",  "Cough", "Diarrhea", "Nasal Congestion", "Sick to Your Stomach or Vomitting", "Fever", "None of these", "Skipped this Question"))
 
 
 dt_SYMPTDAY_summary <- which_sympt %>% dplyr::group_by(symptom) %>%  dplyr::summarize(n=n(), percentage=round(100*n/nrow(.), digits=2)) %>%  dplyr::select(symptom, n, percentage)
 
 
-# dt_SYMPTDAY_summary$Answer <- dt_SYMPTDAY_summary$symptom
-# dt_SYMPTDAY_summary$'Number of Participants' <- dt_SYMPTDAY_summary$n
-# dt_SYMPTDAY_summary$'Percentage of Participants' <- dt_SYMPTDAY_summary$percentage
-# dt_SYMPTDAY_summary <- dt_SYMPTDAY_summary %>% dplyr::select(Answer, 'Number of Participants', 'Percentage of Participants')
-# 
-# dt_SYMPTDAY_summary  <- dt_SYMPTDAY_summary %>%  add_row(Answer = "Total", 'Number of Participants'=sum(as.numeric(dt_SYMPTDAY_summary$'Number of Participants')), 'Percentage of Participants' = 100)
 
-
-df_SYMPTDAY <- as.data.frame(dt_SYMPTDAY_summary)
-#knitr::kable(df_SYMPTDAY, caption="Table 2: Symptoms in the 24 hours Prior to Sample Donation", align=c("l","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
-
-df_SYMPTDAY  %>%  gt::gt() %>%
+dt_SYMPTDAY_summary  %>%  gt::gt() %>%
   fmt_number(columns = "percentage", decimals = 1) %>%
   tab_header(title = md("Table 2: Symptoms in the 24 hours Prior to Sample Donation")) %>%
-  cols_label(symptom = md("**Answer**"), n = md("**Number**"), percentage = md("**Percentage**")) %>%
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
+  cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>%
+  grand_summary_rows(columns=c(n, percentage),
+                     fns = ~sum(.,na.rm = T)) %>%
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
+  tab_style(style = list(cell_text(weight = "bold")),
+            locations = cells_body(columns = symptom)) 
 
 
 #EATDRINKBEFORE
@@ -521,11 +477,11 @@ SLEEPTIME_V2=BU %>% filter(!is.na(D_299417266_V2)) %>% ggplot(aes(x=D_299417266_
 
 
 
-BU_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%  mutate(sleep = paste0(str_sub(d_556788178,1,11), str_sub(D_299417266_V2,1,5), str_sub(d_556788178,17,24)))
-#BU_sig <- BU_sig %>%  mutate(slptime= ifelse(as.numeric(str_sub(sleep,12,13)>17), (as.Date(sleep) -1), sleep))
-BU_sig <- BU_sig %>%  mutate(slptime= paste0(as.Date(sleep) -1, "T", str_sub(sleep,12,24))) #question is time you went to bed the night BEFORE, so have to subtract a day 
-BU_sig <- BU_sig %>%  mutate(time_sleep = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(slptime)),units="hours"))
-BU_sig <- BU_sig %>%  mutate(time=as.numeric(time_sleep)) 
+BU_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%  
+  mutate(sleep = paste0(str_sub(d_556788178,1,11), str_sub(D_299417266_V2,1,5), str_sub(d_556788178,17,24)),
+         slptime= paste0(as.Date(sleep) -1, "T", str_sub(sleep,12,24)), #question is time you went to bed the night BEFORE, so have to subtract a day 
+         time_sleep = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(slptime)),units="hours"),
+         time=as.numeric(time_sleep)) 
 
 
 BU_SLEEP = BU_sig %>% #group_by(Site) %>% #biochk_outlier,
@@ -554,11 +510,10 @@ WAKETIME_V2=BU %>% filter(!is.na(D_689861450_V2)) %>% ggplot(aes(x=D_689861450_V
 
 
 
-
-
-BU_sig <- BU_tib %>%  filter(!is.na(D_689861450_V2)) %>%  mutate(wake2 = paste0(str_sub(d_556788178,1,11), str_sub(D_689861450_V2,1,5), str_sub(d_556788178,17,24)))
-BU_sig <- BU_sig %>%  mutate(time_biochk2 = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(wake2)),units="hours"))
-BU_sig <- BU_sig %>%  mutate(time2=as.numeric(time_biochk2)) 
+BU_sig <- BU_tib %>%  filter(!is.na(D_689861450_V2)) %>%  
+  mutate(wake2 = paste0(str_sub(d_556788178,1,11), str_sub(D_689861450_V2,1,5), str_sub(d_556788178,17,24)),
+         time_biochk2 = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(wake2)),units="hours"),
+         time2=as.numeric(time_biochk2)) 
 
 
 BU_WAKE = BU_sig %>% #group_by(Site) %>% #biochk_outlier,
@@ -650,6 +605,9 @@ one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the 
 
 #NOTE: NO PARTICIAPNT STARTED THIS SURVEY BEFORE 11/30/22 SO NO VERSION 1 VARIABLES HAVE DATA, ONLY VERSION 2
 
+
+
+#covid was removed from this survey on July 5th, so filtering for only those that completed this survey prior to that point
 BU_tib <- BU_tib %>% filter(d_764863765<as.Date("2023-07-05"))
 BU <- BU %>% filter(d_764863765<as.Date("2023-07-05"))
 
@@ -742,9 +700,11 @@ covid_once_funct(D_694503437_1_1, "Table 21: Had Any Symptoms the First Time Hav
 #COV7
 BU_tib$D_451163824_1_1 <- factor(BU_tib$D_451163824_1_1,levels=c(111520945, 548628123, 567908725, 760969884, 464631026,"Skipped this Question"))
 one_skip_funct(D_451163824_1_1, "Table 22: Worst Symptoms Interfere with Daily Activities the First Time Having COVID-19", D_694503437_1_1, "353358909")
+```
 
+\newpage
 
-
+```{r COVID_sympt1, warning=FALSE, echo=FALSE,  message=FALSE}
 #COV8
 COVID_tib=as_tibble(had_covid)
 COVID_tib8= COVID_tib  %>% filter(D_694503437_1_1=="353358909")
@@ -1114,10 +1074,10 @@ covid_twice_funct(D_694503437_2_2, "Table 34: Had Any Symptoms the Second Time H
 #COV7
 BU_tib$D_451163824_2_2 <- factor(BU_tib$D_451163824_2_2,levels=c(111520945, 548628123, 567908725, 760969884, 464631026,"Skipped this Question"))
 one_skip_funct(D_451163824_2_2, "Table 35: Worst Symptoms Interfere with Daily Activities the Second Time Having COVID-19", D_694503437_2_2, "353358909")
+```
 
-
-
-
+\newpage
+```{r COVID_symp2, warning=FALSE, echo=FALSE,  message=FALSE}
 #COV8
 COVID_tib=as_tibble(had_covid)
 COVID_tib8= COVID_tib  %>%  filter(D_694503437_2_2=="353358909") 
@@ -2428,473 +2388,6 @@ one_skip_funct(D_220055064_5_5_D_220055064_5_5, "COV28_5_5: Brand of Fifth COVID
 
 
 ```
-
-
-
-
-
-
-
-
-
-<!-- ```{r, include=FALSE} -->
-<!-- biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_v1_JP`    where Connect_ID is not null" -->
-<!-- parts <- "SELECT Connect_ID, token, D_512820379, D_471593703, state_d_934298480, D_230663853, -->
-<!-- D_335767902, D_982402227, D_919254129, D_699625233, D_564964481, D_795827569, D_544150384, -->
-<!-- D_371067537, D_430551721, D_821247024,  state_d_725929722,  -->
-<!-- D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998,  -->
-<!-- d_331584571_d_266600170_d_840048338,  d_534669573, d_764863765, d_827220437, d_253883960 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP`  -->
-<!-- where Connect_ID IS NOT NULL" -->
-<!-- specimenBUM <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null" -->
-
-<!-- BUMbiospec_table <- bq_project_query(project, biospec) -->
-<!-- parts_table <- bq_project_query(project, parts) -->
-<!-- specimenBUM_table <- bq_project_query(project, specimenBUM) -->
-
-<!-- BUMbiospec_data <- bq_table_download(BUMbiospec_table, bigint = "integer64") -->
-<!-- parts_data <- bq_table_download(parts_table, bigint = "integer64") -->
-<!-- specimenBUM_data <- bq_table_download(specimenBUM_table, bigint = "integer64") -->
-
-<!-- parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)  -->
-<!-- BUMbiospec_data$Connect_ID <- as.numeric(BUMbiospec_data$Connect_ID)  -->
-<!-- specimenBUM_data$Connect_ID <- as.numeric(specimenBUM_data$Connect_ID)  -->
-
-<!-- BUMbisp= left_join(BUMbiospec_data, parts_data, by="Connect_ID") %>%  left_join(specimenBUM_data, by="Connect_ID") -->
-<!-- #dim(BUMbisp) -->
-
-
-<!-- #Has a recruitment flag -->
-<!-- bispBUM <- BUMbisp %>% filter(D_512820379==486306141 | D_512820379==854703046) -->
-<!-- #cat("Has a recruitment flag:", dim(bisp)[[1]]) -->
-
-<!-- #User consent submitted -- already included in verified? -->
-<!-- #bisp <- bisp %>% filter(D_919254129==353358909) -->
-<!-- #cat("User consent submitted:", dim(bisp)[[1]]) -->
-
-<!-- #User profile submitted -- already included in verified? -->
-<!-- #bisp <- bisp %>% filter(D_699625233==353358909) -->
-<!-- #cat("User profile submitted:", dim(bisp)[[1]]) -->
-
-<!-- #Verified by site -->
-<!-- bispBUM <- bispBUM %>% filter(D_821247024==197316935) -->
-<!-- #cat("Verified by site:", dim(bisp)[[1]]) -->
-
-<!-- #Check in time not null and Check out time not null, filtered in SQL query -->
-
-<!-- #BU completed -->
-<!-- BUM <- bispBUM %>% filter(d_265193023==231311385) -->
-<!-- cat("Blood Urine Survey Completed:", dim(BU)[[1]]) -->
-<!-- #dim(BU) -->
-
-<!-- BU_tib <- as_tibble(BUM) -->
-<!-- #dim(BU_tib) -->
-
-<!-- knitr::opts_chunk$set(comment = NA) -->
-
-
-
-
-
-
-<!-- BUM_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Intersex or Other", "654207589"="Male", -->
-<!--                  "110092955"="The same day", "952212668"="The day before", "330461666"="More than a day before", "974230748"="Yes, in the past day", -->
-<!--                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all", -->
-<!--                  "548628123"="A little bit", "567908725"="Somewhat", "760969884"="Quite a bit", "464631026"="Very Much", "707601969"="Yes, another", -->
-<!--                  "232063618"="Less than 1 month", "948148236"="Between 1 and 3 months", "692824372"="More than 3 months", "224099497"="Yes, mostly", -->
-<!--                  "770236544"="No, I never experienced this", "931688701"="Yes, I am experiencing this now", "586272115"="Yes,  in the past, but I am not experiencing it now", -->
-<!--                  "661871565"="Moderna", "657978450"="Pfizer", "411943417"="Johnson & Johnson", "113838601"="AstraZeneca", "807835037"="Other",  -->
-<!--                  "670680466"="Excellent", "927477599"="Very Good", "719933364"="Good", "131550264"="Fair", "138752522"="Poor", "648960871"="Never", -->
-<!--                  "693256778"="Less than Once Per Week", "735330419"="1-2 Times per Week", "138332277"="3-5 Times per Week", "858624942"="Once per Day",  -->
-<!--                  "85067541"="2-3 Times per Day", "317567178"="In the last month", "891558680"="In the last 1-6 months", "796081734"="In the past 6-12 months", -->
-<!--                  "752219885"="Over a year, in the Last Two Years", "314487612"="More than 2 years", "666365344"="Within the Last 24 Hours",  -->
-<!--                  "735136116"="In the Past 2-7 Days", "382679079"="In the last 2-4 weeks", "830677489"="More than 4 Weeks Ago", "349122068"="One", -->
-<!--                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know", -->
-<!--                  "317811347"="Don't Know", "850675416"="Two or more times per day") -->
-
-<!-- gt_functBUM <- function(CID, Title){   -->
-<!--   CID_SYM <- rlang::ensym(CID) -->
-<!--   dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) -->
-<!--   gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage) -->
-
-
-
-<!--   gt_yn %>%  gt::gt(rowname_col = "row_lab")  %>%   -->
-<!--   fmt_number(columns = "percentage", decimals = 1) %>%  -->
-<!--   tab_header(title = md(Title)) %>%  -->
-<!--   cols_label(answer = md("**Answer**"), n= md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>%  -->
-<!--         grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
-<!--   tab_options( -->
-<!--       stub.font.weight = "bold" -->
-<!--     ) %>% -->
-<!--   tab_style( -->
-<!--     style = list( -->
-<!--       cell_text(weight = "bold") -->
-<!--     ), -->
-<!--     locations = cells_body( -->
-<!--       columns = answer, -->
-<!--     ) -->
-<!--   )  -->
-<!-- } -->
-
-
-<!-- ``` -->
-
-
-
-<!-- ## SYMPTDAY -->
-
-<!-- ```{r, warning=FALSE, echo=FALSE,  message=FALSE} -->
-
-
-
-<!-- BUM_sympt= BU_tib %>%  mutate(symptom= case_when(D_470484596_D_756774083==1 ~ "Cough", -->
-<!--                                              D_470484596_D_235386560==1 ~ "Diarrhea", -->
-<!--                                              D_470484596_D_955154600==1 ~ "Nasal Congestion", -->
-<!--                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
-<!--                                              D_470484596_D_406943303==1 ~ "Fever", -->
-<!--                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!--                                              TRUE   ~ "Skipped this Question")) -->
-<!-- dt_SYMPTDAY_summary <- BUM_sympt %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
-<!-- #dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
-<!-- #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
-
-<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
-<!--   fmt_number(columns = "percentage", decimals = 1) %>% -->
-<!--   tab_header(title = md("Research Survey SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>% -->
-<!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% -->
-<!--   #summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
-<!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
-<!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
-
-
-<!-- # dt_SYMPTDAY= BU_tib %>%  mutate(freq=rep(1, dim(BU_tib)[[1]]))   -->
-<!-- #  -->
-<!-- # dt_SYMPTDAY$percentage= (dt_SYMPTDAY$freq/dim(dt_SYMPTDAY)[[1]])*100  -->
-<!-- #  -->
-<!-- #  -->
-<!-- # BU_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when(D_470484596_D_756774083==1 ~ "Cough", -->
-<!-- #                                              D_470484596_D_235386560==1 ~ "Diarrhea", -->
-<!-- #                                              D_470484596_D_955154600==1 ~ "Nasal Congestion", -->
-<!-- #                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
-<!-- #                                              D_470484596_D_406943303==1 ~ "Fever", -->
-<!-- #                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!-- #                                              TRUE   ~ "Skipped this Question")) -->
-<!-- #  -->
-<!-- # dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE)  -->
-<!-- # gtm3_print <- gt(dt_SYMPTDAY_summary) -->
-<!-- #  -->
-<!-- # dt_SYMPTDAY_summary %>%  gt::gt() %>%   -->
-<!-- #   fmt_number(columns = "percentage", decimals = 1) %>%  -->
-<!-- #   tab_header(title = md("Research Survey SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>%  -->
-<!-- #   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>%  -->
-<!-- #   summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
-<!-- #   tab_options(stub.font.weight = "bold") %>% -->
-<!-- #   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
-
-
-
-
-
-
-<!-- # dt_SYMPTDAY= BU_tib %>%  mutate(freq=rep(1, dim(BU_tib)[[1]])) -->
-<!-- #  -->
-<!-- # dt_SYMPTDAY$percentage= (dt_SYMPTDAY$freq/dim(dt_SYMPTDAY)[[1]])*100 -->
-<!-- #  -->
-<!-- #  -->
-<!-- # BU_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when(D_470484596_D_756774083==1 ~ "Cough", -->
-<!-- #                                              D_470484596_D_235386560==1 ~ "Diarrhea", -->
-<!-- #                                              D_470484596_D_955154600==1 ~ "Nasal Congestion", -->
-<!-- #                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
-<!-- #                                              D_470484596_D_406943303==1 ~ "Fever", -->
-<!-- #                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!-- #                                              TRUE   ~ "Skipped this Question")) -->
-<!-- # #dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
-<!-- # dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
-<!-- # #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
-<!-- #  -->
-<!-- # dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
-<!-- #   fmt_number(columns = "percentage", decimals = 1) %>% -->
-<!-- #   tab_header(title = md("Clinical Survery SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>% -->
-<!-- #   cols_label(symptom = md("**Answer**"),  n = md("**Number of Participants**"),  percentage = md("**Percentage of Participants**")) %>% -->
-<!-- #   summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
-<!-- #   #grand_summary_rows(columns=c( percentage),fns = ~sum(.,na.rm = T))|> -->
-<!-- #   tab_options(stub.font.weight = "bold") %>% -->
-<!-- #   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
-
-
-<!-- BU_sympt= BU_tib %>%  mutate(symptom= case_when(D_470484596_D_756774083==1 ~ "Cough", -->
-<!--                                              D_470484596_D_235386560==1 ~ "Diarrhea", -->
-<!--                                              D_470484596_D_955154600==1 ~ "Nasal Congestion", -->
-<!--                                              D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting", -->
-<!--                                              D_470484596_D_406943303==1 ~ "Fever", -->
-<!--                                              D_470484596_D_214414872==1 ~ "None of these", -->
-<!--                                              TRUE   ~ "Skipped this Question")) -->
-
-<!-- dt_SYMPTDAY_summary <- BU_sympt %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
-
-<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>%   -->
-<!--   fmt_number(columns = "percentage", decimals = 1) %>%  -->
-<!--   tab_header(title = md("Clinical Survey SYMPTDAY: Symptoms in the 24 hours Prior to Sample Donation")) %>%  -->
-<!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>%  -->
-<!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
-<!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
-
-
-
-
-
-
-<!-- BUM_sg= BUM_sympt %>% dplyr::mutate(skip_symp=ifelse(symptom=="Skipped this Question", 1, 0 ))  -->
-
-<!-- BU_sg= BU_sympt %>% dplyr::mutate(skip_symp=ifelse(symptom=="Skipped this Question", 1, 0 ))  -->
-
-
-
-
-
-<!-- Ttest1 <- t.test(BUM_sg$skip_symp, BU_sg$skip_symp) -->
-<!-- if(Ttest1$p.value <0.05){cat("There is a statistical significance in difference of missingness.")} # between the Clinical Blood Urine Survey and the Research Blood Urine Mouthwash Survey -->
-
-<!-- ``` -->
-
-
-
-
-
-
-<!-- \newpage -->
-<!-- ## EATDRINKBEFORE -->
-<!-- ```{r, warning=FALSE, echo=FALSE,  message=FALSE} -->
-
-<!-- #gt_functBU(D_867307558, "Research Survey EATDRINKBEFORE: When Last Food or Beverage Consumed") -->
-<!-- #gt_functBU(D_867307558, "Clinical Survey EATDRINKBEFORE: When Last Food or Beverage Consumed") -->
-
-
-<!-- BUM_sympt1 <- BU_tib %>% dplyr::mutate(symptom= case_when(D_867307558==110092955 ~ "The same day", -->
-<!--                                              D_867307558==952212668 ~ "The day before", -->
-<!--                                              D_867307558==330461666 ~ "More than a day before", -->
-<!--                                              TRUE   ~ "Skipped this Question")) -->
-<!-- BUM_sympt1$symptom <- factor(BUM_sympt1$symptom, levels= c("The same day", "The day before", "More than a day before", "Skipped this Question")) -->
-
-<!-- dt_SYMPTDAY_summary <- BUM_sympt1 %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
-<!-- #dt_SYMPTDAY_summary <- BUM_sympt1 %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
-<!-- #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
-
-<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
-<!--   fmt_number(columns = "percentage", decimals = 1) %>% -->
-<!--   tab_header(title = md("Research Survey EATDRINKBEFORE (Completed Within 12 hours of Check-in): When Last Food or Beverage Consumed")) %>% -->
-<!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% -->
-<!--   #summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
-<!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
-<!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
-
-
-<!-- BU_sympt1 <- BU_tib %>% dplyr::mutate(symptom= case_when(D_867307558==110092955 ~ "The same day", -->
-<!--                                              D_867307558==952212668 ~ "The day before", -->
-<!--                                              D_867307558==330461666 ~ "More than a day before", -->
-<!--                                              TRUE   ~ "Skipped this Question")) -->
-<!-- BU_sympt1$symptom <- factor(BU_sympt1$symptom, levels= c("The same day", "The day before", "More than a day before", "Skipped this Question")) -->
-
-<!-- dt_SYMPTDAY_summary <- BU_sympt1 %>% dplyr::group_by(symptom) %>%   dplyr::summarize(n=n(), percentage=100*n/nrow(.))  %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage) -->
-<!-- #dt_SYMPTDAY_summary <- BUM_sympt1 %>% dplyr::group_by(symptom) %>%   summarize_at("percentage", sum, na.rm = TRUE) -->
-<!-- #gtm3_print <- gt(dt_SYMPTDAY_summary) -->
-
-<!-- dt_SYMPTDAY_summary %>%  gt::gt() %>% -->
-<!--   fmt_number(columns = "percentage", decimals = 1) %>% -->
-<!--   tab_header(title = md("Research Survey EATDRINKBEFORE (Completed Within 12 hours of Check-in): When Last Food or Beverage Consumed")) %>% -->
-<!--   cols_label(symptom = md("**Answer**"), n = md("**Number of Participants**"), percentage = md("**Percentage of Participants**")) %>% -->
-<!--   #summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>% -->
-<!--   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))|> -->
-<!--   tab_options(stub.font.weight = "bold") %>% -->
-<!--   tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))  -->
-
-
-
-
-<!-- BUM_sg= BU_tib %>% dplyr::mutate(skip_eat=ifelse(is.na(D_867307558), 1, 0 ))  -->
-
-<!-- BU_sg= BU_tib %>% dplyr::mutate(skip_eat=ifelse(is.na(D_867307558), 1, 0 ))  -->
-
-
-
-
-
-<!-- Ttest2 <- t.test(BUM_sg$skip_eat, BU_sg$skip_eat) -->
-<!-- if(Ttest2$p.value <0.05){cat("There's a statistical significance in difference of missingness \n between Clinical and Research surveys.")} -->
-<!-- if(Ttest2$p.value>0.05){cat("There's no statistical significance in difference of missingness \n (for Clinical and Research surveys.")} -->
-
-
-<!-- ``` -->
-
-
-
-<!-- \newpage -->
-
-
-<!-- ## SLEEPTIME Variable Version 2 -->
-<!-- ```{r, warning=FALSE, error=FALSE, echo=FALSE,  message=FALSE} -->
-
-
-<!-- #reminders <- reminders %>%  mutate(verif= ifelse(as.numeric(str_sub(d_914594314,12,13))<20, d_914594314, paste(str_sub(d_914594314,1,8), (as.numeric(str_sub(d_914594314,9,10)) + 1), str_sub(d_914594314,11,24)))) -->
-<!-- #BU_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%  mutate(slptime <- ifelse(as.numeric(str_sub(d_556788178,12,13)>17), paste(str_sub(d_914594314,9,10), (as.numeric(str_sub(d_914594314,9,10)) + 1), str_sub(D_299417266_V2,1,5), #str_sub(d_914594314,9,10), str_sub(d_914594314,11,24) , ))) -->
-
-<!-- BUM_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%  mutate(sleep = paste0(str_sub(d_556788178,1,11), str_sub(D_299417266_V2,1,5), str_sub(d_556788178,17,24))) -->
-<!-- #BUM_sig <- BUM_sig %>%  mutate(slptime= ifelse(as.numeric(str_sub(sleep,12,13)>17), (as.Date(sleep) -1), sleep)) -->
-<!-- BUM_sig <- BUM_sig %>%  mutate(slptime= case_when(as.numeric(str_sub(D_299417266_V2,1,2))>12 ~ paste0(as.Date(sleep) -1, "T", str_sub(sleep,12,24)), -->
-<!--                                                   as.numeric(str_sub(D_299417266_V2,1,2))<12  ~ paste0(as.Date(sleep), "T", str_sub(sleep,12,24)))) #question is time you went to bed the night BEFORE, so have to subtract a day if pm or same day for am -->
-<!-- BUM_sig <- BUM_sig %>%  mutate(time_sleep = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(slptime)),units="hours")) -->
-<!-- BUM_sig <- BUM_sig %>%  mutate(time=as.numeric(time_sleep))  -->
-
-
-<!-- BUM_SLEEP = BUM_sig %>% #group_by(Site) %>% #biochk_outlier, -->
-<!--   dplyr::summarize('Number of Participants'=n(), -->
-<!--                    Min = min(time,na.rm = TRUE), -->
-<!--                    Q1 = quantile(time, 0.25,na.rm = TRUE), -->
-<!--                    Median = median(time,na.rm = TRUE), -->
-<!--                    Mean = mean(time,na.rm = TRUE), -->
-<!--                    SD=sd(time,na.rm = TRUE), -->
-<!--                    Q3 = quantile(time, 0.75,na.rm = TRUE), -->
-<!--                    Max = max(time,na.rm = TRUE)) -->
-<!-- bm_wake <- knitr::kable(BUM_SLEEP,caption='Research Survey SLEEPTIME: Hours Participant Fell Asleep Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape() -->
-<!-- add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes  -->
-
-<!-- cat(round((sum(is.na(BUM_sig$time))/dim(BUM_sig)[[1]])*100, digits=2), "% of participants from the Research Blood Urine Mouthwash Survey skipped this question. ") -->
-
-
-
-
-
-
-
-
-<!-- BU_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%  mutate(sleep = paste0(str_sub(d_556788178,1,11), str_sub(D_299417266_V2,1,5), str_sub(d_556788178,17,24))) -->
-<!-- #BU_sig <- BU_sig %>%  mutate(slptime= ifelse(as.numeric(str_sub(sleep,12,13)>17), (as.Date(sleep) -1), sleep)) -->
-<!-- BU_sig <- BU_sig %>%  mutate(slptime= case_when(as.numeric(str_sub(D_299417266_V2,1,2))>12 ~ paste0(as.Date(sleep) -1, "T", str_sub(sleep,12,24)), -->
-<!--                                                   as.numeric(str_sub(D_299417266_V2,1,2))<12  ~ paste0(as.Date(sleep), "T", str_sub(sleep,12,24)))) #question is time you went to bed the night BEFORE, so have to subtract a day if pm or same day for am -->
-<!-- BU_sig <- BU_sig %>%  mutate(time_sleep = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(slptime)),units="hours")) -->
-<!-- BU_sig <- BU_sig %>%  mutate(time=as.numeric(time_sleep))  -->
-
-
-<!-- BU_SLEEP = BU_sig %>% #group_by(Site) %>% #biochk_outlier, -->
-<!--   dplyr::summarize('Number of Participants'=n(), -->
-<!--                    Min = min(time,na.rm = TRUE), -->
-<!--                    Q1 = quantile(time, 0.25,na.rm = TRUE), -->
-<!--                    Median = median(time,na.rm = TRUE), -->
-<!--                    Mean = mean(time,na.rm = TRUE), -->
-<!--                    SD=sd(time,na.rm = TRUE), -->
-<!--                    Q3 = quantile(time, 0.75,na.rm = TRUE), -->
-<!--                    Max = max(time,na.rm = TRUE)) -->
-<!-- bm_wake <- knitr::kable(BU_SLEEP,caption='Clinical Survey SLEEPTIME: Hours Participant Fell Asleep Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape() -->
-<!-- add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes  -->
-
-<!-- cat(round((sum(is.na(BU_sig$time))/dim(BU_sig)[[1]])*100, digits=2), "% of participants from the Research Blood Urine Mouthwash Survey skipped this question. ") -->
-
-
-
-
-
-
-<!-- BUM_sg= BUM_sig %>% dplyr::mutate(skip_time=ifelse(is.na(time), 1, 0 ))  -->
-
-<!-- BU_sg= BU_sig %>% dplyr::mutate(skip_time=ifelse(is.na(time), 1, 0 ))  -->
-
-
-<!-- Ttest4 <- t.test(BUM_sg$skip_time, BU_sg$skip_time) -->
-<!-- #ifelse(Ttest4$p.value <0.05, print("There is a statistical significance in difference of missingness."), print("There is no statistical significance in difference of missingness."))  #between the Clinical Blood Urine Survey and the Research Blood Urine Mouthwash Survey -- throwing an error for some reason -->
-<!-- cat("There is no statistical significance in difference of missingness.") -->
-
-<!-- ``` -->
-
-
-
-
-
-
-
-
-<!-- \newpage -->
-
-
-<!-- ## WAKETIME Variable Version 2 -->
-<!-- ```{r, warning=FALSE, echo=FALSE,  message=FALSE} -->
-
-<!-- BU_sig <- BU_tib %>%  filter(!is.na(D_689861450_V2)) %>%  mutate(wake2 = paste0(str_sub(d_556788178,1,11), str_sub(D_689861450_V2,1,5), str_sub(d_556788178,17,24))) -->
-<!-- BU_sig <- BU_sig %>%  mutate(time_biochk2 = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(wake2)),units="hours")) -->
-<!-- BU_sig <- BU_sig %>%  mutate(time2=as.numeric(time_biochk2))  -->
-
-
-<!-- BU_WAKE = BU_sig %>% #group_by(Site) %>% #biochk_outlier, -->
-<!--   dplyr::summarize('Number of Participants'=n(), -->
-<!--                    Min = min(time2,na.rm = TRUE), -->
-<!--                    Q1 = quantile(time2, 0.25,na.rm = TRUE), -->
-<!--                    Median = median(time2,na.rm = TRUE), -->
-<!--                    Mean = mean(time2,na.rm = TRUE), -->
-<!--                    SD=sd(time2,na.rm = TRUE), -->
-<!--                    Q3 = quantile(time2, 0.75,na.rm = TRUE), -->
-<!--                    Max = max(time2,na.rm = TRUE)) -->
-<!-- bm_wake <- knitr::kable(BU_WAKE,caption='Research Survey WAKETIME: Hours Awakened Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape() -->
-<!-- add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes  -->
-
-<!-- cat(round((sum(is.na(BU_sig$time2))/dim(BU_sig)[[1]])*100, digits=2), "% of participants from the Research Blood Urine Mouthwash Survey skipped this question. ") -->
-
-
-
-
-
-
-
-<!-- BU_sig <- BU_tib %>%  filter(!is.na(D_689861450_V2)) %>%  mutate(wake2 = paste0(str_sub(d_556788178,1,11), str_sub(D_689861450_V2,1,5), str_sub(d_556788178,17,24))) -->
-<!-- BU_sig <- BU_sig %>%  mutate(time_biochk2 = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(wake2)),units="hours")) -->
-<!-- BU_sig <- BU_sig %>%  mutate(time2=as.numeric(time_biochk2))  -->
-
-
-<!-- BU_WAKE = BU_sig %>% #group_by(Site) %>% #biochk_outlier, -->
-<!--   dplyr::summarize('Number of Participants'=n(), -->
-<!--                    Min = min(time2,na.rm = TRUE), -->
-<!--                    Q1 = quantile(time2, 0.25,na.rm = TRUE), -->
-<!--                    Median = median(time2,na.rm = TRUE), -->
-<!--                    Mean = mean(time2,na.rm = TRUE), -->
-<!--                    SD=sd(time2,na.rm = TRUE), -->
-<!--                    Q3 = quantile(time2, 0.75,na.rm = TRUE), -->
-<!--                    Max = max(time2,na.rm = TRUE)) -->
-<!-- bm_wake <- knitr::kable(BU_WAKE,caption='Clinical WAKETIME: Hours Awakened Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape() -->
-<!-- add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes  -->
-
-<!-- cat(round((sum(is.na(BU_sig$time2))/dim(BU_sig)[[1]])*100, digits=2), "% of participants from the Research Blood Urine Mouthwash Survey skipped this question. ") -->
-
-
-<!-- BU_sg= BU_sig %>% dplyr::mutate(skip_wake=ifelse(is.na(time2), 1, 0 ))  -->
-
-<!-- BU_sg= BU_sig %>% dplyr::mutate(skip_wake=ifelse(is.na(time2), 1, 0 ))  -->
-
-
-<!-- Ttest3 <- t.test(BU_sg$skip_wake, BU_sg$skip_wake) -->
-<!-- #ifelse(Ttest3$p.value <0.05, print("There is a statistical significance in difference of missingness."), cat("There is no statistical significance in difference of missingness."))-- double printing with print, throwing error with cat -->
-<!-- #if(Ttest3$p.value <0.05){cat("There is a statistical significance in difference of missingness.")}  #between the Clinical Blood Urine Survey and the Research Blood Urine Mouthwash Survey -->
-<!-- cat("There is no statistical significance in difference of missingness.") -->
-
-<!-- ``` -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
