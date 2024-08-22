@@ -3,6 +3,7 @@
 
 library(bigrquery)
 library(data.table)
+library(dplyr)
 library(rio)
 
 bq_auth()
