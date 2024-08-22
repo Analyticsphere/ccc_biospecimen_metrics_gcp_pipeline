@@ -3833,7 +3833,8 @@ knitr::kable(clin_bldcnt_HF2,
              col.names=c("Clinic Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Clinical Collections"),
              caption='Table 2.6: Baseline Blood Collection Completeness Among Clinical Collections \n by Clinic Location, \n Henry Ford Health',
              row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>%
-  kable_styling(latex_options = "scale_down") 
+  kable_styling(latex_options = "scale_down") %>%  
+  add_indent(seq(1, nrow(clin_bldcnt_HF2) - 1))
 
 
 
