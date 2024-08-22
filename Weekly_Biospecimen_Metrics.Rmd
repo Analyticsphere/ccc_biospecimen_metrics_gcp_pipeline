@@ -351,8 +351,55 @@ This Weekly Metrics report contains tables and plots for the Connect Biospecimen
 ## Tables 1-4
 
 #### FOR TABLES 1-4 I CHANGED NO SAMPLES COLLECTED TO BE NO COLLECTED SAMPLES AND ALSO THAT THE PARTICIPANTS DID HAVE A COLLECTION APPOINTMENT, SO THAT THOSE WHO HAVEN'T EVEN SCHEDULEN AN APPT YET ARE NOT COUNTED IN THE NO SAMPLES COLLECTED COLUMN
-biospe <- biospe %>% 
-    mutate(
+
+# mouthwash or blood or urine collected
+recrver1 <- recrver1 %>% mutate(BiospeCollection = ifelse((recrver1$d_878865966 == 353358909| recrver1$d_167958071 == 353358909), "Any biospecimen Collections","No biospecimen collections")) 
+
+recrver1$Site<- droplevels(recrver1$Site)
+
+
+
+bio.appoint <- biospe %>% arrange(Connect_ID, d_410912345, d_951355211) %>%
+  group_by(Connect_ID) %>%
+  summarise(
+    d_410912345 = mean(d_410912345, na.rm = TRUE), #to remove the multiple collections by Connect_ID
+    d_951355211 = first(d_951355211),  # arbitrarily, just to get this variable in the final df
+    d_650516960 = first(d_650516960)  # arbitrarily, just to get this variable in the final df
+  ) 
+ 
+biocol.tb <- base::merge(recrver1[,c("Connect_ID","Site","BiospeCollection","d_878865966","d_684635302","d_167958071", "d_173836415_d_266600170_d_185243482", "d_173836415_d_266600170_d_452847912", "d_173836415_d_266600170_d_822274939", "d_173836415_d_266600170_d_139245758",
+                                     "BL_BioSpm_BloodSetting_v1r0", "BL_BioSpm_UrineSetting_v1r0", "BL_BioSpm_MWSetting_v1r0", "BioFin_BaseBloodCol_v1r0", "BioFin_BaseUrineCol_v1r0", "BioFin_BaseMWCol_v1r0")],
+                         bio.appoint,by.x="Connect_ID",by.y="Connect_ID",all.x=TRUE )
+ 
+table1 <- biocol.tb %>% #filter(recrver1$d_821247024==197316935) %>%
+  mutate(#appointment = ifelse((d_410912345!= 353358909 | is.na(d_410912345)), 104430631, 353358909),
+         biocol.appoint = case_when(BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 ~ "Baseline Collection",
+                                    TRUE ~ "No Baseline Collection")) 
+tab___1 <- table1 %>%  
+  mutate(biocol.appoint = factor(biocol.appoint, levels=c("Baseline Collection","No Baseline Collection"))) %>% dplyr::select(Site, biocol.appoint )  %>% 
+  tbl_cross(
+    row = Site,
+    col = biocol.appoint,
+    digits=c(0,1),
+    percent = "row",
+    label=list(Site="Site",
+               biocol.appoint = " "),
+    missing="ifany",
+    margin_text="Total") 
+
+
+
+table1_totals <- as.data.frame(tab___1)
+table1_totals <- table1_totals[-1, ]
+total_rows <- nrow(table1_totals)
+
+biospe.t1 <- knitr::kable(table1_totals, col.names=c("Site", "Baseline Collection","No Baseline Collection", "Total Verified Participants"), caption='Table 1.1: Baseline Biospecimen Collection Status Among Verified Participants', row.names=FALSE,align=c("l","c","c","c"), booktabs = TRUE) %>%  add_indent(seq(1, total_rows - 1)) %>% kable_styling(latex_options = "scale_down")
+
+
+
+
+biospe_locations<-table1 %>% filter(d_650516960== 534621077) %>% 
+  mutate(
     Site_location = case_when(
       d_951355211 == 777644826 ~ "UC-DCAM",
       d_951355211 == 145191545 ~ "Ingalls Harvey",
@@ -381,64 +428,9 @@ biospe <- biospe %>%
       d_951355211==807443231 ~ "All Saints (FW)",
     )
   )
+#TRUE ~ "Missing"))
 
-# mouthwash or blood or urine collected
-recrver1 <- recrver1 %>% mutate(BiospeCollection = ifelse((recrver1$d_878865966 == 353358909| recrver1$d_167958071 == 353358909), "Any biospecimen Collections",
-                                                          "No biospecimen collections")) 
-
-recrver1$Site<- droplevels(recrver1$Site)
-
-
-
-# bio.appoint <- biospe %>% arrange(Connect_ID, d_410912345, d_951355211) %>%
-#   group_by(Connect_ID) %>%
-#   summarise(
-#     d_410912345 = mean(d_410912345, na.rm = TRUE), #to remove the multiple collections by Connect_ID
-#     d_951355211 = first(d_951355211),  # arbitrarily, just to get this variable in the final df
-#     d_650516960 = first(d_650516960)  # arbitrarily, just to get this variable in the final df
-#   ) 
-
-biocol.tb <- base::merge(recrver1[,c("Connect_ID","Site","BiospeCollection","d_878865966","d_684635302","d_167958071", "d_173836415_d_266600170_d_185243482", 
-                                     "d_173836415_d_266600170_d_452847912", "d_173836415_d_266600170_d_822274939", "d_173836415_d_266600170_d_139245758",
-                                     "BL_BioSpm_BloodSetting_v1r0", "BL_BioSpm_UrineSetting_v1r0", "BL_BioSpm_MWSetting_v1r0", "BioFin_BaseBloodCol_v1r0", 
-                                     "BioFin_BaseUrineCol_v1r0", "BioFin_BaseMWCol_v1r0")],
-                         biospe[,c("Connect_ID", "d_410912345", "Site_location", "d_650516960", "d_951355211")],
-                         by.x="Connect_ID",by.y="Connect_ID",all.x=TRUE )
-
-# biocol.tb <- base::merge(recrver1[,c("Connect_ID","Site","BiospeCollection","d_878865966","d_684635302","d_167958071", "d_173836415_d_266600170_d_185243482", "d_173836415_d_266600170_d_452847912", "d_173836415_d_266600170_d_822274939", "d_173836415_d_266600170_d_139245758",
-#                                      "BL_BioSpm_BloodSetting_v1r0", "BL_BioSpm_UrineSetting_v1r0", "BL_BioSpm_MWSetting_v1r0", "BioFin_BaseBloodCol_v1r0", "BioFin_BaseUrineCol_v1r0", "BioFin_BaseMWCol_v1r0")],
-#                          bio.appoint,by.x="Connect_ID",by.y="Connect_ID",all.x=TRUE )
-
-table1 <- biocol.tb %>% #filter(recrver1$d_821247024==197316935) %>%
-  mutate(#appointment = ifelse((d_410912345!= 353358909 | is.na(d_410912345)), 104430631, 353358909),
-    biocol.appoint = case_when(BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 ~ "Baseline Collection",
-                               TRUE ~ "No Baseline Collection")) 
-tab___1 <- table1 %>%  
-  mutate(biocol.appoint = factor(biocol.appoint, levels=c("Baseline Collection","No Baseline Collection"))) %>% dplyr::select(Site, biocol.appoint )  %>% 
-  tbl_cross(
-    row = Site,
-    col = biocol.appoint,
-    digits=c(0,1),
-    percent = "row",
-    label=list(Site="Site",
-               biocol.appoint = " "),
-    missing="ifany",
-    margin_text="Total") 
-
-
-
-table1_totals <- as.data.frame(tab___1)
-table1_totals <- table1_totals[-1, ]
-total_rows <- nrow(table1_totals)
-
-biospe.t1 <- knitr::kable(table1_totals, col.names=c("Site", "Baseline Collection","No Baseline Collection", "Total Verified Participants"), caption='Table 1.1: Baseline Biospecimen Collection Status Among Verified Participants', row.names=FALSE,align=c("l","c","c","c"), booktabs = TRUE) %>%  add_indent(seq(1, total_rows - 1)) %>% kable_styling(latex_options = "scale_down")
-
-
-
-
-
-
-biospe_locations<-table1 %>% filter(d_650516960== 534621077)  
+#biospe_locations<-table1 %>% filter(d_650516960== 534621077)  
 
 
 biospe_locations$biocol.appoint[biospe_locations$biocol.appoint=="Baseline Collection"]="Number of Research Collections"
@@ -1414,7 +1406,7 @@ bldcol_research_HF1 <- bldcol_research_HF[,c(9:12,4)]
 
 biocounts <- biospe %>%  select(Connect_ID, bldcol, d_556788178, d_650516960)
 HFSITES <- table1_2__locations %>%  filter(Site=="Henry Ford Health") %>% select(Connect_ID, Site_location )
-left7 <- left_join(HFSITES, biocounts, by="Connect_ID")
+biospe7 <- left_join(HFSITES, biocounts, by="Connect_ID")
 biospe7$HF_Sites <- biospe7$Site_location                             
 
 tube_col_HF2 <- biospe7  %>% group_by(Connect_ID,HF_Sites,d_650516960) %>%
