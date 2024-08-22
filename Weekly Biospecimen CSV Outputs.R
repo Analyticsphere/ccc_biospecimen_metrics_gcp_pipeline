@@ -5,7 +5,7 @@ library(bigrquery)
 library(data.table)
 library(dplyr)
 library(rio)
-
+library(glue)
 bq_auth()
 2
 
