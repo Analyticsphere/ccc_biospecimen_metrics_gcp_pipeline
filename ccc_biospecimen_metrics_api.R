@@ -9,7 +9,6 @@ library(rmarkdown)
 library(googleCloudStorageR)
 library(gargle)
 library(tools)
-library(config)
 library(glue)
 
 #* heartbeat...for testing purposes only. Not required to run analysis.
