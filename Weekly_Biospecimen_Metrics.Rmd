@@ -668,7 +668,7 @@ table2_totals <- table2_totals[-1, ]
 biospe.bld <- knitr::kable(table2_totals, 
                            col.names=c("Site", "Any Blood Collected","No Blood Collected", "Total Collections"),
                            caption='Table 1.5: Baseline Blood Collection Status Among Biospecimen Collections', row.names=FALSE,align=c("l","c","c","c"), 
-                           booktabs = TRUE, escape = FALSE)  %>% kable_styling(latex_options = "HOLD_position")   
+                           booktabs = TRUE)  %>% kable_styling(latex_options = "HOLD_position")   
 
 
 
@@ -1407,30 +1407,32 @@ bldcol_research_HF1 <- bldcol_research_HF[,c(9:12,4)]
 biocounts <- biospe %>%  select(Connect_ID, bldcol, d_556788178, d_650516960)
 HFSITES <- table1_2__locations %>%  filter(Site=="Henry Ford Health") %>% select(Connect_ID, Site_location )
 biospe7 <- left_join(HFSITES, biocounts, by="Connect_ID")
-biospe7$HF_Sites <- biospe7$Site_location                             
 
-tube_col_HF2 <- biospe7  %>% group_by(Connect_ID,HF_Sites,d_650516960) %>%
+tube_col_HF2 <- biospe7  %>% group_by(Connect_ID,Site_location,d_650516960) %>%
   dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
                    collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE))
 
 
-tube_research_HF2 <- tube_col_HF2 %>% filter(d_650516960==664882224) %>%
-  mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max==5, bldcol_max==4),"All Blood Collected",
-                             ifelse(bldcol_max==0, "No Blood Collected","Partial Blood Collected")),
-         bld.complt = factor(bld.complt, levels = c("All Blood Collected","Partial Blood Collected",  "No Blood Collected" ))) 
-
+tube_research_HF2 <- tube_col_HF2 %>% 
+  mutate(bld_complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max == 5, bldcol_max == 4), "All Blood Collected",
+                             ifelse(bldcol_max == 0, "No Blood Collected", "Partial Blood Collected")),
+         bld_complt = factor(bld_complt, levels = c("All Blood Collected", "Partial Blood Collected", "No Blood Collected"))) %>%
+  select(Site_location, bld_complt) %>%
+  ungroup()  # Explicitly ungroup to avoid the Connect_ID issue
 
 clin_bldcnt_HF2_cross <- tube_research_HF2 %>% 
   tbl_cross(
-    row = HF_Sites,
-    col = bld.complt,
-    digits=c(0,1),
+    row = Site_location,
+    col = bld_complt,
+    digits = c(0,1),
     percent = "row",
-    label=list(HF_Sites="Clinical Location",
-               bld.complt = " "),
-    missing="ifany",
-    missing_text="0 ( 0 %)",
-    margin_text="Total")
+    label = list(Site_location = "Clinical Location",
+                 bld_complt = " "),
+    missing = "ifany",
+    missing_text = "0 ( 0 %)",
+    margin_text = "Total"
+  )
+
 
 clin_bldcnt_HF2_df <- as.data.frame(clin_bldcnt_HF2_cross$table_body)
  
@@ -1473,7 +1475,7 @@ tube_clinic$Site <-factor(tube_clinic$Site,levels=c("HealthPartners", "Henry For
                                                     "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado",
                                                     "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest"))
 
-tube_completeness <- tube_clinic %>% 
+tube_completeness <- tube_clinic %>% ungroup() %>% 
   dplyr::select(bldcol_tubes, Site)  %>% 
   tbl_cross(
     col = bldcol_tubes, 
@@ -1843,11 +1845,11 @@ Tb.research.coltube <- tube_col %>% filter(d_650516960==534621077) %>%  mutate(S
 Tb.research.coltube$bldcol_tubes <- factor(Tb.research.coltube$bldcol_max,levels=c(0:5))
 Tb.research.coltube$bldcol_tubes <- droplevels(Tb.research.coltube$bldcol_tubes)
 
-Tb.research.coltube$Site <-factor(Tb.research.coltube$Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
-                                                                    "Marshfield Clinic Health System",
-                                                                    "Sanford Health", "University of Chicago Medicine"))
+# Tb.research.coltube$Site <-factor(Tb.research.coltube$Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
+#                                                                     "Marshfield Clinic Health System",
+#                                                                     "Sanford Health", "University of Chicago Medicine"))
 
-Total.research.coltube <- Tb.research.coltube %>% 
+Total.research.coltube <- Tb.research.coltube %>% ungroup() %>% 
   dplyr::select(bldcol_tubes, Site)  %>% 
   tbl_cross(
     col = bldcol_tubes, 
@@ -1886,9 +1888,9 @@ research.coltube.bld.only<- research.coltube.bld.only %>%  mutate(tube_type=drop
 
 research__blood <- research__blood %>% filter(!is.na(tube_type))
 
-research__blood$Site <-factor(research__blood$Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
-                                                            "Marshfield Clinic Health System",
-                                                            "Sanford Health", "University of Chicago Medicine"))
+# research__blood$Site <-factor(research__blood$Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
+#                                                             "Marshfield Clinic Health System",
+#                                                             "Sanford Health", "University of Chicago Medicine"))
 
 Total_research_blood <- research__blood %>% 
   dplyr::select(tube_type, Site)  %>% 
@@ -3440,7 +3442,7 @@ coll_bptl_diff5_4 <- coll_bptl_diff5_4 %>% filter(!is.na(coll_days_diff))
 coll_bptl_diff5_4$Connect_ID <- as.numeric(coll_bptl_diff5_4$`as.character(Connect_ID)`)
 
 
-crosstable_coll_bptl5_4 <- coll_bptl_diff5_4 %>%
+crosstable_coll_bptl5_4 <- coll_bptl_diff5_4 %>% ungroup() %>% 
   tbl_cross(
     row = Site_location,
     col = coll_days_diff,
@@ -6192,4 +6194,3 @@ landscape(tbl_7_10)
 
 
 ```
-
