@@ -8,6 +8,7 @@ header-includes:
 
 output:
   pdf_document:
+    latex_engine: xelatex
     extra_dependencies: ["float"]
     toc: false
     keep_tex: yes
