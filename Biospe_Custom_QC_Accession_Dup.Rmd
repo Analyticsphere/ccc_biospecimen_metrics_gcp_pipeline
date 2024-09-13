@@ -8,6 +8,7 @@ header-includes:
 
 output:
   pdf_document:
+    latex_engine: xelatex
     extra_dependencies: ["float"]
     toc: false
     keep_tex: yes
@@ -30,6 +31,7 @@ library(expss)
 library(knitr)
 library(kableExtra)
 library(glue)
+library(expss) # needed for xlxs
 bq_auth()
 
 
@@ -158,8 +160,9 @@ knitr::kable(qc2)
 ### 2. If all blood tubes are not collected, (Derived) Clinical Site Blood Collected (BioClin_SiteBloodColl_v1r0) should be no or NULL.
 ```{r Clin_SiteBloodColl, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & !is.na(d_173836415_d_266600170_d_693370086)) 
-qc2_1 <- qc2_1  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_534041351)  %>%  sort_by(Site)
+qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & 
+                              (!is.na(d_173836415_d_266600170_d_693370086) | d_173836415_d_266600170_d_693370086==104430631)) 
+qc2_1 <- qc2_1  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_693370086)  %>%  sort_by(Site)
 
 
 colnames(qc2_1) <- c("Site", "Connect ID", "Value")
@@ -175,7 +178,7 @@ knitr::kable(qc2_1)
 
 qc2_2 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & d_878865966!=104430631 & 
                               Connect_ID!=2310991421) #HP sent clinical sample when it should've only been research- needs to be manually removed
-qc2_2 <- qc2_2  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_534041351)  %>%  sort_by(Site)
+qc2_2 <- qc2_2  %>% select(Site, Connect_ID, d_878865966)  %>%  sort_by(Site)
 
 
 colnames(qc2_2) <- c("Site", "Connect ID", "Value")
@@ -208,7 +211,8 @@ knitr::kable(derv_ur)
 
 ```{r BioClin_BldUrnPlacedTm_1, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc3_1 <- bioqc %>%  filter(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)) < as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935)) & as.POSIXct(ymd_hms(d_173836415_d_266600170_d_184451682))!=as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780))) %>%  select(Site, Connect_ID, d_173836415_d_266600170_d_184451682) %>%  sort_by(Site)
+qc3_1 <- bioqc %>%  filter(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)) < as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935)) & as.POSIXct(ymd_hms(d_173836415_d_266600170_d_184451682))!=as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780))) %>%  
+  select(Site, Connect_ID, d_173836415_d_266600170_d_184451682) %>%  sort_by(Site)
 
 
 colnames(qc3_1) <- c("Site", "Connect ID", "Value")
@@ -218,7 +222,8 @@ knitr::kable(qc3_1)
 
 ### 6. If BioClin_BldOrderPlacdDt_v1r0 occured after BioClin_UrnOrderPlacdDt_v1r0, then BioClin_BldUrnPlacedTm_v1r0 should = BioClin_UrnOrderPlacdDt_v1r0
 ```{r BioClin_BldUrnPlacedTm_2, echo=FALSE, warning=FALSE, message=FALSE}
-qc3_2 <- bioqc %>%  filter(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)) > as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935)) & as.POSIXct(ymd_hms(d_173836415_d_266600170_d_184451682))!=as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935))) %>% select(Site, Connect_ID, d_173836415_d_266600170_d_184451682) %>%  sort_by(Site)
+qc3_2 <- bioqc %>%  filter(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)) > as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935)) & as.POSIXct(ymd_hms(d_173836415_d_266600170_d_184451682))!=as.POSIXct(ymd_hms(d_173836415_d_266600170_d_939818935))) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_184451682) %>%  sort_by(Site)
 
 
 colnames(qc3_2) <- c("Site", "Connect ID", "Value")
@@ -233,7 +238,8 @@ knitr::kable(qc3_2)
 
 currentDate <- Sys.Date()
 
-qc4 <- bioqc %>%  filter(d_973670172_d_593843561==353358909 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & is.na(d_173836415_d_266600170_d_786930107)) %>% 
+qc4 <- bioqc %>%  filter(d_973670172_d_593843561==353358909 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
+                           is.na(d_173836415_d_266600170_d_786930107)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_786930107) %>%  sort_by(Site)
 
 
@@ -361,7 +367,8 @@ knitr::kable(qc7_tube2)
 ### 12. All baseline samples ("BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMWCol_v1r0") are collected, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then SMMet_BLSamplesColl_v1r0 must be YES
 ```{r SMMET, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc8 <- bioqc %>%  filter(d_878865966==353358909 & d_167958071==353358909 & d_684635302==353358909 & d_678166505>=as.Date("2022-11-21")  & d_254109640 !=353358909) %>% 
+qc8 <- bioqc %>%  filter(d_878865966==353358909 & d_167958071==353358909 & d_684635302==353358909 & 
+                           d_678166505>=as.Date("2022-11-21")  & d_254109640 !=353358909) %>% 
   select(Site, Connect_ID, d_254109640) %>%  sort_by(Site)
 
 
@@ -375,7 +382,8 @@ knitr::kable(qc8)
 ### 13. If BioFin_BaseBloodCol_v1r0 is yes and the collection setting is Research, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then (Autogenerated) Date/time Baseline Research Blood Collected must be populated  
 ```{r BloodDateTime, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc9B <- bioqc %>%  filter(d_878865966==353358909 & d_650516960==534621077 & d_678166505>=as.Date("2022-11-21") & is.na(d_173836415_d_266600170_d_561681068)) %>% 
+qc9B <- bioqc %>%  filter(d_878865966==353358909 & d_650516960==534621077 & 
+                            d_678166505>=as.Date("2022-11-21") & is.na(d_173836415_d_266600170_d_561681068)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_561681068) %>%  sort_by(Site)
 
 
@@ -385,7 +393,8 @@ knitr::kable(qc9B)
 
 ### 14. If BioFin_BaseUrineCol_v1r0 is yes and the collection setting is Research, and BioCol_ColTime_v1r0 occured on or after 11/21/2022 then (Autogenerated) Date/time Baseline Research Urine Collected must be populated
 ```{r UrineDateTime, echo=FALSE, warning=FALSE, message=FALSE}
-qc9U <- bioqc %>%  filter(d_167958071==353358909 & d_650516960==534621077  & d_678166505>=as.Date("2022-11-21") & is.na(d_173836415_d_266600170_d_847159717)) %>% 
+qc9U <- bioqc %>%  filter(d_167958071==353358909 & d_650516960==534621077  & d_678166505>=as.Date("2022-11-21") & 
+                            is.na(d_173836415_d_266600170_d_847159717)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_847159717) %>%  sort_by(Site)
 
 colnames(qc9U) <- c("Site", "Connect ID", "(Autogenerated) Date/time Baseline Research Urine Collected")
@@ -430,7 +439,9 @@ knitr::kable(qc11)
 ```{r BioClin_SiteUrineColl, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-qc12 <- bioqc %>%  filter(Connect_ID!=5667758818 & d_973670172_d_593843561==353358909  & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_915838974, units="days"), digits=0)) >7 & is.na(d_173836415_d_266600170_d_786930107)) %>% 
+qc12 <- bioqc %>%  filter(Connect_ID!=5667758818 & d_973670172_d_593843561==353358909  & 
+                            d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_915838974, units="days"), digits=0)) >7 & 
+                            is.na(d_173836415_d_266600170_d_786930107)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_786930107) %>%  sort_by(Site)
 
 
@@ -1124,12 +1135,12 @@ knitr::kable(mw_dt) %>% kable_styling(latex_options = "HOLD_position")
 # 44. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 10 days ago, BioKit_KitStatusBL_v1r0 should be Received
 ```{r kit_recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
-kits_recvd <- bioqc %>%  filter(#d_173836415_d_266600170_d_915179629==103209024 &  
+kits_recvd <- HMW %>%  filter(#d_173836415_d_266600170_d_915179629==103209024 &  
                                   as.numeric(round(difftime(currentDate, d_195145666, units="days"), digits=0)) > 10 & 
                                   d_173836415_d_266600170_d_319972665_d_221592017!=375535639) %>% 
-  select(Site, Connect_ID, d_195145666) %>%  sort_by(Site)
+  select(Site, Connect_ID, d_195145666, d_972453354) %>%  sort_by(Site)
 
-colnames(kits_recvd) <- c("Site", "Connect ID", "SrvMtW_TmComplete_v1r0")
+colnames(kits_recvd) <- c("Site", "Connect ID", "SrvMtW_TmComplete_v1r0", "BioKit_ReturnKitTrack")
 knitr::kable(kits_recvd) %>% kable_styling(latex_options = "HOLD_position")
 
 ```
@@ -1371,8 +1382,8 @@ colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection 
 
 ```{r DupCsv, echo=FALSE, warning=FALSE, message=FALSE}
 
-#write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
-write_labelled_xlsx(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"))
+write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+#write_labelled_xlsx(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"))
 
 ```
 
