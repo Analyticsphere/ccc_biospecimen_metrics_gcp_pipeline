@@ -1513,6 +1513,7 @@ colnames(tube_completeness_totals) <- current_colnames
 clin_col <- biospe %>% select(Connect_ID, d_650516960, d_410912345)
 bldurcl <- left_join(recrver1, clin_col, by="Connect_ID")
 
+
 bldurcl <- bldurcl %>% filter(d_650516960==664882224 & d_410912345==353358909) %>%
   mutate(Data_System = case_when((d_173836415_d_266600170_d_534041351==353358909 & is.na(d_173836415_d_266600170_d_693370086)) |
                                    (d_173836415_d_266600170_d_210921343==353358909 & is.na(d_173836415_d_266600170_d_786930107))~ "Biospecimen Dashboard Only",
@@ -3868,10 +3869,12 @@ add_footnote(tab10_2, "Note: The expected total blood collection tubes vary by s
 
 tab8=knitr::kable(notcol_combo2_totals,
                   caption='Table 2.10: Baseline Blood Tubes Collected Among Clinical Biospecimen Collections by Tube Type',
-                  row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  
+                  row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  
+  add_indent(seq(1, nrow(notcol_combo2_totals) - 1))  %>% 
   kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% 
-  column_spec(column = 2:ncol(notcol_combo2_totals),width = "4cm")  %>% 
-  column_spec(column = 1:ncol(notcol_combo2_totals),width = "5cm") %>%  landscape()
+  #column_spec(column = 2:ncol(notcol_combo2_totals),width = "4cm")  %>% 
+  #column_spec(column = 1:ncol(notcol_combo2_totals),width = "5cm") %>%  
+  landscape()
 add_footnote(tab8, "Note: The expected collected tube type varies by site and is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD. (6) HP: 2 SST, 1 Heparin, 1 EDTA, 1 STRECK. (7) SFH: 4 SST, 2 Heparin, 3 EDTA. (8) UChicago- 2 SST, 1 Heparin, 1 EDTA", notation = "none") 
 
 
@@ -5278,7 +5281,7 @@ research.vt_plotHP_locs + guides(color = guide_legend(title = "Clinic Location")
 
 ```{r AdHoc1, eval=TRUE,echo=FALSE, warning=FALSE, include=FALSE}
 
-## Need to run chunks: Table6, Table14, Figures16_18, 
+## Need to run chunks: Table6, Table14, Table15, Figures16_18, 
 
 
 Orland_ad_hoc <- research.vt_plUC %>% filter(as.Date(col.Monday.date)>="2023-12-11" & Site_location=="Orland Park")
@@ -5963,7 +5966,7 @@ knitr::kable(all_shipped_2,format.args = list(big.mark = ","),
 table7_2before <- knitr::kable(all_shipped_before,
                                caption='Table 7.3 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped before 6/17/2024)',
                                row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7_2before, "Note: Kits were returned using USPS prior to 6/17/2024", notation = "none")
+add_footnote(table7_2before, "Note: During this time the kit return method was USPS.", notation = "none")
 
 ```
 
@@ -5973,9 +5976,9 @@ add_footnote(table7_2before, "Note: Kits were returned using USPS prior to 6/17/
 ```{r KnitrTables7.2after,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
 
 table7_2after <- knitr::kable(all_shipped_after,format.args = list(big.mark = ","),
-                              caption='Table 7.4 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped after 6/17/2024)',
+                              caption='Table 7.4 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago \n (kits shipped between 6/17/2024 and 8/28/2024)',
                               row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7_2after, "Note: Kits were returned using FedEx after 6/17/2024", notation = "none")
+add_footnote(table7_2after, "Note: During this time the kit return method was FedEx; Query for addresses to print pulled oldest clinical collection date/time stamp first.", notation = "none")
 
 ```
 
@@ -5986,7 +5989,7 @@ add_footnote(table7_2after, "Note: Kits were returned using FedEx after 6/17/202
 table7_2after2 <- knitr::kable(all_shipped_after2,format.args = list(big.mark = ","),
                               caption='Table 7.5 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped after 8/28/2024)',
                               row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7_2after2, "Note: Sort order was updated on 8/28/2024", notation = "none")
+add_footnote(table7_2after2, "Query for addresses to print was updated on 8/28/2024 to pull most recent clinical collection date/time stamp first. Kit return method remained as FedEx.", notation = "none")
 
 ```
 
