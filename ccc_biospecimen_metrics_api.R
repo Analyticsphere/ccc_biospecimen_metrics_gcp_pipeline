@@ -9,7 +9,6 @@ library(rmarkdown)
 library(googleCloudStorageR)
 library(gargle)
 library(tools)
-library(config)
 library(glue)
 
 #* heartbeat...for testing purposes only. Not required to run analysis.
@@ -27,6 +26,13 @@ function() {
 function(report, testing = FALSE) {
   testing <- as.logical(testing)
   report <- as.character(report)
+  
+  # Authenticate to BigQuery
+  if (Sys.getenv('GOOGLE_APPLICATION_CREDENTIALS') != "") {
+    bigrquery::bq_auth(path = Sys.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+  } else {
+    bigrquery::bq_auth()  # This will work on Google Cloud Run
+  }
 
   # Determines which config from config.yml to use
   Sys.setenv(R_CONFIG_ACTIVE = report)
