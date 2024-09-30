@@ -5958,7 +5958,6 @@ MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
 
 
 
-
 \FloatBarrier
 ```{r newTables7.1,eval=TRUE,echo=FALSE,results='asis'} 
 #results='asis'
@@ -5995,6 +5994,7 @@ table7_2after <- knitr::kable(all_shipped_after,format.args = list(big.mark = ",
                               row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 add_footnote(table7_2after, "Note: During this time the kit return method was FedEx; Query for addresses to print pulled oldest clinical collection date/time stamp first.", notation = "none")
 
+
 ```
 
 \FloatBarrier
@@ -6005,17 +6005,6 @@ table7_2after2 <- knitr::kable(all_shipped_after2,format.args = list(big.mark = 
                               caption='Table 7.5 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped after 8/28/2024)',
                               row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 add_footnote(table7_2after2, "Query for addresses to print was updated on 8/28/2024 to pull most recent clinical collection date/time stamp first, with a 5 day lag from date of clinical blood/urine collection date. Kit return method remained as FedEx.", notation = "none")
-
-```
-
-\FloatBarrier
-
-```{r Shipped_After_August,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
-
-table7_2after2 <- knitr::kable(all_shipped_after2,format.args = list(big.mark = ","),
-                              caption='Table 7.5 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped after 8/28/2024)',
-                              row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7_2after2, "Note: Sort order was updated on 8/28/2024", notation = "none")
 
 ```
 
