@@ -735,6 +735,9 @@ table1_4_locations <- table1_4_locations %>% filter(!is.na(Site_location))
 
 
 table1_4_locations_all <- table1_4_locations 
+#for footnote:
+footnote_count <- sum(table1_4_locations_all$biocol.appoint=="Number of Clinical Collections")
+
 table1_4_locations_7days <- table1_4_locations %>% filter(d_556788178 >= currentDate - 7)
 table1_4_locations_30days <- table1_4_locations %>% filter(d_556788178 >= currentDate - 30)
 
@@ -3565,11 +3568,16 @@ col_num_1.2_gt #%>% kable_styling(latex_options = "scale_down")
 \FloatBarrier
 ```{r KnitrTables1.4, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
-knitr::kable(final_col_num_1.5[, c(1,2,8,9)], 
-             col.names=c("Collection Location", "Total Clinical Collections", "In the Past 7 days",  "In the Past 30 days"), 
-             caption='Table 1.4: Baseline Clinical Biospecimen Collections at Sanford Health by Clinic Location', 
+SF_collections <- knitr::kable(final_col_num_1.5[, c(1,8,9)],  #final_col_num_1.5[, c(1,2,8,9)], 
+             #col.names=c("Collection Location", "Total Clinical Collections", "In the Past 7 days",  "In the Past 30 days"),
+             col.names=c("Collection Location", "In the Past 7 days",  "In the Past 30 days"),
+             caption='Table 1.4: Baseline Clinical Biospecimen Collections in the Past 30 Days at Sanford Health by Clinic Location', 
              row.names=FALSE, align=c("l","c"), format.args = list(big.mark = ","), booktabs = TRUE) %>%  
   column_spec(3:4, width = "4cm")
+
+add_footnote(SF_collections, 
+             paste0("This table reflects Clincal Collections in the past 30 days; the total number of Clinical Collections at Sanford Health is ", footnote_count),
+             notation = "none")
 ```
 \FloatBarrier
 ```{r KnitrTables1.5, eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, warning=FALSE, results='asis'}
