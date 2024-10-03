@@ -6002,6 +6002,7 @@ table7_2after <- knitr::kable(all_shipped_after,format.args = list(big.mark = ",
                               row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 add_footnote(table7_2after, "Note: During this time the kit return method was FedEx; Query for addresses to print pulled oldest clinical collection date/time stamp first.", notation = "none")
 
+
 ```
 
 \FloatBarrier
