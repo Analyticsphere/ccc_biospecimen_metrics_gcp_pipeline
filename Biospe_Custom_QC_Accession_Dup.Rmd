@@ -1382,7 +1382,7 @@ colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection 
 
 ```{r DupCsv, echo=FALSE, warning=FALSE, message=FALSE}
 
-write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
 #write_labelled_xlsx(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"))
 
 ```

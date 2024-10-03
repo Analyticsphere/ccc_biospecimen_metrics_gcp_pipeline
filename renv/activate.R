@@ -33,6 +33,7 @@ local({
     if (!is.null(override))
       return(override)
 
+
     # if we're being run in a context where R_LIBS is already set,
     # don't load -- presumably we're being run as a sub-process and
     # the parent process has already set up library paths for us
@@ -59,6 +60,7 @@ local({
     TRUE
 
   })
+
 
   # bail if we're not enabled
   if (!enabled) {
@@ -131,6 +133,7 @@ local({
   
   }
   
+
   heredoc <- function(text, leave = 0) {
   
     # remove leading, trailing whitespace
@@ -146,6 +149,7 @@ local({
   
   }
   
+
   startswith <- function(string, prefix) {
     substring(string, 1, nchar(prefix)) == prefix
   }
@@ -651,6 +655,7 @@ local({
     if (is.na(auto) && getRversion() >= "4.4.0")
       auto <- "TRUE"
   
+
     if (auto %in% c("TRUE", "True", "true", "1"))
       return(renv_bootstrap_platform_prefix_auto())
   
@@ -859,6 +864,7 @@ local({
       - Use `renv::record(\"%3$s\")` to record renv %1$s in the lockfile.
       - Use `renv::restore(packages = \"renv\")` to install renv %2$s into the project library.
     ")
+    
     catf(fmt, friendly, renv_bootstrap_version_friendly(version), remote)
   
     FALSE
@@ -1080,7 +1086,8 @@ local({
   
     # if jsonlite is loaded, use that instead
     if ("jsonlite" %in% loadedNamespaces()) {
-  
+
+      
       json <- tryCatch(renv_json_read_jsonlite(file, text), error = identity)
       if (!inherits(json, "error"))
         return(json)
@@ -1165,6 +1172,7 @@ local({
   
   }
   
+
   renv_json_read_remap <- function(json, map) {
   
     # fix names
