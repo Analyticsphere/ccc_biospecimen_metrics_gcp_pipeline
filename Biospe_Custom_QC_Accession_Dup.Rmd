@@ -161,7 +161,8 @@ knitr::kable(qc2)
 ```{r Clin_SiteBloodColl, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & 
-                              (!is.na(d_173836415_d_266600170_d_693370086) | d_173836415_d_266600170_d_693370086==104430631)) 
+                              d_173836415_d_266600170_d_693370086==353358909 & 
+                              Connect_ID!=2300063524) #specific exclusion- not editing this persons data
 qc2_1 <- qc2_1  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_693370086)  %>%  sort_by(Site)
 
 
@@ -807,11 +808,30 @@ knitr::kable(bio_mw_setting_res)
 
 
 ```{r BioClin_PolyBloodID_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
+# 
+# bioqc1 <- bioqc %>%  filter(!is.na(d_646899796_integer) & 
+#                               if(Site %in% c("Baylor Scott and White Health","HealthPartners","Marshfield Clinical Health System",
+#                                              "Kaiser Permanente Colorado","Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest")){
+#                                 d_173836415_d_266600170_d_543608829!="[]"} & 
+#                         Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 & #HFH exclusions
+#                           Connect_ID!=4782195164) #UC exclusion
 
-bioqc1 <- bioqc %>%  filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796_integer) &
-                        Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 & #HFH exclusions
-                          Connect_ID!=4782195164) #UC exclusion
-
+bioqc1 <- bioqc %>%
+  filter(
+    !is.na(d_646899796_integer) & 
+    ( 
+      !(Site %in% c("Baylor Scott and White Health", "HealthPartners", "Marshfield Clinical Health System",
+                     "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest")) | 
+      d_173836415_d_266600170_d_543608829 != "[]"
+    ) & 
+    Connect_ID != 2824989966 & 
+    Connect_ID != 3759939890 & 
+    Connect_ID != 4688823720 & 
+    Connect_ID != 8589481620 & 
+    Connect_ID != 6336258662 & # HFH exclusions
+    Connect_ID != 4782195164  # UC exclusion
+  )
+# 
 # bioqc1$str1 <- bioqc1$d_173836415_d_266600170_d_543608829
 # 
 # bioqc1 %>%  group_by(Connect_ID) %>%  mutate(PolyBloodID = unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) )
@@ -838,8 +858,7 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "HOLD_position") %>% r
 
 #bioqc2 <- bioqc %>% mutate(urineID = ifelse(is.numeric(d_928693120), is.numeric(d_928693120), is.numeric(d_928693120_integer)))
 
-bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120_integer) &
-
+bioqc2 <- bioqc %>%  filter(!is.na(d_928693120_integer) & d_173836415_d_266600170_d_110349197!="[]" & 
                         Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 &
                           Connect_ID!=6473532641 & Connect_ID!=4435276749 ) #HFH exclusions)
 
