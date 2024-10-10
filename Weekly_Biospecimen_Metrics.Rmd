@@ -258,21 +258,8 @@ recrver1<- recrver1 %>% mutate(BldCollection = ifelse(recrver1$BioFin_BaseBloodC
 
 ### Each week must start on Monday and end with the following Sunday to be consitent with all reports
 veristart.date = as.Date(min(as.POSIXct(recr.bio$d_914594314),na.rm=TRUE))
-veristart.date + days(5)
+#veristart.date + days(5)
 #[1] "2021-08-01"
-recrver1$verified.week <- ceiling(as.numeric(difftime(as.Date(ymd_hms(recrver1$d_914594314)),as.Date(veristart.date-days(2)),units="days"))/7)
-recrver1$verified.Sunday.date <- veristart.date + days(5)+ dweeks(recrver1$verified.week-1)
-
-
-
-
-
-
-
-# tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
-# urine <- dd[grepl("Urine",dd$`Variable Label`),]
-# mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
-
 
 
 ```
@@ -736,7 +723,7 @@ table1_4_locations <- table1_4_locations %>% filter(!is.na(Site_location))
 
 table1_4_locations_all <- table1_4_locations 
 #for footnote:
-footnote_count <- sum(table1_4_locations_all$biocol.appoint=="Number of Clinical Collections")
+footnote_count <- sum(table1_2_locations$biocol.appoint=="Number of Clinical Collections" & table1_2_locations$Site=="Sanford Health")
 
 table1_4_locations_7days <- table1_4_locations %>% filter(d_556788178 >= currentDate - 7)
 table1_4_locations_30days <- table1_4_locations %>% filter(d_556788178 >= currentDate - 30)

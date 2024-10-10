@@ -161,7 +161,8 @@ knitr::kable(qc2)
 ```{r Clin_SiteBloodColl, echo=FALSE, warning=FALSE, message=FALSE}
 
 qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & 
-                              (!is.na(d_173836415_d_266600170_d_693370086) | d_173836415_d_266600170_d_693370086==104430631)) 
+                              d_173836415_d_266600170_d_693370086==353358909 & 
+                              Connect_ID!=2300063524) #specific exclusion- not editing this persons data
 qc2_1 <- qc2_1  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_693370086)  %>%  sort_by(Site)
 
 
@@ -577,8 +578,10 @@ knitr::kable(qc13_tube8)
 
 
 
-qc13_tube7 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119)
-                                & Connect_ID!=2215062576) %>% #KPNW exclusion 
+qc13_tube7 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & 
+                                  d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119) & 
+                                  Connect_ID!=2215062576 & #KPNW exclusion
+                                  Connect_ID!=4002548016) %>%  #HF exclusion
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  sort_by(Site)
 
 colnames(qc13_tube7) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
@@ -803,15 +806,37 @@ knitr::kable(bio_mw_setting_res)
 
 \newpage
 \FloatBarrier
-## 29. BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0
+## 29. BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0 if and BioClin_DBBloodRRLDt_v1r0 occured more than 7 days ago
 
 
 ```{r BioClin_PolyBloodID_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
+# 
+# bioqc1 <- bioqc %>%  filter(!is.na(d_646899796_integer) & 
+#                               if(Site %in% c("Baylor Scott and White Health","HealthPartners","Marshfield Clinical Health System",
+#                                              "Kaiser Permanente Colorado","Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest")){
+#                                 d_173836415_d_266600170_d_543608829!="[]"} & 
+#                         Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 & #HFH exclusions
+#                           Connect_ID!=4782195164) #UC exclusion
 
-bioqc1 <- bioqc %>%  filter(d_173836415_d_266600170_d_543608829!="[]" & !is.na(d_646899796_integer) &
-                        Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 & #HFH exclusions
-                          Connect_ID!=4782195164) #UC exclusion
-
+bioqc1 <- bioqc %>%
+  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7 &
+           !is.na(d_646899796_integer) & 
+           ( !(Site %in% c("Baylor Scott and White Health", "HealthPartners", "Marshfield Clinical Health System",
+                           "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest")) | 
+               d_173836415_d_266600170_d_543608829 != "[]") & 
+           Connect_ID != 2824989966 & 
+           Connect_ID != 3759939890 & 
+           Connect_ID != 4688823720 & 
+           Connect_ID != 8589481620 & 
+           Connect_ID != 6336258662 &
+           Connect_ID != 5461650381 &
+           Connect_ID != 4900116130 &
+           Connect_ID != 4462616750 &
+           Connect_ID != 9111871102 &
+           Connect_ID != 8476952861 &# HFH exclusions
+           Connect_ID != 4782195164  # UC exclusion
+  )
+# 
 # bioqc1$str1 <- bioqc1$d_173836415_d_266600170_d_543608829
 # 
 # bioqc1 %>%  group_by(Connect_ID) %>%  mutate(PolyBloodID = unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) )
@@ -832,16 +857,16 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "HOLD_position") %>% r
 ```
 
 \FloatBarrier
-## 30. BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0
+## 30. BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0 if BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago.
 
 ```{r PolyUrineID, echo=FALSE, warning=FALSE, message=FALSE}
 
 #bioqc2 <- bioqc %>% mutate(urineID = ifelse(is.numeric(d_928693120), is.numeric(d_928693120), is.numeric(d_928693120_integer)))
 
-bioqc2 <- bioqc %>%  filter(d_173836415_d_266600170_d_110349197!="[]" & !is.na(d_928693120_integer) &
-
-                        Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 &
-                          Connect_ID!=6473532641 & Connect_ID!=4435276749 ) #HFH exclusions)
+bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7 &
+                               !is.na(d_928693120_integer) & d_173836415_d_266600170_d_110349197!="[]" & 
+                               Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 &
+                               Connect_ID!=6473532641 & Connect_ID!=4435276749 & Connect_ID!=4900116130 & Connect_ID!=5461650381 ) #HFH exclusions)
 
 #PolyUrineID <- bioqc2$d_173836415_d_266600170_d_110349197
 str2 <- bioqc2$d_173836415_d_266600170_d_110349197
@@ -948,7 +973,8 @@ knitr::kable(all_populate) %>% kable_styling(latex_options = "HOLD_position")
 ```{r HC_Rules1, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-hmw1 <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_379252329==976461859 & d_690210658!=d_194252513) %>% 
+hmw1 <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_379252329==976461859 & d_690210658!=d_194252513 & 
+                          Connect_ID!=4765411890) %>% #KPCO exclusion
   select(Site, Connect_ID, d_690210658) %>%  sort_by(Site)
 
 colnames(hmw1) <- c("Site", "Connect ID", "Supply Kit ID")
