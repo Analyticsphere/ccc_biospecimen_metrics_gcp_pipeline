@@ -197,7 +197,8 @@ box1$BioBPTL_DateRec_v1r0 <- box_wl_flat$d_926457119
 box1$BioShip_SignEmail_v1r0 <- box_wl_flat$d_948887825
 box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
 box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
-box1 <- box1 %>%  mutate(BioBPTL_ShipRec_v1r0= case_when(BioBPTL_ShipRec_v1r0==353358909 ~ "Yes",
+box1 <- box1 %>%  filter(as.Date(BioShip_ShipTime_v1r0) >= as.Date(currentDate - 31)) %>% #limiting to the last month 
+  mutate(BioBPTL_ShipRec_v1r0= case_when(BioBPTL_ShipRec_v1r0==353358909 ~ "Yes",
                                                          BioBPTL_ShipRec_v1r0==104430631  ~ "No"))
 box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_ModifiedTime_v1r0,	BioShip_ShipTime_v1r0,	BioPack_BoxStrtTime_v1r0,	BioBPTL_ShipComments_v1r0,	d_885486943,
                          BioBPTL_DateRec_v1r0,	BioShip_SignEmail_v1r0,	BioPack_TrackScan1_v1r0,	BioPack_Courier_v1r0,	BioShip_LocalID_v1r0,	BioShip_LogSite_v1r0,	BioPack_TempProbe_v1r0,
