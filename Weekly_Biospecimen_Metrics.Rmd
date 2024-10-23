@@ -161,10 +161,9 @@ recrvar_nd_label <- base::merge(recrvar_nd, y[,c("Primary.Source","conceptId.2",
 recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source =="Biospecimen" | grepl("biospecimen|blood|urine|mouthwash|collection|Blood|Urine|Mouthwash|MW|Ur|Ur Surv|MW Surv",recrvar_nd_label$Variable.Label)),] #49
 query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
-#tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
 
-
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" "))) #removed "date", as it is no longer in the participants table
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046' or d_831041022 = '353358909')  and d_831041022 = '104430631'\")",sep=" "))) 
+#removed "date", as it is no longer in the participants table
 
 
 recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
@@ -1264,7 +1263,7 @@ for(i in 1:length(bld.ls)){
 }
 table(biospe$d_650516960,biospe$bldcol)
 biospe <- biospe %>% mutate(bloodcomplete = ifelse((d_650516960==534621077 & bldcol == 5) | (d_650516960==664882224 & bldcol == 11), "Blood.Completion" ,#blood collection completion
-                                                   ifelse( (d_650516960==534621077 & (bldcol<5 & bldcol>0)) | (d_650516960==664882224 & (bldcol <  11 & bldcol < 0)),"Blood.Incompleted","NoBlood")),
+                                                   ifelse( (d_650516960==534621077 & (bldcol<5 & bldcol>0)) | (d_650516960==664882224 & (bldcol <  11 & bldcol > 0)),"Blood.Incompleted","NoBlood")),
                             Urine_col = ifelse(d_973670172_d_593843561==353358909, 1, ifelse(d_973670172_d_593843561==104430631,0,0)),
                             MW_col = ifelse(d_143615646_d_593843561==353358909,1,ifelse(d_143615646_d_593843561==104430631,0,0)),
                             biocol_Setting = case_when(d_650516960==534621077  ~"Research",
@@ -2419,7 +2418,7 @@ colnames(Table18_combined_totals) <- current_colnames
 test21r <- recrver1 %>%  filter(d_265193023==231311385 & !is.na(d_222161762) & !is.na(d_822499427)) 
 test21r <-  test21r %>% mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_822499427)),units="mins")))
 test21rb <-  test21r %>%  filter(d_222161762<as.Date("2023-07-05") & ctime>0)
-test21ra <-  test21r %>%  filter(d_222161762>as.Date("2023-07-05"))
+test21ra <-  test21r %>%  filter(d_222161762>=as.Date("2023-07-05"))
 
 
 Table21R_Before = test21rb %>% group_by(Site) %>% 
@@ -5616,14 +5615,14 @@ all_shipped_after
 summary_table_after2<- filtered_data %>%
   group_by(Site) %>%
   summarise(Shipped = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-08-28"),
-            Shipped_OneWeek = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-08-28" & 
-                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < (as.Date(currentDate) -7)),
+            Shipped_TwoWeeks = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-08-28" & 
+                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < (as.Date(currentDate) -14)),
             Received = sum(Kit_Status == "Received" & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-08-28"))
 
 
 total_shipped2 <- sum(summary_table_after2$Shipped)
 total_received2 <- sum(summary_table_after2$Received)
-total_ship_previous_week2 <- sum(summary_table_after2$Shipped_OneWeek)
+total_ship_previous_week2 <- sum(summary_table_after2$Shipped_TwoWeeks)
 total_received2_percentage <- paste(total_received2, "(", round(total_received2/total_ship_previous_week2*100, digits = 1), "%)")
 total_row2 <- c("Total", total_shipped2, total_ship_previous_week2, total_received2)
 
@@ -5638,7 +5637,7 @@ all_shipped_after2 <- rbind(summary_table_after2, total_df2)
 
 # Calculate percentages
 for(i in 1:nrow(all_shipped_after2)){
-  all_shipped_after2[i,"Received"] <- paste0(all_shipped_after2[i,"Received"], " (", round(as.numeric(all_shipped_after2[i,"Received"])/as.numeric(all_shipped_after2[i,"Shipped_OneWeek"])*100, digits = 1), "%)")
+  all_shipped_after2[i,"Received"] <- paste0(all_shipped_after2[i,"Received"], " (", round(as.numeric(all_shipped_after2[i,"Received"])/as.numeric(all_shipped_after2[i,"Shipped_TwoWeeks"])*100, digits = 1), "%)")
   
 }
 all_shipped_after2
@@ -5653,8 +5652,7 @@ all_shipped_after2
 ```{r Table7.3_7.6, include=FALSE, echo=FALSE, warning=FALSE}
 
 
-#Table 7.3
-#before
+####################
 all_completed <- left_join(table27_elg_distinct,kit_assembly, by=c("Connect_ID", "Site",  "Kit_Status", "d_173836415_d_266600170_d_319972665_d_661940160"))
 
 Coll_Card_Table <- all_completed %>% filter(d_173836415_d_266600170_d_319972665_d_221592017 ==375535639) %>% 
@@ -5676,7 +5674,7 @@ Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>%
 
 
 
-#Table 7.4
+############
 #d_265193023==231311385 --- had to remove, no one finished yet
 
 test30 <- table27_elg %>%  filter(!is.na(d_143615646_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) 
@@ -5711,7 +5709,8 @@ Table7.4after = test30after %>% group_by(Site) %>%
 
 
 
-#Table 7.5
+
+#################
 firstcoltime <- tube_col %>% select(Connect_ID, collection.tm)
 first_col_time <- left_join(table27_elg_distinct, firstcoltime, by=c("Connect_ID", "Site"))
 test31 <- first_col_time %>%  filter(!is.na(collection.tm) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) 
@@ -5732,9 +5731,9 @@ Table7.5 = test31b %>% group_by(Site) %>%
                    Max = max(ctime))
 
 
-#Table 32
 
 
+##################################
 
 conditions <- all_completed[,c("Connect_ID","d_173836415_d_266600170_d_319972665_d_221592017", "d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477",
                                "d_633640710_d_289239334","d_633640710_d_992420392","d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603")]
@@ -5997,7 +5996,7 @@ add_footnote(table7_2after, "Note: During this time the kit return method was Fe
 ```{r Shipped_After_August,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
 
 table7_2after2 <- knitr::kable(all_shipped_after2,format.args = list(big.mark = ","),
-                              caption='Table 7.5 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped after 8/28/2024)',
+                              caption='Table 7.5 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 2 Weeks Ago (kits shipped after 8/28/2024)',
                               row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 add_footnote(table7_2after2, "Query for addresses to print was updated on 8/28/2024 to pull most recent clinical collection date/time stamp first, with a 5 day lag from date of clinical blood/urine collection date. Kit return method remained as FedEx.", notation = "none")
 
