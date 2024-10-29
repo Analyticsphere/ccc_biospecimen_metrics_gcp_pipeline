@@ -62,8 +62,10 @@ D_371067537, D_430551721, D_821247024, D_914594314,  state_d_725929722, d_822499
 D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, 
 d_331584571_d_266600170_d_840048338, d_220186468, d_253883960, d_764863765, d_784810139
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where Connect_ID IS NOT NULL and (D_512820379='486306141' OR D_512820379='854703046') and 
-((d_220186468='231311385' and Date(d_784810139)>='2023-07-05') or (d_265193023='231311385' and Date(d_222161762)<'2023-07-05') or (d_253883960='231311385' and Date(d_764863765)<'2023-07-05'))"
+where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and 
+((d_220186468='231311385' and Date(d_784810139)>='2023-07-05') or 
+(d_265193023='231311385' and Date(d_222161762)<'2023-07-05') or 
+(d_253883960='231311385' and Date(d_764863765)<'2023-07-05')) and d_821247024='197316935'"
 
 
 
@@ -100,10 +102,6 @@ bu_pts <- bu_only %>%  filter((d_253883960=='231311385' & as.Date(d_764863765)<'
 
 cvd <- bind_rows(covid_pts, bum_pts, bu_pts)
 
-
-cat("Particiapnts with COVID Survey Completion: ", dim(cvd)[[1]])
-#dim(CVD)
-
 CVD_tib <- as_tibble(cvd)
 #dim(CVD_tib)
 
@@ -115,6 +113,14 @@ knitr::opts_chunk$set(comment = NA)
 
 
 
+
+```{r counts, warning=FALSE, echo=FALSE}
+
+cat("Particiapnts with COVID Survey Completion: ", dim(cvd)[[1]])
+
+
+
+```
 
 ```{r functions, include=FALSE}
 ##FUNCTIONS
