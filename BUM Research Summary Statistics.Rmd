@@ -48,8 +48,10 @@ biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_
 parts <- "SELECT Connect_ID, token, D_512820379, D_471593703, state_d_934298480, D_230663853,
 D_335767902, D_982402227, D_919254129, D_699625233, D_564964481, D_795827569, D_544150384,
 D_371067537, D_430551721, D_821247024, D_914594314,  state_d_725929722, d_822499427, d_222161762,
-D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, d_331584571_d_266600170_d_840048338 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where Connect_ID IS NOT NULL and (D_512820379='486306141' OR D_512820379='854703046') and d_331584571_d_266600170_d_840048338 is not null and d_331584571_d_266600170_d_343048998 is not null and d_265193023='231311385'"
+D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, d_331584571_d_266600170_d_840048338 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
+where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and d_821247024='197316935' and
+d_331584571_d_266600170_d_840048338 is not null and d_331584571_d_266600170_d_343048998 is not null and d_265193023='231311385'"
 specimenBUM <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null"
 
 
@@ -68,12 +70,14 @@ biospec_data$Connect_ID <- as.numeric(biospec_data$Connect_ID)
 specimenBUM_data$Connect_ID <- as.numeric(specimenBUM_data$Connect_ID) 
 
 
-bisp= left_join(biospec_data, parts_data, by="Connect_ID") %>%  left_join(specimenBUM_data, by="Connect_ID") 
+##Need to remove duplicates from the biospecimen table
+rows_to_keep <- specimenBUM_data %>%
+  group_by(Connect_ID) %>%
+  filter(d_556788178 == min(d_556788178, na.rm = TRUE)) %>%
+  ungroup()
+
+bisp= left_join(parts_data, biospec_data, by="Connect_ID") %>%  left_join(rows_to_keep, by="Connect_ID") 
 #dim(bisp)
-
-
-cat("Particiapnts with Blood, Urine, Mouthwash Survey Completed: ", dim(bisp)[[1]])
-#dim(BUM)
 
 BUM_tib <- as_tibble(bisp)
 #dim(BUM_tib)
@@ -83,6 +87,13 @@ knitr::opts_chunk$set(comment = NA)
 ```
 
 
+```{r counts, warning=FALSE, echo=FALSE}
+
+cat("Particiapnts with Blood, Urine, Mouthwash Survey Completed: ", dim(bisp)[[1]])
+
+
+
+```
 
 ```{r functions, include=FALSE}
 ##FUNCTIONS
