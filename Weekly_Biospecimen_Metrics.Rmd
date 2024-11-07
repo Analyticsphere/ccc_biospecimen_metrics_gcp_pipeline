@@ -48,7 +48,7 @@ library(stringr) ###to work on patterns, charaters
 library(tinytex) #for pdf
 #library(rmarkdown) ###for the output tables into other files: pdf, rtf, etc.
 library(janitor) #to get the summary sum
-library(finalfit) #https://cran.r-project.org/web/packages/finalfit/vignettes/export.html t
+library(finalfit) #https://cran.r-project.org/web/packages/finalfit/vignettes/export.htmlt
 library(expss) ###to add labels
 library(epiDisplay) ##recommended applied here crosstable, tab1
 library(summarytools) ##recommended
@@ -6309,7 +6309,7 @@ table7_9 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==10443
                                  #as.numeric(MW_completion) <-3 ~ "4+ Days before Collection",
                                  as.numeric(MW_completion) ==-3 ~ "3 Days before Collection",
                                  as.numeric(MW_completion) ==-2 ~ "2 Days before Collection",
-                                 as.numeric(MW_completion) ==-2 ~ "1 Day before Collection",
+                                 as.numeric(MW_completion) ==-1 ~ "1 Day before Collection",
                                  as.numeric(MW_completion)==0 ~ "Same Day as Collection",
                                  as.numeric(MW_completion)==1 ~ "1 Day after Collection",
                                  as.numeric(MW_completion)==2 ~ "2 Days after Collection",
