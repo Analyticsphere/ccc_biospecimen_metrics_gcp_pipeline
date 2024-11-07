@@ -1387,6 +1387,7 @@ for(i in 1:length(bld.ls)){
   no_dups$blddid <- no_dups$blddid+blddid  
   
 }
+
 table(no_dups$d_650516960,no_dups$bldcol)
 no_dups<- no_dups%>% mutate(bloodcomplete = ifelse((d_650516960==534621077 & bldcol == 5) | (d_650516960==664882224 & bldcol == 11), "Blood.Completion" ,#blood collection completion
                                                    ifelse( (d_650516960==534621077 & (bldcol<5 & bldcol>0)) | (d_650516960==664882224 & (bldcol <  11 & bldcol > 0)),"Blood.Incompleted","NoBlood")),
