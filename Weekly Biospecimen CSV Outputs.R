@@ -19,7 +19,7 @@ project <- "nih-nci-dceg-connect-prod-6d04"
 
 
 ##Select the Biospecimen Data
-bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null') #used in csv files
+bio_tb <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` WHERE d_410912345 IS NOT NULL OR d_820476880 LIKE 'CHA%'") #avoids gcp issue while keping home collections
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -324,7 +324,7 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
                "BioClin_DBUrineID_v1r0",
                "BioClin_DBUrineRRLBL_v1r0",
                "BioClin_DBUrineRRLDtBL_v1r0",
-               "BioCol_PhlebInitials_v1r0",
+               "BioCol_PhlebTMInitials_v1r0",
                "BioCol_ColNote1_v1r0",
                "BioCol_TubeColl_v1r0_Bio",
                "BioCol_TubeID_v1r0_Bio",
