@@ -462,6 +462,7 @@ settings_breakdown <- knitr::kable(table1_allsett,
 
 
 
+
 ## By research location
 biospe_locations<-table1 %>% filter(d_650516960== 534621077) %>% 
   mutate(
@@ -730,6 +731,7 @@ table2 <- table1 %>% filter(biocol.appoint=='Baseline Collection') %>%
 
 table1.5 <- create_tbl_cross(table2, 'Site', "BioFin_BaseBloodCol_v1r0", "row", 'Site', " ")
 
+
 biospe.bld <- knitr::kable(table1.5, 
                            col.names=c("Site", "Any Blood Collected","No Blood Collected", "Total Collections"),
                            caption='Table 1.6: Baseline Blood Collection Status Among Biospecimen Collections',
@@ -779,6 +781,7 @@ add_Site_location <- function(table1_4_locations, csv_file_path) {
       "d_173836415_d_266600170_d_185243482 == ", id, " | d_173836415_d_266600170_d_452847912 == ", id, " ~ \"", location, "\",\n"
     )
     
+
     case_when_string_region <- paste0(
       case_when_string_region,
       "d_173836415_d_266600170_d_185243482 == ", id, " | d_173836415_d_266600170_d_452847912 == ", id, " ~ \"", region, "\",\n"
@@ -877,12 +880,14 @@ SF_collections <- SF_collections[, c("Region", "Collection Location", "In the Pa
 
 
 SF_collections_tbl <- SF_collections %>%
+
   select(-Region) %>%  # Remove Region just before rendering
   kbl(caption = "Table 1.4: Baseline Clinical Biospecimen Collections in the Past 30 Days at Sanford Health by Clinic Location",
       booktabs = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE) %>%
   row_spec(0, bold = TRUE) %>%
   pack_rows(index = table(SF_collections$Region))  # Group by Region
+
 
 
 ```
@@ -896,6 +901,7 @@ top10 <- count_all %>%
   arrange(Region, desc(Count_Total))  %>%     
   ungroup() 
 
+
 colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "Total Percentage")
 
 SF_top10_collections <- top10 %>%
@@ -908,6 +914,8 @@ SF_top10_collections <- top10 %>%
   pack_rows(index = table(top10$Region))  # Group by Region for display
 
 
+colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "Total Percentage")
+
 ## Used in footnote
 SF_footnote <- count_all %>%  group_by(Region) %>%  tally(Count_Total)
 
@@ -915,6 +923,7 @@ Bi_count <- SF_footnote$n[SF_footnote$Region=="Bismarck"]
 F_count <- SF_footnote$n[SF_footnote$Region=="Fargo"]
 S_count <- SF_footnote$n[SF_footnote$Region=="Sioux Falls"]
 Be_count <- SF_footnote$n[SF_footnote$Region=="Bemidji"]
+
 
 
 
@@ -1179,7 +1188,6 @@ colnames(spec_by_site_R)[ncol(spec_by_site_R)] <- "Total Research Collections"
 
 
 
-
 table4_redone__C <- table2 %>%  filter(d_650516960==664882224) %>% 
   mutate('Specimens Collected'= case_when((BioFin_BaseBloodCol_v1r0=="Any blood collected" & BioFin_BaseUrineCol_v1r0=="Any urine collected") ~ 'Blood & Urine (All)',
                                           (BioFin_BaseBloodCol_v1r0=="Any blood collected" & BioFin_BaseUrineCol_v1r0!="Any urine collected") ~ 'Blood Only',
@@ -1189,8 +1197,10 @@ table4_redone__C <- table2 %>%  filter(d_650516960==664882224) %>%
 table4_redone__C$`Specimens Collected` <- factor(table4_redone__C$`Specimens Collected`, levels = c('Blood & Urine (All)', 'Blood Only', 'Urine Only', 'No Specimens Collected'))
 
 
+
 table4_redone__C$Site <- droplevels(table4_redone__C$Site)
 table4_redone__C$'Specimens Collected' <- droplevels(table4_redone__C$'Specimens Collected')
+
 
 spec_by_site_C <- create_tbl_cross(table4_redone__C, 'Specimens Collected', "Site", "column", " ", " ")
 colnames(spec_by_site_C)[ncol(spec_by_site_C)] <- "Total Clinical Collections"
@@ -1946,6 +1956,7 @@ research.coltube.bld.only<- research.coltube.bld.only %>%  mutate(tube_type=drop
 research__blood <- research__blood %>% filter(!is.na(tube_type))
 
 
+
 bloodtubetype_R <- create_tbl_cross(research__blood, "Site", "tube_type", "column", "Site", " ")
 colnames(bloodtubetype_R)[ncol(bloodtubetype_R)] <- "Total Blood Tubes Collections"
 colnames(bloodtubetype_R)[1] <- "Site"
@@ -1975,6 +1986,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
 clinic.coltube<- clinic.coltube %>% filter(biocol_Setting == "Clinical" & tubecol == 353358909 & tube_types!="Urine 1") %>% # & tube_type!="MW Tube1") %>% #added, need to test 
   mutate(Site=droplevels(Site),
          tube_type = factor(tube_types,levels=c("SS T1", "SS T2","SS T3", "SS T4", "SS T5", "Heparin 1","Heparin 2","EDTA 1","EDTA 2","EDTA 3","ACD 1","STRECK 1")))
+
 
 
 bloodtubetype_C <- create_tbl_cross(clinic.coltube, "Site", "tube_types", "column", "Site", " ")
@@ -2042,6 +2054,24 @@ colnames(reason_notcol)[1] <- "Site"
 
 
 
+# research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type) %>%
+#   tbl_cross(  col = notcol.notes,
+#               row = tube_type,
+#               percent = "row",
+#               digits= c(0,1),
+#               label= c(notcol.notes~ " ", tube_type~"Tube Type"),
+#               missing="ifany",
+#               missing_text="0 ( 0 %)")
+# 
+# 
+# 
+# research.notcolnotes_tube_totals <- as.data.frame(research.notcolnotes_tube)
+# research.notcolnotes_tube_totals <- research.notcolnotes_tube_totals[-1, ]
+# 
+# current_colnames <- colnames(research.notcolnotes_tube_totals)
+# current_colnames[length(current_colnames)] <- "Total Tubes Not Collected"
+# current_colnames[1] <- "Tube Type"
+# colnames(research.notcolnotes_tube_totals) <- current_colnames
 
 
 tube_type_notcolreasons <- create_tbl_cross(research.notcol, "tube_type", "notcol.notes", "column", "Tube Type", " ")
@@ -2171,6 +2201,7 @@ test17 <- research.survey %>%  filter(Site=="HealthPartners" |  Site=="Henry For
 test17$Site<- droplevels(test17$Site)
 
 
+
 BUM_status <- create_tbl_cross(test17, "research.sv", "Site", "column", " ", " ")
 colnames(BUM_status)[ncol(BUM_status)] <- "Total Research Surveys"
 
@@ -2268,12 +2299,30 @@ test17_a$checktmvisit<- droplevels(test17_a$checktmvisit)
 
 
 
+
 precovid_BUMtime <- create_tbl_cross(test17_b, "checktmvisit", "Site", "column", " ", " ")
 colnames(precovid_BUMtime)[ncol(precovid_BUMtime)] <- "Total Research Surveys"
 
 
 
 
+
+# Table17_combinedA <- test17_a %>% dplyr::select(Site, checktmvisit )  %>% tbl_cross(
+#   row = checktmvisit,
+#   col = Site,
+#   digits=c(0,2),
+#   percent = "column",
+#   label=list(Site ~ " ", checktmvisit ~ " "),
+#   missing="ifany")
+# 
+# 
+# Table17_combinedA_totals <- as.data.frame(Table17_combinedA)
+# Table17_combinedA_totals <- Table17_combinedA_totals[-1, ]
+# 
+# 
+# current_colnames <- colnames(Table17_combinedA_totals)
+# current_colnames[length(current_colnames)] <- " Total Research Surveys"
+# colnames(Table17_combinedA_totals) <- current_colnames
 
 postcovid_BUMtime <- create_tbl_cross(test17_a, "checktmvisit", "Site", "column", " ", " ")
 colnames(postcovid_BUMtime)[ncol(postcovid_BUMtime)] <- "Total Research Surveys"
@@ -2300,6 +2349,7 @@ time.clcsv_checkin <-time.clcsv_checkin %>%
 test18a_B <- test18 %>%  filter(checktmvisit=="> 72hrs" | checktmvisit=="> 48 hrs to 72 hrs" | checktmvisit=="> 24 hrs to 48 hrs" | 
                                   checktmvisit=="> 12 hrs to 24 hrs" |checktmvisit=="> 3 hrs to 12 hrs" |checktmvisit=="0 hrs to 3 hrs" | checktmvisit=="Missing Time")
 test18a_B$checktmvisit<- droplevels(test18a_B$checktmvisit)
+
 
 
 
@@ -3456,12 +3506,14 @@ col_num_1.2_gt
 ```{r KnitrTables1.4, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 add_footnote(SF_collections_tbl, 
+
              paste0("This table reflects Clincal Collections in the past 30 days; the total number of Clinical Collections at Sanford Health is ",
                     sum(count_all$Count_Total)),
              notation = "none")
 
 add_footnote(SF_top10_collections, paste0("This table reflects Clincal Collections at the top collection locations in each region. The total number of Clinical Collections in each region are as follows: Bemidji: ", Be_count,
 "; Bismarck: ", Bi_count, "; Fargo: ", F_count, "; Sioux Falls: ", S_count, "."), notation = "none")
+
 
 ```
 \FloatBarrier
