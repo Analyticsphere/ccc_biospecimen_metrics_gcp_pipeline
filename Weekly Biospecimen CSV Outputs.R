@@ -19,7 +19,7 @@ project <- "nih-nci-dceg-connect-prod-6d04"
 
 
 ##Select the Biospecimen Data
-bio_tb <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` WHERE d_410912345 IS NOT NULL OR d_820476880 LIKE 'CHA%'") #avoids gcp issue while keping home collections
+bio_tb <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`") 
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -246,7 +246,6 @@ y$conceptId.3 <- as.character(y$conceptId.3)
 y$conceptId.4 <- as.numeric(y$conceptId.4)
 
 biospe_CID_dd <- base::merge(biospe_CID, y[,c("Formula.for.Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
-
 
 biospe_CID_dd <- biospe_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
                                                                  !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
