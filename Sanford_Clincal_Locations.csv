@@ -1,23 +1,22 @@
 ID,Region,Site_location
+8000108100,Sioux Falls,Aberdeen SD Lab 
+8000108102,Sioux Falls,Aberdeen SD PSC Lab
+8000208100,Sioux Falls,Adrian MN Lab 
+3413508100,Sioux Falls,Albert Lea MN United Lab 
+1039808100,Fargo,Alexandria MN Lab 
+5008608100,Sioux Falls,Armour SD Lab 
+1812708100,Fargo,Ashby MN Lake Region Lab 
 1067408100,Bemidji,Bagley MN Clinic Lab 
 1002808100,Bemidji,Bagley MN Lab
+1812908100,Fargo,Barnesville MN Lake Region Lab 
+1812808100,Fargo,Battlelake MN Lake Region Lab 
 1057808101,Bemidji,Bemidji MN 1611 Anne Street Lab 
 8004008103,Bemidji,Bemidji MN Cancer Center Lab 
 1057808100,Bemidji,Bemidji MN Clinic Lab 
 1056608101,Bemidji,Bemidji MN Dermatology Clinic Lab 
 1002508100,Bemidji,Bemidji MN Medical Center Lab 
 1057808103,Bemidji,Bemidji MN Occ Med Lab
-1058508100,Bemidji,Blackduck MN Lab 
-1058608100,Bemidji,Cass Lake MN Lab 
-1067508100,Bemidji,Clearbrook MN Lab 
-4200108102,Bemidji,Int'l Falls MN Annex Lab 
-4200108100,Bemidji,Int'l Falls MN Main Lab
-1038608100,Bemidji,Kelliher MN Lab 
-4210308100,Bemidji,Littlefork MN Lab 
-1553408100,Bemidji,Mahnomen MN Clinic Lab
-3900108100,Bemidji,Mahnomen MN Medical Center Lab
-3600108102,Bemidji,Red Lake Falls MN Lab 
-1058708100,Bemidji,Walker MN Lab
+8000308100,Sioux Falls,Beresford SD Lab 
 1040402002,Bismarck,Bismarck ND Allergy Lab
 1040702100,Bismarck,Bismarck ND Cardiology Lab 
 1041107800,Bismarck,Bismarck ND CTVS Lab 
@@ -31,6 +30,7 @@ ID,Region,Site_location
 1075608100,Bismarck,Bismarck ND HLA Lab 
 1049502800,Bismarck,Bismarck ND Infectious Disease Lab 
 1041908105,Bismarck,Bismarck ND Int Med Lab 
+8004608100,Bismarck,Bismarck ND Main Hospital Lab
 1042008100,Bismarck,Bismarck ND Medical Center Lab
 1049308100,Bismarck,Bismarck ND Nephology Lab 
 1042403000,Bismarck,Bismarck ND Neurosurgery Lab 
@@ -48,43 +48,46 @@ ID,Region,Site_location
 1045208100,Bismarck,Bismarck ND Walk-in Clinic Lab 
 1045308100,Bismarck,Bismarck ND Women's Health Lab 
 1045308101,Bismarck,Bismarck ND Womens MFM Lab 
+1058508100,Bemidji,Blackduck MN Lab 
+3412208100,Sioux Falls,Blue Earth MN United Lab
 4310308100,Bismarck,Bowman ND Lab
+8000408100,Sioux Falls,Brandon SD Lab 
+8000508100,Sioux Falls,Brookings SD Clinic Lab
+8000508101,Sioux Falls,Brookings SD Hospital Lab 
+8000508102,Sioux Falls,Brookings SD SDSU Lab 
+4410208100,Sioux Falls,Browns Valley MN Lab
+2201008100,Sioux Falls,Burke SD Lab
+1007108100,Sioux Falls,Canby MN Lab
+1003308100,Sioux Falls,Canton Inwood SD Lab
+1058608100,Bemidji,Cass Lake MN Lab 
+1001108100,Sioux Falls,Chamberlain SD Lab
+8003708100,Sioux Falls,Clark SD Lab 
+1005208100,Sioux Falls,Clear Lake SD Lab 
+1067508100,Bemidji,Clearbrook MN Lab 
+5000208100,Sioux Falls,Corsica SD Lab
+3600108100,Fargo,Crookston MN Lab
+8002708117,Sioux Falls,Dakota Dunes SD Lab 
+1560208100,Fargo,Detroit Lakes MN Lab 
+1570008100,Fargo,Devils Lake ND Lab 
 1093708100,Bismarck,Dickinson ND East Lab 
 1042008104,Bismarck,Dickinson ND Occ Health Lab
 1045708100,Bismarck,Dickinson ND West Lab 
-4800108100,Bismarck,Elgin ND Lab 
-4610001800,Bismarck,Grand Forks ND U of ND Lab
-4300108100,Bismarck,Hettinger ND Lab
-1046008100,Bismarck,Mandan ND East Lab 
-1046308100,Bismarck,Mandan ND North Lab 
-1029508100,Bismarck,Minot ND Northwest Lab 
-1042008103,Bismarck,Minot ND Occ Health Lab 
-1046608100,Bismarck,Minot ND Southeast Lab 
-4810308100,Bismarck,Richardton ND Lab 
-1028708100,Bismarck,Watford City ND Family Med Lab 
-2800108100,Bismarck,Watford City ND Mckenzie County Lab
-2810608100,Bismarck,Williston ND McKenzie County Lab
-2810601000,Bismarck,Williston ND Urgent Care Lab
-1039808100,Fargo,Alexandria MN Lab 
-1812708100,Fargo,Ashby MN Lake Region Lab 
-1812908100,Fargo,Barnesville MN Lake Region Lab 
-1812808100,Fargo,Battlelake MN Lake Region Lab 
-3600108100,Fargo,Crookston MN Lab
-1560208100,Fargo,Detroit Lakes MN Lab 
-1570008100,Fargo,Devils Lake ND Lab 
 1550008100,Fargo,East Grand Forks MN Central Lab 
 1550008101,Fargo,East Grand Forks MN Demers Lab 
 3600108101,Fargo,East Grand Forks MN Riverview Health Lab
 1554308100,Fargo,Edgley ND Lab
+4800108100,Bismarck,Elgin ND Lab 
 1554108100,Fargo,Ellendale ND Lab 
 1554508100,Fargo,Enderlin ND Lab 
 1814608100,Fargo,Evansville MN Lab 
+3411008100,Sioux Falls,Fairmont MN United Lab
 1543808103,Fargo,Fargo ND Amber Valley Lab 
 1555808133,Fargo,Fargo ND Broadway Desk 22 Lab
 1555108100,Fargo,Fargo ND Broadway Hospital Lab
 1500108131,Fargo,Fargo ND Broadway Respiratory Lab 
 1543008101,Fargo,Fargo ND Broadway Specialty Care Lab
 1555808164,Fargo,Fargo ND Broadway Urgent Care Lab 
+1555108106,Fargo,Fargo ND Children's Southwest Lab 
 4510008100,Fargo,Fargo ND Family Healthcare Downtown Lab
 4510208100,Fargo,Fargo ND Family Healthcare South Lab 
 1555808132,Fargo,Fargo ND Heart Center Lab
@@ -112,27 +115,51 @@ ID,Region,Site_location
 1555808162,Fargo,Grand Forks ND Cancer Center Lab 
 1568508100,Fargo,Grand Forks ND Hospital Lab 
 1538305600,Fargo,Grand Forks ND Sports Med Lab 
+4610001800,Bismarck,Grand Forks ND U of ND Lab
 1551208100,Fargo,Gwinner ND Lab 
 3700108100,Fargo,Hallock MN Kittson Health Lab
+8001108101,Sioux Falls,Harrisburg SD Lab 
+8001208100,Sioux Falls,Hartford SD Lab 
 1550308100,Fargo,Hawley MN Lab
 1814808100,Fargo,Herman MN Lab 
+4300108100,Bismarck,Hettinger ND Lab
 1554608100,Fargo,Hillsboro ND Family Healthcare Lab
 3505008100,Fargo,Hillsboro ND Lab 
 1814708100,Fargo,Hoffman MN Lab 
 1555108201,Fargo,Horace ND Lab 
+3000408100,Sioux Falls,Hospers IA Lab 
+4200108102,Bemidji,Int'l Falls MN Annex Lab 
+4200108100,Bemidji,Int'l Falls MN Main Lab
+1036708100,Sioux Falls,Ipswich SD Lab 
+1002308100,Sioux Falls,Jackson MN Lab 
 1551408100,Fargo,Jamestown ND 2nd Ave Lab 
 1551108100,Fargo,Jamestown ND 5th Ave Lab 
 2502008100,Fargo,Jamestown ND Medical Center Lab
 3700108101,Fargo,Karlstad MN Kittson Health Lab
+1038608100,Bemidji,Kelliher MN Lab 
+1002308102,Sioux Falls,Lakefield MN Jackson Lab 
 1552708100,Fargo,LaMoure ND Lab 
 1552908100,Fargo,Lidgerwood ND Lab 
 1553008100,Fargo,Lisbon ND Lab 
+4210308100,Bemidji,Littlefork MN Lab 
+8001408100,Sioux Falls,Luverne MN Lab
+1553408100,Bemidji,Mahnomen MN Clinic Lab
+3900108100,Bemidji,Mahnomen MN Medical Center Lab
+1046008100,Bismarck,Mandan ND East Lab 
+1046308100,Bismarck,Mandan ND North Lab 
+1003108102,Sioux Falls,Marshall MN Avera Lab 
 1501008100,Fargo,Mayville ND Lab 
+3000208100,Sioux Falls,Mill Creek IA Lab
+1029508100,Bismarck,Minot ND Northwest Lab 
+1042008103,Bismarck,Minot ND Occ Health Lab 
+1046608100,Bismarck,Minot ND Southeast Lab 
+8001508100,Sioux Falls,Mitchell SD Lab 
 1537101000,Fargo,Moorhead MN Fam Med Lab 
 1537201300,Fargo,Moorhead MN Int Med Lab 
 1555108105,Fargo,Moorhead MN Lab 
 1537905400,Fargo,Moorhead MN OB/GYN Lab 
 1813808100,Fargo,Morris MN Lab
+8001608100,Sioux Falls,Mountain Lake MN Lab 
 1553108100,Fargo,Oakes ND Lab 
 3107208100,Fargo,Ortonville MN Lab
 3810108100,Fargo,Ottertail MN Lab 
@@ -141,90 +168,73 @@ ID,Region,Site_location
 1553708100,Fargo,Pelican Rapids MN Lab 
 3811208100,Fargo,Perham MN Clinic Lab 
 3800208100,Fargo,Perham MN Medical Center Lab 
-1002708100,Fargo,Thief River Falls MN Lab 
-1554008100,Fargo,Twin Valley MN Lab 
-1553808100,Fargo,Ulen MN Lab 
-1553208100,Fargo,Valley City ND Lab 
-1553308100,Fargo,Wahpeton ND Lab
-1555108104,Fargo,West Fargo ND Clinic Lab 
-1535801000,Fargo,West Fargo ND Fam Med Lab 
-1535905400,Fargo,West Fargo ND OB/GYN Lab 
-1566101200,Fargo,West Fargo ND Pediatrics Lab
-1533508100,Fargo,Wheaton MN Clinic Lab 
-1506008100,Fargo,Wheaton MN Medical Center Lab
-8000108100,Sioux Falls,Aberdeen SD Lab 
-8000208100,Sioux Falls,Adrian MN Lab 
-3413508100,Sioux Falls,Albert Lea MN United Lab 
-5008608100,Sioux Falls,Armour SD Lab 
-8000308100,Sioux Falls,Beresford SD Lab 
-3412208100,Sioux Falls,Blue Earth MN United Lab
-8000408100,Sioux Falls,Brandon SD Lab 
-8000508100,Sioux Falls,Brookings SD Clinic Lab
-8000508101,Sioux Falls,Brookings SD Hospital Lab 
-8000508102,Sioux Falls,Brookings SD SDSU Lab 
-4410208100,Sioux Falls,Browns Valley MN Lab
-2201008100,Sioux Falls,Burke SD Lab
-1007108100,Sioux Falls,Canby MN Lab
-1003308100,Sioux Falls,Canton Inwood SD Lab
-8003708100,Sioux Falls,Clark SD Lab 
-1005208100,Sioux Falls,Clear Lake SD Lab 
-5000208100,Sioux Falls,Corsica SD Lab
-8002708117,Sioux Falls,Dakota Dunes SD Lab 
-3411008100,Sioux Falls,Fairmont MN United Lab
-8001108101,Sioux Falls,Harrisburg SD Lab 
-8001208100,Sioux Falls,Hartford SD Lab 
-3000408100,Sioux Falls,Hospers IA Lab 
-1036708100,Sioux Falls,Ipswich SD Lab 
-1002308100,Sioux Falls,Jackson MN Lab 
-1002308102,Sioux Falls,Lakefield MN Jackson Lab 
-8001408100,Sioux Falls,Luverne MN Lab
-1003108102,Sioux Falls,Marshall MN Avera Lab 
-3000208100,Sioux Falls,Mill Creek IA Lab
-8001508100,Sioux Falls,Mitchell SD Lab 
-8001608100,Sioux Falls,Mountain Lake MN Lab 
 8002108100,Sioux Falls,Pierre SD Lab 
 8003408100,Sioux Falls,Pipestone MN Hospital Lab 
 1148208100,Sioux Falls,Ponca NE Lab
 8002208100,Sioux Falls,Rapid City SD Lab 
+3600108102,Bemidji,Red Lake Falls MN Lab 
+4810308100,Bismarck,Richardton ND Lab 
 4410308100,Sioux Falls,Rosholt SD Lab 
 1002108100,Sioux Falls,Sheldon IA Lab
 3005108105,Sioux Falls,Sioux Center IA Lab 
+1050208100,Sioux Falls,Sioux Falls Children's Specialty Clinic Lab
 1122111301,Sioux Falls,Sioux Falls SD 10th & Phillips Lab 
 8000708100,Sioux Falls,Sioux Falls SD 26th & Sycamore Lab
-8000808100,Sioux Falls,Sioux Falls SD 32nd & Ellis Lab
+8000808100,Sioux Falls,Sioux Falls SD 32nd & Ellis Lab Old
+8000808101,Sioux Falls,Sioux Falls SD 32nd & Ellis Lab
 8001008100,Sioux Falls,Sioux Falls SD 34th & Kiwanis Lab
 8001908100,Sioux Falls,Sioux Falls SD 49th & Oxbow Lab
 8002308100,Sioux Falls,Sioux Falls SD 4th & Sycamore Lab
-8004408100,Sioux Falls,Sioux Falls SD 69th & Louise Lab
-8000908100,Sioux Falls,Sioux Falls SD 69th & Minnesota Lab
+8004408100,Sioux Falls,Sioux Falls SD 69th & Louise Lab A
+1048501000,Sioux Falls,Sioux Falls SD 69th & Louise Lab B
+8000908100,Sioux Falls,Sioux Falls SD 69th & Minnesota Lab A
+1029208100,Sioux Falls,Sioux Falls SD 69th & Minnesota Lab B
 1050408100,Sioux Falls,Sioux Falls SD Dermatology Clinic Lab
 8006106600,Sioux Falls,Sioux Falls SD Imagenetics Lab 
 8007308100,Sioux Falls,Sioux Falls SD Madison Veterans Parkway Lab 
+8002008100,Sioux Falls,Sioux Falls SD MB2 Childrens Lab
 8002708100,Sioux Falls,Sioux Falls SD MB2 Lab
+1099808102,Sioux Falls,Sioux Falls SD Medical Building 2
 1000108100,Sioux Falls,Sioux Falls SD Medical Center Lab
 8002708119,Sioux Falls,Sioux Falls SD Occ Med Lab
+8002708103,Sioux falls ,Sioux Falls SD PSC Central Lab
 8006808100,Sioux Falls,Sioux Falls SD Reference Lab 
 1099908101,Sioux Falls,Sioux Falls SD Sanford Center Research Lab
 8002708102,Sioux Falls,Sioux Falls SD Vandemark Lab
 8003508100,Sioux Falls,Sioux Falls SD Women's Health Plaza Lab
+8001808100,Sioux Falls,Sioux Falls SL Oncology Lab
+8006608100,Sioux Falls ,Sioux Falls Sports Complex Lab
 4400108100,Sioux Falls,Sisseton SD Lab
 4700108100,Sioux Falls,Slayton MN Lab
+1002708100,Fargo,Thief River Falls MN Lab 
 1003108100,Sioux Falls,Tracy MN Lab
+1554008100,Fargo,Twin Valley MN Lab 
+1553808100,Fargo,Ulen MN Lab 
+1553208100,Fargo,Valley City ND Lab 
 1002208100,Sioux Falls,Vermillion SD Lab
 6008208100,Sioux Falls,Viborg SD Lab
+1553308100,Fargo,Wahpeton ND Lab
+1058708100,Bemidji,Walker MN Lab
 8003808100,Sioux Falls,Watertown SD Lab
 8003808101,Sioux Falls,Watertown SD Prairie Lakes Clinic Lab 
+1028708100,Bismarck,Watford City ND Family Med Lab 
+2800108100,Bismarck,Watford City ND Mckenzie County Lab
 1005308100,Sioux Falls,Webster SD Lab
 3411508100,Sioux Falls,Wells MN United Lab
+1555108104,Fargo,West Fargo ND Clinic Lab 
+1535801000,Fargo,West Fargo ND Fam Med Lab 
+1535905400,Fargo,West Fargo ND OB/GYN Lab 
+1566101200,Fargo,West Fargo ND Pediatrics Lab
 1001308100,Sioux Falls,Westbrook MN Lab
+1533508100,Fargo,Wheaton MN Clinic Lab 
+1506008100,Fargo,Wheaton MN Medical Center Lab
+2810608100,Bismarck,Williston ND McKenzie County Lab
+2810601000,Bismarck,Williston ND Urgent Care Lab
 8002408100,Sioux Falls,Windom MN Clinic Lab
 2300108100,Sioux Falls,Windom MN Medical Center Lab
 3411708100,Sioux Falls,Winnebago MN United Lab 
 2109208100,Sioux Falls,Winner SD Lab
+1031208101,Sioux Falls,Worthington MN Clinic Lab
 8002508101,Sioux Falls,Worthington MN Clinic Lab 
 1006108100,Sioux Falls,Worthington MN Hospital Lab
 8002508100,Sioux Falls,Worthington MN Medical Center Lab 
-1555108106,Fargo,Fargo ND Children's Southwest lab 
-8002008100,Sioux Falls,Sioux Falls SD MB2 Childrens Lab
-1050208100,Sioux Falls,Sioux Falls Children's Specialty Clinic Lab
-8006608100,Sioux Falls ,Sioux Falls Sports Complex Lab
