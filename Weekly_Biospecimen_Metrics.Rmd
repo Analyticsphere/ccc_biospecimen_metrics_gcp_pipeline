@@ -416,6 +416,7 @@ no_dups$Site <- factor(no_dups$d_827220437, levels= c("Baylor Scott and White He
                                                       "Kaiser Permanente Hawaii","Kaiser Permanente Northwest")) 
 
 
+
 no_dups <- no_dups %>% 
   mutate(
     Site_location = case_when(
@@ -786,6 +787,7 @@ col_num_1.2_gt <- col_num_1.2_gt %>%  summary_rows(
 
 table1.5 <- create_tbl_cross(coll_sett_all, 'Site', "BioFin_BaseBloodCol_v1r0", "row", 'Site', " ")
 
+
 biospe.bld <- knitr::kable(table1.5, 
                            col.names=c("Site", "Any Blood Collected","No Blood Collected", "Total Collections"),
                            caption='Table 1.7: Baseline Blood Collection Status Among Biospecimen Collections',
@@ -831,6 +833,7 @@ add_Site_location <- function(table1_4_locations, csv_file_path) {
       "d_173836415_d_266600170_d_185243482 == ", id, " | d_173836415_d_266600170_d_452847912 == ", id, " ~ \"", location, "\",\n"
     )
     
+
     case_when_string_region <- paste0(
       case_when_string_region,
       "d_173836415_d_266600170_d_185243482 == ", id, " | d_173836415_d_266600170_d_452847912 == ", id, " ~ \"", region, "\",\n"
@@ -962,6 +965,7 @@ SF_collections$Region <- factor(SF_collections$Region, levels=c("Bemidji","Bisma
 
 
 SF_collections_tbl <- SF_collections %>%
+
   select(-Region) %>%  # Remove Region just before rendering
   kbl(caption = "Table 1.5: Baseline Clinical Biospecimen Collections in the Past 30 Days at Sanford Health by Clinic Location",
       booktabs = TRUE) %>%
@@ -982,6 +986,7 @@ top10 <- count_all %>%
   arrange(Region, desc(Count_Total))  %>%     
   ungroup() 
 
+
 colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "Total Percentage")
 
 SF_top10_collections <- top10 %>%
@@ -992,6 +997,8 @@ SF_top10_collections <- top10 %>%
   row_spec(0, bold = TRUE) %>%
   pack_rows(index = table(top10$Region))  # Group by Region for display
 
+
+colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "Total Percentage")
 
 ## Used in footnote
 SF_footnote <- count_all %>%  group_by(Region) %>%  tally(Count_Total) 
@@ -1005,6 +1012,7 @@ UK_count <- SF_footnote$n[SF_footnote$Region=="Unknown"]
 footnote_text <- paste0("This table reflects Clinical Collections at the top collection locations in each region. ",
                         "The total number of Clinical Collections in each region are as follows: Bemidji: ", Be_count,
                         "; Bismarck: ", Bi_count, "; Fargo: ", F_count, "; Sioux Falls: ", S_count, "; Missing Location IDs: ", UK_count, ".")
+
 
 
 
@@ -1185,8 +1193,10 @@ table4_redone__C <- coll_sett_all %>%  filter(all_settings=="Clinical") %>%
 table4_redone__C$`Specimens Collected` <- factor(table4_redone__C$`Specimens Collected`, levels = c('Blood & Urine (All)', 'Blood Only', 'Urine Only', 'No Specimens Collected'))
 
 
+
 table4_redone__C$Site <- droplevels(table4_redone__C$Site)
 table4_redone__C$'Specimens Collected' <- droplevels(table4_redone__C$'Specimens Collected')
+
 
 spec_by_site_C <- create_tbl_cross(table4_redone__C, 'Specimens Collected', "Site", "column", " ", " ")
 colnames(spec_by_site_C)[ncol(spec_by_site_C)] <- "Total Clinical Collections"
@@ -1696,6 +1706,7 @@ research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tub
 research__blood <- research__blood %>% filter(!is.na(tube_type))
 
 
+
 bloodtubetype_R <- create_tbl_cross(research__blood, "Site", "tube_type", "column", "Site", " ")
 colnames(bloodtubetype_R)[ncol(bloodtubetype_R)] <- "Total Blood Tubes Collections"
 colnames(bloodtubetype_R)[1] <- "Site"
@@ -1725,6 +1736,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
 clinic.coltube<- clinic.coltube %>% filter(biocol_Setting == "Clinical" & tubecol == 353358909 & tube_types!="Urine 1") %>% # & tube_type!="MW Tube1") %>% #added, need to test 
   mutate(Site=droplevels(Site),
          tube_type = factor(tube_types,levels=c("SS T1", "SS T2","SS T3", "SS T4", "SS T5", "Heparin 1","Heparin 2","EDTA 1","EDTA 2","EDTA 3","ACD 1","STRECK 1")))
+
 
 
 bloodtubetype_C <- create_tbl_cross(clinic.coltube, "Site", "tube_types", "column", "Site", " ")
@@ -1794,6 +1806,24 @@ colnames(reason_notcol)[1] <- "Site"
 
 
 
+# research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type) %>%
+#   tbl_cross(  col = notcol.notes,
+#               row = tube_type,
+#               percent = "row",
+#               digits= c(0,1),
+#               label= c(notcol.notes~ " ", tube_type~"Tube Type"),
+#               missing="ifany",
+#               missing_text="0 ( 0 %)")
+# 
+# 
+# 
+# research.notcolnotes_tube_totals <- as.data.frame(research.notcolnotes_tube)
+# research.notcolnotes_tube_totals <- research.notcolnotes_tube_totals[-1, ]
+# 
+# current_colnames <- colnames(research.notcolnotes_tube_totals)
+# current_colnames[length(current_colnames)] <- "Total Tubes Not Collected"
+# current_colnames[1] <- "Tube Type"
+# colnames(research.notcolnotes_tube_totals) <- current_colnames
 
 
 tube_type_notcolreasons <- create_tbl_cross(research.notcol, "tube_type", "notcol.notes", "column", "Tube Type", " ")
@@ -1927,6 +1957,7 @@ Table21R_After = postcovR_comp %>% group_by(Site) %>%
 
 
 
+
 ```
 
 
@@ -1968,8 +1999,10 @@ clinical.survey$checktmvisit <- droplevels(clinical.survey$checktmvisit)
 BU_status <- create_tbl_cross(clinical.survey, "clin.sv", "Site", "column", " ", " ")
 colnames(BU_status)[ncol(BU_status)] = "Total Clinical Surveys"
 
+
 clin_comp <- clinical.survey %>%  filter(clin.sv == "Submitted")
 coll_comp_BU <- create_tbl_cross(clin_comp, "checktmvisit", "Site", "column", " ", " ")
+
 colnames(coll_comp_BU)[ncol(coll_comp_BU)] <- "Total Submitted Clinical Surveys"
 
 
@@ -2998,12 +3031,14 @@ col_num_1.2_gt
 ```{r KnitrTables1.4, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 add_footnote(SF_collections_tbl, 
+
              paste0("This table reflects Clincal Collections in the past 30 days; the total number of Clinical Collections at Sanford Health is ",
                     dim(table1_4_locations)[[1]]),
              notation = "none")
 
 add_footnote(SF_top10_collections,footnote_text, notation= "none") 
 # paste0("This table reflects Clincal Collections at the top collection locations in each region. The total number of Clinical Collections in each region are as follows: Bemidji: ", Be_count,"; Bismarck: ", Bi_count, "; Fargo: ", F_count, "; Sioux Falls: ", S_count, "."), notation = "none")
+
 
 ```
 \FloatBarrier
