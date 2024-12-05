@@ -2532,12 +2532,6 @@ biospe_adhoc2= biospe_adhoc_2 %>%  filter((!is.na(d_232343615_d_926457119) | !is
                                       !is.na(Clin_Site_location) & !is.na(Site)) %>% 
   mutate(Site=droplevels(Site))
 
-
-
-# biospe_adhoc2$Clin_Site_location <- factor(biospe_adhoc2$Clin_Site_location,levels=c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-#                                  "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "Missing HFH Location ID","Elk River", "Chanhassen", "Missing HP location", "Kaiser Permanente Colorado","Kaiser Permanente Georgia","Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest","Sanford Health", "South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", "Missing UC location")) 
-
-
 coll_bptl_diff2 <- biospe_adhoc2  %>% group_by(as.character(Connect_ID),Site, Clin_Site_location) %>% 
   mutate(any_collection = min(d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119,
                               d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119,
@@ -2552,11 +2546,17 @@ coll_bptl_diff2 <- biospe_adhoc2  %>% group_by(as.character(Connect_ID),Site, Cl
 #don't know how this is happening but needs to be included for now
 coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
 
+
+# biospe_adhoc2$Clin_Site_location <- factor(biospe_adhoc2$Clin_Site_location,levels=c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
+#                                  "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "Missing HFH Location ID","Elk River", "Chanhassen", "Missing HP location", "Kaiser Permanente Colorado","Kaiser Permanente Georgia","Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest","Sanford Health", "South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", "Missing UC location")) 
+
+
 coll_bptl_diff2$Connect_ID <- as.numeric(coll_bptl_diff2$`as.character(Connect_ID)`)
 coll_bptl_diff2$coll_days_diff <- factor(coll_bptl_diff2$coll_days_diff,levels=c("1 Day","2 Days","3 Days","4 Days", ">4 Days"))
 
 
 ctabs_rsch_coll_days <- coll_bptl_diff2 %>%  tabyl(Site, coll_days_diff) %>%  add_totals_and_percentages(total_position = c("both"), percentage_type = "row")
+
 
 
 
@@ -2691,7 +2691,6 @@ Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
 ```
 
 
-
 ```{r Table31, include=FALSE, echo=FALSE, warning=FALSE}
 
 coll_bptl_diff2 <- coll_bptl_diff2 %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(clin_coll_bu)), units="hours"))
@@ -2734,6 +2733,7 @@ Hrs_bptl_clin <- Hrs_bptl_clin_summ  %>%
 
 
 ```
+
 
 
 ```{r SF_table5_6, include=FALSE, echo=FALSE, warning=FALSE}
@@ -2879,7 +2879,6 @@ research.survey<- research.survey %>% mutate(#weekday = weekdays(ymd_hms(collect
   #start.date = min(schedulecol.tm),
   current.date=max(as.POSIXct(ymd_hms(schedulecol.tm))),
   BioRec_CollectScheduled = ifelse(as.Date(ymd_hms(schedulecol.tm)) >= as.Date(as.POSIXct(ymd_hms(d_914594314))),1,0))
-
 
 
 ##HF
