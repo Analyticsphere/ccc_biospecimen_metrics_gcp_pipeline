@@ -2870,8 +2870,6 @@ clc_both_vt.site.NW
 
 
 
-
-
 ```{r Figures4, include=FALSE, echo=FALSE, warning=FALSE, eval=TRUE}
 
 research.survey<- research.survey %>% mutate(#weekday = weekdays(ymd_hms(collection.tm)),
