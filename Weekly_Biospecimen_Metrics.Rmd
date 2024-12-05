@@ -2495,7 +2495,7 @@ crosstable.coll_bptl28 <- ctable.coll_bptl28  %>%
                 locations = gt::cells_title(groups = "title")) %>%  
   gt::cols_width(everything() ~ gt::px(80),
                   `Collection Location` ~ gt::px(120)) %>%  # Narrow column widths if needed  
-  gt::tab_options(table.width = "80%", # Adjust the width as needed
+  gt::tab_options(table.width = "90%", # Adjust the width as needed
     table.border.right.width = px(0),
     #container.width = "80%",  # Ensure table container doesn't full page width
     table.align = "left", # Ensure the table aligns to the left
@@ -2595,7 +2595,7 @@ crosstable.coll_bptl_2 <- rsch_coll_days  %>%
                 locations = gt::cells_title(groups = "title")) %>%  
   gt::cols_width(everything() ~ gt::px(80),
                   `Collection Location` ~ gt::px(120)) %>%  # Narrow column widths if needed  
-  gt::tab_options(table.width = "80%", # Adjust the width as needed
+  gt::tab_options(table.width = "90%", # Adjust the width as needed
     table.border.right.width = px(0),
     #container.width = "80%",  # Ensure table container doesn't full page width
     table.align = "left", # Ensure the table aligns to the left
@@ -2684,7 +2684,7 @@ Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
                locations = gt::cells_title(groups = "title")) %>% 
   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
                 locations = gt::cells_row_groups()) %>% 
-  gt::tab_options(table.width = "75%", table.align = "left", table.font.size = "smaller")
+  gt::tab_options(table.width = "90%", table.align = "left", table.font.size = "smaller")
 
 
 
@@ -2728,7 +2728,7 @@ Hrs_bptl_clin <- Hrs_bptl_clin_summ  %>%
   tab_header('Table 5.6: Baseline- Time (in Hours) from Clinical Collection to Receipt by Clinic Location')  %>% 
   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
                 locations = gt::cells_row_groups()) %>% 
-  gt::tab_options(table.width = "75%", table.align = "left", table.font.size = "smaller")
+  gt::tab_options(table.width = "90%", table.align = "left", table.font.size = "smaller")
   #tab_footnote(footnote= paste0('Table 5.6: Baseline- Time (in Hours) from Clinical Collection to Receipt by Clinic Location'),
                #locations = gt::cells_column_labels(columns = "Total Received Clinical Collections"))
 
@@ -3763,7 +3763,7 @@ knitr::kable(Hrs_bptl_clinSF,
 ```
 
 \FloatBarrier
-
+\newpage
 
 ```{r Figs6_14_Plots, warning=FALSE, eval=TRUE,echo=FALSE}
 
