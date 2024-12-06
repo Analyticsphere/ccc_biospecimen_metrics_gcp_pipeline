@@ -2042,8 +2042,25 @@ hist_funct(D_877074400_V2, "Number of COVID-19 Vaccinations", "Vaccinations", "C
 
 #COV27 (up to 10 vaccines)
 
-CVD_tib$D_715581797_1_1 <- ifelse(!is.na(CVD_tib$D_715581797_1_1), CVD_tib$D_715581797_1_1, CVD_tib$D_715581797_V2_1_1)
-CVD_tib$D_715581797_2_2 <- ifelse(!is.na(CVD_tib$D_715581797_2_2), CVD_tib$D_715581797_2_2, CVD_tib$D_715581797_V2_2_2)
+CVD_tib$D_715581797_1_1 <- ifelse(!is.na(CVD_tib$D_715581797_1_1), CVD_tib$D_715581797_1_1, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_1_1), CVD_tib$D_715581797_V2_1_1, CVD_tib$D_71558179_V2_1_1))
+CVD_tib$D_715581797_2_2 <- ifelse(!is.na(CVD_tib$D_715581797_2_2), CVD_tib$D_715581797_2_2, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_2_2), CVD_tib$D_715581797_V2_2_2, CVD_tib$D_71558179_V2_2_2))
+CVD_tib$D_715581797_3_3 <- ifelse(!is.na(CVD_tib$D_715581797_3_3), CVD_tib$D_715581797_3_3, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_3_3), CVD_tib$D_715581797_V2_3_3, CVD_tib$D_71558179_V2_3_3))
+CVD_tib$D_715581797_4_4 <- ifelse(!is.na(CVD_tib$D_715581797_4_4), CVD_tib$D_715581797_4_4, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_4_4), CVD_tib$D_715581797_V2_4_4, CVD_tib$D_71558179_V2_4_4))
+CVD_tib$D_715581797_5_5 <- ifelse(!is.na(CVD_tib$D_715581797_5_5), CVD_tib$D_715581797_5_5, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_5_5), CVD_tib$D_715581797_V2_5_5, CVD_tib$D_71558179_V2_5_5))
+CVD_tib$D_715581797_6_6 <- ifelse(!is.na(CVD_tib$D_715581797_6_6), CVD_tib$D_715581797_6_6, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_6_6), CVD_tib$D_715581797_V2_6_6, CVD_tib$D_71558179_V2_6_6))
+CVD_tib$D_715581797_7_7 <- ifelse(!is.na(CVD_tib$D_715581797_7_7), CVD_tib$D_715581797_7_7, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_7_7), CVD_tib$D_715581797_V2_7_7, CVD_tib$D_71558179_V2_7_7))
+CVD_tib$D_715581797_8_8 <- ifelse(!is.na(CVD_tib$D_715581797_8_8), CVD_tib$D_715581797_8_8, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_8_8), CVD_tib$D_715581797_V2_8_8, CVD_tib$D_71558179_V2_8_8))
+CVD_tib$D_715581797_9_9 <- ifelse(!is.na(CVD_tib$D_715581797_9_9), CVD_tib$D_715581797_9_9, 
+                                  ifelse(!is.na(CVD_tib$D_715581797_V2_9_9), CVD_tib$D_715581797_V2_9_9, CVD_tib$D_71558179_V2_9_9))
+
 
 date_hist_funct(D_715581797_1_1, "Date of First COVID-19 vaccine", "Date", "Cases")
 date_hist_funct(D_715581797_2_2, "Date of Second COVID-19 vaccine", "Date", "Cases")
