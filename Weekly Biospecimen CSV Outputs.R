@@ -6,6 +6,8 @@ library(data.table)
 library(dplyr)
 library(rio)
 library(glue)
+install.packages("openxlsx")
+library(openxlsx)
 bq_auth()
 2
 
@@ -204,7 +206,7 @@ box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_Mod
                          BioBPTL_DateRec_v1r0,	BioShip_SignEmail_v1r0,	BioPack_TrackScan1_v1r0,	BioPack_Courier_v1r0,	BioShip_LocalID_v1r0,	BioShip_LogSite_v1r0,	BioPack_TempProbe_v1r0,
                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
 box1 <- box1[, c(1:8, 10:21)]
-write.csv(box1,glue("Formatted_prod_flatBoxes_JP_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+write.xlsx(box1,glue("Formatted_prod_flatBoxes_JP_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
@@ -650,7 +652,7 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
 
 biospe1_final <- biospe1 %>% select(names_set)
 
-write.csv(biospe1_final,glue("Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+write.xlsx(biospe1_final,glue("Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
@@ -820,8 +822,8 @@ recrbio_1[recrbio_1== as.character("104430631")] = "No"
 # recrbio1.replace({'353358909': 'Yes'}, regex=True, inplace=True)
 
 
-# write.csv(recrbio1,paste(local_drive, "Connect_prod_recr_veriBiospe_Formats_",currentDate,".csv",sep=""),row.names = F,na="")
-write.csv(recrbio_1,glue("Connect_prod_recr_veriBiospe_Formats_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+# write.xlsx(recrbio1,paste(local_drive, "Connect_prod_recr_veriBiospe_Formats_",currentDate,".csv",sep=""),row.names = F,na="")
+write.xlsx(recrbio_1,glue("Connect_prod_recr_veriBiospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
@@ -935,6 +937,6 @@ kitA_table$BioKit_ReturnKitTrack_v1r0 <- gsub("[()]", "", kitA_table$BioKit_Retu
 kitA_table$BioKit_ReturnKitTrack_v1r0 <- as.numeric(kitA_table$BioKit_ReturnKitTrack_v1r0)
 
 
-write.csv(kitA_table,glue("Connect_prod_KitAssembly_Table_{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
+write.xlsx(kitA_table,glue("Connect_prod_KitAssembly_Table_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
