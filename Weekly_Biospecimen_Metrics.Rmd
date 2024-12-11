@@ -1875,7 +1875,7 @@ discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>%
 discard.site <- n_pct_table(discard.tb$Site,discard.tb$tube_type)
 discard.site <- (discard.site[, c(10, 1:9)]) #Will need to update dimensions when STRECK Tube 1 listed 
 
-discard.site[6,c(2:10)] <- paste(discard.site[6,c(2:10)], "(100%)")
+discard.site[nrow(discard.site),c(2:10)] <- paste(discard.site[nrow(discard.site),c(2:10)], "(100%)")
 
 ```
 
@@ -3760,6 +3760,7 @@ knitr::kable(Hrs_bptl_clinSF,
 ```
 
 \FloatBarrier
+\newpage
 \newpage
 
 ```{r Figs6_14_Plots, warning=FALSE, eval=TRUE,echo=FALSE}
