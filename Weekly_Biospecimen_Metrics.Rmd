@@ -3753,13 +3753,17 @@ knitr::kable(SF_coll_rcpt,
 ```
 
 \FloatBarrier
-```{r Coll_Time_Spread,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
+```{r Coll_Time_Spread_Rsch,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 Hrs_bptl_rsch
+```
 
-
-
+\FloatBarrier
+```{r Coll_Time_Spread_Clin,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 Hrs_bptl_clin
+```
 
+\FloatBarrier
+```{r Coll_Time_Spread_SF,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
 knitr::kable(Hrs_bptl_clinSF, 
              col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), 
@@ -3769,6 +3773,7 @@ knitr::kable(Hrs_bptl_clinSF,
 
 ```
 
+\newpage
 \FloatBarrier
 \newpage
 \newpage
