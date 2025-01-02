@@ -3020,7 +3020,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 biospe.t1  %>% kable_styling(latex_options = "scale_down")
 
 
-add_footnote(settings_breakdown, "Note: Any collections indicated under 'Home' setting reflect collections in which home mouthwash was the only sample collected. . Home setting is assumed to be 0 (0%) when not listed.", notation = "none")
+add_footnote(settings_breakdown, "Note: Any collections indicated under 'Home' setting reflect collections in which home mouthwash was the only sample collected. Home setting is assumed to be 0 (0%) when not listed.", notation = "none")
   
 ```
 \FloatBarrier
