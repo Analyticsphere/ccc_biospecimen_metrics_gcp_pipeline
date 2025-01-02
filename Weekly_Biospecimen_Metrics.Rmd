@@ -108,6 +108,16 @@ write_to_local_drive = F #F
 #filename=
 local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-Missingness-and-Metrics/data/", "")
 
+
+# knitr::opts_chunk$set(
+#   echo = FALSE,
+#   warning = FALSE,   
+#   message = FALSE,   
+#   #fig.keep = "high", # Keep high-resolution plots for display but not save them
+#   fig.path = NULL    # Avoid saving to any specific folder
+# )
+
+
 ```
 
 ```{r BQPull, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
@@ -586,7 +596,7 @@ coll_sett_all <- table1 %>%  filter(BiospeCollection == "Any biospecimen Collect
 table1_allsett <- create_tbl_cross(coll_sett_all, "Site", "all_settings", "row", "Site", "Collection Setting")  
 
 settings_breakdown <- knitr::kable(table1_allsett, 
-                                   caption='Table 1.2 Baseline Biospeicmen Collection Setting', 
+                                   caption='Table 1.2 Baseline Biospecimen Collection Setting', 
                                    row.names=FALSE,align=c("l","c","c","c"), booktabs = TRUE) %>%  
   add_indent(seq(1, nrow(table1_allsett) - 1)) %>% 
   kable_styling(latex_options = "scale_down")
@@ -1875,7 +1885,7 @@ discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>%
 discard.site <- n_pct_table(discard.tb$Site,discard.tb$tube_type)
 discard.site <- (discard.site[, c(10, 1:9)]) #Will need to update dimensions when STRECK Tube 1 listed 
 
-discard.site[6,c(2:10)] <- paste(discard.site[6,c(2:10)], "(100%)")
+discard.site[nrow(discard.site),c(2:10)] <- paste(discard.site[nrow(discard.site),c(2:10)], "(100%)")
 
 ```
 
@@ -3010,7 +3020,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 biospe.t1  %>% kable_styling(latex_options = "scale_down")
 
 
-add_footnote(settings_breakdown, "Note: Any collections indicated under 'Home' setting reflect collections in which home mouthwash was the only sample collected.", notation = "none")
+add_footnote(settings_breakdown, "Note: Any collections indicated under 'Home' setting reflect collections in which home mouthwash was the only sample collected. Home setting is assumed to be 0 (0%) when not listed.", notation = "none")
   
 ```
 \FloatBarrier
@@ -3743,13 +3753,17 @@ knitr::kable(SF_coll_rcpt,
 ```
 
 \FloatBarrier
-```{r Coll_Time_Spread,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
+```{r Coll_Time_Spread_Rsch,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 Hrs_bptl_rsch
+```
 
-
-
+\FloatBarrier
+```{r Coll_Time_Spread_Clin,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 Hrs_bptl_clin
+```
 
+\FloatBarrier
+```{r Coll_Time_Spread_SF,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
 knitr::kable(Hrs_bptl_clinSF, 
              col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), 
@@ -3759,7 +3773,9 @@ knitr::kable(Hrs_bptl_clinSF,
 
 ```
 
+\newpage
 \FloatBarrier
+\newpage
 \newpage
 
 ```{r Figs6_14_Plots, warning=FALSE, eval=TRUE,echo=FALSE}
@@ -5369,3 +5385,29 @@ landscape(tbl_7_10)
 
 
 ```
+
+
+
+<!-- # ```{r cleanup, include=FALSE} -->
+<!-- #  -->
+<!-- # ###### For some reason, every time this report is run all of the plots are saving as a pdf under a newly created folder "Weekly_Biospecimen_Metrics_files". Need that deleted. -->
+<!-- #  -->
+<!-- # # Define the folder path -->
+<!-- # folder_path <- "C:/Users/dowlingk2/Documents/GitHub/ccc_biospecimen_metrics_gcp_pipeline/Weekly_Biospecimen_Metrics_files" -->
+<!-- #  -->
+<!-- # # Check if the folder exists, and delete it if it does -->
+<!-- # if (dir.exists(folder_path)) { -->
+<!-- #   unlink(folder_path, recursive = TRUE) -->
+<!-- # } -->
+
+
+<!-- ! Unable to load picture or PDF file 'Weekly_Biospecimen_Metrics_files/figure-latex/Figure1-1.pdf'. -->
+<!-- <to be read again>  -->
+<!--                    } -->
+<!-- l.628 ...Metrics_files/figure-latex/Figure1-1.pdf} -->
+
+<!-- Error: LaTeX failed to compile Weekly_Biospecimen_Metrics.tex. See https://yihui.org/tinytex/r/#debugging for debugging tips. See Weekly_Biospecimen_Metrics.log for more info. -->
+<!-- Execution halted -->
+
+<!-- # ``` -->
+
