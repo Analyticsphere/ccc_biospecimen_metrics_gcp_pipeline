@@ -3764,13 +3764,16 @@ knitr::kable(SF_coll_rcpt,
 Hrs_bptl_rsch
 ```
 
+
 \newpage
+
 \FloatBarrier
 ```{r Coll_Time_Spread_Clin,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 Hrs_bptl_clin
 ```
 
 \newpage
+
 \FloatBarrier
 ```{r Coll_Time_Spread_SF,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
