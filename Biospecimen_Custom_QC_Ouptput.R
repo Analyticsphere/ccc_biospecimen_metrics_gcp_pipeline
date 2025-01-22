@@ -921,7 +921,7 @@ bioqc_csv3$Rule47 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, 
 
 
 
-###################################################################################      Final Output 
+#################################     Final Output of QC report #####################################################
 
 
 
@@ -933,3 +933,4 @@ bioqc_csv3$Rule47 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, 
 
 bioqc_xlxs <- bioqc_csv3 %>%  select(Connect_ID, Collection_ID, Site, starts_with("Rule")) %>% arrange(Connect_ID)
 openxlsx::write.xlsx(bioqc_xlxs,glue("Biospeimen_CustomQC_Rules_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+
