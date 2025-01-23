@@ -62,4 +62,13 @@ covid_survey_stats:
   gcp_info:
     cloud_scheduler: ccc-covid-survey-stats
     frequency: "30 12 1 * *"# first of the Month at 12:30 PM"
-    
+
+
+biospecimen_custom_qc:
+  r_file_name: "Biospecimen_Custom_QC_Output.R"
+  report_file_name: 
+  box_folders:
+    - "221297686961"
+  gcp_info:
+    cloud_scheduler: ccc-biospecimen-custom-qc
+    frequency: "30 11 * * 1" # every Monday at 11:30 AM"
