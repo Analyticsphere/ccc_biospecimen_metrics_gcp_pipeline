@@ -172,9 +172,10 @@ knitr::kable(qc2)
 ### 2.a. If all blood tubes are not collected, (Derived) Clinical Site Blood Collected (BioClin_SiteBloodColl_v1r0) should be no or NULL.
 ```{r Clin_SiteBloodColl, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 & 
-                              d_173836415_d_266600170_d_693370086==353358909 & 
-                              Connect_ID!=2300063524) #specific exclusion- not editing this persons data
+qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & d_454453939_d_593843561==104430631 &
+                              d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 &
+                              d_703954371_d_593843561==104430631 & d_838567176_d_593843561==104430631 &  d_173836415_d_266600170_d_693370086==353358909 & 
+                              Connect_ID!=2300063524 & Connect_ID!=7848933050) #specific exclusion- not editing this persons data
 qc2_1 <- qc2_1  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_693370086)  %>%  sort_by(Site)
 
 
@@ -188,14 +189,27 @@ knitr::kable(qc2_1)
 ### 2.b. If any urine tubes is not collected, (Derived) Clinical Site Urine Collected (BioClin_SiteUrineCollBL_v1r0) should be no or NULL.
 ```{r Clin_SiteUrineColl, echo=FALSE, warning=FALSE, message=FALSE}
 
-qc2_1a <- bioqc %>%  filter( d_973670172_d_593843561==104430631  & d_173836415_d_266600170_d_786930107==353358909)
-qc2_1a <- qc2_1a  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_786930107)  %>%  sort_by(Site)
+qc2_1a <- bioqc %>%  filter( d_973670172_d_593843561==104430631  & d_173836415_d_266600170_d_786930107==353358909 &
+                               !(Connect_ID %in% c(1140047316, 1215003341, 1250934825, 2300063524, 2039357566, 2755205973, 
+                                               3287102562, 3862626013, 4479873637, 4980503471, 6321294709, 7352978604, 
+                                               7882825421, 8184138489, 8633594373, 1102086935, 1375421153, 2871811858, 
+                                               2887898061, 3456526723, 3992444928, 4207529981, 4838682809, 6467484794, 
+                                               6523900663, 6538980272, 7106367407, 9366425281, 9652100378, 9672292896, 
+                                               6422794867, 1349953410, 1731138933, 2769291903, 3589595480, 3722445358, 
+                                               5972658064, 8553891957, 9121406600, 9575612025)))
+qc2_1a <- qc2_1a  %>% select(Site, Connect_ID, d_973670172_d_593843561, d_173836415_d_266600170_d_786930107)  %>%  sort_by(Site)
 
 
-colnames(qc2_1a) <- c("Site", "Connect ID", "Value")
+colnames(qc2_1a) <- c("Site", "Connect ID", "Urine Collected", "BioClin_SiteUrineCollBL_v1r0")
 knitr::kable(qc2_1a)
 
-#write.csv(qc2_1a,paste0('Github_Issue_190_Urine_Rule', Sys.Date(), '.csv'), row.names = F,na="")
+
+qc2_1b <- bioqc %>%  filter( d_973670172_d_593843561==104430631  & d_173836415_d_266600170_d_786930107==353358909) %>%  
+  select(Site, Connect_ID, d_820476880, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_110349197)
+colnames(qc2_1b) <- c("Site", "Connect ID", "Collection ID", "BioClin_ClinicalUrnTmBL_v1r0", "BioClin_SntUrineAccIDBL_v1r0", "BioClin_PolyUrineIDBL_v1r0")
+knitr::kable(qc2_1b)
+write.csv(qc2_1b,paste0('Bio_QC_Issue__Rule_2b', Sys.Date(), '.csv'), row.names = F,na="")
+openxlsx::write.xlsx(qc2_1b,paste0('Bio_QC_Issue__Rule_2b', Sys.Date(), '.xlsx'), row.names = F,na="")
 
 ```
 
@@ -881,7 +895,9 @@ knitr::kable(c_blood3.1)
 ### 29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
 ```{r All3_C_B4, echo=FALSE, warning=FALSE, message=FALSE}
 
-c_blood3.4 <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_982213346) & ((d_173836415_d_266600170_d_592099155=="534621077" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="104430631")) %>% 
+c_blood3.4 <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_982213346) & 
+                                  ((d_173836415_d_266600170_d_592099155=="534621077" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="104430631") &
+                                  !(Connect_ID %in%  c(7848933050, 5885436394, 9258958214, 2300063524))) %>% 
     select(Site, Connect_ID, d_878865966, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_982213346) %>%  sort_by(Site)
 
 
@@ -1004,8 +1020,9 @@ knitr::kable(polyblood) %>% kable_styling(latex_options = "HOLD_position") %>% r
 bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7 &
                                (Site=="Henry Ford Health System" | Site=="University of Chicago Medicine") & #only HP and UC sends this
                                !is.na(d_928693120_integer) & #d_173836415_d_266600170_d_110349197!="[]" & 
-                               Connect_ID!=2824989966 & Connect_ID!=3759939890 & Connect_ID!=4688823720 & Connect_ID!=8589481620 & Connect_ID!=6336258662 &
-                               Connect_ID!=6473532641 & Connect_ID!=4435276749 & Connect_ID!=4900116130 & Connect_ID!=5461650381 &  #HFH exclusions
+                               !(Connect_ID %in% c(1629086681, 3165368475, 3293040395, 3544623873, 6361337944, 6954174713, 7571439842,
+                                                   3770024701, 8836251245, 9768745029, 5461650381, 4900116130, 4435276749,  
+                                                   6473532641, 6336258662, 8589481620, 4688823720, 3759939890, 2824989966)) & #HFH exclusions
                                !(Connect_ID %in% qc_7$`Connect ID`)) # Don't count the empty bracket people if they're in rule #7, because those would be expected
 
 #remove any brackets around polyID
@@ -1564,7 +1581,8 @@ write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections
 
 # Identify Connect_IDs with different d_650516960 values
 different_values <- bio_dup_with_status %>%
-  filter(d_410912345=="353358909") %>% 
+  filter(d_410912345=="353358909" & 
+           !(Connect_ID %in% c(2589415525, 4545815202, 4545815202, 2589415525))) %>% #Biospecimen team has handled these ones
   group_by(Connect_ID) %>% 
   summarize(unique_values = n_distinct(d_650516960), .groups = "drop") %>%
   filter(unique_values > 1) %>%
