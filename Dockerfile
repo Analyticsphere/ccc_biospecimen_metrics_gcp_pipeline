@@ -1,6 +1,6 @@
 # Dockerfile
 
-FROM rocker/tidyverse:latest
+FROM rocker/tidyverse:4.3
 
 # Set the correct path for xelatex
 ENV PATH="$PATH:/root/bin:/usr/local/lib"
