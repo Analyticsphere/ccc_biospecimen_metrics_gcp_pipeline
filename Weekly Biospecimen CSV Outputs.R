@@ -69,7 +69,7 @@ recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source =="Biospec
 select <- paste(recrvar.bio$column_name,collapse=",")
 
 
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762,", select,
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762, d_254109640,", select,
                                "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" "))) #removed "date", as it is no longer in the participants table
 
 
@@ -800,7 +800,7 @@ recrbio_1 <- recrbio1[!duplicated(names(recrbio1))]
 #new column order requested 11/22/23
 recrbio_1 <- recrbio_1[, c("Connect_ID","RcrtES_Site_v1r0","BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMouthCol_v1r0","BioSpm_BloodSettingBL_v1r0",
                            "BioSpm_UrineSettingBL_v1r0","BioSpm_MWSettingBL_v1r0","BioChk_CompleteBL_v1r0","BioChk_TimeBL_v1r0","BioFin_CheckOutTmBL_v1r0","BioFin_ResearchBldTmBL_v1r0",
-                           "BioFin_ResearchUrnTmBL_v1r0","BioFin_BMTimeBL_v1r0","BioClin_SiteBldLocBL_v1r0","BioClin_SiteUrLocatBL_v1r0","BioClin_SntBloodAccIDBL_v1r0",
+                           "BioFin_ResearchUrnTmBL_v1r0","BioFin_BMTimeBL_v1r0", "SMMet_BLSamplesColl_v1r0","BioClin_SiteBldLocBL_v1r0","BioClin_SiteUrLocatBL_v1r0","BioClin_SntBloodAccIDBL_v1r0",
                            "BioClin_SntUrineAccIDBL_v1r0", "BioClin_PolyBloodIDBL_v1r0","BioClin_PolyUrineIDBL_v1r0","BioClin_SiteBloodCollBL_v1r0","BioClin_ClinBloodTmBL_v1r0",
                            "BioClin_SiteUrineCollBL_v1r0", "BioClin_ClinicalUrnTmBL_v1r0","BioClin_SiteBloodRRLBL_v1r0","BioClin_SiteBldRRLDtBL_v1r0","BioClin_SiteUrineRRLBL_v1r0",
                            "BioClin_SiteUrnRRLDtBL_v1r0", "BioClin_BldOrUrnPlcdBL_v1r0","BioClin_BldUrnPlcdTmBL_v1r0","BioClin_BldOrderPlcdBL_v1r0","BioClin_BldOrdPlacdDtBL_v1r0",
