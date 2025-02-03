@@ -4281,9 +4281,10 @@ research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y
 research.vt_plotUC + guides(color = guide_legend(title = "Collection Location")) 
 
 
-# Create a sequence of dates for the range you are interested in
-date_range <- seq.Date(from = as.Date("2024-05-20"), to = as.Date(currentDate)-7, by = "week")
-clinic_locations <- c("South Loop", "Orland Park", "Kenwood", "River East", "Dearborn Station", "Ingalls", "Crown Point")
+
+
+
+
 
 
 edited_fig11_1_Clin_tally <- clinical.survey %>%
@@ -4293,6 +4294,9 @@ edited_fig11_1_Clin_tally <- clinical.survey %>%
   tally()
 
 # Complete the data to include all combinations of Clin_Site_location and dates in the range
+date_range <- seq.Date(from = as.Date("2024-05-20"), to = as.Date(currentDate)-7, by = "week")
+clinic_locations <- c("South Loop", "Orland Park", "Kenwood", "River East", "Dearborn Station", "Ingalls", "Crown Point")
+
 complete_data <- edited_fig11_1_Clin_tally %>%
   ungroup() %>%
   complete(Clin_Site_location = clinic_locations, col.Monday.date = date_range, fill = list(n = 0))
