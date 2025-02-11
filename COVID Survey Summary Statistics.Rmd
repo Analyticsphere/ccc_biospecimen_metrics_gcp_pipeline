@@ -4,23 +4,13 @@ author: "Kelsey Dowling"
 date: "`r Sys.Date()`"
 header-includes:  
     \usepackage[labelformat=empty]{caption}
-    \usepackage{placeins}
-    \usepackage{booktabs}
-
 
 
 output:
   pdf_document:
-    extra_dependencies: ["float"]
-    toc: false
-    toc_depth: 2
-    keep_tex: yes
-    fig_width: 7
-    fig_height: 5
-    fig_caption: true
+    latex_engine: xelatex
     df_print: paged
 ---
-
 
 
 This report includes all COVID-19 Survey Data as well as COVID-19 related questions that have since been removed from the Research Blood, Urine, Mouthwash Survey and the Clinical Blood, Urine Survey on July 5th, 2023.
@@ -343,7 +333,6 @@ refactor_variables <- function(dataframe, variable_pattern, levels) {
 
 
 \newpage
-\pagebreak
 
 ```{r COVID, warning=FALSE, echo=FALSE,  message=FALSE}
 
