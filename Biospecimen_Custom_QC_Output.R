@@ -1,4 +1,5 @@
-
+print("in Biospeciment_Custom_QC_Output.R!")
+cat("in Biospeciment_Custom_QC_Output.R!")
 
 library(bigrquery)
 library(boxr)
