@@ -1,6 +1,7 @@
 
 
 library(bigrquery)
+library(boxr)
 library(lubridate)
 library(dplyr)
 library(stringr)
@@ -31,7 +32,19 @@ if (use_test_box_folder) {
 } else {
   boxfolder <- 221297686961 # destination of CSV files (not pdf)
 }
-################################################################################
+
+
+# Retrieve credentials from environment variables and pass them to box_auth()
+boxr::box_auth(
+  client_id = Sys.getenv("BOX_CLIENT_ID"),
+  client_secret = Sys.getenv("BOX_CLIENT_SECRET")
+)
+
+############################################################
+
+
+
+
 
 
 
@@ -152,7 +165,8 @@ bioqc_csv <- bioqc %>%
                                                2887898061, 3456526723, 3992444928, 4207529981, 4838682809, 6467484794, 
                                                6523900663, 6538980272, 7106367407, 9366425281, 9652100378, 9672292896, 
                                                6422794867, 1349953410, 1731138933, 2769291903, 3589595480, 3722445358, 
-                                               5972658064, 8553891957, 9121406600, 9575612025, 4057490101, 9167792140)), 
+                                               5972658064, 8553891957, 9121406600, 9575612025, 4057490101, 9167792140,
+                                               8924667241, 9694753790, 5899565591, 6568449334)), 
                          "Rule 2b", " "),
          
          # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
