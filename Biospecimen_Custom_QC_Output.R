@@ -262,7 +262,8 @@ bioqc_csv <- bioqc %>%
          #18. Tube Date Received Research - If (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
          Rule18_mw = ifelse(d_650516960==534621077 & !is.na(d_173836415_d_266600170_d_448660695) &
                               as.numeric(round(difftime(currentDate, as.Date(d_173836415_d_266600170_d_448660695), units="days"), digits=0))>4 & 
-                                d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119), "Rule 18-mw", " "),
+                                d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) &
+                              Connect_ID!="2330722643", "Rule 18-mw", " "),
          
          Rule18_SST1 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
                                 d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119), "Rule 18-SST1", " "),
@@ -917,7 +918,6 @@ bioqc_csv2 <-  bioqc_csv %>% filter(!if_all(starts_with("Rule"), ~ . == " " | is
 
 
 bioqc_csv3 <- full_join(bioqc_csv2, split_setting, by=c("Connect_ID", "Collection_ID"))
-
 bioqc_csv3$Rule47 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, "Rule 47", " ")
 
 

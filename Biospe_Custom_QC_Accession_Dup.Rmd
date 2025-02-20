@@ -247,23 +247,6 @@ knitr::kable(qc3b)
 
 
 
-```{r BioFin_BaseBloodCol_v1r0___reverse, include=FALSE}
-#### 3b. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If any blood tubes are collected, this should be yes
-qc2_2 <- bioqc %>%  filter( (d_232343615_d_593843561==353358909 | d_299553921_d_593843561==353358909 | d_376960806_d_593843561==353358909 | d_454453939_d_593843561==353358909 | d_589588440_d_593843561==353358909 | d_958646668_d_593843561==353358909 | d_677469051_d_593843561==353358909 | d_683613884_d_593843561==353358909 | d_703954371_d_593843561==353358909 | d_838567176_d_593843561==353358909) & d_878865966==104430631 & 
-                              Connect_ID!=2310991421) #HP sent clinical sample when it should've only been research- needs to be manually removed
-qc2_2 <- qc2_2  %>% select(Site, Connect_ID, d_878865966)  %>%  sort_by(Site)
-
-
-colnames(qc2_2) <- c("Site", "Connect ID", "Value")
-knitr::kable(qc2_2)
-
-```
-
-
-
-
-
-
 ### 4. (Derived) Baseline urine sample collected (BioFin_BaseUrineCol_v1r0): If any urine tubes are not collected, this should be no
 
 ```{r BioFin_BaseUrineCol_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
@@ -586,7 +569,8 @@ knitr::kable(qc13_tube9)
 bioqcR <- bioqc %>%  filter(d_650516960==534621077)
 
 
-qc13_Rtube1 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_448660695, units="days"), digits=0))>4 & d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) ) %>% 
+qc13_Rtube1 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_448660695, units="days"), digits=0))>4 & d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) & 
+                                    Connect_ID!="2330722643") %>% 
 
   select(Site, Connect_ID, d_143615646_d_926457119)%>%  sort_by(Site)
 
