@@ -80,7 +80,7 @@ FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
 WHERE (d_820476880 LIKE 'CHA%') 
    OR (d_820476880 LIKE 'CXA%' AND d_410912345='353358909' AND Connect_ID IN (SELECT Connect_ID FROM T));"
 
-parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666
+parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666, d_173836415_d_266600170_d_319972665_d_826941471
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
@@ -242,23 +242,6 @@ colnames(qc3b) <- c("Site", "Connect ID", "Value")
 knitr::kable(qc3b)
 
 ```
-
-
-
-
-
-```{r BioFin_BaseBloodCol_v1r0___reverse, include=FALSE}
-#### 3b. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If any blood tubes are collected, this should be yes
-qc2_2 <- bioqc %>%  filter( (d_232343615_d_593843561==353358909 | d_299553921_d_593843561==353358909 | d_376960806_d_593843561==353358909 | d_454453939_d_593843561==353358909 | d_589588440_d_593843561==353358909 | d_958646668_d_593843561==353358909 | d_677469051_d_593843561==353358909 | d_683613884_d_593843561==353358909 | d_703954371_d_593843561==353358909 | d_838567176_d_593843561==353358909) & d_878865966==104430631 & 
-                              Connect_ID!=2310991421) #HP sent clinical sample when it should've only been research- needs to be manually removed
-qc2_2 <- qc2_2  %>% select(Site, Connect_ID, d_878865966)  %>%  sort_by(Site)
-
-
-colnames(qc2_2) <- c("Site", "Connect ID", "Value")
-knitr::kable(qc2_2)
-
-```
-
 
 
 
@@ -586,7 +569,8 @@ knitr::kable(qc13_tube9)
 bioqcR <- bioqc %>%  filter(d_650516960==534621077)
 
 
-qc13_Rtube1 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_448660695, units="days"), digits=0))>4 & d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) ) %>% 
+qc13_Rtube1 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_448660695, units="days"), digits=0))>4 & d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) & 
+                                    Connect_ID!="2330722643") %>% 
 
   select(Site, Connect_ID, d_143615646_d_926457119)%>%  sort_by(Site)
 
@@ -1385,7 +1369,33 @@ knitr::kable(kits_recvd) %>% kable_styling(latex_options = "HOLD_position")
 ```
 
 
+# 47. BioFin_BMTimeBL_v1r0 must be in the structure of YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM:SS.SSSZ
+```{r MW_coll_DT, echo=FALSE, warning=FALSE, message=FALSE}
 
+
+#date/time can be YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM:SS.SSSZ
+datetime_regex <- "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$|^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+
+invalid_rows <- HMW %>%
+    filter(!is.na(d_173836415_d_266600170_d_448660695) & 
+           !grepl(datetime_regex, d_173836415_d_266600170_d_448660695)) %>%
+    select(Site, Connect_ID, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_319972665_d_661940160,d_173836415_d_266600170_d_319972665_d_826941471) %>%
+    arrange(Site)
+
+
+invalid_rows2 <-  HMW %>%
+    filter((as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)) < as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160))) |
+             (as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)) > as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_826941471))) |
+             as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)), as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)), units="days"))>60) %>%
+    select(Site, Connect_ID, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_826941471) %>%
+    arrange(Site)
+
+invalid_rows_all <- rbind(invalid_rows,invalid_rows2)
+
+colnames(invalid_rows) <- c("Site", "Connect ID", "BioFin_BMTimeBL_v1r0k", "BioKit_KitShipTm_v1r0", "BioKit_KitRecdTm_v1r0")
+knitr::kable(invalid_rows) %>% kable_styling(latex_options = "scale_down")
+
+```
 
 
 
@@ -1551,7 +1561,7 @@ colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection 
 
 
 
-# 47. If BioSpm_Visit_v1r0 is Baseline and the collection is finalized, then BioSpm_Setting_v1r0 for all collections for the participant should either all be Research or Clinical. This only applies to participants with duplicate baseline collections.
+# 48. If BioSpm_Visit_v1r0 is Baseline and the collection is finalized, then BioSpm_Setting_v1r0 for all collections for the participant should either all be Research or Clinical. This only applies to participants with duplicate baseline collections.
 ```{r Double_Baseline, echo=FALSE, warning=FALSE, message=FALSE}
 
 # Identify Connect_IDs with different d_650516960 values

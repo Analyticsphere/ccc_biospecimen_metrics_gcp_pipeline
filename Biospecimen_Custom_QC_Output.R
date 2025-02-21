@@ -262,7 +262,8 @@ bioqc_csv <- bioqc %>%
          #18. Tube Date Received Research - If (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
          Rule18_mw = ifelse(d_650516960==534621077 & !is.na(d_173836415_d_266600170_d_448660695) &
                               as.numeric(round(difftime(currentDate, as.Date(d_173836415_d_266600170_d_448660695), units="days"), digits=0))>4 & 
-                                d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119), "Rule 18-mw", " "),
+                                d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) &
+                              Connect_ID!="2330722643", "Rule 18-mw", " "),
          
          Rule18_SST1 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
                                 d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119), "Rule 18-SST1", " "),
@@ -636,7 +637,10 @@ kits_recvd <- HMW %>%  filter(  as.numeric(round(difftime(currentDate, d_1951456
 
 
 
+#47.BioFin_BMTimeBL_v1r0 must be in the structure of YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM:SS.SSSZ
+datetime_regex <- "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$|^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
 
+invalid_rows <- HMW %>% filter(!is.na(d_173836415_d_266600170_d_448660695) & !grepl(datetime_regex, d_173836415_d_266600170_d_448660695))
 
 
 
@@ -659,6 +663,7 @@ bioqc_csv$Rule43 = ifelse(bioqc_csv$Connect_ID %in% homsetting$Connect_ID, "Rule
 bioqc_csv$Rule44 = ifelse(bioqc_csv$Connect_ID %in% bl_mw$Connect_ID, "Rule 44", " ")
 bioqc_csv$Rule45 = ifelse(bioqc_csv$Connect_ID %in% mw_dt$Connect_ID, "Rule 45", " ")
 bioqc_csv$Rule46 = ifelse(bioqc_csv$Connect_ID %in% kits_recvd$Connect_ID, "Rule 46", " ")
+bioqc_csv$Rule47 = ifelse(bioqc_csv$Connect_ID %in% kits_recvd$Connect_ID, "Rule 47", " ")
 
 
 
@@ -917,8 +922,7 @@ bioqc_csv2 <-  bioqc_csv %>% filter(!if_all(starts_with("Rule"), ~ . == " " | is
 
 
 bioqc_csv3 <- full_join(bioqc_csv2, split_setting, by=c("Connect_ID", "Collection_ID"))
-
-bioqc_csv3$Rule47 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, "Rule 47", " ")
+bioqc_csv3$Rule48 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, "Rule 48", " ")
 
 
 

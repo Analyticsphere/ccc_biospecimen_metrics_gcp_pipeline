@@ -98,7 +98,7 @@ cat("Particiapnts with Blood, Urine, Mouthwash Survey Completed: ", dim(bisp)[[1
 ```{r functions, include=FALSE}
 ##FUNCTIONS
 
-BUM_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Unknown", "536341288"="Female", "576796184"="Intersex or Other", "654207589"="Male",
+BUM_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Unknown", "536341288"="Female", "576796184"="Unknown", "654207589"="Male",
                  "110092955"="The same day", "952212668"="The day before", "330461666"="More than a day before", "974230748"="Yes, in the past day",
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
                  "548628123"="A little bit", "567908725"="Somewhat", "760969884"="Quite a bit", "464631026"="Very Much", "707601969"="Yes, another",
