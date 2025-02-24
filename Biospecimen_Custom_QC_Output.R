@@ -861,7 +861,12 @@ dup_list <- bio_dup_with_status %>%
          Urine_Tube_Collected, MW_Tube_Collected) %>%
   arrange(Connect_ID)
 
-colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection ID", "Collection Date/Time", "Collection Finalized", "True Duplicate",
+dup_list_by_tube <- dup_list %>%  
+  group_by(Connect_ID) %>%
+  filter(any(across(ends_with("_Tube_Collected"), ~ all(. == "Yes", na.rm = TRUE)))) %>%
+  ungroup()
+
+colnames(dup_list_by_tube) <- c("Connect ID", "Site", "Collection Setting", "Collection ID", "Collection Date/Time", "Collection Finalized", "True Duplicate",
                         "SST1_Tube_Collected", "SST2_Tube_Collected", "SST3_Tube_Collected", "SST4_Tube_Collected",
                         "SST5_Tube_Collected", "HeparinT1_Tube_Collected", "HeparinT2_Tube_Collected", "EDTAT1_Tube_Collected",
                         "EDTAT2_Tube_Collected", "EDTAT3_Tube_Collected", "ACD_Tube_Collected", "STRECK_Tube_Collected","Urine_Tube_Collected", "MW_Tube_Collected")
@@ -871,7 +876,7 @@ colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection 
 
 
 #write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
-openxlsx::write.xlsx(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(dup_list_by_tube,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
