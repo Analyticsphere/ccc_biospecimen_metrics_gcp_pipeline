@@ -35,11 +35,11 @@ if (use_test_box_folder) {
 }
 
 
-# Retrieve credentials from environment variables and pass them to box_auth()
-boxr::box_auth(
-  client_id = Sys.getenv("BOX_CLIENT_ID"),
-  client_secret = Sys.getenv("BOX_CLIENT_SECRET")
-)
+# # Retrieve credentials from environment variables and pass them to box_auth()-- will use later for pulling from box to add 'NewRules' column to QC report
+# boxr::box_auth(
+#   client_id = Sys.getenv("BOX_CLIENT_ID"),
+#   client_secret = Sys.getenv("BOX_CLIENT_SECRET")
+# )
 
 ############################################################
 
