@@ -4229,7 +4229,6 @@ visit_wk_site_edited <- coll_sett_all %>% arrange(Site,Site_location,all_setting
 
 
 
-
 research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
 research.vt_plUC <- research.vt_plUC %>% group_by(col.Monday.date) %>% mutate(total_collections = sum(n))
 research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=total_collections)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
@@ -4265,7 +4264,7 @@ clinical.vt_plotUC <- ggplot(visit_wk_site.hybrid_UC, aes(x=as.Date(col.Monday.d
 print(clinical.vt_plotUC)
 
 
-research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine")
+research.vt_plUC= visit_wk_site_edited %>%  filter( Site=="University of Chicago Medicine" & all_settings=="Research")
 research.vt_plotUC <- ggplot(research.vt_plUC, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) + #,fill=site, color=site)) +   #research.vt <-    ,fill=Site, color=Site
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Number of Collections") +
