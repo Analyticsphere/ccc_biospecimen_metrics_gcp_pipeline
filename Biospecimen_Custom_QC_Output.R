@@ -42,12 +42,6 @@ if (use_test_box_folder) {
 #   client_secret = Sys.getenv("BOX_CLIENT_SECRET")
 # )
 
-# Retrieve credentials from environment variables and pass them to box_auth()
-boxr::box_auth(
-  client_id = Sys.getenv("BOX_CLIENT_ID"),
-  client_secret = Sys.getenv("BOX_CLIENT_SECRET")
-)
-
 
 ############################################################
 
