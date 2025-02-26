@@ -1358,18 +1358,23 @@ knitr::kable(mw_dt) %>% kable_styling(latex_options = "HOLD_position")
 # 46. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 10 days ago, BioKit_KitStatusBL_v1r0 should be Received
 ```{r kit_recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
-kits_recvd <- HMW %>%  filter(#d_173836415_d_266600170_d_915179629==103209024 &  
+kits_recvd <- HMW %>%  filter(#d_173836415_d_266600170_d_915179629==103209024 & #--- sometimes this is null, sometimes its home 
                                   as.numeric(round(difftime(currentDate, d_195145666, units="days"), digits=0)) > 10 & 
                                   d_173836415_d_266600170_d_319972665_d_221592017!=375535639) %>% 
   select(Site, Connect_ID, d_195145666, d_972453354) %>%  sort_by(Site)
 
 colnames(kits_recvd) <- c("Site", "Connect ID", "SrvMtW_TmComplete_v1r0", "BioKit_ReturnKitTrack")
-knitr::kable(kits_recvd) %>% kable_styling(latex_options = "HOLD_position")
+#knitr::kable(kits_recvd) %>% kable_styling(latex_options = "HOLD_position")
+
+cat(paste0("There are ", nrow(kits_recvd), " rows. This has been made into a separate XLXS file called", "\n", "'Biospecimen_QC_Rule46_Errors[current date]_[box folder number].xlxs'"))
+
+openxlsx::write.xlsx(kits_recvd,glue("{local_drive}Biospecimen_QC_Rule46_Errors{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 ```
 
 
 # 47. BioFin_BMTimeBL_v1r0 must be in the structure of YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM:SS.SSSZ
+\FloatBarrier
 ```{r MW_coll_DT, echo=FALSE, warning=FALSE, message=FALSE}
 
 
@@ -1393,7 +1398,7 @@ invalid_rows2 <-  HMW %>%
 invalid_rows_all <- rbind(invalid_rows,invalid_rows2)
 
 colnames(invalid_rows) <- c("Site", "Connect ID", "BioFin_BMTimeBL_v1r0k", "BioKit_KitShipTm_v1r0", "BioKit_KitRecdTm_v1r0")
-knitr::kable(invalid_rows) %>% kable_styling(latex_options = "scale_down")
+knitr::kable(invalid_rows) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size = 8)
 
 ```
 
