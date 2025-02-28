@@ -2522,8 +2522,8 @@ crosstable.coll_bptl28 <- ctable.coll_bptl28  %>%
   gt::tab_style(style = list(gt::cell_text(align = "center")), 
                 locations = gt::cells_title(groups = "title")) %>%  
   gt::cols_width(everything() ~ gt::px(80),
-                  `Collection Location` ~ gt::px(120)) %>%  # Narrow column widths if needed  
-  gt::tab_options(table.width = "90%", # Adjust the width as needed
+                  `Collection Location` ~ gt::px(160)) %>%  # Narrow column widths if needed  
+  gt::tab_options(table.width = "100%", # Adjust the width as needed
     table.border.right.width = px(0),
     #container.width = "80%",  # Ensure table container doesn't full page width
     table.align = "left", # Ensure the table aligns to the left
@@ -2714,7 +2714,7 @@ Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
                locations = gt::cells_title(groups = "title")) %>% 
   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
                 locations = gt::cells_row_groups()) %>% 
-  gt::tab_options(table.width = "85%", table.align = "left", table.font.size = "smaller")
+  gt::tab_options(table.width = "100%", table.align = "left", table.font.size = "smaller")
 
 
 
