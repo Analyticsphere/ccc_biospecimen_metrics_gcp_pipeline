@@ -4432,7 +4432,7 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y
                               "Edith Sanford Breast Center (coded as Sanford Center)"="#FDBE19", 
                                   "Edith Sanford Breast Center"="#2973A5","Fargo Amber Valley"="#309EBD")) +
                      #guide = guide_legend(nrow = 2, byrow = TRUE)) + 
-  guides(color = guide_legend(nrow = 3, byrow = TRUE, title = "Collection Location")) +
+guides(color = guide_legend(nrow = 3, byrow = TRUE, title = "Collection Location")) +
   ggtitle(label="Figure 6.13: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Sanford Health") +
   theme(panel.background = element_blank(),
         legend.title = element_text(size=8.5),
