@@ -460,6 +460,10 @@ no_dups <- no_dups %>%
       d_951355211 == 856158129 ~ "BCC- Irving",
       d_951355211 == 436956777 ~ "NTX Biorepository",
       d_951355211 == 288564244 ~ "BCC- Fort Worth",
+      d_951355211 == 246137578 ~ "Edith Sanford Breast Center (coded as Sanford Center)",
+      d_951355211 == 433070901 ~ "Edith Sanford Breast Center",
+      d_951355211 == 769594361 ~ "Fargo Amber Valley",
+      d_951355211 == 255636184 ~ "Stevens Point",
       is.na(d_951355211) & Site=='University of Chicago Medicine' ~ "Missing UC location",
       is.na(d_951355211) & Site=='HealthPartners' ~ "Missing HP location",
       is.na(d_951355211) & Site=='Marshfield Clinic Health System' ~ "Missing MF location",
@@ -514,6 +518,8 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                     d_173836415_d_266600170_d_452847912 == 1010270015 ~ "NCO",
                                   d_173836415_d_266600170_d_185243482 == 1050020026 | 
                                     d_173836415_d_266600170_d_452847912 == 1050020026 ~ "Brownstown",
+                                  d_173836415_d_266600170_d_185243482 == 1010170010 | 
+                                    d_173836415_d_266600170_d_452847912 == 1010170010 ~ "E Jefferson Pathology",
                                   Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1) ~ "South Loop",
                                   Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2) ~ "Orland Park",
                                   Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3) ~ "Kenwood",
@@ -645,8 +651,9 @@ col_num_1.1 <- col_num_1.1 %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
     `Collection Location` %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
-    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", "Merrill") ~ "Marshfield Clinic Health System",
-    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Missing SF location") ~ "Sanford Health",
+    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", "Merrill", "Stevens Point") ~ "Marshfield Clinic Health System",
+    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University","Edith Sanford Breast Center (coded as Sanford Center)", 
+                                  "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
     `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ "Other"
@@ -735,7 +742,7 @@ rownames(col_num_1.2) <- col_num_1.2$`Collection Location`
 col_num_1.2 <- col_num_1.2 %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "Missing HFH location") ~ "Henry Ford Health", 
+                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology","Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Missing HP location") ~ "HealthPartners", #"NSC", 
     `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", "DCAM (Hyde Park)", 
                                  "Crown Point", "Missing UC location") ~ "University of Chicago Medicine",
@@ -2418,8 +2425,9 @@ coll_bptl_diff <- biospe_adhoc_all %>%
                                          "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
                                          "HFH Livonia Research Clinic", "HFH Pop-Up", "Missing HFH location",
                                          "Marshfield", "MF Pop-Up","Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
-                                         "Colby Abbotsford","Minocqua","Merrill",
-                                         "Sioux Falls Imagenetics","Fargo South University",
+                                         "Colby Abbotsford","Minocqua","Merrill","Stevens Point",
+                                         "Sioux Falls Imagenetics","Fargo South University","Edith Sanford Breast Center (coded as Sanford Center)", 
+                                  "Edith Sanford Breast Center","Fargo Amber Valley",
                                          "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park", "Missing UC location")),
          Site = factor(Site, levels=c("Baylor Scott and White Health","HealthPartners","Henry Ford Health",
                                       "Marshfield Clinic Health System","Sanford Health","University of Chicago Medicine")))  %>% 
@@ -2481,8 +2489,9 @@ ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
     `Collection Location` %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
-    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", "Merrill") ~ "Marshfield Clinic Health System",
-    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Missing SF location") ~ "Sanford Health",
+    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", "Merrill", "Stevens Point") ~ "Marshfield Clinic Health System",
+    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)", 
+                                  "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
     `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
@@ -2567,7 +2576,7 @@ coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
 
 
 # biospe_adhoc2$Clin_Site_location <- factor(biospe_adhoc2$Clin_Site_location,levels=c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-#                                  "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "Missing HFH Location ID","Elk River", "Chanhassen","Park Nicollet Minneapolis Clinic", "Missing HP location", "Kaiser Permanente Colorado","Kaiser Permanente Georgia","Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest","Sanford Health", "South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls","DCAM (Hyde Park)", "Crown Point", "Missing UC location")) 
+#                                  "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", "Missing HFH Location ID","Elk River", "Chanhassen","Park Nicollet Minneapolis Clinic", "Missing HP location", "Kaiser Permanente Colorado","Kaiser Permanente Georgia","Oahu Clinics", "Non-Oahu Clinics", "Kaiser Permanente Northwest","Sanford Health", "South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls","DCAM (Hyde Park)", "Crown Point", "Missing UC location")) 
 
 
 coll_bptl_diff2$Connect_ID <- as.numeric(coll_bptl_diff2$`as.character(Connect_ID)`)
@@ -2592,7 +2601,7 @@ colnames(rsch_coll_days) <- c("Collection Location", "1 Day", "2 Days", "3 Days"
 rsch_coll_days <- rsch_coll_days %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "Missing HFH location") ~ "Henry Ford Health", 
+                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Missing HP location") ~ "HealthPartners", #"NSC", 
     `Collection Location`== "Kaiser Permanente Colorado" ~ "Kaiser Permanente Colorado",
     `Collection Location`== "Kaiser Permanente Georgia" ~ "Kaiser Permanente Georgia",
@@ -2687,8 +2696,9 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
     `Collection Location` %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
-    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", "Merrill") ~ "Marshfield Clinic Health System",
-    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Missing SF location") ~ "Sanford Health",
+    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", "Merrill", "Stevens Point") ~ "Marshfield Clinic Health System",
+    `Collection Location` %in% c("Sioux Falls Imagenetics", "Edith Sanford Breast Center (coded as Sanford Center)", 
+                                  "Edith Sanford Breast Center","Fargo Amber Valley","Fargo South University", "Missing SF location") ~ "Sanford Health",
     `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
@@ -2728,7 +2738,7 @@ colnames(Hrs_bptl_clin_summ)[1] <- "Collection Location"
 Hrs_bptl_clin_summ <- Hrs_bptl_clin_summ %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "Missing HFH location") ~ "Henry Ford Health", 
+                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Missing HP location") ~ "HealthPartners", #"NSC", 
     `Collection Location`== "Kaiser Permanente Colorado" ~ "Kaiser Permanente Colorado",
     `Collection Location`== "Kaiser Permanente Georgia" ~ "Kaiser Permanente Georgia",
@@ -4206,7 +4216,7 @@ research.vt_plotH_Clin <- ggplot(edited_fig3_1_Clin_tally, aes(x=as.Date(col.Mon
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2023-05-22"),as.Date(currentDate)-7),expand=c(0,0))  +
   scale_color_manual(values=c("Wyandotte"="#B1C7D9", "Macomb"="#164C71", "West Bloomfield"="#FDBE19", "Royal Oak"="#F8D991", 
                               "Fairlane (Dearborn)"="#565C65", "Columbus"= "#3C989E", "Plymouth"="#CC7D15", "Troy"="#DAB384", "Taylor"="#7C94A8","Brownstown"="#2973A5",
-                              "Livonia"="#BBBEC1", "Ford Road"="#99C0C4", "NCO"="#B9D7E3", "Sterling Heights"="#309EBD", "K1 HFH Main"="#97C4D5")) + 
+                              "Livonia"="#BBBEC1", "Ford Road"="#99C0C4", "NCO"="#B9D7E3", "Sterling Heights"="#309EBD", "K1 HFH Main"="#97C4D5", "E Jefferson Pathology"="#74B0C7")) + 
   ggtitle(label="Figure 6.4: Baseline- Weekly Clinical Biospecimen Collections \n by Clinic Location, Henry Ford Health") +
   labs(color = "Clinic Location") +
   theme(panel.background = element_blank(),
@@ -4377,7 +4387,8 @@ research.vt_plotMF1 + guides(color = guide_legend(title = "Collection Location")
 knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 
 research.vt_plSH= visit_wk_site_edited %>%  filter( Site=="Sanford Health")
-research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y=n)) + 
+research.vt_plSH <- research.vt_plSH %>% group_by(col.Monday.date) %>% mutate(total_collections = sum(n))
+research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y=total_collections)) + 
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Number of Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-7),expand=c(0,0))  +
@@ -4399,6 +4410,7 @@ new_SF_plot <- ggplot(visit_wk_site.hybridSF, aes(x=as.Date(col.Monday.date), y=
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   scale_color_manual(values=c("Clinical"="#164C71", "Research"="#FDBE19")) +
   ggtitle(label=paste("Figure 6.12 Baseline- Weekly Biospecimen Collections by Collection Setting \n  Sanford Health")) +
+  labs(color = "Collection Setting") +
   theme(panel.background = element_blank(),
         #legend.title = element_text(size=7),
         legend.position = "bottom",
@@ -4415,7 +4427,11 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Number Collections") +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),(as.Date(currentDate)-7)),expand=c(0,0))  +
-  scale_color_manual(values=c("Fargo South University"="#3C989E", "Sioux Falls Imagenetics"="#CC7D15")) + 
+  scale_color_manual(values=c("Fargo South University"="#3C989E", "Sioux Falls Imagenetics"="#CC7D15",
+                              "Edith Sanford Breast Center (coded as Sanford Center)"="#FDBE19", 
+                                  "Edith Sanford Breast Center"="#2973A5","Fargo Amber Valley"="#309EBD")) +
+                     #guide = guide_legend(nrow = 2, byrow = TRUE)) + 
+  guides(color = guide_legend(nrow = 2, byrow = TRUE, title = "Collection Location")) +
   ggtitle(label="Figure 6.13: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Sanford Health") +
   theme(panel.background = element_blank(),
         legend.position = "bottom",
@@ -4423,7 +4439,7 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) , 
         axis.title.y = element_text(size = 14,color="black"),   
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
-research.vt_plotSH + guides(color = guide_legend(title = "Collection Location")) 
+print(research.vt_plotSH) #+ guides(color = guide_legend(title = "Collection Location")) 
 
 
 
@@ -4494,14 +4510,16 @@ print(research.vt_plotBSW)
 
 
 
-research.vt_plotBSW1 <- ggplot(research.vt_plBSW, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) +
+#research.vt_plotBSW1 <- 
+  ggplot(research.vt_plBSW, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) +
   geom_line() + geom_point(width = 0.2) +
   scale_y_continuous(name="Number Collections", limits = c(0, NA)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week", limits=c( as.Date("2024-06-24"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   #scale_fill_brewer(palette="Dark2") +
   scale_color_manual(values=c("BCC- Fort Worth"="#B1C7D9", "BCC- HWC"="#164C71", "BCC- Worth St"="#FDBE19", 
-                              "FW All Saints"="#565C65", "NTX Biorepository"="#3C989E"),
-                     guide = guide_legend(nrow = 2, byrow = TRUE)) +
+                              "FW All Saints"="#565C65", "NTX Biorepository"="#3C989E")) +
+                     #guide = guide_legend(nrow = 2, byrow = TRUE)) +
+guides(color = guide_legend(nrow = 2, byrow = TRUE, title = "Collection Location"))+
   ggtitle(label="Figure 6.17: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Baylor Scott and White Health") +
   theme(panel.background = element_blank(),
         legend.position = "bottom",
@@ -4509,7 +4527,7 @@ research.vt_plotBSW1 <- ggplot(research.vt_plBSW, aes(x=as.Date(col.Monday.date)
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) ,  #, face = "bold"
         axis.title.y = element_text(size = 14,color="black"),   
         plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) 
-research.vt_plotBSW1 + guides(color = guide_legend(title = "Collection Location")) 
+#research.vt_plotBSW1 + guides(color = guide_legend(title = "Collection Location")) 
 
 
 
@@ -4569,13 +4587,14 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
                                                     d_827220437==809703864 ~ "University of Chicago Medicine",
                                                     d_827220437==472940358 ~ "Baylor Scott and White Health"),
                                    Kit_Status = case_when(#d_173836415_d_266600170_d_319972665_d_221592017==517216441	~"Pending", -- no one will have this
+                                     d_173836415_d_266600170_d_319972665_d_221592017==728267588	~"Initialized",
                                      d_173836415_d_266600170_d_319972665_d_221592017==849527480	~"Address Printed",
                                      d_173836415_d_266600170_d_319972665_d_221592017==241974920	~ "Assigned",
                                      d_173836415_d_266600170_d_319972665_d_221592017==277438316	~ "Shipped",
                                      d_173836415_d_266600170_d_319972665_d_221592017==375535639	~ "Received",
                                      is.na(d_173836415_d_266600170_d_319972665_d_221592017) ~ "No Status"))
 
-kit_table$Kit_Status<- factor(kit_table$Kit_Status,levels=c("No Status", "Address Printed", "Assigned", "Shipped", "Received"))
+kit_table$Kit_Status<- factor(kit_table$Kit_Status,levels=c("No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))
 
 kit_date <- left_join( kit_data, kit_table,  by="Connect_ID")
 
