@@ -2714,7 +2714,7 @@ Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
                locations = gt::cells_title(groups = "title")) %>% 
   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
                 locations = gt::cells_row_groups()) %>% 
-  gt::tab_options(table.width = "90%", table.align = "left", table.font.size = "smaller")
+  gt::tab_options(table.width = "85%", table.align = "left", table.font.size = "smaller")
 
 
 
@@ -3742,7 +3742,8 @@ add_footnote(all_rsch_days, paste0("At the time of reporting, ", dim(biospe_adho
 \FloatBarrier
 ```{r Rsch_clt_days,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
-crosstable.coll_bptl28
+crosstable.coll_bptl28 %>%
+  gt::as_latex()
 ```
 
 \FloatBarrier
@@ -4431,10 +4432,12 @@ research.vt_plotSH <- ggplot(research.vt_plSH, aes(x=as.Date(col.Monday.date), y
                               "Edith Sanford Breast Center (coded as Sanford Center)"="#FDBE19", 
                                   "Edith Sanford Breast Center"="#2973A5","Fargo Amber Valley"="#309EBD")) +
                      #guide = guide_legend(nrow = 2, byrow = TRUE)) + 
-  guides(color = guide_legend(nrow = 2, byrow = TRUE, title = "Collection Location")) +
+guides(color = guide_legend(nrow = 3, byrow = TRUE, title = "Collection Location")) +
   ggtitle(label="Figure 6.13: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Sanford Health") +
   theme(panel.background = element_blank(),
+        legend.title = element_text(size=8.5),
         legend.position = "bottom",
+        legend.text = element_text(size = 8),
         axis.line = element_line(size=0.2),
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14) , 
         axis.title.y = element_text(size = 14,color="black"),   
