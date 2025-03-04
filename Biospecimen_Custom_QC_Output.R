@@ -240,8 +240,29 @@ bioqc_csv <- bioqc %>%
          Rule17_SST1 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                             d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119), "Rule 17-SST1", " "),
          
+         Rule17_SST2 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
+                                d_703954371_d_593843561==353358909 & d_703954371_d_762124027==104430631 & is.na(d_703954371_d_926457119), "Rule 17-SST2", " "),
+         
+         Rule17_SST3 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
+                                d_376960806_d_593843561==353358909 & d_376960806_d_762124027==104430631 & is.na(d_376960806_d_926457119), "Rule 17-SST3", " "),
+         
+         Rule17_SST4 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
+                                d_232343615_d_593843561==353358909 & d_232343615_d_762124027==104430631 & is.na(d_232343615_d_926457119), "Rule 17-SST4", " "),
+         
+         Rule17_SST5 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
+                                d_589588440_d_593843561==353358909 & d_589588440_d_762124027==104430631 & is.na(d_589588440_d_926457119), "Rule 17-SST5", " "),
+         
          Rule17_EDTA1 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
-                                 d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119), "Rule 17-EDTA1", " "),
+                                 d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119) & 
+                                 Connect_ID!="9729007313", "Rule 17-EDTA1", " "),
+         
+         Rule17_EDTA2 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
+                                 d_677469051_d_593843561==353358909 & d_677469051_d_762124027==104430631 & is.na(d_677469051_d_926457119) & 
+                                 Connect_ID!="9729007313", "Rule 17-EDTA2", " "),
+         
+         Rule17_EDTA3 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
+                                 d_683613884_d_593843561==353358909 & d_683613884_d_762124027==104430631 & is.na(d_683613884_d_926457119) & 
+                                 Connect_ID!="9729007313", "Rule 17-EDTA3", " "),
          
          Rule17_ACD1 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_652357376_d_593843561==353358909 & d_652357376_d_762124027==104430631 & is.na(d_652357376_d_926457119) & 
@@ -265,26 +286,26 @@ bioqc_csv <- bioqc %>%
          Rule18_mw = ifelse(d_650516960==534621077 & !is.na(d_173836415_d_266600170_d_448660695) &
                               as.numeric(round(difftime(currentDate, as.Date(d_173836415_d_266600170_d_448660695), units="days"), digits=0))>4 & 
                                 d_143615646_d_593843561==353358909 & d_143615646_d_762124027==104430631 & is.na(d_143615646_d_926457119) &
-                              Connect_ID!="2330722643", "Rule 18-mw", " "),
+                              !(Connect_ID %in% c("2330722643", "3080768933", "9375710580", "3409243008")), "Rule 18-mw", " "),
          
          Rule18_SST1 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
-                                d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119), "Rule 18-SST1", " "),
+                                d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119) & 
+                                Connect_ID!="3409243008", "Rule 18-SST1", " "),
          
          Rule18_EDTA1 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
-                                 d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119), "Rule 18-EDTA1", " "),
+                                 d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119) &
+                                 !(Connect_ID %in% c("3409243008", "8193439990", "5743151720")), "Rule 18-EDTA1", " "),
          
          Rule18_ACD1 = ifelse((d_650516960==534621077 | d_827220437==657167265) & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
                                 d_652357376_d_593843561==353358909 & d_652357376_d_762124027==104430631 & is.na(d_652357376_d_926457119) & 
-                                Connect_ID!=1735874266, "Rule 18-ACD1", " "),
+                                !(Connect_ID %in% c("1735874266", "3409243008")), "Rule 18-ACD1", " "),
          
          Rule18_SST2 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
-                                d_703954371_d_593843561==353358909 & d_703954371_d_762124027==104430631 & is.na(d_703954371_d_926457119), "Rule 18-SST2", " "),
+                                d_703954371_d_593843561==353358909 & d_703954371_d_762124027==104430631 & is.na(d_703954371_d_926457119) & Connect_ID!="3409243008", "Rule 18-SST2", " "),
          
          Rule18_HEP1 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
-                                d_838567176_d_593843561==353358909 & d_838567176_d_762124027==104430631 &  is.na(d_838567176_d_926457119), "Rule 18-HEP1", " "),
-         
-         Rule18_HEP2 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
-                                d_958646668_d_593843561==353358909 & d_958646668_d_762124027==104430631 &  is.na(d_958646668_d_926457119), "Rule 18-HEP2", " "),
+                                d_838567176_d_593843561==353358909 & d_838567176_d_762124027==104430631 &  is.na(d_838567176_d_926457119) & 
+                                !(Connect_ID %in% c("3409243008", "8193439990")), "Rule 18-HEP1", " "),
          
          Rule18_URN = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 &  
                                d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119) & 
@@ -395,8 +416,18 @@ bioqc_csv <- bioqc %>%
          Rule30a = ifelse(d_167958071=="353358909" & d_173836415_d_266600170_d_718172863=="664882224" & is.na(d_173836415_d_266600170_d_139245758), "Rule 30a", " "),
          
          
-         #30.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
-         Rule30b = ifelse(!is.na(d_173836415_d_266600170_d_139245758) & d_173836415_d_266600170_d_718172863=="664882224" & d_167958071=="104430631", "Rule 30b", " ")) 
+         #30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.
+         Rule30b = ifelse(!is.na(d_173836415_d_266600170_d_139245758) & d_173836415_d_266600170_d_718172863=="664882224" & d_167958071=="104430631", "Rule 30b", " "),
+         
+         
+         #49. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clincial, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteBldLocBL_v1r0 must be populated.
+         Rule49 = ifelse(d_878865966==353358909 & d_173836415_d_266600170_d_592099155==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & 
+                                   is.na(d_173836415_d_266600170_d_185243482), "Rule 49", " "),
+         
+         
+         #50. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clincial, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteUrLocatBL_v1r0 must be populated.
+         Rule50 = ifelse(d_167958071==353358909 & d_173836415_d_266600170_d_718172863==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
+                            is.na(d_173836415_d_266600170_d_452847912), "Rule 50", " ")) 
  
 
 
@@ -892,7 +923,7 @@ openxlsx::write.xlsx(dup_list_by_tube,glue("{local_drive}Duplicate_Baseline_Bios
 
 
 
-# 47. If BioSpm_Visit_v1r0 is Baseline and the collection is finalized, then BioSpm_Setting_v1r0 for all collections for the participant should either all be Research or Clinical. This only applies to participants with duplicate baseline collections.
+# 48. If BioSpm_Visit_v1r0 is Baseline and the collection is finalized, then BioSpm_Setting_v1r0 for all collections for the participant should either all be Research or Clinical. This only applies to participants with duplicate baseline collections.
 
 # Identify Connect_IDs with different d_650516960 values
 different_values <- bio_dup_with_status %>%
@@ -924,6 +955,8 @@ split_setting <- split_setting %>%  select(Connect_ID, Collection_ID)
 
 
 
+
+
 ## Only want the output to contain those with errors
 bioqc_csv2 <-  bioqc_csv %>% filter(!if_all(starts_with("Rule"), ~ . == " " | is.na(.)))
 
@@ -937,7 +970,15 @@ bioqc_csv3$Rule48 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, 
 
 
 
+## Make sure rules are in numerical order
+#Grab all rule rules, account for weird rule structure like "Rule18_SST2" or "Rule29a"
+rule_cols <- grep("^Rule\\d+", colnames(bioqc_csv3), value = TRUE)
 
+rule_numbers <- as.numeric(gsub("^Rule(\\d+).*", "\\1", rule_cols))
+
+sorted_rule_cols <- rule_cols[order(rule_numbers)]
+
+bioqc_csv3 <- bioqc_csv3[, c("Connect_ID", "Collection_ID", "Site", sorted_rule_cols)]
 
 
 
