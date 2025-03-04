@@ -2519,6 +2519,7 @@ ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
 #     table.font.size = "7pt")
 
 
+
 #to help shirnk this very long table
 ctable.coll_bptl28 <- ctable.coll_bptl28 %>%  filter(str_sub(.data$`Total Received Research Collections`, 1, 1) != "0")
 
@@ -2729,6 +2730,7 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
 #Footnote, if any data missing
 footnote5.5 <- coll_bptl_diff %>% filter(is.na(any_collection) | is.na(d_678166505))
 
+
 # Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
 #   gt::gt(groupname_col = "Site_Group") %>% 
 #   tab_header('Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location') %>% 
@@ -2755,6 +2757,7 @@ knit_hrs_rsch_55 <- knitr::kable(hrs_rsch_55[, c(1:8)],
   pack_rows(index = site_group_counts) %>% 
   kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
   landscape()
+
 
 
 
