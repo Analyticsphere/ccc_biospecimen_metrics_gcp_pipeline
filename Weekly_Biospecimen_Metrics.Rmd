@@ -2484,6 +2484,9 @@ ctable.coll_bptl28 <- ctable.coll_bptl28[,c(13:18,6)]
 
 colnames(ctable.coll_bptl28) <- c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Day", ">4 Days", "Total Received Research Collections")
 
+#to help shirnk this very long table
+ctable.coll_bptl28 <- ctable.coll_bptl28 %>%  filter(!is.na("Collection Location"))
+
 
 ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
   mutate(Site_Group = case_when(
@@ -2497,38 +2500,57 @@ ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
     TRUE ~ " "
   )) 
 
+
 # crosstable.coll_bptl28 <- ctable.coll_bptl28  %>%
 #   gt::gt(groupname_col = "Site_Group") %>% 
-#   tab_header('Table 5.2: Baseline Collection-To-Receipt Time (in Days) Among Research Collections by Collection Location') %>% 
-#   tab_footnote(footnote= paste0("There are ", dim(biospe_adhoc_missings)[[1]], " participants with missing collection receipt times."),
+#   tab_header(title = "Table 5.2: Baseline Collection-To-Receipt Time (in Days) \n Among Research Collections by Collection Location") %>% 
+#   tab_footnote(footnote = paste0("At the time of reporting, ", dim(biospe_adhoc_missings)[[1]], " of the Research Collections do not have not receipt date/time information available."),
 #                locations = gt::cells_title(groups = "title")) %>% 
 #   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
 #                 locations = gt::cells_row_groups()) %>% 
-#   gt::tab_style(style = list(gt::cell_text(align = "left")), # Align title to the left
-#                 locations = gt::cells_title(groups = "title")) %>%  # Target the title
-#   gt::cols_width(everything() ~ gt::px(100)) %>%  # Narrow column widths if needed  
-#   gt::tab_options(#table.width = "60%", # Adjust the width as needed
-#     table.border.left.width = px(0),
+#   gt::tab_style(style = list(gt::cell_text(align = "center")), 
+#                 locations = gt::cells_title(groups = "title")) %>%  
+#   gt::cols_width(everything() ~ gt::px(80),
+#                   `Collection Location` ~ gt::px(160)) %>%  # Narrow column widths if needed  
+#   gt::tab_options(table.width = "100%", # Adjust the width as needed
+#     table.border.right.width = px(0),
+#     #container.width = "80%",  # Ensure table container doesn't full page width
 #     table.align = "left", # Ensure the table aligns to the left
-#     table.font.size = "xx-small")
+#     table.font.size = "7pt")
 
-crosstable.coll_bptl28 <- ctable.coll_bptl28  %>%
-  gt::gt(groupname_col = "Site_Group") %>% 
-  tab_header(title = "Table 5.2: Baseline Collection-To-Receipt Time (in Days) \n Among Research Collections by Collection Location") %>% 
-  tab_footnote(footnote = paste0("At the time of reporting, ", dim(biospe_adhoc_missings)[[1]], " of the Research Collections do not have not receipt date/time information available."),
-               locations = gt::cells_title(groups = "title")) %>% 
-  gt::tab_style(style = list(gt::cell_text(weight = "bold")),
-                locations = gt::cells_row_groups()) %>% 
-  gt::tab_style(style = list(gt::cell_text(align = "center")), 
-                locations = gt::cells_title(groups = "title")) %>%  
-  gt::cols_width(everything() ~ gt::px(80),
-                  `Collection Location` ~ gt::px(160)) %>%  # Narrow column widths if needed  
-  gt::tab_options(table.width = "100%", # Adjust the width as needed
-    table.border.right.width = px(0),
-    #container.width = "80%",  # Ensure table container doesn't full page width
-    table.align = "left", # Ensure the table aligns to the left
-    table.font.size = "7pt")
 
+#to help shirnk this very long table
+ctable.coll_bptl28 <- ctable.coll_bptl28 %>%  filter(str_sub(.data$`Total Received Research Collections`, 1, 1) != "0")
+
+
+# Separate the Total row
+total_row <- ctable.coll_bptl28 %>% filter(`Collection Location` == "Total")
+
+# Remove the Total row from the main table
+rsch_coll_times <- ctable.coll_bptl28 %>%
+  filter(`Collection Location` != "Total") %>%
+  arrange(Site_Group, `Collection Location`)
+
+# Append the Total row at the bottom with Site_Group = "Total"
+rsch_coll_times <- bind_rows(rsch_coll_times, total_row %>% mutate(Site_Group = "Total"))
+
+
+rsch_coll_times$Site_Group <- factor(rsch_coll_times$Site_Group, levels = unique(rsch_coll_times$Site_Group))
+
+# Count occurrences of each Site_Group to ensure proper grouping
+site_group_counts <- table(rsch_coll_times$Site_Group)
+
+#colnames(rsch_coll_times)[1] <- "Collection Location"
+
+rsch_coll_times52 <- knitr::kable(rsch_coll_times[, c(2:7)], 
+             caption="Table 5.2: Baseline Collection-To-Receipt Time (in Days) Among Research Collections by Collection Location",
+             col.names=c("Collection Location","1 Day","2 Days","3 Days","4 Day",">4 Days","Total Received Research Collections"),
+             align=c("l","c","c","c","c","c","c"), 
+             booktabs = TRUE, longtable = TRUE) %>%  
+  pack_rows(index = site_group_counts) %>%  # Ensure "Total" is last
+  row_spec(which(rsch_coll_times$`Collection Location` %in% names(site_group_counts)), hline_after = TRUE) %>%
+  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
+  landscape()
 
 
 
@@ -2707,14 +2729,33 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
 #Footnote, if any data missing
 footnote5.5 <- coll_bptl_diff %>% filter(is.na(any_collection) | is.na(d_678166505))
 
-Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
-  gt::gt(groupname_col = "Site_Group") %>% 
-  tab_header('Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location') %>% 
-  tab_footnote(footnote= "Note: BPTL receipt time is assumed to be 11:30am ET.",
-               locations = gt::cells_title(groups = "title")) %>% 
-  gt::tab_style(style = list(gt::cell_text(weight = "bold")),
-                locations = gt::cells_row_groups()) %>% 
-  gt::tab_options(table.width = "100%", table.align = "left", table.font.size = "smaller")
+# Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
+#   gt::gt(groupname_col = "Site_Group") %>% 
+#   tab_header('Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location') %>% 
+#   tab_footnote(footnote= "Note: BPTL receipt time is assumed to be 11:30am ET.",
+#                locations = gt::cells_title(groups = "title")) %>% 
+#   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
+#                 locations = gt::cells_row_groups()) %>% 
+#   gt::tab_options(table.width = "100%", table.align = "left", table.font.size = px(7))
+
+hrs_rsch_55 <- Hrs_bptl_rsch_summ %>%
+  arrange(Site_Group, `Collection Location`)
+
+
+hrs_rsch_55$Site_Group <- factor(hrs_rsch_55$Site_Group, levels = unique(hrs_rsch_55$Site_Group))
+
+# Count occurrences of each Site_Group to ensure proper grouping
+site_group_counts <- table(hrs_rsch_55$Site_Group)
+
+
+knit_hrs_rsch_55 <- knitr::kable(hrs_rsch_55[, c(1:8)], 
+             caption='Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location',
+             align=c("l","c","c","c","c","c","c","c"), 
+             booktabs = TRUE, longtable = TRUE) %>%  
+  pack_rows(index = site_group_counts) %>% 
+  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
+  landscape()
+
 
 
 
@@ -3742,8 +3783,10 @@ add_footnote(all_rsch_days, paste0("At the time of reporting, ", dim(biospe_adho
 \FloatBarrier
 ```{r Rsch_clt_days,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
-crosstable.coll_bptl28 %>%
-  gt::as_latex()
+#crosstable.coll_bptl28 %>% gt::as_latex()
+
+add_footnote(rsch_coll_times52, paste0("At the time of reporting, ", dim(biospe_adhoc_missings)[[1]], " of the Research Collections do not have receipt date/time information available."), notation="none")
+
 ```
 
 \FloatBarrier
@@ -3776,7 +3819,10 @@ knitr::kable(SF_coll_rcpt,
 
 \FloatBarrier
 ```{r Coll_Time_Spread_Rsch,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
-Hrs_bptl_rsch
+#Hrs_bptl_rsch
+
+add_footnote(knit_hrs_rsch_55, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation="none")
+
 ```
 
 
