@@ -36,8 +36,8 @@ RUN apt-get update \
     tk-dev 
 
 # Install tinytex
-# RUN Rscript -e 'tinytex::install_tinytex()'
-RUN Rscript -e 'tinytex::install_tinytex(repository = "illinois")'
+RUN Rscript -e 'tinytex::install_tinytex()'
+#RUN Rscript -e 'tinytex::install_tinytex(repository = "illinois")'
 
 # Needed for summarytools namespace
 RUN Rscript -e 'install.packages("tcltk")'
