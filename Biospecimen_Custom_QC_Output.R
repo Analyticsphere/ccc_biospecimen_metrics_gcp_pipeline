@@ -402,8 +402,10 @@ bioqc_csv <- bioqc %>%
          Rule28d = ifelse(!is.na(d_173836415_d_266600170_d_448660695) & (is.na(d_173836415_d_266600170_d_915179629) | d_684635302=="104430631"), "Rule 28d", " "),
          
          
-         #29.a. If BioFin_BaseBloodCol_v1r0= yes, and BioSpm_BloodSettingBL_v1r0= Clinical, then BioClin_ClinBloodTmBL_v1r0 must be populated.
-         Rule29a = ifelse(d_878865966=="353358909" & d_173836415_d_266600170_d_592099155=="664882224" & is.na(d_173836415_d_266600170_d_982213346), "Rule 29a", " "),
+         #29.a. If BioFin_BaseBloodCol_v1r0= yes, BioSpm_BloodSettingBL_v1r0= Clinical, and BioClin_DBBloodRRLDt_v1r0 occurred more than seven days ago, then BioClin_ClinBloodTmBL_v1r0 must be populated.
+         Rule29a = ifelse(d_878865966=="353358909" & d_173836415_d_266600170_d_592099155=="664882224" & 
+                            as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7 & 
+                            is.na(d_173836415_d_266600170_d_982213346), "Rule 29a", " "),
          
          
          #29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
@@ -412,8 +414,9 @@ bioqc_csv <- bioqc %>%
                             !(Connect_ID %in%  c(7848933050, 5885436394, 9258958214, 2300063524)), "Rule 29b", " "),
          
          
-         #30.a. If BioFin_BaseBloodCol_v1r0= yes, and BioSpm_BloodSettingBL_v1r0= Clinical, then BioClin_ClinBloodTmBL_v1r0 must be populated.
-         Rule30a = ifelse(d_167958071=="353358909" & d_173836415_d_266600170_d_718172863=="664882224" & is.na(d_173836415_d_266600170_d_139245758), "Rule 30a", " "),
+         #30.a. 30.a. If BioFin_BaseUrineCol_v1r0= yes, and BioSpm_UrineSettingBL_v1r0= Clinical, and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, then BioClin_ClinicalUrnTmBL_v1r0 must be populated.
+         Rule30a = ifelse(d_167958071=="353358909" & d_173836415_d_266600170_d_718172863=="664882224" & is.na(d_173836415_d_266600170_d_139245758) & 
+                            as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7, "Rule 30a", " "),
          
          
          #30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.

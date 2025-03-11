@@ -926,10 +926,11 @@ knitr::kable(r_mw3.4)
 
 
 
-### 29.a. If BioFin_BaseBloodCol_v1r0= yes, and BioSpm_BloodSettingBL_v1r0= Clinical, then BioClin_ClinBloodTmBL_v1r0 must be populated.
+### 29.a. If BioFin_BaseBloodCol_v1r0= yes, BioSpm_BloodSettingBL_v1r0= Clinical, and BioClin_DBBloodRRLDt_v1r0 occurred more than seven days ago, then BioClin_ClinBloodTmBL_v1r0 must be populated.
 ```{r All3_C_B1, echo=FALSE, warning=FALSE, message=FALSE}
 
-c_blood3.1 <- bioqc %>%  filter(d_878865966=="353358909" & d_173836415_d_266600170_d_592099155=="664882224" & is.na(d_173836415_d_266600170_d_982213346)) %>% 
+c_blood3.1 <- bioqc %>%  filter(d_878865966=="353358909" & d_173836415_d_266600170_d_592099155=="664882224" & 
+                                  as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7 & is.na(d_173836415_d_266600170_d_982213346)) %>% 
     select(Site, Connect_ID, d_878865966, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_982213346) %>%  sort_by(Site)
 
 
@@ -954,10 +955,11 @@ knitr::kable(c_blood3.4)
 
 
 
-### 30.a. If BioFin_BaseUrineCol_v1r0= yes, and BioSpm_UrineSettingBL_v1r0= Clinical, then BioClin_ClinicalUrnTmBL_v1r0 must be populated.
+### 30.a. If BioFin_BaseUrineCol_v1r0= yes, and BioSpm_UrineSettingBL_v1r0= Clinical, and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, then BioClin_ClinicalUrnTmBL_v1r0 must be populated.
 ```{r All3_C_U1, echo=FALSE, warning=FALSE, message=FALSE}
 
-c_urine3.1 <- bioqc %>%  filter(d_167958071=="353358909" & d_173836415_d_266600170_d_718172863=="664882224" & is.na(d_173836415_d_266600170_d_139245758))  %>%  
+c_urine3.1 <- bioqc %>%  filter(d_167958071=="353358909" & d_173836415_d_266600170_d_718172863=="664882224" & 
+                                  as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7 & is.na(d_173836415_d_266600170_d_139245758))  %>%  
     select(Site, Connect_ID, d_167958071, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_139245758) %>%  sort_by(Site)
 
 
