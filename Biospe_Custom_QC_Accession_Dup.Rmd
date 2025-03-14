@@ -197,7 +197,7 @@ qc2_1a <- bioqc %>%  filter( d_973670172_d_593843561==104430631  & d_173836415_d
                                                6523900663, 6538980272, 7106367407, 9366425281, 9652100378, 9672292896, 
                                                6422794867, 1349953410, 1731138933, 2769291903, 3589595480, 3722445358, 
                                                5972658064, 8553891957, 9121406600, 9575612025, 4057490101, 9167792140,
-                                               8924667241, 9694753790, 5899565591, 6568449334)))
+                                               8924667241, 9694753790, 5899565591, 6568449334, 1371560328, 8625295305)))
 qc2_1a <- qc2_1a  %>% select(Site, Connect_ID, d_973670172_d_593843561, d_173836415_d_266600170_d_786930107)  %>%  sort_by(Site)
 
 
@@ -1441,52 +1441,52 @@ knitr::kable(invalid_rows) %>% kable_styling(latex_options = "scale_down", full_
 
 
 
-bio <- "WITH T AS (
-  SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-  GROUP BY Connect_ID
-  HAVING COUNT(Connect_ID) =1 ) 
-SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Connect_ID = T.Connect_ID ;"
+# bio2 <- "WITH T AS (
+#   SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+#   GROUP BY Connect_ID
+#   HAVING COUNT(Connect_ID) =1 ) 
+# SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+# INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Connect_ID = T.Connect_ID ;"
 
 
 
-parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437
+parts2 <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL"
 
-parts_table <- bq_project_query(project, parts)
+parts_table2 <- bq_project_query(project, parts2)
 
-parts_data <- bq_table_download(parts_table, bigint = "integer64", n_max = Inf, page_size = 1000)
+parts_data2 <- bq_table_download(parts_table2, bigint = "integer64", n_max = Inf, page_size = 1000)
 
-bio_table <- bq_project_query(project, bio)
-bio_data <- bq_table_download(bio_table, bigint = "integer64", n_max = Inf, page_size = 1000)
-
-
-bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
-parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
+#bio_table2 <- bq_project_query(project, bio2)
+#bio_data2 <- bq_table_download(bio_table2, bigint = "integer64", n_max = Inf, page_size = 1000)
 
 
-
-#bioqc_join= left_join(parts_data, bio_data, by="Connect_ID") 
-
-#bioqc <- as_tibble(bioqc_join)
-
-bioqc= left_join(bio_data, parts_data,  by=c("Connect_ID", "d_827220437") )
-
-knitr::opts_chunk$set(comment = NA)
+#bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
+parts_data2$Connect_ID <- as.numeric(parts_data2$Connect_ID)
 
 
-
-
-
-bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartners",
-                                                 d_827220437==548392715 ~ "Henry Ford Health System",
-                                                 d_827220437==303349821 ~ "Marshfield Clinical Health System",
-                                                 d_827220437==657167265 ~ "Sanford Health",
-                                                 d_827220437==809703864 ~ "University of Chicago Medicine",
-                                                d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                                                 d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                                                 d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
+# 
+# #bioqc_join= left_join(parts_data, bio_data, by="Connect_ID") 
+# 
+# #bioqc <- as_tibble(bioqc_join)
+# 
+# bioqc2= left_join(bio_data2, parts_data2,  by=c("Connect_ID", "d_827220437") )
+# 
+# knitr::opts_chunk$set(comment = NA)
+# 
+# 
+# 
+# 
+# 
+# bioqc2 <- bioqc2 %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartners",
+#                                                  d_827220437==548392715 ~ "Henry Ford Health System",
+#                                                  d_827220437==303349821 ~ "Marshfield Clinical Health System",
+#                                                  d_827220437==657167265 ~ "Sanford Health",
+#                                                  d_827220437==809703864 ~ "University of Chicago Medicine",
+#                                                 d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+#                                                  d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+#                                                  d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+#                                                  d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
 ```
 
@@ -1518,7 +1518,7 @@ dup_data <- bq_table_download(dup_table, bigint = "integer64", n_max = Inf, page
 dup_data$Connect_ID <- as.numeric(dup_data$Connect_ID)
 
 
-bio_dup= left_join(dup_data, parts_data, by=c("Connect_ID", "d_827220437") )
+bio_dup= left_join(dup_data, parts_data2, by=c("Connect_ID", "d_827220437") )
 
 bio_dup <- bio_dup %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HP",
                                                  d_827220437==548392715 ~ "HF",
@@ -1636,7 +1636,24 @@ knitr::kable(blood_loc)
 
 
 
-###	50. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clincial, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteUrLocatBL_v1r0 must be populated.
+
+###	50. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clincial, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SntBloodAccIDBL_v1r0 or BioClin_PolyBloodIDBL_v1r0 must be populated.
+```{r New_PolyBlood_Check, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+blood_locPL <- bioqc %>%  filter(d_878865966==353358909 & d_173836415_d_266600170_d_592099155==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & 
+                           (is.na(d_173836415_d_266600170_d_341570479) & is.na(d_173836415_d_266600170_d_543608829))) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_543608829) %>%  sort_by(Site)
+
+
+colnames(blood_locPL) <- c("Site", "Connect ID", "BioClin_SntBloodAccIDBL", "BioClin_PolyBloodIDBL")
+knitr::kable(blood_locPL)
+
+```
+
+
+
+###	51. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clincial, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteUrLocatBL_v1r0 must be populated.
 ```{r BioClin_SiteUrLocatBL_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 
@@ -1650,6 +1667,20 @@ knitr::kable(urine_loc)
 
 ```
 
+
+###	52. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clincial, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SntUrineAccIDBL_v1r0 or BioClin_PolyUrineIDBL_v1r0 must be populated.
+```{r New_PolyUrine_Check, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+urine_locPL <- bioqc %>%  filter(d_167958071==353358909 & d_173836415_d_266600170_d_718172863==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
+                           (is.na(d_173836415_d_266600170_d_198261154) & is.na(d_173836415_d_266600170_d_110349197))) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_110349197) %>%  sort_by(Site)
+
+
+colnames(urine_locPL) <- c("Site", "Connect ID", "BioClin_SntUrineAccIDBL", "BioClin_PolyUrineIDBL")
+knitr::kable(urine_locPL)
+
+```
 
 
 

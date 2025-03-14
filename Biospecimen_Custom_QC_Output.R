@@ -169,7 +169,7 @@ bioqc_csv <- bioqc %>%
                                                6523900663, 6538980272, 7106367407, 9366425281, 9652100378, 9672292896, 
                                                6422794867, 1349953410, 1731138933, 2769291903, 3589595480, 3722445358, 
                                                5972658064, 8553891957, 9121406600, 9575612025, 4057490101, 9167792140,
-                                               8924667241, 9694753790, 5899565591, 6568449334)), 
+                                               8924667241, 9694753790, 5899565591, 6568449334, 1371560328, 8625295305)), 
                          "Rule 2b", " "),
          
          # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
@@ -423,15 +423,25 @@ bioqc_csv <- bioqc %>%
          Rule30b = ifelse(!is.na(d_173836415_d_266600170_d_139245758) & d_173836415_d_266600170_d_718172863=="664882224" & d_167958071=="104430631", "Rule 30b", " "),
          
          
-         #49. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clincial, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteBldLocBL_v1r0 must be populated.
+         #49. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clinical, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteBldLocBL_v1r0 must be populated.
          Rule49 = ifelse(d_878865966==353358909 & d_173836415_d_266600170_d_592099155==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & 
                                    is.na(d_173836415_d_266600170_d_185243482), "Rule 49", " "),
          
          
-         #50. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clincial, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteUrLocatBL_v1r0 must be populated.
-         Rule50 = ifelse(d_167958071==353358909 & d_173836415_d_266600170_d_718172863==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
-                            is.na(d_173836415_d_266600170_d_452847912), "Rule 50", " ")) 
+         #50. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clinical, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SntBloodAccIDBL_v1r0 or BioClin_PolyBloodIDBL_v1r0 must be populated.
+         Rule50 = ifelse(d_878865966==353358909 & d_173836415_d_266600170_d_592099155==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & 
+                           (is.na(d_173836415_d_266600170_d_341570479) & is.na(d_173836415_d_266600170_d_543608829)), "Rule 50", " "),
+         
+         
+         #51. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clinical, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteUrLocatBL_v1r0 must be populated.
+         Rule51 = ifelse(d_167958071==353358909 & d_173836415_d_266600170_d_718172863==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
+                            is.na(d_173836415_d_266600170_d_452847912), "Rule 51", " "), 
  
+         #52. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clinical, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SntUrineAccIDBL_v1r0 or BioClin_PolyUrineIDBL_v1r0 must be populated.
+         Rule52 = ifelse(d_167958071==353358909 & d_173836415_d_266600170_d_718172863==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
+                           (is.na(d_173836415_d_266600170_d_198261154) & is.na(d_173836415_d_266600170_d_110349197)), "Rule 52", " ")) 
+
+
 
 
 
