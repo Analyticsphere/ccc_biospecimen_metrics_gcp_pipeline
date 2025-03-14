@@ -514,8 +514,6 @@ qc13_tube_sst5 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173
 colnames(qc13_tube_sst5) <- c("Site", "Connect ID", "Serum Separator Tube 5- Date Received")
 knitr::kable(qc13_tube_sst5)
 
-
-
 qc13_tube3 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119) & 
                                   Connect_ID!="9729007313") %>% 
   select(Site, Connect_ID, d_454453939_d_926457119) %>%  sort_by(Site)
@@ -1654,6 +1652,7 @@ knitr::kable(blood_locPL)
 
 
 ###	51. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clincial, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteUrLocatBL_v1r0 must be populated.
+
 ```{r BioClin_SiteUrLocatBL_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
 
@@ -1681,6 +1680,7 @@ colnames(urine_locPL) <- c("Site", "Connect ID", "BioClin_SntUrineAccIDBL", "Bio
 knitr::kable(urine_locPL)
 
 ```
+
 
 
 
