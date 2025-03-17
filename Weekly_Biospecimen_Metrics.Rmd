@@ -4661,6 +4661,12 @@ kitassembly_table <- bq_project_query(project, kitassembly)
 kitassembly_data <- bq_table_download(kitassembly_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kitassembly_data$Connect_ID <- as.numeric(kitassembly_data$Connect_ID)
 kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
+
+
+#Removing duplicates 
+kit_assembly <- kit_assembly %>%
+  distinct(Connect_ID, .keep_all = TRUE)
+
 ```
 
 
@@ -4912,7 +4918,7 @@ all_shipped_after2
 
 
 ####################
-all_completed <- left_join(table27_elg_distinct,kit_assembly, by=c("Connect_ID", "Site",  "Kit_Status", "d_173836415_d_266600170_d_319972665_d_661940160"))
+all_completed <- left_join(table27_elg_distinct,kit_assembly, by=c("Connect_ID", "Site",  "Kit_Status", "d_173836415_d_266600170_d_319972665_d_661940160", 'd_547363263'))
 
 Coll_Card_Table <- all_completed %>% filter(d_173836415_d_266600170_d_319972665_d_221592017 ==375535639) %>% 
   mutate(Card_Status = case_when(d_137401245==353358909	~"Collection Card Not Included",
