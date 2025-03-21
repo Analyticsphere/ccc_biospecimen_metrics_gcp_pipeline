@@ -1445,6 +1445,22 @@ one_skip_funct(D_591826144, "Still Experiencing the Other Symptoms Since COVID-1
 #COV20A1
 
 
+## Handle variables that have the nested "entity" and combine them with those that don't
+### The covid dataframe has these entity instances, the bu/bum did not
+
+# Identify base variable names (removing "_entity_" portion)
+base_vars <- unique(gsub("_entity_", "_", names(CVD_tib)[grepl("^D_114280729_", names(CVD_tib))]))
+
+# Coalesce variables (handling both versions)
+CVD_tib <- CVD_tib %>% mutate(across(all_of(base_vars), 
+                                     ~ coalesce(.,
+                                                get(gsub("_(D_\\d+)$", "_entity_\\1", cur_column()))), 
+                                     .names = "{.col}"))
+
+
+
+
+##Factor these responses
 variable_pattern <- "^D_114280729_"
 levels <- c(232063618, 948148236,  692824372, "Skipped this Question")
 
