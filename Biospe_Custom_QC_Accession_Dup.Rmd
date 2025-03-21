@@ -496,13 +496,15 @@ qc13_tube5 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_1738364
 colnames(qc13_tube5) <- c("Site", "Connect ID", "Serum Separator Tube 2- Date Received")
 knitr::kable(qc13_tube5)
 
-qc13_tube_sst3 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_376960806_d_593843561==353358909 & d_376960806_d_762124027==104430631 & is.na(d_376960806_d_926457119)) %>% 
+qc13_tube_sst3 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_376960806_d_593843561==353358909 & d_376960806_d_762124027==104430631 & is.na(d_376960806_d_926457119) & 
+                                      Connect_ID!="9729007313") %>% 
   select(Site, Connect_ID, d_376960806_d_926457119) %>%  sort_by(Site)
 
 colnames(qc13_tube_sst3) <- c("Site", "Connect ID", "Serum Separator Tube 3- Date Received")
 knitr::kable(qc13_tube_sst3)
 
-qc13_tube_sst4 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_232343615_d_593843561==353358909 & d_232343615_d_762124027==104430631 & is.na(d_232343615_d_926457119)) %>% 
+qc13_tube_sst4 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_232343615_d_593843561==353358909 & d_232343615_d_762124027==104430631 & is.na(d_232343615_d_926457119) & 
+                                      Connect_ID!="9729007313") %>% 
   select(Site, Connect_ID, d_232343615_d_926457119) %>%  sort_by(Site)
 
 colnames(qc13_tube_sst4) <- c("Site", "Connect ID", "Serum Separator Tube 4- Date Received")
