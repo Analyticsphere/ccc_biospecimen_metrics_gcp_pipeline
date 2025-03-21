@@ -3120,7 +3120,7 @@ col_num_1.2_gt
 ```
 
 \FloatBarrier
-```{r KnitrTables1.4, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+```{r KnitrTables1.5, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 add_footnote(SF_collections_tbl, 
 
@@ -3134,12 +3134,12 @@ add_footnote(SF_top10_collections,footnote_text, notation= "none")
 
 ```
 \FloatBarrier
-```{r KnitrTables1.5, eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+```{r KnitrTables1.7, eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 biospe.bld #%>% kable_styling(latex_options = "scale_down")
 ```
 
 \FloatBarrier
-```{r KnitrTables1.6, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+```{r KnitrTables1.8, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 
 tab5=knitr::kable(distrb_allsetts_with_totals, 
                   #col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
@@ -3151,7 +3151,7 @@ add_footnote(tab5, "Note: Blood and urine specimens are not collected in the Hom
 ```
 
 \FloatBarrier
-```{r KnitrTables1.7, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+```{r KnitrTables1.9, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 tab5_1=knitr::kable(site_results["Henry Ford Health"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
                     caption='Table 1.9: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Henry Ford Health', 
@@ -3161,7 +3161,7 @@ add_footnote(tab5_1, "Note: Blood and urine specimens are not collected in the H
 ```
 
 \FloatBarrier
-```{r KnitrTables1.8, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+```{r KnitrTables1.10, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 tab5_2=knitr::kable(site_results["HealthPartners"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
                     caption='Table 1.10: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, HealthPartners', 
@@ -3171,7 +3171,7 @@ add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the H
 ```
 
 \FloatBarrier
-```{r KnitrTables1.9, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+```{r KnitrTables1.11, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 
 tab5_3=knitr::kable(site_results["Sanford Health"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
@@ -3182,7 +3182,7 @@ add_footnote(tab5_3, "Note: Blood and urine specimens are not collected in the H
 ```
 
 \FloatBarrier
-```{r KnitrTables1.10, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+```{r KnitrTables1.12, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 
 tab5_4=knitr::kable(site_results["University of Chicago Medicine"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
@@ -3193,7 +3193,7 @@ add_footnote(tab5_4, "Note: Blood and urine specimens are not collected in the H
 ```
 
 \FloatBarrier
-```{r KnitrTables1.11, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+```{r KnitrTables1.13, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 #Change from 1.8 to 1.9
 Bld_urn_cli = knitr::kable(system_coll, 
                            caption='Table 1.13: Baseline- Data System Status Among Clinical Biospecimen Collections by Specimen Type', 
