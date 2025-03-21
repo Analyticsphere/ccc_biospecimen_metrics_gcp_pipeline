@@ -13,7 +13,7 @@ header-includes:
 output:
   pdf_document:
       latex_engine: xelatex
-      extra_dependencies: ["float"]
+      extra_dependencies: ["float", "longtable", "booktabs"]
       toc: true
       keep_tex: yes
       fig_width: 7
@@ -373,6 +373,15 @@ add_totals_and_percentages <- function(df, total_position = c("row", "col", "bot
   
   return(df)
 }
+
+
+###################
+
+
+
+#allows gt tables to go onto a second page if it gets too long
+gt::gt_latex_dependencies()
+
 
 ```
 
@@ -798,12 +807,12 @@ col_num_1.2_gt <- col_num_1.2 %>%
 
 
 
-
 col_num_1.2_gt <- col_num_1.2_gt %>%  summary_rows(
   groups = TRUE,
   columns = vars("Total Clinical Collections"),
   fns = (Sum = ~sum(.)),
-) %>% tab_header("Table 1.4: Baseline Clinical Biospecimen Collections by Clinic Location")
+) %>% tab_header("Table 1.4: Baseline Clinical Biospecimen Collections by Clinic Location") 
+  
 
 
 
@@ -3095,12 +3104,17 @@ settings_breakdown
   
 ```
 \FloatBarrier
-```{r KnitrTables1.2_1.3, eval=TRUE,echo=FALSE,error=FALSE, message=FALSE,warning=FALSE,results='asis'}
-options(knitr.table.format = "latex")
-options(kableExtra.auto_format = FALSE)
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```{r KnitrTables1.3, eval=TRUE,echo=FALSE,error=FALSE, message=FALSE,warning=FALSE,results='asis'}
+# options(knitr.table.format = "latex")
+# options(kableExtra.auto_format = FALSE)
+# knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 
-col_num_1.1_gt 
+
+col_num_1.2_gt 
+```
+\newpage
+\FloatBarrier
+```{r KnitrTables1.4, eval=TRUE,echo=FALSE,error=FALSE, message=FALSE,warning=FALSE,results='asis'}
 
 col_num_1.2_gt 
 ```
@@ -4249,7 +4263,7 @@ ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location))
                      values=c("HFH K-13 Research Clinic"="#164C71", "HFH Cancer Pavilion Research Clinic"="#FDBE19", 
                               "HFH Livonia Research Clinic"="#3C989E", "HFH Pop-Up"="#CC7D15",
                               "HFH Detroit Northwest"="#BBBEC1"),
-                     guide = guide_legend(nrow = 2, byrow = TRUE)) +
+                     guide = guide_legend(nrow = 3, byrow = TRUE)) +
   labs(color = "Collection Location") +
   ggtitle(label="Figure 6.3: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Henry Ford Health") +
   theme(panel.background = element_blank(),
