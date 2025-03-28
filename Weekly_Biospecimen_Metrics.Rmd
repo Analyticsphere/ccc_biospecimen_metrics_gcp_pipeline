@@ -2635,15 +2635,20 @@ ctabs_rsch_coll_days <- coll_bptl_diff2 %>%  tabyl(Site, coll_days_diff) %>%  ad
 rsch_coll_days <- coll_bptl_diff2 %>%  tabyl(Clin_Site_location, coll_days_diff) %>%  add_totals_and_percentages(total_position = c("both"), percentage_type = "row")
 colnames(rsch_coll_days) <- c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Day", ">4 Days", "Total Received Clinical Collections")
 
+rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Colorado"]="KPCO"
+rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Georgia"]="KPGA"
+rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Hawaii"]="KPHI"
+rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Northwest"]="KPNW"
+
 rsch_coll_days <- rsch_coll_days %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
                                  "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Missing HP location") ~ "HealthPartners", #"NSC", 
-    `Collection Location`== "Kaiser Permanente Colorado" ~ "Kaiser Permanente Colorado",
-    `Collection Location`== "Kaiser Permanente Georgia" ~ "Kaiser Permanente Georgia",
+    `Collection Location`== "KPCO" ~ "Kaiser Permanente Colorado",
+    `Collection Location`== "KPGA" ~ "Kaiser Permanente Georgia",
     `Collection Location` %in% c("Oahu Clinics", "Non-Oahu Clinics") ~ "Kaiser Permanente Hawaii",
-    `Collection Location`== "Kaiser Permanente Northwest" ~ "Kaiser Permanente Northwest",
+    `Collection Location`== "KPNW" ~ "Kaiser Permanente Northwest",
     `Collection Location`== "Sanford Health" ~ "Sanford Health",
     `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", 
                                  "DCAM (Hyde Park)","Crown Point", "Missing UC location") ~ "University of Chicago Medicine",
@@ -2658,14 +2663,16 @@ crosstable.coll_bptl_2 <- rsch_coll_days  %>%
   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
                 locations = gt::cells_row_groups()) %>% 
   gt::tab_style(style = list(gt::cell_text(align = "center")), 
-                locations = gt::cells_title(groups = "title")) %>%  
-  gt::cols_width(everything() ~ gt::px(80),
-                  `Collection Location` ~ gt::px(120)) %>%  # Narrow column widths if needed  
-  gt::tab_options(table.width = "90%", # Adjust the width as needed
-    table.border.right.width = px(0),
-    #container.width = "80%",  # Ensure table container doesn't full page width
-    table.align = "left", # Ensure the table aligns to the left
-    table.font.size = "7pt")
+                locations = gt::cells_title(groups = "title")) %>%
+gt::cols_width(
+  `Collection Location` ~ gt::px(175), #Location Titles are by far the longest
+  `Total Received Clinical Collections` ~ gt::px(80), # Totals are rather long as well
+  everything() ~ gt::px(70)) %>%  
+gt::tab_options(table.width = "95%", # Adjust the width as needed
+  table.border.right.width = px(0),
+  #container.width = "80%",  # Ensure table container doesn't full page width
+  table.align = "left", # Ensure the table aligns to the left
+  table.font.size = "6pt")
 
 
 ```
@@ -3110,7 +3117,7 @@ settings_breakdown
 # knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 
 
-col_num_1.2_gt 
+col_num_1.1_gt 
 ```
 \newpage
 \FloatBarrier
