@@ -186,7 +186,7 @@ knitr::kable(qc2)
 qc2_1 <- bioqc %>%  filter( d_232343615_d_593843561=="No" & d_299553921_d_593843561=="No" & d_376960806_d_593843561=="No" & d_454453939_d_593843561=="No" &
                               d_589588440_d_593843561=="No" & d_958646668_d_593843561=="No" & d_677469051_d_593843561=="No" & d_683613884_d_593843561=="No" &
                               d_703954371_d_593843561=="No" & d_838567176_d_593843561=="No" &  d_173836415_d_266600170_d_693370086=="Yes" & 
-                              Connect_ID!="2300063524" & Connect_ID!="7848933050") #specific exclusion- not editing this persons data
+                              !(Connect_ID %in% c("2300063524","7848933050", "3467573584"))) 
 qc2_1 <- qc2_1  %>% select(Site, Connect_ID, d_173836415_d_266600170_d_693370086)  %>%  sort_by(Site)
 
 
@@ -208,7 +208,8 @@ qc2_1a <- bioqc %>%  filter( d_973670172_d_593843561=="No"  & d_173836415_d_2666
                                                    "6523900663", "6538980272", "7106367407", "9366425281", "9652100378", "9672292896", 
                                                    "6422794867", "1349953410", "1731138933", "2769291903", "3589595480", "3722445358", 
                                                    "5972658064", "8553891957", "9121406600", "9575612025", "4057490101", "9167792140",
-                                                   "8924667241", "9694753790", "5899565591", "6568449334", "1371560328", "8625295305")))
+                                                   "8924667241", "9694753790", "5899565591", "6568449334", "1371560328", "8625295305",
+                                                   "6862754687", "9143436002")))
 
 qc2_1a <- qc2_1a  %>% select(Site, Connect_ID, d_973670172_d_593843561, d_173836415_d_266600170_d_786930107)  %>%  sort_by(Site)
 
@@ -644,7 +645,7 @@ knitr::kable(qc13_Rtube2)
 
 
 qc13_Rtube3 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_454453939_d_593843561=="Yes" & d_454453939_d_762124027=="No" & is.na(d_454453939_d_926457119) &
-                                    !(Connect_ID %in% c("3409243008", "8193439990", "5743151720"))) %>% 
+                                    !(Connect_ID %in% c("3409243008", "8193439990", "5743151720", "5861017989"))) %>% 
   select(Site, Connect_ID, d_454453939_d_926457119) %>%  sort_by(Site)
 
 colnames(qc13_Rtube3) <- c("Site", "Connect ID", "EDTA Tube 1- Date Received")
@@ -1001,24 +1002,26 @@ knitr::kable(c_urine3.4)
 
 ```{r TBA1, echo=FALSE, warning=FALSE, message=FALSE}
 ### TBA1. If BioClin_SiteBloodCollBL_v1r0 is yes, then BioFin_BaseBloodCol_v1r0 should be yes
-no_db_blood <- bioqc %>%  filter(d_173836415_d_266600170_d_693370086=="353358909" & d_878865966=="No")  %>%  
+no_db_blood <- bioqc %>%  filter(d_173836415_d_266600170_d_693370086=="Yes" & d_878865966=="No")  %>%  
     select(Site, Connect_ID, d_173836415_d_266600170_d_693370086, d_878865966) %>%  sort_by(Site)
 
 
-colnames(no_db_blood) <- c("Site", "Connect ID",  "BioClin_SiteBloodCollBL_v1r0", "BioFin_BaseBloodCol_v1r0")
-#knitr::kable(no_db_blood) 
+# colnames(no_db_blood) <- c("Site", "Connect ID",  "BioClin_SiteBloodCollBL_v1r0", "BioFin_BaseBloodCol_v1r0")
+# knitr::kable(no_db_blood) 
+# write.csv(no_db_blood,paste0('Github_Issue185', Sys.Date(), '.csv'), row.names = F,na="")
                               
 ```
 
 
 ```{r TBA2, echo=FALSE, warning=FALSE, message=FALSE}
 ### TBA2. If BioClin_SiteUrineCollBL_v1r0 is yes, then BioFin_BaseUrineCol_v1r0 should be yes
-no_db_urine <- bioqc %>%  filter(d_173836415_d_266600170_d_786930107=="353358909" & d_167958071=="No")  %>%  
-    select(Site, Connect_ID, d_173836415_d_266600170_d_786930107, d_167958071) %>%  sort_by(Site)
-
-
-colnames(no_db_urine) <- c("Site", "Connect ID",  "BioClin_SiteUrineCollBL_v1r0", "BioFin_BaseUrineCol_v1r0")
-#knitr::kable(no_db_urine) 
+# no_db_urine <- bioqc %>%  filter(d_173836415_d_266600170_d_786930107=="Yes" & d_167958071=="No")  %>%  
+#     select(Site, Connect_ID, d_173836415_d_266600170_d_786930107, d_167958071) %>%  sort_by(Site)
+# 
+# 
+# colnames(no_db_urine) <- c("Site", "Connect ID",  "BioClin_SiteUrineCollBL_v1r0", "BioFin_BaseUrineCol_v1r0")
+# knitr::kable(no_db_urine) 
+# write.csv(no_db_urine,paste0('Github_Issue_185', Sys.Date(), '.csv'), row.names = F,na="")
                               
 ```
 
