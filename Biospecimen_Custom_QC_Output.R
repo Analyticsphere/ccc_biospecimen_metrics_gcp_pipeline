@@ -716,7 +716,7 @@ bioqc_csv$Rule43 = ifelse(bioqc_csv$Connect_ID %in% homsetting$Connect_ID, "Rule
 bioqc_csv$Rule44 = ifelse(bioqc_csv$Connect_ID %in% bl_mw$Connect_ID, "Rule 44", " ")
 bioqc_csv$Rule45 = ifelse(bioqc_csv$Connect_ID %in% mw_dt$Connect_ID, "Rule 45", " ")
 bioqc_csv$Rule46 = ifelse(bioqc_csv$Connect_ID %in% kits_recvd$Connect_ID, "Rule 46", " ")
-bioqc_csv$Rule47 = ifelse(bioqc_csv$Connect_ID %in% kits_recvd$Connect_ID, "Rule 47", " ")
+bioqc_csv$Rule47 = ifelse(bioqc_csv$Connect_ID %in% invalid_rows$Connect_ID, "Rule 47", " ")
 
 
 

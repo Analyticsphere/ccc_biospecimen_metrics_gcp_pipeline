@@ -1423,7 +1423,7 @@ colnames(invalid_rows) <- c("Site", "Connect ID", "BioFin_BMTimeBL_v1r0k", "BioK
 knitr::kable(invalid_rows) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size = 8)
 
 ```
-
+\FloatBarrier
 
 
 
