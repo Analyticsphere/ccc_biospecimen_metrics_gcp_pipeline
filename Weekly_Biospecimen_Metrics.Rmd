@@ -126,7 +126,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 bio_tb <- bq_project_query(project, 
-                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null')  
+                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null and Connect_ID is not null')  
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -180,13 +180,13 @@ recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source =="Biospec
 query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762, state_d_667474224, ",
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, 
+                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713, state_d_706256705,",
                                select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and d_831041022 = '104430631'\")",
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
+                               d_831041022 = '104430631'\")",
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
-
-
 
 recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
 
@@ -338,6 +338,45 @@ cross_table_df <- as.data.frame(cross__table)[-1, ]
 }
 
 
+create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name, margin_text) {
+  cross__table <- data %>%
+    tbl_cross(
+      row = !!sym(row_var),
+      col = !!sym(colm_var),
+      label = list(!!sym(row_var) ~ row_name,
+                   !!sym(colm_var) ~ column_name),
+      percent = row_or_col_pct,
+      digits = c(0, 2),
+      margin_text = margin_text
+    )
+  
+  # Check if table_body exists and has data
+  if (!is.null(cross__table[["table_body"]]) && nrow(cross__table[["table_body"]]) > 0) {
+    # Need only the total column to be a column percentage
+    cross__table[["table_body"]]$stat_0 <- sapply(strsplit(cross__table[["table_body"]]$stat_0, " "), "[", 1)
+    
+    cross__table_df <- as.data.frame(cross__table)[2:nrow(as.data.frame(cross__table)), ]
+    colnames(cross__table_df)[1] <- row_name
+    
+    # Ensure 'Total Verified Participants' exists before modifying
+    if ("Total Verified Participants" %in% colnames(cross__table_df)) {
+      cross__table_df$`Total Verified Participants` <- as.numeric(gsub(",", "", cross__table_df$`Total Verified Participants`))
+      
+      total_participants <- cross__table_df$`Total Verified Participants`
+      percentages <- round((total_participants / total_participants[length(total_participants)]) * 100, digits = 2)
+      
+      cross__table_df$`Total Verified Participants` <- paste0(format(total_participants, big.mark = ","), " (", percentages, "%)")
+    }
+    
+    colnames(cross__table_df)[ncol(cross__table_df)] <- "Total Verified \n Participants"
+    return(cross__table_df)
+  } else {
+    warning("The cross table is empty or missing table_body.")
+    return(data.frame()) # Return an empty data frame if table_body is missing
+  }
+}
+
+
 
 
 # Function to add total row, total column, and calculate row/column percentages
@@ -439,16 +478,24 @@ no_dups$Site <- factor(no_dups$d_827220437, levels= c("Baylor Scott and White He
 no_dups <- no_dups %>% 
   mutate(
     Site_location = case_when(
+      #UC
       d_951355211 == 777644826 ~ "UC-DCAM",
       d_951355211 == 145191545 ~ "Ingalls Harvey",
       d_951355211 == 489380324 ~ "River East",
       d_951355211 == 120264574 ~ "South Loop",
+      d_951355211 == 319518299 ~ "UCM Pop-Up",
+      d_951355211 == 940329442 ~ "Orland Park"
+      #HP
       d_951355211 == 834825425 ~ "HP Research Clinic",
       d_951355211 == 574368418 ~ "HP Park Nicollet",
+      #HFH
       d_951355211 == 736183094 ~ "HFH K-13 Research Clinic",
       d_951355211 == 886364332 ~ "HFH Cancer Pavilion Research Clinic",
       d_951355211 == 706927479 ~ "HFH Livonia Research Clinic",
       d_951355211 == 322059622 ~ "HFH Pop-Up",
+      d_951355211 == 911683679 ~ "HFH Detroit Northwest",
+      d_951355211 == 852689772 ~ "In-home Collection",
+      #MF
       d_951355211 == 692275326 ~ "Marshfield",
       d_951355211 == 813701399 ~ "Weston",
       d_951355211 == 698283667 ~ "Lake Hallie",
@@ -457,11 +504,10 @@ no_dups <- no_dups %>%
       d_951355211 == 983848564 ~ "Colby Abbotsford",
       d_951355211 == 261931804 ~ "Minocqua",
       d_951355211 == 665277300 ~ "Merrill",
-      d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
-      d_951355211 == 467088902 ~ "Fargo South University",
       d_951355211 == 567969985 ~ "MF Pop-Up",
-      d_951355211 == 319518299 ~ "UCM Pop-Up",
-      d_951355211 == 940329442 ~ "Orland Park",
+      d_951355211 == 255636184 ~ "Stevens Point",
+      d_951355211 == 813412950 ~ "Neillsville",
+      #BSWH
       d_951355211 == 723351427 ~ "BCC- HWC",
       d_951355211 == 807443231 ~ "FW All Saints",
       d_951355211 == 475614532 ~ "BCC- Plano",
@@ -470,12 +516,13 @@ no_dups <- no_dups %>%
       d_951355211 == 397883980 ~ "Irving",
       d_951355211 == 436956777 ~ "NTX Biorepository",
       d_951355211 == 288564244 ~ "BCC- Fort Worth",
+      #SF
+      d_951355211 == 769594361 ~ "Fargo Amber Valley",
+      d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
+      d_951355211 == 467088902 ~ "Fargo South University",
       d_951355211 == 246137578 ~ "Edith Sanford Breast Center (coded as Sanford Center)",
       d_951355211 == 433070901 ~ "Edith Sanford Breast Center",
-      d_951355211 == 769594361 ~ "Fargo Amber Valley",
-      d_951355211 == 255636184 ~ "Stevens Point",
-      d_951355211 == 813412950 ~ "Neillsville",
-      d_951355211 == 911683679 ~ "HFH Detroit Northwest",
+      #Missing
       is.na(d_951355211) & Site=='University of Chicago Medicine' ~ "Missing UC location",
       is.na(d_951355211) & Site=='HealthPartners' ~ "Missing HP location",
       is.na(d_951355211) & Site=='Marshfield Clinic Health System' ~ "Missing MF location",
@@ -572,10 +619,34 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                   d_827220437==657167265 ~ "Sanford Health",
                                   TRUE ~ "Unidentified location"),
                                  BiospeCollection = ifelse((recrver1$d_878865966 == 353358909 | recrver1$d_167958071 == 353358909 | 
-                                                              recrver1$d_684635302 == 353358909 ), "Any biospecimen Collections","No biospecimen collections"))
+                                                              recrver1$d_684635302 == 353358909 ), "Any biospecimen Collections","No biospecimen collections"),
+                                 age = case_when(state_d_934298480 == "713781738"~ "30-34",
+                                                 state_d_934298480 == '631272782' ~ "35-39",
+                                                 state_d_934298480 == '124276120' ~ "40-45",
+                                                 state_d_934298480 == '450985724' ~ "46-50",
+                                                 state_d_934298480 == '363147933' ~ "51-55",
+                                                 state_d_934298480 == '636706443' ~ "56-60",
+                                                 state_d_934298480 == '771230670' ~ "61-65",
+                                                 state_d_934298480 == '722846087' ~ "66-70"),
+                                 race = case_when(state_d_684926335 == '635279662' |state_d_849518448 == '768826601' | state_d_119643471 == '635279662' | state_d_253532712=='723775357' ~ "White, Non-Hispanic" , 
+                                                  state_d_684926335 %in% c('232334767', '401335456') |
+                                                    state_d_849518448 == '181769837' |
+                                                    state_d_253532712 %in% c('153444133','572474909','308427446','211228524','277568192','611398522','181769837') |
+                                                    state_d_119643471 %in% c( '232334767','211228524','308427446','432722256','232663805','785578696','200929978','490725843','965998904') ~ "Other",
+                                                  state_d_684926335 == '178420302'  | 
+                                                    state_d_849518448 == '178420302' | 
+                                                    state_d_253532712 == '178420302' |
+                                                    state_d_119643471  %in% c( '986445321','746038746','178420302') |
+                                                    (is.na(state_d_119643471) & d_827220437 == '657167265') ~ "Unknown"),
+                                 sex = case_when(state_d_706256705 == '536341288' | state_d_435027713 == '536341288' ~ "Female",
+                                                 state_d_706256705 == '654207589' | state_d_435027713 == '654207589' ~ "Male",
+                                                 #state_d_706256705 == '830573274' ~ "Intersex or Other", # too small of a count for now, need to combine with unknown 
+                                                 state_d_706256705 == '830573274' | state_d_706256705 == '178420302' | state_d_435027713 == '178420302' ~ "Unknown"))
 
 
-biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site", "token"))
+#biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site", "token"))
+
+biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
 
 ```
 
@@ -670,7 +741,7 @@ col_num_1.1 <- col_num_1.1 %>%
                                  "Stevens Point", "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University","Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ "Other"
   ))
@@ -845,6 +916,51 @@ biospe.bld <- knitr::kable(table1.5,
 
 
 ```
+
+```{r Collections_by_Demographic, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
+BLCol_by_Sex_df <- create_tbl_cross2(table1, "sex", "biocol.appoint", "row", "Sex", "Baseline Biospecimen Collection Status", "Total Verified Participants")
+
+BLCol_by_Sex <- knitr::kable(BLCol_by_Sex_df, 
+             caption='Table 1.14 Baseline Biospecimen Collection Status by Sex \n Among Verified Participants',
+             row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>%
+    kable_styling(latex_options = "scale_down") %>%  
+    add_indent(seq(1, nrow(BLCol_by_Sex_df) - 1)) %>%  landscape() %>% 
+  footnote(general="Note: Sex defined as the de-identified sex data reported by sites at time of invitation.",
+           general_title = "")
+
+
+
+
+
+BLCol_by_Age_df <- create_tbl_cross2(table1, "age", "biocol.appoint", "row", "Age", "Baseline Biospecimen Collection Status", "Total Verified Participants")
+
+BLCol_by_Age <- knitr::kable(BLCol_by_Age_df, 
+             caption="Table 1.15. Baseline Biospecimen Collection Status by Age \n Among Verified Participants",
+             row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>%
+    kable_styling(latex_options = "scale_down") %>%  
+    add_indent(seq(1, nrow(BLCol_by_Age_df) - 1)) %>%  landscape() %>% 
+  footnote(general="Note: Age defined as the de-identified age data reported by sites at time of invitation, not current age at the time of specimen collection.",
+           general_title = "")
+
+
+
+
+
+BLCol_by_Race_df <- create_tbl_cross2(table1, "race", "biocol.appoint", "row", "Race", "Baseline Biospecimen Collection Status", "Total Verified Participants")
+
+BLCol_by_Race <- knitr::kable(BLCol_by_Race_df, 
+             caption="Table 1.16. Baseline Biospecimen Collection Status by Race \n Among Verified Participants",
+             row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>%
+    kable_styling(latex_options = "scale_down") %>%  
+    add_indent(seq(1, nrow(BLCol_by_Race_df) - 1)) %>%  landscape() %>%
+    footnote(general = "Note: Race defined as the de-identified race data reported by sites at time of invitation.",
+             general_title = "")
+
+
+```
+
+
 
 
 ```{r Sanford_Table_1.4, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
@@ -2454,7 +2570,7 @@ coll_bptl_diff <- biospe_adhoc_all %>%
                                          "Irving", "NTX Biorepository","BCC- Fort Worth",
                                          "HP Research Clinic", "HP Park Nicollet", "Missing HP location",
                                          "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
-                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "Missing HFH location",
+                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "Missing HFH location",
                                          "Neillsville", "Missing MF location",
                                          "Marshfield", "MF Pop-Up","Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
                                          "Colby Abbotsford","Minocqua","Merrill","Stevens Point",
@@ -2528,7 +2644,7 @@ ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "In-home Collection","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
   )) 
@@ -2763,6 +2879,7 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Fargo South University", "Missing SF location") ~ "Sanford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
@@ -3229,6 +3346,21 @@ Bld_urn_cli = knitr::kable(system_coll,
 add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later than Biospecimen Dashboard data. 'Site Data Only' is assumed to be '0 (0%)' when not listed.", 
              notation = "none")
 ```
+
+
+
+\FloatBarrier
+```{r KnitrTables1.14_1.16, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+
+BLCol_by_Sex 
+
+BLCol_by_Age 
+
+BLCol_by_Race
+
+```
+
+
 
 \FloatBarrier
 \newpage
@@ -3785,14 +3917,14 @@ add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment
 tabl27 <- knitr::kable(verif_draw_order,
                        caption='Table 4.8: Baseline- Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
-add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
+add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data.", notation="none")
 
 
 tab4_9 <- knitr::kable(avg_draw_order, 
                        caption='Table 4.9: Baseline- Time (in Days) from Draw Order Placement to Clinical Collection', 
                        row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% 
   kable_styling(latex_options = "scale_down") #%>% landscape()
-add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
+add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data.", notation="none")
 
 
 
@@ -4291,7 +4423,7 @@ ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location))
   scale_color_manual(name = "Collection Location",
                      values=c("HFH K-13 Research Clinic"="#164C71", "HFH Cancer Pavilion Research Clinic"="#FDBE19", 
                               "HFH Livonia Research Clinic"="#3C989E", "HFH Pop-Up"="#CC7D15",
-                              "HFH Detroit Northwest"="#BBBEC1"),
+                              "HFH Detroit Northwest"="#BBBEC1", "In-home Collection"="#2973A5"),
                      guide = guide_legend(nrow = 3, byrow = TRUE)) +
   labs(color = "Collection Location") +
   ggtitle(label="Figure 6.3: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Henry Ford Health") +
