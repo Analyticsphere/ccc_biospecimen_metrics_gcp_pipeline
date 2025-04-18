@@ -2880,7 +2880,6 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Fargo South University", "Missing SF location") ~ "Sanford Health",
     `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection","Missing HFH location") ~ "Henry Ford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
   )) 
