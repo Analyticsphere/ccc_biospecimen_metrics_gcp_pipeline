@@ -70,7 +70,7 @@ select <- paste(recrvar.bio$column_name,collapse=",")
 
 
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762, d_254109640,", select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" "))) #removed "date", as it is no longer in the participants table
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' \")",sep=" "))) #removed "date", as it is no longer in the participants table
 
 
 recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
