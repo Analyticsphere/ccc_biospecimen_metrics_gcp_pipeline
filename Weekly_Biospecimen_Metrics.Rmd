@@ -484,7 +484,7 @@ no_dups <- no_dups %>%
       d_951355211 == 489380324 ~ "River East",
       d_951355211 == 120264574 ~ "South Loop",
       d_951355211 == 319518299 ~ "UCM Pop-Up",
-      d_951355211 == 940329442 ~ "Orland Park"
+      d_951355211 == 940329442 ~ "Orland Park",
       #HP
       d_951355211 == 834825425 ~ "HP Research Clinic",
       d_951355211 == 574368418 ~ "HP Park Nicollet",
