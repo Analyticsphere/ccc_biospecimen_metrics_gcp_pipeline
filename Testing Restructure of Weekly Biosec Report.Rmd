@@ -126,7 +126,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 bio_tb <- bq_project_query(project, 
-                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null')  
+                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null and Connect_ID is not null')  
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -180,9 +180,11 @@ recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source =="Biospec
 query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713, state_d_706256705,",
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, 
+                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713, state_d_706256705,",
                                select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and d_831041022 = '104430631'\")",
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
+                               d_831041022 = '104430631'\")",
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
 
@@ -476,16 +478,24 @@ no_dups$Site <- factor(no_dups$d_827220437, levels= c("Baylor Scott and White He
 no_dups <- no_dups %>% 
   mutate(
     Site_location = case_when(
+      #UC
       d_951355211 == 777644826 ~ "UC-DCAM",
       d_951355211 == 145191545 ~ "Ingalls Harvey",
       d_951355211 == 489380324 ~ "River East",
       d_951355211 == 120264574 ~ "South Loop",
+      d_951355211 == 319518299 ~ "UCM Pop-Up",
+      d_951355211 == 940329442 ~ "Orland Park",
+      #HP
       d_951355211 == 834825425 ~ "HP Research Clinic",
       d_951355211 == 574368418 ~ "HP Park Nicollet",
+      #HFH
       d_951355211 == 736183094 ~ "HFH K-13 Research Clinic",
       d_951355211 == 886364332 ~ "HFH Cancer Pavilion Research Clinic",
       d_951355211 == 706927479 ~ "HFH Livonia Research Clinic",
       d_951355211 == 322059622 ~ "HFH Pop-Up",
+      d_951355211 == 911683679 ~ "HFH Detroit Northwest",
+      d_951355211 == 852689772 ~ "In-home Collection",
+      #MF
       d_951355211 == 692275326 ~ "Marshfield",
       d_951355211 == 813701399 ~ "Weston",
       d_951355211 == 698283667 ~ "Lake Hallie",
@@ -494,11 +504,10 @@ no_dups <- no_dups %>%
       d_951355211 == 983848564 ~ "Colby Abbotsford",
       d_951355211 == 261931804 ~ "Minocqua",
       d_951355211 == 665277300 ~ "Merrill",
-      d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
-      d_951355211 == 467088902 ~ "Fargo South University",
       d_951355211 == 567969985 ~ "MF Pop-Up",
-      d_951355211 == 319518299 ~ "UCM Pop-Up",
-      d_951355211 == 940329442 ~ "Orland Park",
+      d_951355211 == 255636184 ~ "Stevens Point",
+      d_951355211 == 813412950 ~ "Neillsville",
+      #BSWH
       d_951355211 == 723351427 ~ "BCC- HWC",
       d_951355211 == 807443231 ~ "FW All Saints",
       d_951355211 == 475614532 ~ "BCC- Plano",
@@ -507,12 +516,13 @@ no_dups <- no_dups %>%
       d_951355211 == 397883980 ~ "Irving",
       d_951355211 == 436956777 ~ "NTX Biorepository",
       d_951355211 == 288564244 ~ "BCC- Fort Worth",
+      #SF
+      d_951355211 == 769594361 ~ "Fargo Amber Valley",
+      d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
+      d_951355211 == 467088902 ~ "Fargo South University",
       d_951355211 == 246137578 ~ "Edith Sanford Breast Center (coded as Sanford Center)",
       d_951355211 == 433070901 ~ "Edith Sanford Breast Center",
-      d_951355211 == 769594361 ~ "Fargo Amber Valley",
-      d_951355211 == 255636184 ~ "Stevens Point",
-      d_951355211 == 813412950 ~ "Neillsville",
-      d_951355211 == 911683679 ~ "HFH Detroit Northwest",
+      #Missing
       is.na(d_951355211) & Site=='University of Chicago Medicine' ~ "Missing UC location",
       is.na(d_951355211) & Site=='HealthPartners' ~ "Missing HP location",
       is.na(d_951355211) & Site=='Marshfield Clinic Health System' ~ "Missing MF location",
@@ -634,7 +644,9 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                                  state_d_706256705 == '830573274' | state_d_706256705 == '178420302' | state_d_435027713 == '178420302' ~ "Unknown"))
 
 
-biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site", "token"))
+#biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site", "token"))
+
+biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
 
 ```
 
@@ -729,7 +741,7 @@ col_num_1.1 <- col_num_1.1 %>%
                                  "Stevens Point", "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University","Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ "Other"
   ))
@@ -2558,7 +2570,7 @@ coll_bptl_diff <- biospe_adhoc_all %>%
                                          "Irving", "NTX Biorepository","BCC- Fort Worth",
                                          "HP Research Clinic", "HP Park Nicollet", "Missing HP location",
                                          "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
-                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "Missing HFH location",
+                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "Missing HFH location",
                                          "Neillsville", "Missing MF location",
                                          "Marshfield", "MF Pop-Up","Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
                                          "Colby Abbotsford","Minocqua","Merrill","Stevens Point",
@@ -2632,7 +2644,7 @@ ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "In-home Collection","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
   )) 
@@ -2867,7 +2879,7 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Fargo South University", "Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
   )) 
@@ -3333,6 +3345,21 @@ Bld_urn_cli = knitr::kable(system_coll,
 add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later than Biospecimen Dashboard data. 'Site Data Only' is assumed to be '0 (0%)' when not listed.", 
              notation = "none")
 ```
+
+
+
+\FloatBarrier
+```{r KnitrTables1.14_1.16, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
+
+BLCol_by_Sex 
+
+BLCol_by_Age 
+
+BLCol_by_Race
+
+```
+
+
 
 \FloatBarrier
 \newpage
@@ -3889,14 +3916,14 @@ add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment
 tabl27 <- knitr::kable(verif_draw_order,
                        caption='Table 4.8: Baseline- Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
-add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
+add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data.", notation="none")
 
 
 tab4_9 <- knitr::kable(avg_draw_order, 
                        caption='Table 4.9: Baseline- Time (in Days) from Draw Order Placement to Clinical Collection', 
                        row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% 
   kable_styling(latex_options = "scale_down") #%>% landscape()
-add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and Sanford Health are exluded due to the limited availability of draw order placement data.", notation="none")
+add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data.", notation="none")
 
 
 
@@ -4395,7 +4422,7 @@ ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location))
   scale_color_manual(name = "Collection Location",
                      values=c("HFH K-13 Research Clinic"="#164C71", "HFH Cancer Pavilion Research Clinic"="#FDBE19", 
                               "HFH Livonia Research Clinic"="#3C989E", "HFH Pop-Up"="#CC7D15",
-                              "HFH Detroit Northwest"="#BBBEC1"),
+                              "HFH Detroit Northwest"="#BBBEC1", "In-home Collection"="#2973A5"),
                      guide = guide_legend(nrow = 3, byrow = TRUE)) +
   labs(color = "Collection Location") +
   ggtitle(label="Figure 6.3: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Henry Ford Health") +
@@ -4937,138 +4964,6 @@ fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
 
 
 
-
-```{r Table7.2_before_after, include=FALSE, echo=FALSE, warning=FALSE,results='hold'}
-
-
-#### Overall Table 7.2
-
-# Calculate percentages
-for(i in 1:nrow(all_shipped_2)){
-  all_shipped_2[i,"Received"] <- paste0(all_shipped_2[i,"Received"], " (", round(as.numeric(all_shipped_2[i,"Received"])/as.numeric(all_shipped_2[i,"Shipped_OneWeek"])*100, digits = 1), "%)")
-}
-
-
-#### BEFORE 6/17/24 -- shipments were stopped from mid may to mid June ######################   
-#Adding total shipped as of a week ago column
-summary_table2_before<- filtered_data %>%
-  group_by(Site) %>%
-  summarise(Shipped = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < "2024-06-17"),
-            Shipped_OneWeek = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < "2024-06-17"),
-            Received = sum(Kit_Status == "Received" & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < "2024-06-17"))
-
-
-total_shipped <- sum(summary_table2_before$Shipped)
-total_received <- sum(summary_table2_before$Received)
-total_ship_previous_week <- sum(summary_table2_before$Shipped_OneWeek)
-total_received_percentage <- paste(total_received, "(", round(total_received/total_ship_previous_week*100, digits = 1), "%)")
-total_row <- c("Total", total_shipped, total_ship_previous_week, total_received) 
-
-# Create a new data frame for the "Total" row
-total_df <- data.frame(t(total_row), stringsAsFactors = FALSE)
-
-# Set column names
-colnames(total_df) <- colnames(summary_table2_before)
-
-# Append the "Total" row to summary_table2_before
-all_shipped_before <- rbind(summary_table2_before, total_df)
-
-# Calculate percentages
-for(i in 1:nrow(all_shipped_before)){
-  all_shipped_before[i,"Received"] <- paste0(all_shipped_before[i,"Received"], " (", round(as.numeric(all_shipped_before[i,"Received"])/as.numeric(all_shipped_before[i,"Shipped_OneWeek"])*100, digits = 1), "%)")
-  
-}
-all_shipped_before
-
-
-
-
-
-
-
-#### AFTER 6/17/24######################   d_173836415_d_266600170_d_319972665_d_661940160
-#Adding total shipped as of a week ago column
-
-summary_table_after<- filtered_data %>%
-  group_by(Site) %>%
-  summarise(Shipped = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-06-17" &
-               as.Date(d_173836415_d_266600170_d_319972665_d_661940160) <= "2024-08-28"),
-            Shipped_OneWeek = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-06-17" &
-                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) <= "2024-08-28"  &
-                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < (as.Date(currentDate) -7)),
-            Received = sum(Kit_Status == "Received" & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-06-17" &
-                              as.Date(d_173836415_d_266600170_d_319972665_d_661940160) <= "2024-08-28"))
-
-
-total_shipped <- sum(summary_table_after$Shipped)
-total_received <- sum(summary_table_after$Received)
-total_ship_previous_week <- sum(summary_table_after$Shipped_OneWeek)
-total_received_percentage <- paste(total_received, "(", round(total_received/total_ship_previous_week*100, digits = 1), "%)")
-total_row <- c("Total", total_shipped, total_ship_previous_week, total_received)
-
-# Create a new data frame for the "Total" row
-total_df <- data.frame(t(total_row), stringsAsFactors = FALSE)
-
-# Set column names
-colnames(total_df) <- colnames(summary_table_after)
-
-# Append the "Total" row to summary_table_after
-all_shipped_after <- rbind(summary_table_after, total_df)
-
-# Calculate percentages
-for(i in 1:nrow(all_shipped_after)){
-  all_shipped_after[i,"Received"] <- paste0(all_shipped_after[i,"Received"], " (", round(as.numeric(all_shipped_after[i,"Received"])/as.numeric(all_shipped_after[i,"Shipped_OneWeek"])*100, digits = 1), "%)")
-  
-}
-all_shipped_after
-
-
-
-
-
-
-
-
-###### After 8/28/24 ###################
-
-
-summary_table_after2<- filtered_data %>%
-  group_by(Site) %>%
-  summarise(Shipped = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-08-28"),
-            Shipped_TwoWeeks = sum(Kit_Status %in% c("Received", "Shipped") & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-08-28" & 
-                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < (as.Date(currentDate) -14)),
-            Received = sum(Kit_Status == "Received" & as.Date(d_173836415_d_266600170_d_319972665_d_661940160) > "2024-08-28"))
-
-
-total_shipped2 <- sum(summary_table_after2$Shipped)
-total_received2 <- sum(summary_table_after2$Received)
-total_ship_previous_week2 <- sum(summary_table_after2$Shipped_TwoWeeks)
-total_received2_percentage <- paste(total_received2, "(", round(total_received2/total_ship_previous_week2*100, digits = 1), "%)")
-total_row2 <- c("Total", total_shipped2, total_ship_previous_week2, total_received2)
-
-# Create a new data frame for the "Total" row
-total_df2 <- data.frame(t(total_row2), stringsAsFactors = FALSE)
-
-# Set column names
-colnames(total_df2) <- colnames(summary_table_after2)
-
-# Append the "Total" row to summary_table_after2
-all_shipped_after2 <- rbind(summary_table_after2, total_df2)
-
-# Calculate percentages
-for(i in 1:nrow(all_shipped_after2)){
-  all_shipped_after2[i,"Received"] <- paste0(all_shipped_after2[i,"Received"], " (", round(as.numeric(all_shipped_after2[i,"Received"])/as.numeric(all_shipped_after2[i,"Shipped_TwoWeeks"])*100, digits = 1), "%)")
-  
-}
-all_shipped_after2
-
-
-```
-
-
-
-
-
 ```{r Table7.3_7.6, include=FALSE, echo=FALSE, warning=FALSE}
 
 
@@ -5088,7 +4983,7 @@ Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>%
   missing="ifany",
   missing_text="0 (0%") %>%
   modify_header() %>%
-  modify_caption("Table 7.6: Baseline- Collection Card Status Among Home Mouthwash Kits Received") %>%
+  modify_caption("Table 7.3: Baseline- Collection Card Status Among Home Mouthwash Kits Received") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
@@ -5099,11 +4994,11 @@ Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>%
 
 test30 <- table27_elg %>%  filter(!is.na(d_143615646_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) 
 
-test30 <-  test30 %>% mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_143615646_d_826941471)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),units="days")))
+test30 <-  test30 %>% 
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_143615646_d_826941471)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),units="days"))) %>%  
+  filter(ctime>0)
 
-test30before <-  test30 %>%  filter(ctime>0 & d_173836415_d_266600170_d_319972665_d_661940160 < as.Date("2024-06-17"))
-
-Table7.4before = test30before %>% group_by(Site) %>% 
+Table7.4 = test30 %>% group_by(Site) %>% 
   dplyr::summarize(N=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -5113,20 +5008,6 @@ Table7.4before = test30before %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    #Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
-test30after <-  test30 %>%  filter(ctime>0 & d_173836415_d_266600170_d_319972665_d_661940160 > as.Date("2024-06-17"))
-
-Table7.4after = test30after %>% group_by(Site) %>%
-  dplyr::summarize(N=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   #SD=sd(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   #Perc.95= quantile(ctime, 0.95),
-                   Max = max(ctime))
-
 
 
 
@@ -5322,7 +5203,9 @@ MW_Coll_Kits <- ggplot(fig5_week_final, aes(x = as.Date(col.Monday.date))) +
         axis.title.x = element_text(size = 14, face = "bold"),
         axis.title.y = element_text(size = 14, face = "bold", color = "black"),
         plot.title = element_text(hjust = 0.5, size = 12, face = "bold")) +
-  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE)) +
+  labs(caption = "This figure includes all home mouthwsh kit types: Initial, Replacement Kit 1 and Replacement Kit 2 ") +
+  theme(plot.caption = element_text(hjust=0))
 
 
 ```
@@ -5388,40 +5271,6 @@ knitr::kable(all_shipped_2,format.args = list(big.mark = ","),
 
 ```
 
-\FloatBarrier
-```{r KnitrTables7.2before,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
-
-table7_2before <- knitr::kable(all_shipped_before,
-                               caption='Table 7.3 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago (kits shipped before 6/17/2024)',
-                               row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7_2before, "Note: During this time the kit return method was USPS.", notation = "none")
-
-```
-
-
-\FloatBarrier
-
-```{r KnitrTables7.2after,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
-
-table7_2after <- knitr::kable(all_shipped_after,format.args = list(big.mark = ","),
-                              caption='Table 7.4 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago \n (kits shipped between 6/17/2024 and 8/28/2024)',
-                              row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7_2after, "Note: During this time the kit return method was FedEx; Query for addresses to print pulled oldest clinical collection date/time stamp first.", notation = "none")
-
-
-```
-
-\FloatBarrier
-
-```{r Shipped_After_August,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
-
-table7_2after2 <- knitr::kable(all_shipped_after2,format.args = list(big.mark = ","),
-                              caption='Table 7.5 Baseline- Home Mouthwash Kit Return Rate for Packages Shipped up to 2 Weeks Ago (kits shipped after 8/28/2024)',
-                              row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7_2after2, "Query for addresses to print was updated on 8/28/2024 to pull most recent clinical collection date/time stamp first, with a 5 day lag from date of clinical blood/urine collection date. Kit return method remained as FedEx.", notation = "none")
-
-```
-
 
 
 \FloatBarrier
@@ -5466,27 +5315,20 @@ Coll_Card_StatusBF %>% kable_styling(latex_options = "HOLD_position")
 
 
 #all these will move down a table number
-table7.4before <- knitr::kable(Table7.4before,
-                               caption='Table 7.7: Baseline- Time (in Days) from Home Mouthwash Kit Shipment to BPTL Receipt \n (kits shipped before 6/17/2024)',
+table7.4 <- knitr::kable(Table7.4,
+                               caption='Table 7.4: Baseline- Time (in Days) from Home Mouthwash Kit Shipment to BPTL Receipt \n (kits shipped before 6/17/2024)',
                                row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7.4before, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
-
-
-
-table7.4after <- knitr::kable(Table7.4after,
-                              caption='Table 7.8: Baseline- Time (in Days) from Home Mouthwash Kit Shipment to BPTL Receipt \n (kits shipped after 6/17/2024)',
-                              row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% kable_styling(latex_options = "HOLD_position")
-add_footnote(table7.4after, "Note: Kits were returned using FedEx after 6/17/2024.", notation = "none")
+add_footnote(table7.4, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
 
 
 
 knitr::kable(Table7.5,
-             caption='Table 7.9: Baseline- Time (in Days) from Clinical Collection to Home Mouthwash Kit Shipment',
+             caption='Table 7.5: Baseline- Time (in Days) from Clinical Collection to Home Mouthwash Kit Shipment',
              row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 
 
 knitr::kable(table32_pct,
-             caption='Table 7.10: Baseline- Kit Conditions Among Received Home Mouthwash Kits',
+             caption='Table 7.6: Baseline- Kit Conditions Among Received Home Mouthwash Kits',
              row.names=FALSE, align=c("l","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 ```
 
@@ -5498,44 +5340,6 @@ knitr::kable(table32_pct,
 \FloatBarrier
 
 ```{r Tables7.9_7.12, eval=TRUE,echo=FALSE,results='asis'}
-
-table7_7 <- table27_elg_distinct %>% filter(Kit_Status=="Shipped") %>% 
-  mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
-                                   d_547363263==615768760 ~ "Started",
-                                   d_547363263==231311385 ~ "Submitted")) %>%  
-  mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>% 
-  tbl_cross(
-    row = Site,
-    col = MWSrvy_status,
-    digits=c(0,1),
-    percent = "row",
-    label=list(Site="Site",
-               MWSrvy_status = "Survey Status"),
-    missing="ifany",
-    margin_text="Total")
-
-table7_7_totals <- as.data.frame(table7_7)
-table7_7_totals <- table7_7_totals[c(-1),]
-
-
-tab7_7 <- knitr::kable(table7_7_totals ,
-                       col.names=c("Site", "Not Started","Started","Submitted","Total Kits in 'Shipped' Status"), 
-                       caption="Table 7.11: Baseline- Mouthwash Biospecimen Survey Status Among Mouthwash Kits in 'Shipped' Status", 
-                       row.names=FALSE,align=c("l","c","c","c","c"), booktabs = TRUE)
-
-num_rows <- nrow(table7_7_totals)
-tab7_7 <- tab7_7 %>%
-  row_spec(1:(num_rows - 1), extra_css = "text-indent: 20px;")
-
-kable_styling(tab7_7, latex_options = "scale_down")
-
-
-
-
-
-
-
-
 
 
 
@@ -5560,7 +5364,7 @@ table7_8_totals <- table7_8_totals[c(-1),]
 
 tab7_8 <- knitr::kable(table7_8_totals ,
                        col.names=c("Site", "Not Started","Started","Submitted","Total Received Kits"), 
-                       caption='Table 7.12: Baseline- Mouthwash Biospecimen Survey Status Among Received Home Mouthwash Kits', 
+                       caption='Table 7.7: Baseline- Mouthwash Biospecimen Survey Status Among Received Home Mouthwash Kits', 
                        row.names=FALSE,align=c("l","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 
@@ -5616,7 +5420,7 @@ tbl_7_9 <- table7_9 %>%
   #bold_labels() %>%
   #italicize_levels() %>%
   modify_header(stat_0 = "Total") %>%
-  modify_caption("Table 7.13: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n(Pre-update to survey description on PWA)") %>%
+  modify_caption("Table 7.8: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n(Pre-update to survey description on PWA)") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down")
 
@@ -5666,7 +5470,7 @@ tbl_7_10 <- table7_10 %>%
   #bold_labels() %>%
   #italicize_levels() %>%
   modify_header(stat_0 = "Total") %>%
-  modify_caption("Table 7.14: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n (Post-update to survey description on PWA)") %>%
+  modify_caption("Table 7.9: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n (Post-update to survey description on PWA)") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down")
 
