@@ -701,7 +701,34 @@ datetime_regex <- "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$|^\\d{4}-\\d{2}-\\
 invalid_rows <- HMW %>% filter(!is.na(d_173836415_d_266600170_d_448660695) & !grepl(datetime_regex, d_173836415_d_266600170_d_448660695))
 
 
+#53. Connect ID and token in Participants Table must match Connect ID and token in Biospecimens table
+tokens <- "SELECT 
+CASE 
+  WHEN b.d_827220437 = '472940358' THEN 'Baylor Scott and White Health'
+  WHEN b.d_827220437 = '531629870' THEN 'HealthPartners'
+  WHEN b.d_827220437 = '548392715' THEN 'Henry Ford Health System'
+  WHEN b.d_827220437 = '303349821' THEN 'Marshfield Clinical Health System'
+  WHEN b.d_827220437 = '657167265' THEN 'Sanford Health'
+  WHEN b.d_827220437 = '809703864' THEN 'University of Chicago Medicine'
+  WHEN b.d_827220437 = '125001209' THEN 'Kaiser Permanente Colorado'
+  WHEN b.d_827220437 = '327912200' THEN 'Kaiser Permanente Georgia'
+  WHEN b.d_827220437 = '300267574' THEN 'Kaiser Permanente Hawaii'
+  WHEN b.d_827220437 = '452412599' THEN 'Kaiser Permanente Northwest'
+END AS Site,
+b.Connect_ID, d_820476880, 
+b.token as bio_token, 
+p.token as parts_token
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` b
+left join `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` p
+on b.Connect_ID=p.Connect_ID
+where b.token!=p.token
+group by Site, b.Connect_ID, d_820476880, b.token, p.token
+order by b.Connect_ID asc"
 
+token_table <- bq_project_query(project, tokens)
+token_match <- bq_table_download(token_table, bigint = "integer64")
+
+colnames(token_match) <- c("Site", "Connect ID", "Collection ID", "Bio Table Token", "Parts. Table Token")
 
 
 
@@ -722,6 +749,7 @@ bioqc_csv$Rule44 = ifelse(bioqc_csv$Connect_ID %in% bl_mw$Connect_ID, "Rule 44",
 bioqc_csv$Rule45 = ifelse(bioqc_csv$Connect_ID %in% mw_dt$Connect_ID, "Rule 45", " ")
 bioqc_csv$Rule46 = ifelse(bioqc_csv$Connect_ID %in% kits_recvd$Connect_ID, "Rule 46", " ")
 bioqc_csv$Rule47 = ifelse(bioqc_csv$Connect_ID %in% invalid_rows$Connect_ID, "Rule 47", " ")
+bioqc_csv$Rule53 = ifelse(bioqc_csv$Connect_ID %in% token_match$Connect_ID, "Rule 53", " ")
 
 
 
