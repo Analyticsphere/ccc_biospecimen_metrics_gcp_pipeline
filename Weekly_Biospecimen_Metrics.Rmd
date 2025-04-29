@@ -1135,7 +1135,7 @@ SF_collections_tbl <- SF_collections %>%
 
   select(-Region) %>%  # Remove Region just before rendering
   kbl(caption = "Table 1.5: Baseline Clinical Biospecimen Collections in the Past 30 Days at Sanford Health by Clinic Location",
-      booktabs = TRUE) %>%
+      booktabs = TRUE, longtable = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE, font_size = 6) %>%
   row_spec(0, bold = TRUE) %>%
   pack_rows(index = table(SF_collections$Region))  # Group by Region
@@ -2897,16 +2897,6 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
 #Footnote, if any data missing
 footnote5.5 <- coll_bptl_diff %>% filter(is.na(any_collection) | is.na(d_678166505))
 
-
-# Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
-#   gt::gt(groupname_col = "Site_Group") %>% 
-#   tab_header('Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location') %>% 
-#   tab_footnote(footnote= "Note: BPTL receipt time is assumed to be 11:30am ET.",
-#                locations = gt::cells_title(groups = "title")) %>% 
-#   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
-#                 locations = gt::cells_row_groups()) %>% 
-#   gt::tab_options(table.width = "100%", table.align = "left", table.font.size = px(7))
-
 hrs_rsch_55 <- Hrs_bptl_rsch_summ %>%
   arrange(Site_Group, `Collection Location`)
 
@@ -2922,8 +2912,8 @@ knit_hrs_rsch_55 <- knitr::kable(hrs_rsch_55[, c(1:8)],
              align=c("l","c","c","c","c","c","c","c"), 
              booktabs = TRUE, longtable = TRUE) %>%  
   pack_rows(index = site_group_counts) %>% 
-  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
-  landscape()
+  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) 
+#%>% landscape()
 
 
 
