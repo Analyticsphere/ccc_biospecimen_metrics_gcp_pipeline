@@ -16,6 +16,7 @@ output:
 This report includes all COVID-19 Survey Data as well as COVID-19 related questions that have since been removed from the Research Blood, Urine, Mouthwash Survey and the Clinical Blood, Urine Survey on July 5th, 2023.
 
 ```{r libraries, include=FALSE}
+
 library(bigrquery)
 library(dplyr)
 library(ggplot2)
@@ -34,9 +35,11 @@ options(tinytex.verbose = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 bq_auth()
+
 ```
 
 ```{r merge, include=FALSE}
+
 project = "nih-nci-dceg-connect-prod-6d04"
 billing= "nih-nci-dceg-connect-prod-6d04"
 
