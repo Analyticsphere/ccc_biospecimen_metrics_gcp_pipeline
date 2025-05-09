@@ -181,7 +181,8 @@ query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, 
-                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713, state_d_706256705,",
+                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713,
+                               state_d_706256705, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491,",
                                select,
                                "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
                                d_831041022 = '104430631'\")",
@@ -4795,8 +4796,6 @@ clc_both_vt.site.NW
 # Baseline Home Mouthwash Collections
 
 \vspace{-0.5em}
-
-
 
 
 ```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
