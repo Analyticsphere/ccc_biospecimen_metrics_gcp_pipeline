@@ -182,7 +182,8 @@ query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, 
-                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713, state_d_706256705,",
+                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713,
+                               state_d_706256705, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491,",
                                select,
                                "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
                                d_831041022 = '104430631'\")",
@@ -3830,6 +3831,7 @@ tab23=knitr::kable(research.vt.length.table,
 add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1) HealthPartners: 25-60 minutes, (2) Henry Ford: 25-60 minutes, (3) Sanford: 10-45 minutes, (4) Marshfield: 10-45 minutes, (5) UChicago: 15-180 minute, and (6) BSWH: 25-60 minutes", notation = "none") #and greater than 500 minutes 
 
 
+
 uc_col_time <- knitr::kable(research.vt.length.UC.table,
                             caption='Table 4.2: Baseline Research Collection Visit Length (in Minutes) by Collection Location, University of Chicago Medicine', 
                             col.names=c('Collection Location', 'Number of Research Collection Visits',"Min","Q1","Median","Mean","Q3" ,"Perc.90","Perc.95","Perc.98","Max"),
@@ -4862,6 +4864,7 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
                                    Kit_Status_r2 = factor(Kit_Status_r2,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")))
  
  
+
 kit_date <- left_join( kit_data, kit_table,  by="Connect_ID")
  
 kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID IS NOT NULL"
@@ -4874,19 +4877,19 @@ kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
 ## Merging the biospecimen table in to use this kit_sett table as a Figure later.
 ## Need to remove duplicates the same way as in the beginning of the code
  
+
 kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471,  d_556788178, d_820476880
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
 where Connect_ID is not null "
 kitsetting_table <- bq_project_query(project, kitsetting)
 kit_set <- bq_table_download(kitsetting_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kit_set$Connect_ID <- as.numeric(kit_set$Connect_ID)
- 
- 
+
 ## Keep only the HMW collections OR the first blood/urine collection to properly remove duplicates
 # 1. Keep all CHA rows-- those are the HMW and we have no duplicates so far
 cha_rows <- kit_set %>%
   filter(grepl("^CHA", d_820476880))
- 
+
 # 2. Among CXA rows, keep earliest timestamp per Connect_ID-- this is what we did with the original biospecimen table duplicates
 cxa_rows <- kit_set %>%
   filter(grepl("^CXA", d_820476880)) %>%
@@ -4917,6 +4920,7 @@ table27_elg <- kit_sett %>% filter( (d_173836415_d_266600170_d_982213346>=as.Dat
 #Updates: need kit assembly merged in to detmine kit replacement status
 table27_elg_distinct <- left_join(table27_elg, kitassembly_data, by="Connect_ID")
  
+
 # when participants get replacement kits, then get an additional row in the kit_assembly table
 # those with replacement kit 1 have one row with a null d_426588510 value, and one row with d_426588510==389478821
 # those with replacement kit 2 have one row with a null d_426588510 value, and one row with d_426588510==389478821 AND one row with d_426588510 == 772116457
@@ -4968,6 +4972,7 @@ status_elg_knA <- status_elgA %>%
  
  
  
+
 ### Replacement Kit 1
 status_elgB <- kit_status_table_7.1 %>%
   filter(kit_level=="Replacement Kit 1") %>%
@@ -5011,6 +5016,7 @@ status_elg_knC <- status_elgC %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down")
  
  
+
 ```
  
  
@@ -5028,6 +5034,7 @@ summary_table2_all<- filtered_data %>%
             Received = sum(Kit_Status_int == "Received"))
  
  
+
 total_shipped <- sum(summary_table2_all$Shipped)
 total_received <- sum(summary_table2_all$Received)
 total_ship_previous_week <- sum(summary_table2_all$Shipped_TwoWeeks)
@@ -5055,6 +5062,7 @@ all_shipped_2_filtered <- all_shipped_2 %>%
   mutate(Site = gsub("Kaiser Permanente", "KP", Site),
          Site = gsub("University of ", "U", Site))
  
+
 fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
   geom_bar(aes(y = as.numeric(Shipped_TwoWeeks), fill = "Shipped"), stat = "identity", width = 0.8, position = position_dodge(width = 0.8)) +
   geom_bar(aes(y = as.numeric(Received), fill = "Received"), stat = "identity", width = 0.8, position = position_dodge(width = 0.8)) +
@@ -5070,8 +5078,7 @@ fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
     axis.line = element_line(color = "black", size = 0.5)
   ) +
   ggtitle("Figure 7.1. Baseline- Total Initial Kits Received of Total Initial Kits Shipped \n Up To 2 Weeks Ago, by Site")
- 
- 
+
 ```
  
  
@@ -5090,6 +5097,7 @@ kits_hmw <- table27_elg_distinct %>% filter(is.na(d_650516960))
 Coll_Card_Table <- kits_hmw %>%
   filter(Kit_Status_int=="Received" & kit_level=="Initial Kit") %>%
   mutate(Card_Status = case_when(d_137401245==353358909           ~"Collection Card Not Included",
+
                                  TRUE ~ "Collection Card Included"))
  
 Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>% tbl_cross(
@@ -5226,8 +5234,7 @@ kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1
 kit_set_col_1$col.Monday.date <- kit_set_col_1$col.Sunday.date-days(6)
  
 kit_fig_1 <- inner_join(kit_set_col_1,kit_table,   by="Connect_ID")
- 
- 
+
 fig5_new_1 <- kit_fig_1 %>%
   filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
  
@@ -5374,6 +5381,7 @@ fig5_week_total2 <- fig5_week_total2 %>%
 thus_far <- round(sum(as.numeric(all_shipped_2_filtered$Received))/sum(as.numeric(all_shipped_2_filtered$Shipped_TwoWeeks))*100, digits=2)
  
  
+
 MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
   geom_ribbon(aes(ymin = 0, ymax = cumulative_shipped, fill = "Total Shipped"), alpha = 0.3) +
   geom_ribbon(aes(ymin = 0, ymax = cumulative_received, fill = "Return Rate"), alpha = 0.3) +
@@ -5589,7 +5597,6 @@ tbl_7_9 <- table7_9 %>%
  
 tbl_7_9 <- tbl_7_9 %>%
   footnote("Only includes data from mouthwash kits returned with completed Collection Card.")
- 
 landscape(tbl_7_9)
  
  
@@ -5639,7 +5646,7 @@ tbl_7_10 <- table7_10 %>%
  
 tbl_7_10 <- tbl_7_10 %>%
   footnote("Only includes data from mouthwash kits returned with completed Collection Card.")
- 
+
 landscape(tbl_7_10)
  
  
@@ -5660,6 +5667,18 @@ survey_cc_int <-  survey_cc_int %>%
   filter(ctime>0)
  
 Table7.10a = survey_cc_int %>% group_by(Site) %>%
+
+
+
+###### Initial 
+survey_cc_int <- Coll_Card_Table %>%  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & as.Date(d_195145666) > "2025-05-01") 
+
+survey_cc_int <-  survey_cc_int %>% 
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="hours"))) %>%  
+  filter(ctime>0)
+
+Table7.10a = survey_cc_int %>% group_by(Site) %>% 
+>>>>>>> fa3f357027ec066b91f66bc9516e14c63b58d38c
   dplyr::summarize(N=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -5706,4 +5725,5 @@ Table7_10b <- knitr::kable(Table7.10b,
   kable_styling(latex_options = "HOLD_position")
 add_footnote(Table7_10b, "Note: Only includes data from mouthwash kits returned with completed Collection Card.", notation = "none")
                   
+
 ```
