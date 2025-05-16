@@ -647,6 +647,7 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
                "Deviation_NotFoundMWT1",
                "Deviation_OtherMWT1",
                "Deviation_OutContMWT1",
+               "BioKit_KitAssembledIDBL_v1r0", ## doesn't match JSON
                "token")
 
 
@@ -921,8 +922,14 @@ CASE
     ELSE 'NA'
   END AS BioKit_CollRound_v1r0,
 
+  CASE
+    WHEN d_426588510 = '663273321' THEN 'Initial Kit'
+    WHEN d_426588510 = '389478821' THEN 'Replacement Kit 1'
+    WHEN d_426588510 = '772116457' THEN 'Replacement Kit 2'
+    ELSE 'NA'
+  END AS BioKit_KitLevel_v1r0,
 
-
+d_759651991 as BioKit_DtKitReq_v1r0 
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` 
 
 where Connect_ID is not null"
