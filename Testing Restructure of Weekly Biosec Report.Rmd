@@ -43,6 +43,7 @@ library(dplyr) ###data management
 # library(boxr) ###read or write data from/to box
 library(tidyverse) ###for data management
 library(reshape)  ###to work on transition from long to wide or wide to long data
+library(reshape2)  ### for the melt function
 library(listr) ###to work on a list of vector, files or..
 library(sqldf) ##sql
 library(lubridate) ###date time
@@ -1712,7 +1713,7 @@ for (i in 1:length(tube.ls)){
   tmp <- as.data.frame(coll_sett_all[,which(colnames(coll_sett_all) %in% c(id,tube,deviation))] )
   tmp <- tmp[which(!is.na(tmp[,(colnames(tmp) == id)])),]
   
-  dev_long <- data.table::melt(tmp,
+  dev_long <- reshape2::melt(tmp, #data.table::melt(tmp,
                                id.vars=c(id,tube), 
                                measure.vars=deviation,
                                variable.name="dev_type",
@@ -3827,7 +3828,8 @@ tab23=knitr::kable(research.vt.length.table,
                    caption='Table 4.1: Baseline Research Collection Visit Length (in Minutes)',
                    row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% 
   kable_styling(latex_options = "scale_down") #%>% landscape()
-add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1) HealthPartners: 25-60 minutes, (2) Henry Ford: 25-60 minutes, (3) Sanford: 10-45 minutes, (4) Marshfield: 10-45 minutes, and (5) UChicago: 15-180 minutes  ", notation = "none") #and greater than 500 minutes 
+add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1) HealthPartners: 25-60 minutes, (2) Henry Ford: 25-60 minutes, (3) Sanford: 10-45 minutes, (4) Marshfield: 10-45 minutes, (5) UChicago: 15-180 minute, and (6) BSWH: 25-60 minutes", notation = "none") #and greater than 500 minutes 
+
 
 
 uc_col_time <- knitr::kable(research.vt.length.UC.table,
@@ -4806,23 +4808,23 @@ kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329
 d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491,
 d_173836415_d_266600170_d_641006239_d_379252329, d_173836415_d_266600170_d_641006239_d_221592017,
 d_173836415_d_266600170_d_448660695
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and
 d_987563196='104430631'"
 kitstatus_table <- bq_project_query(project, kitstatus)
 kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
-
-
-
+ 
+ 
+ 
 kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
 where Connect_ID is not null and d_820476880 LIKE 'CHA%'"
 kitdate_table <- bq_project_query(project, kitdate)
 kit_data <- bq_table_download(kitdate_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
-
-
-
-
+ 
+ 
+ 
+ 
 kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Kaiser Permanente Colorado",
                                                     d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                                     d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
@@ -4833,43 +4835,48 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
                                                     d_827220437==303349821 ~ "Marshfield",
                                                     d_827220437==809703864 ~ "University of Chicago Medicine",
                                                     d_827220437==472940358 ~ "Baylor Scott and White Health"),
-                                   Kit_Status_int = case_when(#d_173836415_d_266600170_d_319972665_d_221592017==517216441	~"Pending", -- no one will have this
-                                     d_173836415_d_266600170_d_319972665_d_221592017==728267588	~"Initialized",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==849527480	~"Address Printed",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==241974920	~ "Assigned",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==277438316	~ "Shipped",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==375535639	~ "Received",
+                                   Kit_Status_int = case_when(#d_173836415_d_266600170_d_319972665_d_221592017==517216441             ~"Pending", -- no one will have this
+                                     d_173836415_d_266600170_d_319972665_d_221592017==728267588    ~"Initialized",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==849527480    ~"Address Printed",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==241974920    ~ "Assigned",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==277438316    ~ "Shipped",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==375535639    ~ "Received",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==332067457    ~ "Undeliverable",
                                      is.na(d_173836415_d_266600170_d_319972665_d_221592017) ~ "No Status"),
-                                   Kit_Status_r1 = case_when(#d_173836415_d_266600170_d_541483796_d_221592017==517216441	~"Pending", -- no one will have this
-                                     d_173836415_d_266600170_d_541483796_d_221592017==728267588	~"Initialized",
-                                     d_173836415_d_266600170_d_541483796_d_221592017==849527480	~"Address Printed",
-                                     d_173836415_d_266600170_d_541483796_d_221592017==241974920	~ "Assigned",
-                                     d_173836415_d_266600170_d_541483796_d_221592017==277438316	~ "Shipped",
-                                     d_173836415_d_266600170_d_541483796_d_221592017==375535639	~ "Received",
+                                   Kit_Status_r1 = case_when(#d_173836415_d_266600170_d_541483796_d_221592017==517216441             ~"Pending", -- no one will have this
+                                     d_173836415_d_266600170_d_541483796_d_221592017==728267588    ~"Initialized",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==849527480    ~"Address Printed",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==241974920    ~ "Assigned",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==277438316    ~ "Shipped",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==375535639    ~ "Received",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==332067457    ~ "Undeliverable",
                                      is.na(d_173836415_d_266600170_d_541483796_d_221592017) ~ "No Status"),
-                                   Kit_Status_r2 = case_when(#d_173836415_d_266600170_d_641006239_d_221592017==517216441	~"Pending", -- no one will have this
-                                     d_173836415_d_266600170_d_641006239_d_221592017==728267588	~"Initialized",
-                                     d_173836415_d_266600170_d_641006239_d_221592017==849527480	~"Address Printed",
-                                     d_173836415_d_266600170_d_641006239_d_221592017==241974920	~ "Assigned",
-                                     d_173836415_d_266600170_d_641006239_d_221592017==277438316	~ "Shipped",
-                                     d_173836415_d_266600170_d_641006239_d_221592017==375535639	~ "Received",
+                                   Kit_Status_r2 = case_when(#d_173836415_d_266600170_d_641006239_d_221592017==517216441             ~"Pending", -- no one will have this
+                                     d_173836415_d_266600170_d_641006239_d_221592017==728267588    ~"Initialized",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==849527480    ~"Address Printed",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==241974920    ~ "Assigned",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==277438316    ~ "Shipped",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==375535639    ~ "Received",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==332067457    ~ "Undeliverable",
                                      is.na(d_173836415_d_266600170_d_641006239_d_221592017) ~ "No Status"),
-                                   Kit_Status_int = factor(Kit_Status_int,levels=c("No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
-                                   Kit_Status_r1 = factor(Kit_Status_r1,levels=c("No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
-                                   Kit_Status_r2 = factor(Kit_Status_r2,levels=c("No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")))
-
+                                   Kit_Status_int = factor(Kit_Status_int,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
+                                   Kit_Status_r1 = factor(Kit_Status_r1,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
+                                   Kit_Status_r2 = factor(Kit_Status_r2,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")))
+ 
+ 
 
 kit_date <- left_join( kit_data, kit_table,  by="Connect_ID")
-
+ 
 kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID IS NOT NULL"
 kitassembly_table <- bq_project_query(project, kitassembly)
 kitassembly_data <- bq_table_download(kitassembly_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kitassembly_data$Connect_ID <- as.numeric(kitassembly_data$Connect_ID)
 kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
-
-
-## Merging the biospecimen table in to use this kit_sett table as a Figure later. 
+ 
+ 
+## Merging the biospecimen table in to use this kit_sett table as a Figure later.
 ## Need to remove duplicates the same way as in the beginning of the code
+ 
 
 kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471,  d_556788178, d_820476880
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
@@ -4877,7 +4884,6 @@ where Connect_ID is not null "
 kitsetting_table <- bq_project_query(project, kitsetting)
 kit_set <- bq_table_download(kitsetting_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kit_set$Connect_ID <- as.numeric(kit_set$Connect_ID)
-
 
 ## Keep only the HMW collections OR the first blood/urine collection to properly remove duplicates
 # 1. Keep all CHA rows-- those are the HMW and we have no duplicates so far
@@ -4890,161 +4896,172 @@ cxa_rows <- kit_set %>%
   group_by(Connect_ID) %>%
   slice_min(order_by = d_556788178, with_ties = FALSE) %>%
   ungroup()
-
+ 
 # 3. Combine the two sets
 kit_set_clean <- bind_rows(cha_rows, cxa_rows)
-
-
-
-
-
+ 
+```
+ 
+ 
+ 
+```{r HomeMW_Data_Merging, include=FALSE, echo=FALSE, warning=FALSE}
+ 
 location_stat <- kit_table %>%  select(Connect_ID, Kit_Status_int,Kit_Status_r1,Kit_Status_r2, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_982213346,
-                                       d_173836415_d_266600170_d_139245758, d_547363263, Site, d_195145666, d_173836415_d_266600170_d_448660695)
+                                       d_173836415_d_266600170_d_139245758, d_547363263, Site, d_195145666, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_319972665_d_379252329)
 kit_sett <- left_join(location_stat, kit_set_clean,   by="Connect_ID") #%>% left_join(recrver1,  by="Connect_ID")
-
+ 
 #"Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to March 29, 2024. Home mouthwash collections were launched for eligible participants in March 29, 2024. Home mouthwash collections for backlog collections (before March 29, 2024) will be launched at a later date.
-table27_elg <- kit_sett %>% filter( (d_173836415_d_266600170_d_982213346>=as.Date("2024-03-29") | is.na(d_173836415_d_266600170_d_982213346)) & 
+table27_elg <- kit_sett %>% filter( (d_173836415_d_266600170_d_982213346>=as.Date("2024-03-29") | is.na(d_173836415_d_266600170_d_982213346)) &
                                     (d_173836415_d_266600170_d_139245758>=as.Date("2024-03-29") | is.na(d_173836415_d_266600170_d_139245758)) &
                                       !(is.na(d_173836415_d_266600170_d_982213346) & is.na(d_173836415_d_266600170_d_139245758))) # needs at least one collection
                                      #Kit_Status!="Unknown")
-
-
+ 
+ 
 #Updates: need kit assembly merged in to detmine kit replacement status
 table27_elg_distinct <- left_join(table27_elg, kitassembly_data, by="Connect_ID")
+ 
 
 # when participants get replacement kits, then get an additional row in the kit_assembly table
 # those with replacement kit 1 have one row with a null d_426588510 value, and one row with d_426588510==389478821
 # those with replacement kit 2 have one row with a null d_426588510 value, and one row with d_426588510==389478821 AND one row with d_426588510 == 772116457
 # those with initial kits will have a null d_426588510 value if kit sent before implementation, or d_426588510==663273321 if its more recent
 # a case when works here because we only want the top value for the participant
-table27_elg_distinct <- table27_elg_distinct %>% 
+table27_elg_distinct <- table27_elg_distinct %>%
+  filter(d_650516960=='664882224' | is.na(d_650516960)) %>%
   mutate(kit_level= case_when(d_426588510 == 772116457 ~ "Replacement Kit 2",
                               d_426588510 == 389478821 ~ "Replacement Kit 1",
                               TRUE ~ "Initial Kit"))
-
-## Because kit assembly has duplicate rows (somehow multiple initial with different kit statuses), only the most recent kit status should remain. 
-## Somehow we're getting rows with the same values for Connect_ID, Kit_Status, kit_level, and kit ID (d_687158491). Need to remove the duplicate rows
-kit_status_table_7.1 <- table27_elg_distinct %>%
-  mutate(kit_status_level = factor(Kit_Status, levels = c("No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received"), ordered = TRUE)) %>%
-  group_by(Connect_ID, kit_level, d_687158491, Site) %>%
-  slice_max(order_by = kit_status_level, n = 1, with_ties = FALSE) %>%
-  ungroup()
-
+ 
+ 
+## Participants are getting Kit_Status and kit_level values for both their HMW and blood/urine collection, causing dupicate rows
+## Blood urine collections will have all kit statuses, HMW collections will only include the received collections and some shipped collections
+## Using blood urine collections (Collection ID starts with CXA) to ensure all kits are counted.
+## This will ONLY work for the first table to get the kit status counts as the CHA columns don't have values for d_678166505 and d_143615646_d_826941471
+ 
+kit_status_table_7.1 <- table27_elg_distinct %>% filter(d_650516960=='664882224')
+ 
+## this looks correct, only 77 duplicates which is the number of replacement 1 and 2 kits, but I don't know why there's still more rows then kit assembly rows here
+## I think 'undeliverable', 'no status', 'inititalized', 'address printed', and 'assigned' don't show up in that table
+ 
 ```
-
-
+ 
+ 
 ```{r tbl7.1, include=FALSE, echo=FALSE, warning=FALSE}
 #### Need Tables for every level of kit. If they EVER had an initial kit, they need to be in the initial table, ect.
 ## On a kit level, NOT a participant level
-
+ 
 ### Initial Kit
-status_elgA <- kit_status_table_7.1 %>% 
-  filter(kit_level=="Initial Kit") %>% 
+status_elgA <- kit_status_table_7.1 %>%
+  filter(kit_level=="Initial Kit") %>%
   tbl_cross(
     row = Site,
-    col = Kit_Status,
+    col = Kit_Status_int,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
-               Kit_Status = "Kit Status"),
+               Kit_Status_int = "Kit Status"),
     missing="ifany",
-    margin_text="Total Eligible") 
-
-
+    margin_text="Total Eligible")
+ 
+ 
 status_elg_knA <- status_elgA %>%
   modify_header(stat_0 = "Total") %>%
   modify_caption("Table 7.1a:  Baseline- Home Mouthwash Initial Kit Status Among Eligible Participants") %>%
-  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down") 
-
-
-
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down")
+ 
+ 
+ 
+ 
 
 ### Replacement Kit 1
 status_elgB <- kit_status_table_7.1 %>%
   filter(kit_level=="Replacement Kit 1") %>%
   tbl_cross(
     row = Site,
-    col = Kit_Status,
+    col = Kit_Status_r1,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
-               Kit_Status = "Kit Status"),
+               Kit_Status_r1 = "Kit Status"),
     missing="ifany",
-    margin_text="Total Eligible") 
-
-
+    margin_text="Total Eligible")
+ 
+ 
 status_elg_knB <- status_elgB %>%
   modify_header(stat_0 = "Total") %>%
   modify_caption("Table 7.1b:  Baseline- Home Mouthwash Replacement Kit 1 \n Status Among Eligible Participants") %>%
-  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down") 
-
-
-
-
-
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down")
+ 
+ 
+ 
+ 
+ 
 ### Replacement Kit 2
-status_elgC <- kit_status_table_7.1 %>% 
+status_elgC <- kit_status_table_7.1 %>%
   filter(kit_level=="Replacement Kit 2") %>%
   tbl_cross(
     row = Site,
-    col = Kit_Status,
+    col = Kit_Status_r2,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
-               Kit_Status = "Kit Status"),
+               Kit_Status_r2 = "Kit Status"),
     missing="ifany",
-    margin_text="Total Eligible") 
-
-
+    margin_text="Total Eligible")
+ 
+ 
 status_elg_knC <- status_elgC %>%
   modify_header(stat_0 = "Total") %>%
   modify_caption("Table 7.1c:  Baseline- Home Mouthwash Replacement Kit 2 \n Status Among Eligible Participants") %>%
-  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down") 
-
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down")
+ 
+ 
 
 ```
-
-
-
+ 
+ 
+ 
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, warning=FALSE,results='hold'}
-
-filtered_data <- filter(kit_status_table_7.1, Kit_Status %in% c("Received", "Shipped"))
-
+ 
+filtered_data <- filter(kit_status_table_7.1, Kit_Status_int %in% c("Received", "Shipped"))
+ 
 summary_table2_all<- filtered_data %>%
-  filter(kit_level=="Initial Kit") %>% 
+  filter(kit_level=="Initial Kit") %>%
   group_by(Site) %>%
-  summarise(Shipped = sum(Kit_Status %in% c("Received", "Shipped")),
-            Shipped_TwoWeeks = sum(Kit_Status %in% c("Received", "Shipped") & 
+  summarise(Shipped = sum(Kit_Status_int %in% c("Received", "Shipped")),
+            Shipped_TwoWeeks = sum(Kit_Status_int %in% c("Received", "Shipped") &
                                     as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < currentDate-14),
-            Received = sum(Kit_Status == "Received"))
-
+            Received = sum(Kit_Status_int == "Received"))
+ 
+ 
 
 total_shipped <- sum(summary_table2_all$Shipped)
 total_received <- sum(summary_table2_all$Received)
 total_ship_previous_week <- sum(summary_table2_all$Shipped_TwoWeeks)
 total_received_percentage <- paste(total_received, "(", round(total_received/total_ship_previous_week*100, digits = 1), "%)")
 total_row <- c("Total", total_shipped, total_ship_previous_week, total_received)
-
+ 
 # Create a new data frame for the "Total" row
 total_df <- data.frame(t(total_row), stringsAsFactors = FALSE)
-
+ 
 # Set column names
 colnames(total_df) <- colnames(summary_table2_all)
-
+ 
 # Append the "Total" row to summary_table2_all
 all_shipped_2 <- rbind(summary_table2_all, total_df)
-
-
+ 
+ 
 ```
-
-
+ 
+ 
 ```{r new_Figs7.3, include=FALSE, echo=FALSE, warning=FALSE}
-
-
+ 
+ 
 all_shipped_2_filtered <- all_shipped_2 %>%
-  filter(Site != "Total")  %>% 
+  filter(Site != "Total")  %>%
   mutate(Site = gsub("Kaiser Permanente", "KP", Site),
          Site = gsub("University of ", "U", Site))
+ 
 
 fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
   geom_bar(aes(y = as.numeric(Shipped_TwoWeeks), fill = "Shipped"), stat = "identity", width = 0.8, position = position_dodge(width = 0.8)) +
@@ -5062,25 +5079,30 @@ fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
   ) +
   ggtitle("Figure 7.1. Baseline- Total Initial Kits Received of Total Initial Kits Shipped \n Up To 2 Weeks Ago, by Site")
 
-
 ```
-
-
-
+ 
+ 
+ 
 ```{r Table7.3_7.6, include=FALSE, echo=FALSE, warning=FALSE}
-
-
+ 
+ 
+## Here we need the CXA collections only- received or shipped and has values for d_678166505 and d_143615646_d_826941471
+ 
+kits_hmw <- table27_elg_distinct %>% filter(is.na(d_650516960))
+ 
+ 
 ####################
 #all_completed <- left_join(table27_elg_distinct,kit_assembly, by=c("Connect_ID", "Site",  "Kit_Status", "d_173836415_d_266600170_d_319972665_d_661940160", 'd_547363263'))
+ 
+Coll_Card_Table <- kits_hmw %>%
+  filter(Kit_Status_int=="Received" & kit_level=="Initial Kit") %>%
+  mutate(Card_Status = case_when(d_137401245==353358909           ~"Collection Card Not Included",
 
-Coll_Card_Table <- kit_status_table_7.1 %>% 
-  filter(Kit_Status=="Received" & kit_level=="Initial Kit") %>% 
-  mutate(Card_Status = case_when(d_137401245==353358909	~"Collection Card Not Included",
                                  TRUE ~ "Collection Card Included"))
-
+ 
 Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>% tbl_cross(
   row = Site,
-  col = Card_Status, 
+  col = Card_Status,
   digits=c(0,1),
   percent = "row",
   label=list(Site ~ "Site", Card_Status ~ " "),
@@ -5089,20 +5111,20 @@ Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>%
   modify_header() %>%
   modify_caption("Table 7.3: Baseline- Collection Card Status Among Home Mouthwash Initial Kits Received") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
-
-
-
-
+ 
+ 
+ 
+ 
 ############
 #d_265193023==231311385 --- had to remove, no one finished yet
-
-test30 <- Coll_Card_Table %>%  filter(!is.na(d_143615646_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) 
-
-test30 <-  test30 %>% 
-  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_143615646_d_826941471)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),units="days"))) %>%  
+ 
+test30 <- Coll_Card_Table %>%  filter(!is.na(d_143615646_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+ 
+test30 <-  test30 %>%
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_143615646_d_826941471)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),units="days"))) %>% 
   filter(ctime>0)
-
-Table7.4 = test30 %>% group_by(Site) %>% 
+ 
+Table7.4 = test30 %>% group_by(Site) %>%
   dplyr::summarize(N=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -5112,23 +5134,26 @@ Table7.4 = test30 %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    #Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
-
-
+ 
+ 
+ 
 #################
-firstcoltime <- tube_col %>% select(Connect_ID, collection.tm)
+ 
+## Here we want ALL kits shipped, so using the CXA collections
+ 
+firstcoltime <- tube_col %>% filter(all_settings=="Clinical")  %>% select(Connect_ID, collection.tm)
 first_col_time <- left_join(kit_status_table_7.1, firstcoltime, by=c("Connect_ID", "Site"))
-
-test31 <- first_col_time %>%  
-  filter(!is.na(collection.tm) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160) & kit_level=="Initial Kit") 
-
-test31 <-  test31 %>% 
+ 
+test31 <- first_col_time %>% 
+  filter(!is.na(collection.tm) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160) & kit_level=="Initial Kit")
+ 
+test31 <-  test31 %>%
   mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),
-                                     min(as.POSIXct(ymd_hms(collection.tm))),units="days")))
-test31b <-  test31 %>%  filter(ctime>0) 
-
-
-Table7.5 = test31b %>% group_by(Site) %>% 
+                                     as.POSIXct(ymd_hms(collection.tm)),units="days")))
+test31b <-  test31 %>%  filter(ctime>0)
+ 
+ 
+Table7.5 = test31b %>% group_by(Site) %>%
   dplyr::summarize(N =n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -5138,19 +5163,19 @@ Table7.5 = test31b %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    #Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
-
-
-
+ 
+ 
+ 
+ 
 ##################################
 condition_cols <- c("d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477", "d_633640710_d_289239334","d_633640710_d_992420392",
-           "d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603") 
-kit_status_table_7.1 <- kit_status_table_7.1 %>%
+           "d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603")
+kits_hmw <- kits_hmw %>%
   mutate(
     multi_cond = rowSums(across(all_of(condition_cols), ~ .x == 353358909, .names = NULL), na.rm = TRUE)
   )
-
-table_32 <- kit_status_table_7.1 %>% filter(Kit_Status=="Received" & kit_level=="Initial Kit") %>%  
+ 
+table_32 <- kits_hmw %>% filter(Kit_Status_int=="Received" & kit_level=="Initial Kit") %>% 
   mutate(kit_condition = case_when(multi_cond>1 & d_633640710_d_950521660!=353358909 ~ "Two of More Conditions Selected", #-- right now no one with multiple selected
                                    #d_633640710_d_950521660==353358909 ~ "Package in Good Conditon",
                                    d_633640710_d_545319575==353358909 ~ "Package Crushed",
@@ -5163,98 +5188,97 @@ table_32 <- kit_status_table_7.1 %>% filter(Kit_Status=="Received" & kit_level==
                                    d_633640710_d_950521660==353358909 ~ "Package in Good Conditon",
                                    d_633640710_d_100618603==353358909 ~ "Other",
                                    TRUE ~ "No Conditions Selected"))
-
-
+ 
+ 
 table__32 <- table_32 %>% select(kit_condition) %>%  group_by(kit_condition) %>%  tally()
-
-
+ 
+ 
 table__32$Percentage <- paste0(
   table__32$n,
   " (",
   sprintf("%.2f%%", (table__32$n / sum(table__32$n)) * 100),
   ")"
 )
-
+ 
 db <- dim(table__32)[[1]]
 table__32[(db+1),2] <- sum(table__32$n)
 table__32[(db+1),1] <- "Total"
 table__32[nrow(table__32),3] <- paste(table__32$n[nrow(table__32)], " (100%)")
-
-
-
+ 
+ 
+ 
 table32_pct <- table__32[,c(1,3)]
-
+ 
 colnames(table32_pct) <- c("Condition", "Total Received Kits")
-
+ 
 table32_pct
-
-
+ 
+ 
 ```
-
-
-
+ 
+ 
+ 
 \FloatBarrier
-
+ 
 ```{r FigMW1, include=FALSE, echo=FALSE, warning=FALSE}
-
-
+ 
+ 
 #NOTE: MUST change currentDate to Mondays date in order for this to run correctly when testing for fixes
 #currentDate= recent Monday date
-
-##Received 
-kit_set_col_1 <- kit_set_clean%>% select(Connect_ID, d_143615646_d_826941471)
-
+ 
+##Received
+kit_set_col_1 <- kit_set_clean %>% select(Connect_ID, d_143615646_d_826941471)
+ 
 kit_set_col_1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_set_col_1$d_143615646_d_826941471,as.Date(veristart.date-days(2)),units="days"))/7)
-kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1$col.Sunday.week-1) 
+kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1$col.Sunday.week-1)
 kit_set_col_1$col.Monday.date <- kit_set_col_1$col.Sunday.date-days(6)
-
+ 
 kit_fig_1 <- inner_join(kit_set_col_1,kit_table,   by="Connect_ID")
-
 
 fig5_new_1 <- kit_fig_1 %>%
   filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
-
-
+ 
+ 
 fig5_week_total_1 <- fig5_new_1 %>%
-  group_by(col.Monday.date) %>% 
+  group_by(col.Monday.date) %>%
   summarise(total_received = sum(!is.na(d_143615646_d_826941471)))
-
+ 
 # Create a data frame with all Mondays from April 1st, 2024, until today
 all_mondays <- data.frame(col.Monday.date = seq(as.Date("2024-04-01"), currentDate-7, by = "week"))
-
-
+ 
+ 
 fig5_week_total_1 <- left_join(all_mondays, fig5_week_total_1, by = "col.Monday.date") %>%
   mutate(total_received = replace(total_received, is.na(total_received), 0))
-
+ 
 #renaming so I can select a subgroup in the next chunk
-kit_table1 <- kit_table
-
+kit_table1 <- kit_status_table_7.1 %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+ 
 kit_table1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_table1$d_173836415_d_266600170_d_319972665_d_661940160,as.Date(veristart.date-days(2)),units="days"))/7)
-kit_table1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_table1$col.Sunday.week-1) 
+kit_table1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_table1$col.Sunday.week-1)
 kit_table1$col.Monday.date <- kit_table1$col.Sunday.date-days(6)
-
-
+ 
+ 
 fig5_new_2 <- kit_table1 %>%
-  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate) 
-
-fig5_week_total_2 <- fig5_new_2 %>%
+  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
+ 
+fig5_week_totals_2 <- fig5_new_2 %>%
   group_by(col.Monday.date) %>%
   summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)))
-
-
-fig5_week_total_2 <- left_join(all_mondays, fig5_week_total_2, by = "col.Monday.date") %>%
+ 
+ 
+fig5_week_total_2 <- left_join(all_mondays, fig5_week_totals_2, by = "col.Monday.date") %>%
   mutate(total_shipped = replace(total_shipped, is.na(total_shipped), 0))
-
-
-
+ 
+ 
+ 
 fig5_week_final <- fig5_week_total_1
-
+ 
 fig5_week_final[,3] <- fig5_week_total_2[,2]
-
+ 
 colnames(fig5_week_final) <- c("col.Monday.date", "total_received", "total_shipped")
-
-
-
+ 
+ 
+ 
 MW_Coll_Kits <- ggplot(fig5_week_final, aes(x = as.Date(col.Monday.date))) +
   geom_line(aes(y = total_shipped, color = "Total Shipped"), linetype = "dashed", size = 1) +
   geom_line(aes(y = total_received, color = "Total Received"), linetype = "dashed", size = 1) +
@@ -5278,108 +5302,98 @@ MW_Coll_Kits <- ggplot(fig5_week_final, aes(x = as.Date(col.Monday.date))) +
   guides(fill = guide_legend(nrow = 2, byrow = TRUE)) +
   labs(caption = "This figure includes all home mouthwsh kit types: Initial, Replacement Kit 1 and Replacement Kit 2 ") +
   theme(plot.caption = element_text(hjust=0))
-
-
+ 
+ 
 ```
-
-
-
+ 
 ```{r FigMW2, include=FALSE, echo=FALSE, warning=FALSE}
-
-#NOTE: MUST change currentDate to Mondays date in order for this to run correctly when testing for fixes
-#currentDate= recent Monday date
-
-
-## Initial only, need to merge in the kit_assembly table
-int_kit <- kitassembly_data %>% 
-  mutate(kit_level= case_when(d_426588510 == 772116457 ~ "Replacement Kit 2",
-                              d_426588510 == 389478821 ~ "Replacement Kit 1",
-                              TRUE ~ "Initial Kit")) %>% 
-  filter(kit_level=="Initial Kit")
-
-kit_set_clean2 <- left_join(int_kit, kit_set_clean, by="Connect_ID")
-kit_table2 <- left_join(int_kit, kit_table, by="Connect_ID")
-
-##Received 
-kit_set_col_2 <- kit_set_clean2 %>% select(Connect_ID, d_143615646_d_826941471)
-
+ 
+##Received
+kit_set_col_2 <- kit_set_clean %>% select(Connect_ID, d_143615646_d_826941471)
+ 
 kit_set_col_2$col.Sunday.week <- ceiling(as.numeric(difftime(kit_set_col_2$d_143615646_d_826941471,as.Date(veristart.date-days(2)),units="days"))/7)
-kit_set_col_2$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_2$col.Sunday.week-1) 
+kit_set_col_2$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_2$col.Sunday.week-1)
 kit_set_col_2$col.Monday.date <- kit_set_col_2$col.Sunday.date-days(6)
-
-
-kit_fig_2 <- inner_join(kit_set_col_2,kit_table2,   by="Connect_ID")
-
-
+ 
+ 
+kit_table_int <- kit_table %>%  filter(Kit_Status_int=="Received")
+ 
+kit_fig_2 <- inner_join(kit_set_col_2,kit_table_int,   by="Connect_ID")
+ 
+ 
 fig5_new_2 <- kit_fig_2 %>%
   filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
-
-
-fig5_week_total_2 <- fig5_new_2 %>%
-  group_by(col.Monday.date) %>% 
-  summarise(total_received = sum(!is.na(d_143615646_d_826941471)))
-
-# Create a data frame with all Mondays from April 1st, 2024, until today
-all_mondays <- data.frame(col.Monday.date = seq(as.Date("2024-04-01"), currentDate-7, by = "week"))
-
-
-fig5_week_total_2 <- left_join(all_mondays, fig5_week_total_2, by = "col.Monday.date") %>%
-  mutate(total_received = replace(total_received, is.na(total_received), 0))
-
-
-
-
-kit_table2$col.Sunday.week <- ceiling(as.numeric(difftime(kit_table2$d_173836415_d_266600170_d_319972665_d_661940160,as.Date(veristart.date-days(2)),units="days"))/7)
-kit_table2$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_table2$col.Sunday.week-1) 
-kit_table2$col.Monday.date <- kit_table2$col.Sunday.date-days(6)
-
-
-fig5_new_2 <- kit_table2 %>%
-  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate) 
-
+ 
+ 
 fig5_week_total_2 <- fig5_new_2 %>%
   group_by(col.Monday.date) %>%
-  summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)))
-
-
+  summarise(total_received = sum(!is.na(d_143615646_d_826941471)))
+ 
+# Create a data frame with all Mondays from April 1st, 2024, until today
+all_mondays <- data.frame(col.Monday.date = seq(as.Date("2024-04-01"), currentDate-7, by = "week"))
+ 
+ 
 fig5_week_total_2 <- left_join(all_mondays, fig5_week_total_2, by = "col.Monday.date") %>%
+  mutate(total_received = replace(total_received, is.na(total_received), 0))
+ 
+ 
+##Shipped
+#renaming so I can select a subgroup in the next chunk
+kit_table2 <- kit_status_table_7.1 %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_661940160) & kit_level=="Initial Kit")
+ 
+kit_table2$col.Sunday.week <- ceiling(as.numeric(difftime(kit_table2$d_173836415_d_266600170_d_319972665_d_661940160,as.Date(veristart.date-days(2)),units="days"))/7)
+kit_table2$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_table2$col.Sunday.week-1)
+kit_table2$col.Monday.date <- kit_table2$col.Sunday.date-days(6)
+ 
+ 
+fig5_new_3 <- kit_table2 %>%
+  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
+ 
+fig5_week_totals_3 <- fig5_new_3 %>%
+  group_by(col.Monday.date) %>%
+  summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)))
+ 
+ 
+fig5_week_total_3 <- left_join(all_mondays, fig5_week_totals_3, by = "col.Monday.date") %>%
   mutate(total_shipped = replace(total_shipped, is.na(total_shipped), 0))
-
-
-
+ 
+ 
+ 
+ 
 fig_7.3_totals <- fig5_week_total_2
-
-fig_7.3_totals[,3] <- fig5_week_total_2[,2]
-
+ 
+fig_7.3_totals[,3] <- fig5_week_total_3[,2]
+ 
 colnames(fig_7.3_totals) <- c("col.Monday.date", "total_received", "total_shipped")
-
-
+ 
+ 
 fig5_week_total2 <- fig_7.3_totals %>%
   arrange(col.Monday.date) %>%
   mutate(cumulative_shipped = cumsum(total_shipped),
          cumulative_received = cumsum(total_received))
-
+ 
 fig5_week_total2 <- fig5_week_total2 %>%
   mutate(percentage_received_to_shipped = round(cumulative_received / cumulative_shipped * 100, digits=2))
-
-
+ 
+ 
 ##Percentage they want is the total received as of today/total shipped as of end of week prior
 #all_shipped_2_filtered already looks at initial kits only
 thus_far <- round(sum(as.numeric(all_shipped_2_filtered$Received))/sum(as.numeric(all_shipped_2_filtered$Shipped_TwoWeeks))*100, digits=2)
-
+ 
+ 
 
 MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
   geom_ribbon(aes(ymin = 0, ymax = cumulative_shipped, fill = "Total Shipped"), alpha = 0.3) +
   geom_ribbon(aes(ymin = 0, ymax = cumulative_received, fill = "Return Rate"), alpha = 0.3) +
   geom_text(data = fig5_week_total2 %>% filter(col.Monday.date == max(col.Monday.date)),
-            aes(x = as.Date(col.Monday.date), 
+            aes(x = as.Date(col.Monday.date),
                 label = paste0(thus_far, "%")),
             y = thus_far, vjust = -0.5, hjust = 1.2,  color = "black",  size = 3) +
   scale_x_date(name = "Date", date_labels = "%y-%m-%d", date_breaks = "2 weeks",
                limits = c(as.Date("2024-03-25"), as.Date(currentDate-7)), expand = c(0,0)) +
   scale_y_continuous(name = "# Kits Shipped") +
   scale_fill_manual(name = "", values = c("Total Shipped" = "#CC7D15", "Return Rate" = "#0072B2")) +
-  ggtitle(label = "Figure 7.3: Baseline− Home Mouthwash Initial Kit Return Rate \n for Kits Shipped Up To 2 Weeks Ago") +
+  ggtitle(label = "Figure 7.3: Baseline − Home Mouthwash Initial Kit Return Rate \n for Kits Shipped Up To 2 Weeks Ago") +
   labs(caption = paste("Note: Shipped data are current through",as.Date(currentDate)-7, ".")) +
   theme(panel.background = element_blank(),
         legend.position = "bottom",
@@ -5388,120 +5402,123 @@ MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
         axis.title.x = element_text(size = 14, face = "bold"),
         axis.title.y = element_text(size = 14, face = "bold", color = "black"),
         plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))
-
-
+ 
 ```
-
-
-
-
+ 
+ 
+ 
+ 
+ 
 \FloatBarrier
-```{r newTables7.1A,eval=TRUE,echo=FALSE,results='asis'} 
+```{r newTables7.1A,eval=TRUE,echo=FALSE,results='asis'}
 #results='asis'
-
-add_footnote(status_elg_knA, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none") 
+ 
+add_footnote(status_elg_knA, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none")
 ```
-
+ 
 \FloatBarrier
-```{r newTables7.1B,eval=TRUE,echo=FALSE,results='asis'} 
+```{r newTables7.1B,eval=TRUE,echo=FALSE,results='asis'}
 #results='asis'
-
-add_footnote(status_elg_knB, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none") 
+ 
+add_footnote(status_elg_knB, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none")
 ```
-
+ 
 \FloatBarrier
-```{r newTables7.1C,eval=TRUE,echo=FALSE,results='asis'} 
+```{r newTables7.1C,eval=TRUE,echo=FALSE,results='asis'}
 #results='asis'
-
-add_footnote(status_elg_knC, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none") 
+ 
+add_footnote(status_elg_knC, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none")
 ```
-
+ 
 \FloatBarrier
 ```{r KnitrTables7.2,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
-
+ 
 knitr::kable(all_shipped_2,format.args = list(big.mark = ","),
              caption='Table 7.2 Baseline- Total Home Mouthwash Initial Kit Return Rate for Packages Shipped up to 2 Weeks Ago',
              row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-
+ 
 ```
-
-
-
+ 
+ 
+ 
 \FloatBarrier
 ```{r Fig7_1, eval=TRUE,echo=FALSE}
-#fig.height = 5, fig.width = 5, 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
-
+#fig.height = 5, fig.width = 5,
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+ 
 fig7_1
-
+ 
 ```
-
-
+ 
+ 
 \FloatBarrier
 ```{r Fig7_2, eval=TRUE,echo=FALSE}
-#fig.height = 5, fig.width = 5, 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
-
+#fig.height = 5, fig.width = 5,
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+ 
 MW_Coll_Kits
-
+ 
 ```
-
+ 
 \FloatBarrier
 ```{r Fig7_3, eval=TRUE,echo=FALSE}
-#fig.height = 5, fig.width = 5, 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+#fig.height = 5, fig.width = 5,
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 MW_overtime
-
+ 
 ```
-
+ 
 \FloatBarrier
 ```{r KnitrTables7.3_7.4,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, results='asis'}
-
+ 
 Coll_Card_StatusBF %>% kable_styling(latex_options = "HOLD_position")
-
-
+ 
+ 
 ```
-
-
-
+ 
+ 
+ 
 \FloatBarrier
 ```{r KnitrTables7.5_7.8,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, results='asis'}
-
-
+ 
+ 
 #all these will move down a table number
 table7.4 <- knitr::kable(Table7.4,
-                               caption='Table 7.4: Baseline- Time (in Days) from Home Mouthwash Initial Kit Shipment to \n BPTL Receipt (kits shipped before 6/17/2024)',
+                               caption='Table 7.4: Baseline- Time (in Days) from Home Mouthwash Initial Kit Shipment to \n BPTL Receipt',
                                row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 add_footnote(table7.4, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
-
-
-
+ 
+ 
+ 
 knitr::kable(Table7.5,
              caption='Table 7.5: Baseline- Time (in Days) from Clinical Collection to Home Mouthwash Initial Kit Shipment',
              row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-
-
+ 
+ 
 knitr::kable(table32_pct,
              caption='Table 7.6: Baseline- Kit Conditions Among Received Home Mouthwash Initial Kits',
              row.names=FALSE, align=c("l","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 ```
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
 \FloatBarrier
-
+ 
 ```{r Tables7.9_7.12, eval=TRUE,echo=FALSE,results='asis'}
-
-
-
-table7_8 <- kit_table %>%  filter(Kit_Status=="Received") %>%
+ 
+ 
+######### Need on a participant level- can have multiple kits but only one survey
+ 
+ 
+ 
+table7_8 <- kit_table %>%  filter(Kit_Status_r2=="Received" | Kit_Status_r1=="Received" | Kit_Status_int=="Received") %>%
   mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
                                    d_547363263==615768760 ~ "Started",
-                                   d_547363263==231311385 ~ "Submitted")) %>%  
-  mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>% 
+                                   d_547363263==231311385 ~ "Submitted")) %>% 
+  mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>%
   tbl_cross(
     row = Site,
     col = MWSrvy_status,
@@ -5511,35 +5528,36 @@ table7_8 <- kit_table %>%  filter(Kit_Status=="Received") %>%
                MWSrvy_status = " "),
     missing="ifany",
     margin_text="Total")
-
+ 
 table7_8_totals <- as.data.frame(table7_8)
 table7_8_totals <- table7_8_totals[c(-1),]
-
-
+ 
+ 
 tab7_8 <- knitr::kable(table7_8_totals ,
-                       col.names=c("Site", "Not Started","Started","Submitted","Total Participants with Received Kits"), 
-                       caption='Table 7.7: Baseline- Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits', 
+                       col.names=c("Site","Not Started","Started","Submitted","Total Participants with Received Kits"),
+                       caption='Table 7.7: Baseline- Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits',
                        row.names=FALSE,align=c("l","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
-
-
+ 
+ 
 num_rows <- nrow(table7_8_totals)
 tab7_8 <- tab7_8 %>%
   row_spec(1:(num_rows - 1), extra_css = "text-indent: 20px;")
-
+ 
 kable_styling(tab7_8, latex_options = "scale_down")
-
-
-
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 #Before MW Survey description Fix
-
-table7_9 <- kit_status_table_7.1 %>% filter(Kit_Status=="Received" & d_137401245==104430631 &  as.Date(d_173836415_d_266600170_d_319972665_d_661940160)<"2024-05-22") %>%
+ 
+table7_9 <- kits_hmw %>%  filter((Kit_Status_r2=="Received" | Kit_Status_r1=="Received" | Kit_Status_int=="Received") & d_137401245==104430631 &
+                                   as.Date(d_173836415_d_266600170_d_319972665_d_661940160)<"2024-05-22") %>%
   mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
                                    d_547363263==615768760 ~ "Started",
                                    d_547363263==231311385 ~ "Submitted"),
@@ -5567,28 +5585,26 @@ table7_9 <- kit_status_table_7.1 %>% filter(Kit_Status=="Received" & d_137401245
                MW_comp_diff = " "),
     missing="ifany",
     margin_text="Total")
-
-
-
+ 
+ 
+ 
 tbl_7_9 <- table7_9 %>%
-  #bold_labels() %>%
-  #italicize_levels() %>%
   modify_header(stat_0 = "Total") %>%
   modify_caption("Table 7.8: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n(Pre-update to survey description on PWA)") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down")
-
-
+ 
+ 
 tbl_7_9 <- tbl_7_9 %>%
   footnote("Only includes data from mouthwash kits returned with completed Collection Card.")
-
 landscape(tbl_7_9)
-
-
-
-
+ 
+ 
+ 
+ 
 #After MW Survey description Fix
-table7_10 <- kit_status_table_7.1 %>% filter(Kit_Status=="Received" & d_137401245==104430631 &  as.Date(d_173836415_d_266600170_d_319972665_d_661940160)>"2024-05-22") %>%
+table7_10 <- kits_hmw %>%  filter((Kit_Status_r2=="Received" | Kit_Status_r1=="Received" | Kit_Status_int=="Received") & d_137401245==104430631 &
+                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160)>="2024-05-22") %>%
   mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
                                    d_547363263==615768760 ~ "Started",
                                    d_547363263==231311385 ~ "Submitted"),
@@ -5602,11 +5618,11 @@ table7_10 <- kit_status_table_7.1 %>% filter(Kit_Status=="Received" & d_13740124
                                  as.numeric(MW_completion)==1 ~ "1 Day after Collection",
                                  as.numeric(MW_completion)==2 ~ "2 Days after Collection",
                                  as.numeric(MW_completion)==3 ~ "3 Days after Collection",
-                                 as.numeric(MW_completion)>=4 ~ "4+ Days after Collection", 
+                                 as.numeric(MW_completion)>=4 ~ "4+ Days after Collection",
                                  TRUE~"4+ Days before Collection")) %>%
   mutate(MW_comp_diff = factor(MW_comp_diff, levels=c("Not Submitted","4+ Days before Collection", "3 Days before Collection","2 Days before Collection","1 Day before Collection",
                                                       "Same Day as Collection","1 Day after Collection", "2 Days after Collection",
-                                                      "3 Days after Collection", "4+ Days after Collection"))) %>% 
+                                                      "3 Days after Collection", "4+ Days after Collection"))) %>%
   dplyr::select(Site, MW_comp_diff)  %>%
   tbl_cross(
     row = Site,
@@ -5617,9 +5633,9 @@ table7_10 <- kit_status_table_7.1 %>% filter(Kit_Status=="Received" & d_13740124
                MW_comp_diff = " "),
     missing="ifany",
     margin_text="Total")
-
-
-
+ 
+ 
+ 
 tbl_7_10 <- table7_10 %>%
   #bold_labels() %>%
   #italicize_levels() %>%
@@ -5627,19 +5643,30 @@ tbl_7_10 <- table7_10 %>%
   modify_caption("Table 7.9: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n (Post-update to survey description on PWA)") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down")
-
+ 
 tbl_7_10 <- tbl_7_10 %>%
   footnote("Only includes data from mouthwash kits returned with completed Collection Card.")
 
 landscape(tbl_7_10)
-
-
+ 
+ 
 ```
-
-
+ 
+ 
 \FloatBarrier
-
+ 
 ```{r Tables10s, eval=TRUE,echo=FALSE,results='asis'}
+ 
+ 
+ 
+###### Initial
+survey_cc_int <- Coll_Card_Table %>%  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & as.Date(d_195145666) > "2025-05-01")
+ 
+survey_cc_int <-  survey_cc_int %>%
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="days"))) %>% 
+  filter(ctime>0)
+ 
+Table7.10a = survey_cc_int %>% group_by(Site) %>%
 
 
 
@@ -5651,6 +5678,7 @@ survey_cc_int <-  survey_cc_int %>%
   filter(ctime>0)
 
 Table7.10a = survey_cc_int %>% group_by(Site) %>% 
+>>>>>>> fa3f357027ec066b91f66bc9516e14c63b58d38c
   dplyr::summarize(N=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -5660,27 +5688,27 @@ Table7.10a = survey_cc_int %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    #Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
+ 
 Table7_10a <- knitr::kable(Table7.10a,
-                           caption='Table 7.10a Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card for Initial Kit (Post update to  survey introduction)',
-                           row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% 
+                           caption='Table 7.10a Baseline- Mouthwash Biospecimen Survey Completion Time (in Days) Relative to Collection Time \n Reported on Collection Card for Initial Kit (Post update to  survey introduction)',
+                           row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 add_footnote(Table7_10a, "Note: Only includes data from mouthwash kits returned with completed Collection Card.", notation = "none")
-
-
+ 
+ 
 ##### Replacement Kit 1
-
-
-survey_cc_r1 <- kit_status_table_7.1 %>% 
+ 
+ 
+survey_cc_r1 <- kits_hmw %>%
   filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) &
-           Kit_Status=="Received" & kit_level=="Replacement Kit 1" & 
-           d_137401245==353358909  & as.Date(d_195145666) > "2025-05-01") 
-
-survey_cc_r1 <-  survey_cc_r1 %>% 
-  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="hours"))) %>%  
+           Kit_Status_r1=="Received"  & kit_level=="Replacement Kit 1"  &
+           as.Date(d_195145666) > "2025-05-01") #& d_137401245==353358909
+ 
+survey_cc_r1 <-  survey_cc_r1 %>%
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="days"))) %>% 
   filter(ctime>0)
-
-Table7.10b = survey_cc_r1 %>% group_by(Site) %>% 
+ 
+Table7.10b = survey_cc_r1 %>% group_by(Site) %>%
   dplyr::summarize(N=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
@@ -5690,11 +5718,12 @@ Table7.10b = survey_cc_r1 %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    #Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
+ 
 Table7_10b <- knitr::kable(Table7.10b,
-                         caption='Table 7.10b Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card for Replacement Kit 1 ',
-                         row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% 
+                         caption='Table 7.10b Baseline- Mouthwash Biospecimen Survey Completion Time (in Days) Relative to Collection Time \n Reported on Collection Card for Replacement Kit 1 ',
+                         row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>%
   kable_styling(latex_options = "HOLD_position")
 add_footnote(Table7_10b, "Note: Only includes data from mouthwash kits returned with completed Collection Card.", notation = "none")
-                   
+                  
+
 ```
