@@ -181,7 +181,8 @@ query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, 
-                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713, state_d_706256705,",
+                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713,
+                               state_d_706256705, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491,",
                                select,
                                "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
                                d_831041022 = '104430631'\")",
@@ -495,6 +496,7 @@ no_dups <- no_dups %>%
       d_951355211 == 322059622 ~ "HFH Pop-Up",
       d_951355211 == 911683679 ~ "HFH Detroit Northwest",
       d_951355211 == 852689772 ~ "In-home Collection",
+      d_951355211 == 755034888 ~ "HFH Jackson",
       #MF
       d_951355211 == 692275326 ~ "Marshfield",
       d_951355211 == 813701399 ~ "Weston",
@@ -747,7 +749,7 @@ col_num_1.1 <- col_num_1.1 %>%
                                  "Stevens Point", "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University","Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth","North Garland", "Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ "Other"
   ))
@@ -1135,7 +1137,7 @@ SF_collections_tbl <- SF_collections %>%
 
   select(-Region) %>%  # Remove Region just before rendering
   kbl(caption = "Table 1.5: Baseline Clinical Biospecimen Collections in the Past 30 Days at Sanford Health by Clinic Location",
-      booktabs = TRUE) %>%
+      booktabs = TRUE, longtable = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE, font_size = 6) %>%
   row_spec(0, bold = TRUE) %>%
   pack_rows(index = table(SF_collections$Region))  # Group by Region
@@ -2579,7 +2581,7 @@ coll_bptl_diff <- biospe_adhoc_all %>%
                                          "Irving", "NTX Biorepository","BCC- Fort Worth","North Garland",
                                          "HP Research Clinic", "HP Park Nicollet", "Missing HP location",
                                          "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
-                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "Missing HFH location",
+                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "HFH Jackson","Missing HFH location",
                                          "Neillsville", "Missing MF location",
                                          "Marshfield", "MF Pop-Up","Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
                                          "Colby Abbotsford","Minocqua","Merrill","Stevens Point",
@@ -2653,7 +2655,7 @@ ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "In-home Collection","Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest", "In-home Collection","HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "North Garland","Missing BSWH location") ~ "Baylor Scott and White",
     `Collection Location` %in% c("Unidentified location") ~ "Other",
     TRUE ~ " "
@@ -2889,23 +2891,13 @@ Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Fargo South University", "Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection","Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection","HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", "North Garland","Missing BSWH location") ~ "Baylor Scott and White",
     TRUE ~ " "
   )) 
 
 #Footnote, if any data missing
 footnote5.5 <- coll_bptl_diff %>% filter(is.na(any_collection) | is.na(d_678166505))
-
-
-# Hrs_bptl_rsch <- Hrs_bptl_rsch_summ  %>%
-#   gt::gt(groupname_col = "Site_Group") %>% 
-#   tab_header('Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location') %>% 
-#   tab_footnote(footnote= "Note: BPTL receipt time is assumed to be 11:30am ET.",
-#                locations = gt::cells_title(groups = "title")) %>% 
-#   gt::tab_style(style = list(gt::cell_text(weight = "bold")),
-#                 locations = gt::cells_row_groups()) %>% 
-#   gt::tab_options(table.width = "100%", table.align = "left", table.font.size = px(7))
 
 hrs_rsch_55 <- Hrs_bptl_rsch_summ %>%
   arrange(Site_Group, `Collection Location`)
@@ -2922,8 +2914,8 @@ knit_hrs_rsch_55 <- knitr::kable(hrs_rsch_55[, c(1:8)],
              align=c("l","c","c","c","c","c","c","c"), 
              booktabs = TRUE, longtable = TRUE) %>%  
   pack_rows(index = site_group_counts) %>% 
-  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
-  landscape()
+  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) 
+#%>% landscape()
 
 
 
@@ -4433,7 +4425,8 @@ ggplot(edited_fig3_1, aes(x=as.Date(col.Monday.date), y=n, color=Site_location))
   scale_color_manual(name = "Collection Location",
                      values=c("HFH K-13 Research Clinic"="#164C71", "HFH Cancer Pavilion Research Clinic"="#FDBE19", 
                               "HFH Livonia Research Clinic"="#3C989E", "HFH Pop-Up"="#CC7D15",
-                              "HFH Detroit Northwest"="#BBBEC1", "In-home Collection"="#2973A5"),
+                              "HFH Detroit Northwest"="#BBBEC1", "In-home Collection"="#2973A5",
+                              "HFH Jackson"="#B9D7E3"),
                      guide = guide_legend(nrow = 3, byrow = TRUE)) +
   labs(color = "Collection Location") +
   ggtitle(label="Figure 6.3: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Henry Ford Health") +
@@ -4803,8 +4796,6 @@ clc_both_vt.site.NW
 # Baseline Home Mouthwash Collections
 
 \vspace{-0.5em}
-
-
 
 
 ```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
