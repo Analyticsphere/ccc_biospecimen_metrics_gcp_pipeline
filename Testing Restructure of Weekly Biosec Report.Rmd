@@ -5047,7 +5047,6 @@ all_shipped_2 <- rbind(summary_table2_all, total_df)
  
 ```{r new_Figs7.3, include=FALSE, echo=FALSE, warning=FALSE}
  
-#site names too long and getting cut off 
 all_shipped_2_filtered <- all_shipped_2 %>%
   filter(Site != "Total")  %>%
   mutate(Site = gsub("Kaiser Permanente", "KP", Site),
@@ -5209,10 +5208,9 @@ table32_pct
  
 #NOTE: MUST change currentDate to Mondays date in order for this to run correctly when testing for fixes
 #currentDate= recent Monday date
- 
-##Received-- need one set of data for the received line
+
+##Received-- need one set of data for the received line  
 kit_set_col_1 <- kit_set_clean %>% select(Connect_ID, d_143615646_d_826941471)
- 
 kit_set_col_1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_set_col_1$d_143615646_d_826941471,as.Date(veristart.date-days(2)),units="days"))/7)
 kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1$col.Sunday.week-1)
 kit_set_col_1$col.Monday.date <- kit_set_col_1$col.Sunday.date-days(6)
@@ -5234,9 +5232,6 @@ all_mondays <- data.frame(col.Monday.date = seq(as.Date("2024-04-01"), currentDa
 fig5_week_total_1 <- left_join(all_mondays, fig5_week_total_1, by = "col.Monday.date") %>%
   mutate(total_received = replace(total_received, is.na(total_received), 0))
  
-
-
-## Shipped-- need another set of data for the shipped line
 kit_table1 <- kit_status_table_7.1 %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_661940160))
  
 kit_table1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_table1$d_173836415_d_266600170_d_319972665_d_661940160,as.Date(veristart.date-days(2)),units="days"))/7)
@@ -5256,9 +5251,6 @@ fig5_week_total_2 <- left_join(all_mondays, fig5_week_totals_2, by = "col.Monday
   mutate(total_shipped = replace(total_shipped, is.na(total_shipped), 0))
  
  
-
-
-## Combine the shipped and received data 
 fig5_week_final <- fig5_week_total_1
  
 fig5_week_final[,3] <- fig5_week_total_2[,2]
@@ -5346,7 +5338,6 @@ fig5_week_total_3 <- left_join(all_mondays, fig5_week_totals_3, by = "col.Monday
  
  
  
-## Combine received and shipped 
 fig_7.3_totals <- fig5_week_total_2
  
 fig_7.3_totals[,3] <- fig5_week_total_3[,2]
@@ -5643,6 +5634,17 @@ landscape(tbl_7_10)
 \FloatBarrier
  
 ```{r Tables10s, eval=TRUE,echo=FALSE,results='asis'}
+ 
+ 
+ 
+###### Initial
+survey_cc_int <- Coll_Card_Table %>%  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & as.Date(d_195145666) > "2025-05-01")
+ 
+survey_cc_int <-  survey_cc_int %>%
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="days"))) %>% 
+  filter(ctime>0)
+ 
+Table7.10a = survey_cc_int %>% group_by(Site) %>%
 
 
 
