@@ -75,14 +75,21 @@ FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
 WHERE (d_820476880 LIKE 'CHA%') 
    OR (d_820476880 LIKE 'CXA%' AND d_410912345='353358909' AND Connect_ID IN (SELECT Connect_ID FROM T));"
 
-parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, 
-d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, 
-d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, 
-d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, 
-d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, 
-d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
+# parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, 
+# d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, 
+# d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, 
+# d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, 
+# d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, 
+# d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666
+# FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
+parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666, d_173836415_d_266600170_d_319972665_d_826941471, #d_173836415_d_266600170_d_319972665_d_759651991, 
+d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_541483796_d_379252329, 
+d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_541483796_d_826941471,
+d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
+d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491 #,d_173836415_d_266600170_d_641006239_d_826941471
+
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
 
@@ -140,6 +147,16 @@ local_drive= ifelse(write_to_local_drive, "~/Biospecimen/data/", "")
 currentDate <- Sys.Date()
 
 
+#################
+
+## Sorting by Site causes an error message when there are no rows. This function eliminates that problem
+safe_arrange <- function(df, ...) {
+  if (nrow(df) > 0) {
+    df %>% arrange(...)
+  } else {
+    df
+  }
+}
 
 
 
@@ -175,7 +192,7 @@ bioqc_csv <- bioqc %>%
                                                6422794867, 1349953410, 1731138933, 2769291903, 3589595480, 3722445358, 
                                                5972658064, 8553891957, 9121406600, 9575612025, 4057490101, 9167792140,
                                                8924667241, 9694753790, 5899565591, 6568449334, 1371560328, 8625295305,
-                                               "6862754687", "9143436002")), 
+                                               "6862754687", "9143436002", "3319331872", "7276829171", "9262617255")), 
                          "Rule 2b", " "),
          
          # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
@@ -253,11 +270,11 @@ bioqc_csv <- bioqc %>%
          
          Rule17_SST3 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_376960806_d_593843561==353358909 & d_376960806_d_762124027==104430631 & is.na(d_376960806_d_926457119) & 
-                                Connect_ID!="9729007313" & Connect_ID!="7609852429", "Rule 17-SST3", " "),
+                                !(Connect_ID %in% c("9729007313","7609852429", "6380609394")), "Rule 17-SST3", " "),
          
          Rule17_SST4 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_232343615_d_593843561==353358909 & d_232343615_d_762124027==104430631 & is.na(d_232343615_d_926457119) & 
-                                Connect_ID!="9729007313" & Connect_ID!="7609852429", "Rule 17-SST4", " "),
+                                !(Connect_ID %in% c("9729007313","7609852429", "6380609394")), "Rule 17-SST4", " "),
          
          Rule17_SST5 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_589588440_d_593843561==353358909 & d_589588440_d_762124027==104430631 & is.na(d_589588440_d_926457119), "Rule 17-SST5", " "),
@@ -423,7 +440,8 @@ bioqc_csv <- bioqc %>%
          #29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
          Rule29b = ifelse(!is.na(d_173836415_d_266600170_d_982213346) & 
                             ((d_173836415_d_266600170_d_592099155=="534621077" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="104430631") &
-                            !(Connect_ID %in%  c(7848933050, 5885436394, 9258958214, 2300063524)), "Rule 29b", " "),
+                            !(Connect_ID %in%  c(7848933050, 5885436394, 9258958214, 2300063524, "1176687465", "1850586900","6575901705", "3467573584", "1274744512")), 
+                          "Rule 29b", " "),
          
          
          #30.a. 30.a. If BioFin_BaseUrineCol_v1r0= yes, and BioSpm_UrineSettingBL_v1r0= Clinical, and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, then BioClin_ClinicalUrnTmBL_v1r0 must be populated.
@@ -451,11 +469,51 @@ bioqc_csv <- bioqc %>%
  
          #52. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_UrineSettingBL_v1r0 is clinical, and BioClin_DBUrineRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SntUrineAccIDBL_v1r0 or BioClin_PolyUrineIDBL_v1r0 must be populated.
          Rule52 = ifelse(d_167958071==353358909 & d_173836415_d_266600170_d_718172863==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
-                           (is.na(d_173836415_d_266600170_d_198261154) & is.na(d_173836415_d_266600170_d_110349197)), "Rule 52", " ")) 
+                           (is.na(d_173836415_d_266600170_d_198261154) & is.na(d_173836415_d_266600170_d_110349197)), "Rule 52", " "),
+        ##	54. If initial kit is shipped, BioKit_KitShipTm_v1r0 should be populated.
+        Rule54 = ifelse(d_173836415_d_266600170_d_319972665_d_221592017=="277438316" & is.na(d_173836415_d_266600170_d_319972665_d_661940160), "Rule 54", " "),
+
+        ###	55. If initial kit is received, BioKit_KitRecdTm_v1r0 should be populated.
+        Rule55 = ifelse(d_173836415_d_266600170_d_319972665_d_221592017=="375535639" & is.na(d_173836415_d_266600170_d_319972665_d_826941471), "Rule 55", " "),
+
+        ###	56. If initial kit BioKit_KitStatus_v1r0 is Assigned, Shipped or Received, then BioKit_KitAssembledID_v1r0 should be populated.
+        Rule56 = ifelse((d_173836415_d_266600170_d_319972665_d_221592017=="241974920" | d_173836415_d_266600170_d_319972665_d_221592017=="277438316" |
+                                  d_173836415_d_266600170_d_319972665_d_221592017=="375535639") & is.na(d_173836415_d_266600170_d_319972665_d_687158491), "Rule 56", " "),
+
+        ###	57. If initial kit BioKit_KitStatus_v1r0 is Initialized, Address Printed or Undeliverable Address, then BioKit_KitAssembledID_v1r0 should be null.
+        Rule57 = ifelse((d_173836415_d_266600170_d_319972665_d_221592017=="728267588" | d_173836415_d_266600170_d_319972665_d_221592017=="849527480" |
+                                  d_173836415_d_266600170_d_319972665_d_221592017=="332067457") & !is.na(d_173836415_d_266600170_d_319972665_d_687158491), "Rule 57", " "),
+
+        ###	58. If Replacement Kit 1 is shipped, BioKit_KitShipTm_v1r0 should be populated.
+        Rule58 = ifelse(d_173836415_d_266600170_d_541483796_d_221592017=="277438316" & is.na(d_173836415_d_266600170_d_541483796_d_661940160), "Rule 58", " "), 
+
+        ###	59. If Replacement Kit 1 is received, BioKit_KitRecdTm_v1r0 should be populated.
+        Rule59 = ifelse(d_173836415_d_266600170_d_541483796_d_221592017=="375535639" & is.na(d_173836415_d_266600170_d_541483796_d_826941471), "Rule 59", " "), 
+
+        ###	60. If Replacement Kit 1 BioKit_KitStatus_v1r0 is Assigned, Shipped or Received, then BioKit_KitAssembledID_v1r0 should be populated.
+        Rule60 = ifelse((d_173836415_d_266600170_d_541483796_d_221592017=="241974920" | d_173836415_d_266600170_d_541483796_d_221592017=="277438316" |
+                                     d_173836415_d_266600170_d_541483796_d_221592017=="375535639") & is.na(d_173836415_d_266600170_d_541483796_d_687158491), "Rule 60", " "),
+
+        ###	61. If Replacement Kit 1 BioKit_KitStatus_v1r0 is Initialized, Address Printed or Undeliverable Address, then BioKit_KitAssembledID_v1r0 should be null.
+        Rule61 = ifelse((d_173836415_d_266600170_d_541483796_d_221592017=="728267588" | d_173836415_d_266600170_d_541483796_d_221592017=="849527480" |
+                                     d_173836415_d_266600170_d_541483796_d_221592017=="332067457") & !is.na(d_173836415_d_266600170_d_541483796_d_687158491), "Rule 61", " "),
 
 
+        ###	62. If Replacement Kit 2 is shipped, BioKit_KitShipTm_v1r0 should be populated.
+        Rule62 = ifelse(d_173836415_d_266600170_d_641006239_d_221592017=="277438316" & is.na(d_173836415_d_266600170_d_641006239_d_661940160), "Rule 62", " "),
+
+        ###	63. If Replacement Kit 2 is received, BioKit_KitRecdTm_v1r0 should be populated.
+          ##filter(d_173836415_d_266600170_d_641006239_d_221592017=="375535639" & is.na(d_173836415_d_266600170_d_641006239_d_826941471)) 
 
 
+        ###	64. If Replacement Kit 2 BioKit_KitStatus_v1r0 is Assigned, Shipped or Received, then BioKit_KitAssembledID_v1r0 should be populated.
+        Rule64 = ifelse((d_173836415_d_266600170_d_641006239_d_221592017=="241974920" | d_173836415_d_266600170_d_641006239_d_221592017=="277438316" |
+                                     d_173836415_d_266600170_d_641006239_d_221592017=="375535639") & is.na(d_173836415_d_266600170_d_641006239_d_687158491), "Rule 64", " "),
+
+
+        ###	65. If Replacement Kit 2 BioKit_KitStatus_v1r0 is Initialized, Address Printed or Undeliverable Address, then BioKit_KitAssembledID_v1r0 should be null.
+        Rule65 = ifelse((d_173836415_d_266600170_d_641006239_d_221592017=="728267588" | d_173836415_d_266600170_d_641006239_d_221592017=="849527480" |
+                                     d_173836415_d_266600170_d_641006239_d_221592017=="332067457") & !is.na(d_173836415_d_266600170_d_641006239_d_687158491), "Rule 65", " ")) 
 
  
 
@@ -471,7 +529,7 @@ qc_7 <- bioqc %>%  filter(d_167958071==353358909 & d_650516960==664882224 & as.n
                             is.na(d_173836415_d_266600170_d_786930107))
 
 qc_8 <- bioqc %>%  filter(d_878865966==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & 
-                            is.na(d_173836415_d_266600170_d_693370086)) %>%  select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  sort_by(Site)
+                            is.na(d_173836415_d_266600170_d_693370086)) %>%  select(Site, Connect_ID, d_173836415_d_266600170_d_693370086) %>%  safe_arrange(Site)
          
          
 bioqc1 <- bioqc %>%  
@@ -499,7 +557,7 @@ bioqc1$d_646899796_integer <- str_trim(bioqc1$d_646899796_integer)
 #Sometimes this poly accession comes in as an array, sometimes it doesn't, so just selecting the integer version of the variable
 bioqc1 <- bioqc1 %>% mutate(BioClin_DBBloodID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_646899796_integer), d_646899796_integer))
 
-polyblood <- bioqc1 %>%  filter(!(bioqc1$BioClin_DBBloodID_v1r0 %in% PolyBloodID)) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>% sort_by(Site)
+polyblood <- bioqc1 %>%  filter(!(bioqc1$BioClin_DBBloodID_v1r0 %in% PolyBloodID)) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>% safe_arrange(Site)
 
 
 
@@ -527,7 +585,7 @@ bioqc2$d_928693120_integer <- str_trim(bioqc2$d_928693120_integer)
 #Sometimes this poly accession comes in as an array, sometimes it doesn't, so just selecting the integer version of the variable
 bioqc2 <- bioqc2 %>%   mutate(BioClin_DBUrineID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_928693120_integer),d_928693120_integer))
 
-polyurine <- bioqc2 %>%  filter(!(bioqc2$BioClin_DBUrineID_v1r0 %in% PolyUrineID)) %>%  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, d_173836415_d_266600170_d_110349197) %>% sort_by(Site)
+polyurine <- bioqc2 %>%  filter(!(bioqc2$BioClin_DBUrineID_v1r0 %in% PolyUrineID)) %>%  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, d_173836415_d_266600170_d_110349197) %>% safe_arrange(Site)
 
 
 
@@ -592,7 +650,7 @@ Bio_HMW <- HMW %>%  left_join(MW_data,  by="Connect_ID")
 
 
 # 33. If kit status is Pending, then date/time kit pending should populate
-pend <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_221592017==517216441 & is.na(d_341636034)) 
+##pend <- HMW %>%  filter(d_173836415_d_266600170_d_319972665_d_221592017==517216441 & is.na(d_341636034)) 
 
 
 # 34. If kit type is Mouthwash, then return kit tracking number, supply kit ID, return kit ID, collection cup ID, and collection card ID should populate.
@@ -733,7 +791,7 @@ colnames(token_match) <- c("Site", "Connect ID", "Collection ID", "Bio Table Tok
 
 
 
-bioqc_csv$Rule33 = ifelse(bioqc_csv$Connect_ID %in% pend$Connect_ID, "Rule 33", " ")
+##bioqc_csv$Rule33 = ifelse(bioqc_csv$Connect_ID %in% pend$Connect_ID, "Rule 33", " ")
 bioqc_csv$Rule34 = ifelse(bioqc_csv$Connect_ID %in% all_populate$Connect_ID, "Rule 34", " ")
 bioqc_csv$Rule35 = ifelse(bioqc_csv$Connect_ID %in% hmw1$Connect_ID, "Rule 35", " ")
 bioqc_csv$Rule36 = ifelse(bioqc_csv$Connect_ID %in% hmw2$Connect_ID, "Rule 36", " ")
@@ -964,9 +1022,7 @@ split_setting <- bio_dup_with_status %>% mutate(Site=case_when(d_827220437==4729
                                                                d_827220437==452412599 ~ "Kaiser Permanente Northwest")) %>% 
   filter(Connect_ID %in% different_values)
 
-
 split_setting$Collection_ID = split_setting$d_820476880
-
 
 split_setting <- split_setting %>%  select(Connect_ID, Collection_ID)
 
@@ -974,7 +1030,50 @@ split_setting <- split_setting %>%  select(Connect_ID, Collection_ID)
 
 
 
-## Only want the output to contain those with errors
+
+###	66. If kit is an Initial kit, BioKit_DtKitReq_v1r0 should be null.
+project_id <- "nih-nci-dceg-connect-prod-6d04"
+dataset <- "FlatConnect"
+table <- "participants_JP"
+column_to_check <- "d_173836415_d_266600170_d_319972665_d_759651991"
+
+# Step 1: Check if the column exists
+check_query <- glue::glue("
+  SELECT column_name
+  FROM `{project_id}.{dataset}.INFORMATION_SCHEMA.COLUMNS`
+  WHERE table_name = '{table}'
+    AND column_name = '{column_to_check}'
+")
+
+check_result <- bq_project_query(project_id, check_query)
+column_check <- bq_table_download(check_result)
+
+# Step 2: If it exists, run the query
+if (nrow(column_check) > 0) {
+  warning(glue::glue("Column {column_to_check} EXISTS in {table}! Pulling data..."))
+  
+  # Safe query to pull Connect_ID and the column
+  data_query <- glue::glue("
+    SELECT Connect_ID, `{column_to_check}`
+    FROM `{project_id}.{dataset}.{table}`
+    WHERE Connect_ID IS NOT NULL
+  ")
+  
+  data_result <- bq_project_query(project_id, data_query)
+  output_data <- bq_table_download(data_result)
+  
+} else {
+  cat("No errors.")
+  output_data <- tibble()
+}
+
+bioqc_csv$Rule66 = ifelse(bioqc_csv$Connect_ID %in% output_data$Connect_ID, "Rule 66", " ")
+
+
+
+
+
+#### Only want the output to contain those with errors
 bioqc_csv2 <-  bioqc_csv %>% filter(!if_all(starts_with("Rule"), ~ . == " " | is.na(.)))
 
 
@@ -985,6 +1084,7 @@ bioqc_csv3$Rule48 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, 
 
 
 
+#################################     Final Output of QC report #####################################################
 
 
 ## Make sure rules are in numerical order
@@ -1002,25 +1102,7 @@ bioqc_csv3 <- bioqc_csv3[, c("Connect_ID", "Collection_ID", "Site", sorted_rule_
 
 
 
-
-
-
-
-
-
-
-
-
-#################################     Final Output of QC report #####################################################
-
-
-
-
-
-
-
-
-
 bioqc_xlxs <- bioqc_csv3 %>%  select(Connect_ID, Collection_ID, Site, starts_with("Rule")) %>% arrange(Connect_ID)
 openxlsx::write.xlsx(bioqc_xlxs,glue("Biospeimen_CustomQC_Rules_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+
 

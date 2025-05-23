@@ -43,6 +43,7 @@ library(dplyr) ###data management
 # library(boxr) ###read or write data from/to box
 library(tidyverse) ###for data management
 library(reshape)  ###to work on transition from long to wide or wide to long data
+library(reshape2)  ### for the melt function
 library(listr) ###to work on a list of vector, files or..
 library(sqldf) ##sql
 library(lubridate) ###date time
@@ -1712,7 +1713,7 @@ for (i in 1:length(tube.ls)){
   tmp <- as.data.frame(coll_sett_all[,which(colnames(coll_sett_all) %in% c(id,tube,deviation))] )
   tmp <- tmp[which(!is.na(tmp[,(colnames(tmp) == id)])),]
   
-  dev_long <- data.table::melt(tmp,
+  dev_long <- reshape2::melt(tmp, #data.table::melt(tmp,
                                id.vars=c(id,tube), 
                                measure.vars=deviation,
                                variable.name="dev_type",
@@ -3827,7 +3828,7 @@ tab23=knitr::kable(research.vt.length.table,
                    caption='Table 4.1: Baseline Research Collection Visit Length (in Minutes)',
                    row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% 
   kable_styling(latex_options = "scale_down") #%>% landscape()
-add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1) HealthPartners: 25-60 minutes, (2) Henry Ford: 25-60 minutes, (3) Sanford: 10-45 minutes, (4) Marshfield: 10-45 minutes, and (5) UChicago: 15-180 minutes  ", notation = "none") #and greater than 500 minutes 
+add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1) HealthPartners: 25-60 minutes, (2) Henry Ford: 25-60 minutes, (3) Sanford: 10-45 minutes, (4) Marshfield: 10-45 minutes, (5) UChicago: 15-180 minute, and (6) BSWH: 25-60 minutes", notation = "none") #and greater than 500 minutes 
 
 
 uc_col_time <- knitr::kable(research.vt.length.UC.table,
@@ -4796,6 +4797,7 @@ clc_both_vt.site.NW
 # Baseline Home Mouthwash Collections
 
 \vspace{-0.5em}
+
 
 
 ```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
