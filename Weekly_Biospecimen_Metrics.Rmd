@@ -341,41 +341,24 @@ cross_table_df <- as.data.frame(cross__table)[-1, ]
 
 
 create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name, margin_text) {
-  cross__table <- data %>%
-    tbl_cross(
-      row = !!sym(row_var),
-      col = !!sym(colm_var),
-      label = list(!!sym(row_var) ~ row_name,
-                   !!sym(colm_var) ~ column_name),
-      percent = row_or_col_pct,
-      digits = c(0, 2),
-      margin_text = margin_text
-    )
+cross__table <- data %>%  
+  tbl_cross(
+    row = !!sym(row_var),
+    col = !!sym(colm_var),
+    digits=c(0,1),
+    percent = row_or_col_pct,
+    label=list(!!sym(row_var) ~ row_name,
+               !!sym(colm_var) ~ column_name),
+    missing="ifany",
+    margin_text="Total") 
+
+#Ops doesn't wnt the total column to have percentaes 
+cross__table[["table_body"]]$stat_0 <- sapply(strsplit(cross__table[["table_body"]]$stat_0, " "), "[", 1)
+
+#Ops doesn't like the grouped by variables on a different line the column labels
+cross_table_df <- as.data.frame(cross__table)[-1, ]
   
-  # Check if table_body exists and has data
-  if (!is.null(cross__table[["table_body"]]) && nrow(cross__table[["table_body"]]) > 0) {
-    # Need only the total column to be a column percentage
-    cross__table[["table_body"]]$stat_0 <- sapply(strsplit(cross__table[["table_body"]]$stat_0, " "), "[", 1)
-    
-    cross__table_df <- as.data.frame(cross__table)[2:nrow(as.data.frame(cross__table)), ]
-    colnames(cross__table_df)[1] <- row_name
-    
-    # Ensure 'Total Verified Participants' exists before modifying
-    if ("Total Verified Participants" %in% colnames(cross__table_df)) {
-      cross__table_df$`Total Verified Participants` <- as.numeric(gsub(",", "", cross__table_df$`Total Verified Participants`))
-      
-      total_participants <- cross__table_df$`Total Verified Participants`
-      percentages <- round((total_participants / total_participants[length(total_participants)]) * 100, digits = 2)
-      
-      cross__table_df$`Total Verified Participants` <- paste0(format(total_participants, big.mark = ","), " (", percentages, "%)")
-    }
-    
-    colnames(cross__table_df)[ncol(cross__table_df)] <- "Total Verified \n Participants"
-    return(cross__table_df)
-  } else {
-    warning("The cross table is empty or missing table_body.")
-    return(data.frame()) # Return an empty data frame if table_body is missing
-  }
+#colnames(cross_table_df)[4] <- "Total Verified \n Participants"
 }
 
 
@@ -642,19 +625,22 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                                     state_d_849518448 == '181769837' |
                                                     state_d_253532712 %in% c('153444133','572474909','308427446','211228524','277568192','611398522','181769837') |
                                                     state_d_119643471 %in% c( '232334767','211228524','308427446','432722256','232663805','785578696','200929978','490725843','965998904') ~ "Other",
-                                                  state_d_684926335 == '178420302'  | 
-                                                    state_d_849518448 == '178420302' | 
-                                                    state_d_253532712 == '178420302' |
-                                                    state_d_119643471  %in% c( '986445321','746038746','178420302') |
-                                                    (is.na(state_d_119643471) & d_827220437 == '657167265') ~ "Unknown"),
+                                                  # state_d_684926335 == '178420302'  | 
+                                                  #   state_d_849518448 == '178420302' | 
+                                                  #   state_d_253532712 == '178420302' |
+                                                  #   state_d_119643471  %in% c( '986445321','746038746','178420302') |
+                                                  #   (is.na(state_d_119643471) & d_827220437 == '657167265') ~ "Unknown"),
+                                                  TRUE ~ "Unknown"),
                                  sex = case_when(state_d_706256705 == '536341288' | state_d_435027713 == '536341288' ~ "Female",
                                                  state_d_706256705 == '654207589' | state_d_435027713 == '654207589' ~ "Male",
-                                                 #state_d_706256705 == '830573274' ~ "Intersex or Other", # too small of a count for now, need to combine with unknown 
-                                                 state_d_706256705 == '830573274' | state_d_706256705 == '178420302' | state_d_435027713 == '178420302' ~ "Unknown"))
+                                                 #state_d_706256705 == '830573274' | state_d_706256705 == '178420302' | state_d_435027713 == '178420302' ~ "Unknown"
+                                                 TRUE ~ "Unknown"))
 
 
 #biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site", "token"))
 
+recrver1$Connect_ID < as.numeric(recrver1$Connect_ID)
+no_dups$Connect_ID < as.numeric(no_dups$Connect_ID)
 biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
 
 ```
@@ -731,8 +717,6 @@ biospe_R_locations<-coll_sett_all %>% filter(all_settings=="Research")
 
 biospe_R_locations$biocol.appoint[biospe_R_locations$biocol.appoint=="Baseline Collection"]="Number of Research Collections"
 
-#table1_1_locations <-  biospe_R_locations %>% filter(biocol.appoint=="Number of Research Collections")
-#table1_1_locations <- table1_1_locations %>%  distinct(Connect_ID, .keep_all = TRUE) #testing this out
 
 col_num <- table(biospe_R_locations$Site_location, biospe_R_locations$biocol.appoint)
 
@@ -755,7 +739,6 @@ col_num_1.1 <- col_num_1.1 %>%
     TRUE ~ "Other"
   ))
 
-#col_num_1.1$`Number of Research Collections` <- paste(col_num_1.1$`Number of Research Collections`, )
 
 col_num_1.1$`N` <- as.numeric(col_num_1.1$`N`)
 col_num_1.1 <- col_num_1.1 %>%
@@ -826,7 +809,6 @@ table1_2_locs<- table1_clin %>% filter(Site!="Kaiser Permanente Georgia"& Site!=
 table1_2_locs$biocol.appoint[table1_2_locs$biocol.appoint=="Baseline Collection"]="Number of Clinical Collections"
 
 table1_2_locations <-  table1_2_locs %>% filter(biocol.appoint=="Number of Clinical Collections")
-#table1_2__locations <- table1_2_locations %>%  distinct(Connect_ID, .keep_all = TRUE) #testing this out
 
 
 col_num <- table(table1_2_locations$Clin_Site_location, table1_2_locations$biocol.appoint)
@@ -905,12 +887,6 @@ col_num_1.2_gt <- col_num_1.2_gt %>%  summary_rows(
 
 
 
-# ## don't think this needed??
-# table2 <- table1 %>% filter(biocol.appoint=='Baseline Collection') %>%
-#   mutate(BioFin_BaseBloodCol_v1r0 = factor(BioFin_BaseBloodCol_v1r0, levels=c("Any blood collected","No blood collected"))) 
-
-
-
 table1.5 <- create_tbl_cross(coll_sett_all, 'Site', "BioFin_BaseBloodCol_v1r0", "row", 'Site', " ")
 
 
@@ -928,15 +904,31 @@ biospe.bld <- knitr::kable(table1.5,
 
 ```{r Collections_by_Demographic, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
-BLCol_by_Sex_df <- create_tbl_cross2(table1, "sex", "biocol.appoint", "row", "Sex", "Baseline Biospecimen Collection Status", "Total Verified Participants")
+BLCol_by_Sex_df <- create_tbl_cross2(table1, "sex", "biocol.appoint", "row", "Sex", "Baseline Biospecimen Collection Status", "Total")
+
+colnames(BLCol_by_Sex_df)[ncol(BLCol_by_Sex_df)] <- "Total Verified \n Participants"
+
+fem_pct <- round((sum(table1$sex=="Female")/sum(!is.na(table1$sex)))*100, digits=2)
+m_pct <- round((sum(table1$sex=="Male")/sum(!is.na(table1$sex)))*100, digits=2)
+uk_pct <- round((sum(table1$sex=="Unknown")/sum(!is.na(table1$sex)))*100, digits=2)
 
 BLCol_by_Sex <- knitr::kable(BLCol_by_Sex_df, 
              caption='Table 1.14 Baseline Biospecimen Collection Status by Sex \n Among Verified Participants',
              row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
-    add_indent(seq(1, nrow(BLCol_by_Sex_df) - 1)) %>%  landscape() %>% 
-  footnote(general="Note: Sex defined as the de-identified sex data reported by sites at time of invitation.",
-           general_title = "")
+    add_indent(seq(1, nrow(BLCol_by_Sex_df) - 1)) %>% 
+   footnote(general="Note: Sex defined as the de-identified sex data reported by sites at time of invitation.",
+           general_title = "",
+           footnote_as_chunk = TRUE,
+           escape = FALSE,
+           threeparttable = TRUE)
+  
+  # footnote(general=paste0("Note: Sex defined as the de-identified sex data reported by sites at time of invitation.",
+  #                         "Of verified participants, ",fem_pct, "\\% are female, ",m_pct, "\\% are male , and ",uk_pct,"\\% are unknown sex"),
+  #          general_title = "",
+  #          footnote_as_chunk = TRUE, 
+  #          escape = FALSE,
+  #          threeparttable = TRUE)
 
 
 
@@ -944,27 +936,62 @@ BLCol_by_Sex <- knitr::kable(BLCol_by_Sex_df,
 
 BLCol_by_Age_df <- create_tbl_cross2(table1, "age", "biocol.appoint", "row", "Age", "Baseline Biospecimen Collection Status", "Total Verified Participants")
 
+colnames(BLCol_by_Age_df)[ncol(BLCol_by_Age_df)] <- "Total Verified \n Participants"
+
 BLCol_by_Age <- knitr::kable(BLCol_by_Age_df, 
              caption="Table 1.15. Baseline Biospecimen Collection Status by Age \n Among Verified Participants",
              row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
-    add_indent(seq(1, nrow(BLCol_by_Age_df) - 1)) %>%  landscape() %>% 
+    add_indent(seq(1, nrow(BLCol_by_Age_df) - 1)) %>% 
   footnote(general="Note: Age defined as the de-identified age data reported by sites at time of invitation, not current age at the time of specimen collection.",
-           general_title = "")
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
 
-
+  # footnote(general=paste0("Note: Age defined as the de-identified age data reported by sites at time of invitation, not current age at the time of specimen collection.",
+  #                         "Of verified participants, ",
+  #                         round((sum(table1$age=="30-34")/sum(!is.na(table1$age)))*100, digits=2), "% are 30-34, ",
+  #                         round((sum(table1$age=="35-39")/sum(!is.na(table1$age)))*100, digits=2), "% are 35-39, ",
+  #                         round((sum(table1$age=="40-45")/sum(!is.na(table1$age)))*100, digits=2), "% are 40-45, ",
+  #                         round((sum(table1$age=="46-50")/sum(!is.na(table1$age)))*100, digits=2), "% are 46-50, ",
+  #                         round((sum(table1$age=="51-55")/sum(!is.na(table1$age)))*100, digits=2), "% are 51-55, ",
+  #                         round((sum(table1$age=="56-60")/sum(!is.na(table1$age)))*100, digits=2), "% are 56-60, ",
+  #                         round((sum(table1$age=="61-65")/sum(!is.na(table1$age)))*100, digits=2), "% are 61-65, ",
+  #                         round((sum(table1$age=="66-67")/sum(!is.na(table1$age)))*100, digits=2), "% are 66-70 ",
+  #                         round((sum(table1$age=="Unknown")/sum(!is.na(table1$age)))*100, digits=2),"% are an unknown age."),
+  #          general_title = "",
+  #          footnote_as_chunk = TRUE, 
+  #          escape = FALSE, 
+  #          threeparttable = TRUE)
 
 
 
 BLCol_by_Race_df <- create_tbl_cross2(table1, "race", "biocol.appoint", "row", "Race", "Baseline Biospecimen Collection Status", "Total Verified Participants")
 
+colnames(BLCol_by_Race_df)[ncol(BLCol_by_Race_df)] <- "Total Verified \n Participants"
+
 BLCol_by_Race <- knitr::kable(BLCol_by_Race_df, 
              caption="Table 1.16. Baseline Biospecimen Collection Status by Race \n Among Verified Participants",
              row.names=FALSE, align=c("l","c","c","c","c","c"), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
-    add_indent(seq(1, nrow(BLCol_by_Race_df) - 1)) %>%  landscape() %>%
+    add_indent(seq(1, nrow(BLCol_by_Race_df) - 1)) %>% 
     footnote(general = "Note: Race defined as the de-identified race data reported by sites at time of invitation.",
-             general_title = "")
+             general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+  # footnote(general=paste0("Note: Race defined as the de-identified race data reported by sites at time of invitation.",
+  #                         "Of verified participants, ",
+  #                         round((sum(table1$race=="Other")/sum(!is.na(table1$race)))*100, digits=2), "% are an 'other' race, ",
+  #                         round((sum(table1$race=="Unknown")/sum(!is.na(table1$race)))*100, digits=2), "% are an 'unknown' race , and ",
+  #                         round((sum(table1$race=='White, Non-Hispanic')/sum(!is.na(table1$race)))*100, digits=2),"% are White, Non-Hispanic."),
+  #          general_title = "",
+  #          ,
+  #          footnote_as_chunk = TRUE, 
+  #          escape = FALSE, 
+  #          threeparttable = TRUE)
 
 
 ```
@@ -974,10 +1001,7 @@ BLCol_by_Race <- knitr::kable(BLCol_by_Race_df,
 
 ```{r Sanford_Table_1.4, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
-#SF_clin <- table1_clin %>% filter(Site=="Sanford Health")
-#biospe1_5 <- no_dups %>% select( Connect_ID,d_556788178)
 
-#table1_4_locations <- left_join(SF_clin, biospe1_5, by = "Connect_ID")
 table1_4_locations <- table1_clin %>% filter(Site=="Sanford Health")
 table1_4_locations$biocol.appoint[table1_4_locations$biocol.appoint == "Baseline Collection"] <- "Number of Clinical Collections"
 
@@ -1067,13 +1091,6 @@ count_all <- table1_4_locations %>%
 total_all <- sum(count_all$Count_Total)
 count_all <- count_all %>%
   mutate(Percent_Total = paste0(round((Count_Total / total_all) * 100, 1), "%"))
-
-
-
-# #Handle those with missing location IDs
-# count_all$Site_location[is.na(count_all$Site_location)]="Missing Both Location IDs"
-# count_all$Region[is.na(count_all$Region)] = "Unknown"
-# #table1_4_locations$Region <- factor(levels=c("Bemidji", "Bismarck", "Fargo", "Sioux Falls", "Unknown"))
 
 
 
@@ -1443,167 +1460,7 @@ tube_col <- coll_sett_all %>% group_by(as.character(Connect_ID),Site,all_setting
                    schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505))))
 
 
-
-#table(tube_col$d_650516960)
-
-tube_col$Connect_ID <- as.numeric(tube_col$`as.character(Connect_ID)`)
-tube_research <- tube_col %>% filter(all_settings=="Research") %>%
-  mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01") | Site=="HealthPartners", bldcol_max==5, bldcol_max==4),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-#Up until 3/1/24 all sits required 5. Up until 3/31/2025 HP required 5. Then up until 3/31/2025 all sites required 4. Starting 3/31/25 HP requires 4 and all other sites require 3. (Heparin tube dropped)
-  # mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01") | Site=="HealthPartners", bldcol_max==5,
-  #                                   ifelse(collection.tm < as.Date("2025-03-31") | Site=="HealthPartners", bldcol_max==4,
-  #                                          bldcol_max==3)),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-
-table.bldcol <- ctable(tube_research$Site,tube_research$bld.complt)
-bldcol_research <- as.data.frame(cbind(table.bldcol$cross_table,table.bldcol$proportions))
-bldcol_research$Site <-trimws(rownames(bldcol_research))
-
-
-bldcol_research$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,1],big.mark=",")," (", round(100*bldcol_research[,5],1),"%)"), format(bldcol_research[,1],big.mark="," ))
-bldcol_research$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,2],big.mark=",")," (", round(100*bldcol_research[,6],1),"%)"), format(bldcol_research[,2],big.mark="," ))
-bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,3],big.mark=",")," (", round(100*bldcol_research[,7],1),"%)"), format(bldcol_research[,3],big.mark="," ))
-# bldcol_research$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,1],big.mark=","),"(", round(100*bldcol_research[,5],1),"%)",sep=" "), format(bldcol_research[,1],big.mark="," ))
-# bldcol_research$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,2],big.mark=","),"(", round(100*bldcol_research[,6],1),"%)",sep=" "), format(bldcol_research[,2],big.mark="," ))
-# bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,3],big.mark=","),"(", round(100*bldcol_research[,7],1),"%)",sep=" "), format(bldcol_research[,3],big.mark="," ))
-
-bldcol_research1 <- bldcol_research[c(1:6),c(9:12,4)] #c(9:12,4)
-
 ```
-
-
-
-
-```{r Table7s, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
-
-#### U-Chicago
-tube_col_UC <- coll_sett_all  %>% filter(Site=='University of Chicago Medicine' & all_settings=="Research" & d_410912345== 353358909) %>% 
-  group_by(as.character(Connect_ID),Site_location,all_settings) %>% 
-  dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
-                   Urine_col_max= max(Urine_col,na.rm=TRUE),
-                   MW_col_max=max(MW_col,na.rm=TRUE),
-                   d_973670172_d_593843561_max=max(d_973670172_d_593843561,na.rm=TRUE),
-                   d_143615646_d_593843561_max = max(d_143615646_d_593843561,na.rm=TRUE),
-                   d_410912345_max=max(d_410912345,na.rm=TRUE),
-                   collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE),
-                   schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505)),na.rm=TRUE))
-
-tube_col_UC$Connect_ID <- as.numeric(tube_col_UC$`as.character(Connect_ID)`)
-
-tube_research_UC <- tube_col_UC %>% #filter(d_650516960==534621077) %>%
-   mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max==5, bldcol_max==4),"BloodCompletion",
-                              ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-#Before 3/1/2024 UC required 5. Before 3/31/2025 they required 4. As of 3/31/2025 heparin was dropped so they require 3.
-  # mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max==5,
-  #                                   ifelse(collection.tm < as.Date("2025-03-31"), bldcol_max==4,
-  #                                          bldcol_max==3)),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-
-table.bldcol_UC <- ctable(tube_research_UC$Site_location,tube_research_UC$bld.complt)
-bldcol_research_UC <- as.data.frame(cbind(table.bldcol_UC$cross_table,table.bldcol_UC$proportions))
-bldcol_research_UC$Site_location <-trimws(rownames(bldcol_research_UC))
-
-
-bldcol_research_UC$n_pct_BloodCompletion <-  paste(format(bldcol_research_UC[,1],big.mark=","),"(", round(100*bldcol_research_UC[,5],1),"%)",sep=" ") 
-bldcol_research_UC$n_pct_BloodInompletion =  paste(format(bldcol_research_UC[,2],big.mark=","),"(", round(100*bldcol_research_UC[,6],1),"%)",sep=" ") 
-bldcol_research_UC$n_pct_NoBlood = paste(format(bldcol_research_UC[,3],big.mark=","),"(", round(100*bldcol_research_UC[,7],1),"%)",sep=" ") 
-
-bldcol_research_UC$Total <- paste(bldcol_research_UC$Total, " (100%)")
-nrow(bldcol_research_UC)
-
-bldcol_research_UC1 <- bldcol_research_UC[,c(9:12,4)]
-
-
-
-
-
-### HF Research
-tube_col_HF <- coll_sett_all %>% filter(Site=='Henry Ford Health' & all_settings=="Research") %>% 
-  group_by(as.character(Connect_ID),Site_location,d_650516960) %>% 
-  dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
-                   Urine_col_max= max(Urine_col,na.rm=TRUE),
-                   MW_col_max=max(MW_col,na.rm=TRUE),
-                   d_973670172_d_593843561_max=max(d_973670172_d_593843561,na.rm=TRUE),
-                   d_143615646_d_593843561_max = max(d_143615646_d_593843561,na.rm=TRUE),
-                   d_410912345_max=max(d_410912345,na.rm=TRUE),
-                   collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE),
-                   schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505)),na.rm=TRUE))
-#table(tube_col_HF$d_650516960)
-
-tube_col_HF$Connect_ID <- as.numeric(tube_col_HF$`as.character(Connect_ID)`)
-
-tube_research_HF <- tube_col_HF %>% #filter(d_650516960==534621077) %>%
-  mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max==5, bldcol_max==4),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-#Before 3/1/2024 HF required 5. Before 3/31/2025 they required 4. As of 3/31/2025 heparin was dropped so they require 3.
-  # mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max==5,
-  #                                   ifelse(collection.tm < as.Date("2025-03-31"), bldcol_max==4,
-  #                                          bldcol_max==3)),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-
-table.bldcol_HF <- ctable(tube_research_HF$Site_location,tube_research_HF$bld.complt)
-bldcol_research_HF <- as.data.frame(cbind(table.bldcol_HF$cross_table,table.bldcol_HF$proportions))
-bldcol_research_HF$Site_location <-trimws(rownames(bldcol_research_HF))
-
-
-bldcol_research_HF$n_pct_BloodCompletion <- paste(format(bldcol_research_HF[,1],big.mark=","),"(", round(100*bldcol_research_HF[,5],1),"%)",sep=" ")
-bldcol_research_HF$n_pct_BloodInompletion = paste(format(bldcol_research_HF[,2],big.mark=","),"(", round(100*bldcol_research_HF[,6],1),"%)",sep=" ")
-bldcol_research_HF$n_pct_NoBlood = paste(format(bldcol_research_HF[,3],big.mark=","),"(", round(100*bldcol_research_HF[,7],1),"%)",sep=" ")
-
-bldcol_research_HF$Total <- paste(bldcol_research_HF$Total, " (100%)")
-nrow(bldcol_research_HF)
-
-bldcol_research_HF1 <- bldcol_research_HF[,c(9:12,4)]
-```
-
-
-```{r HF_BloodColl, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
-
-
-biocounts <- coll_sett_all %>%  select(Connect_ID, bldcol, d_556788178)
-HFSITES <- table1_2_locs %>%  filter(Site=="Henry Ford Health") %>% select(Connect_ID, Clin_Site_location)
-biospe7 <- left_join(HFSITES, biocounts, by="Connect_ID")
-
-tube_col_HF2 <- biospe7  %>% group_by(Connect_ID,Clin_Site_location) %>%
-  dplyr::summarise(bldcol_max = max(bldcol,na.rm=TRUE),
-                   collection.tm =max(as.POSIXct(ymd_hms(d_556788178)),na.rm=TRUE))
-
-
-tube_research_HF2 <- tube_col_HF2 %>% 
-  mutate(bld_complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01"), bldcol_max == 5, bldcol_max == 4), "All Blood Collected",
-                             ifelse(bldcol_max == 0, "No Blood Collected", "Partial Blood Collected")),
-         bld_complt = factor(bld_complt, levels = c("All Blood Collected", "Partial Blood Collected", "No Blood Collected"))) %>%
-  select(Clin_Site_location, bld_complt) %>%
-  ungroup()  # Explicitly ungroup to avoid the Connect_ID issue
-
-
-
-bloodcomp_clinloc <- create_tbl_cross(tube_research_HF2, "Clin_Site_location", "bld_complt", "row", "Clinical Location", " ")
-colnames(bloodcomp_clinloc)[ncol(bloodcomp_clinloc)] <- "Total Clinical Collections"
-
-```
-
-
-
-```{r Clinical_Tube_Count, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
-
-
-tube_clinic <- tube_col %>% filter(all_settings=="Clinical" )%>% mutate(Site=droplevels(Site),
-                                                                      bldcol_max=as.factor(bldcol_max)) #& grepl("Kaiser",Site)
-tube_clinic$bldcol_tubes <- factor(tube_clinic$bldcol_max,levels=c(0:10))
-
-tube_clinic$Site <-factor(tube_clinic$Site,levels=c("HealthPartners", "Henry Ford Health",
-                                                    "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado",
-                                                    "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest"))
-
-tube_completeness_totals <- tube_clinic %>% ungroup()
-
-
-bloodtubes_bysite <- create_tbl_cross(tube_completeness_totals, "Site", "bldcol_tubes", "row", "Site", " ")
-colnames(bloodtubes_bysite)[ncol(bloodtubes_bysite)] <- "Total Clinical Collections"
-colnames(bloodtubes_bysite)[1] <- "Site"
-
-
-
-```
-
-
 
 
 
@@ -1648,6 +1505,7 @@ system_coll
 
 #Participants who checked in for a baseline biospecimen visit but did not give any samples
 dd[grepl("BioChk",dd$`Variable Name`),]
+names(tube_col)[names(tube_col) == "as.character(Connect_ID)"] <- "Connect_ID"
 recr_bio <- base::merge(recrver1,tube_col,by="Connect_ID")
 bio_checkin_resh <- recr_bio  %>% filter(!is.na(d_331584571_d_266600170_d_840048338) & all_settings=="Research") %>% select(BiospeCollection ) %>% tbl_summary()
 table(bio_checkin_resh$BiospeCollection)
@@ -1863,36 +1721,15 @@ dev_tube2 <- base::merge(dev,dev_tube1[,c("dev_type","TubeID","tubeID","deviatio
 
 ```{r Table2.7_2.8, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
-Tb.research.coltube <- tube_col %>% filter(all_settings=="Research") %>%  mutate(Site=droplevels(Site),
-                                                                               bldcol_max=as.factor(bldcol_max)) #& grepl("Kaiser",Site)
-Tb.research.coltube$bldcol_tubes <- factor(Tb.research.coltube$bldcol_max,levels=c(0:5))
-Tb.research.coltube$bldcol_tubes <- droplevels(Tb.research.coltube$bldcol_tubes)
-
-Tb.research.coltube$Site <-factor(Tb.research.coltube$Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
-                                                                    "Marshfield Clinic Health System",
-                                                                    "Sanford Health", "University of Chicago Medicine"))
-
-Total.research.coltube <- Tb.research.coltube %>% ungroup()
-
-bloodtube_R <- create_tbl_cross(Total.research.coltube, "Site", "bldcol_tubes", "row", "Site", " ")
-colnames(bloodtube_R)[ncol(bloodtube_R)] <- "Total Research Collections"
-colnames(bloodtube_R)[1] <- "Site"
-
-
-
-
-
-
 research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 353358909) %>% 
   mutate(Site=droplevels(Site),
          tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "STRECK Tube1")))  
-#research.coltube.bld.only<- research.coltube.bld.only %>%  mutate(tube_type=droplevels(tube_type))
 
 research__blood <- research__blood %>% filter(!is.na(tube_type))
 
 
 
-bloodtubetype_R <- create_tbl_cross(research__blood, "Site", "tube_type", "column", "Site", " ")
+bloodtubetype_R <- create_tbl_cross(research__blood, "Site", "tube_type", "none", "Site", " ")
 colnames(bloodtubetype_R)[ncol(bloodtubetype_R)] <- "Total Blood Tubes Collections"
 colnames(bloodtubetype_R)[1] <- "Site"
 
@@ -1924,9 +1761,13 @@ clinic.coltube<- clinic.coltube %>% filter(biocol_Setting == "Clinical" & tubeco
 
 
 
-bloodtubetype_C <- create_tbl_cross(clinic.coltube, "Site", "tube_types", "column", "Site", " ")
+bloodtubetype_C <- create_tbl_cross(clinic.coltube, "Site", "tube_types", "none", "Site", " ")
 colnames(bloodtubetype_C)[ncol(bloodtubetype_C)] <- "Total Blood Tubes Collections"
 colnames(bloodtubetype_C)[1] <- "Site"
+#order SSTs, EDTAs, Heaparin, Streck
+bloodtubetype_C <- bloodtubetype_C[, c("Site","SS T1", "SS T2","SS T3", "SS T4", "SS T5", "EDTA 1","EDTA 2","EDTA 3",
+                                       "Heparin 1","Heparin 2","STRECK 1","ACD 1","Total Blood Tubes Collections")]
+
 
 
 ```
@@ -1991,27 +1832,7 @@ colnames(reason_notcol)[1] <- "Site"
 
 
 
-# research.notcolnotes_tube <- research.notcol %>% select(notcol.notes, tube_type) %>%
-#   tbl_cross(  col = notcol.notes,
-#               row = tube_type,
-#               percent = "row",
-#               digits= c(0,1),
-#               label= c(notcol.notes~ " ", tube_type~"Tube Type"),
-#               missing="ifany",
-#               missing_text="0 ( 0 %)")
-# 
-# 
-# 
-# research.notcolnotes_tube_totals <- as.data.frame(research.notcolnotes_tube)
-# research.notcolnotes_tube_totals <- research.notcolnotes_tube_totals[-1, ]
-# 
-# current_colnames <- colnames(research.notcolnotes_tube_totals)
-# current_colnames[length(current_colnames)] <- "Total Tubes Not Collected"
-# current_colnames[1] <- "Tube Type"
-# colnames(research.notcolnotes_tube_totals) <- current_colnames
-
-
-tube_type_notcolreasons <- create_tbl_cross(research.notcol, "tube_type", "notcol.notes", "column", "Tube Type", " ")
+tube_type_notcolreasons <- create_tbl_cross(research.notcol, "tube_type", "notcol.notes", "row", "Tube Type", " ")
 colnames(tube_type_notcolreasons)[ncol(tube_type_notcolreasons)] <- "Total Tubes Not Collected"
 colnames(tube_type_notcolreasons)[1] <- "Tube Type"
 
@@ -2058,9 +1879,9 @@ discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>%
   mutate(Site=droplevels(Site),
          tube_type = droplevels(tube_type))
 discard.site <- n_pct_table(discard.tb$Site,discard.tb$tube_type)
-discard.site <- (discard.site[, c(10, 1:9)]) #Will need to update dimensions when STRECK Tube 1 listed 
+discard.site <- (discard.site[, c((ncol(discard.site)), 1:(ncol(discard.site)-1))])
 
-discard.site[nrow(discard.site),c(2:10)] <- paste(discard.site[nrow(discard.site),c(2:10)], "(100%)")
+discard.site[nrow(discard.site),c(2:ncol(discard.site))] <- paste(discard.site[nrow(discard.site),c(2:ncol(discard.site))], "(100%)")
 
 ```
 
@@ -3355,7 +3176,7 @@ add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later
 \FloatBarrier
 ```{r KnitrTables1.14_1.16, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 
-BLCol_by_Sex 
+BLCol_by_Sex
 
 BLCol_by_Age 
 
@@ -3393,235 +3214,35 @@ knitr::kable(spec_by_site_C,
 ```
 
 
-
-
-
-
-```{r KnitrTables6_7.1,echo=FALSE,error=FALSE,message=FALSE, warning=FALSE, results='asis'}
-
-knitr::kable(bldcol_research1, 
-             col.names=c("Site","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Research Collections"), 
-             caption='Table 2.3: Baseline Blood Collection Completeness Among Research Biospecimen Collections', 
-             row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% 
-  kable_styling(latex_options = "scale_down")
-
-
-knitr::kable(bldcol_research_UC1, 
-             col.names=c("Collection Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Research Collections"), 
-             caption='Table 2.4: Baseline Blood Collection Completeness Among Research Collections by Collection Location, University of Chicago Medicine', 
-             row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% 
-  kable_styling(latex_options = "scale_down")
-```
-
-\FloatBarrier
-```{r Figure1, eval=TRUE,echo=FALSE, warning=FALSE}
-
-Inc_bld_UC <- tube_research_UC %>%  select(Connect_ID, Site_location, bld.complt)
-Inc_bld_UC$Connect_ID <- as.numeric(Inc_bld_UC$Connect_ID)
-research.survey$Connect_ID <- as.numeric(research.survey$Connect_ID)
-fig1_UC <- left_join(research.survey, Inc_bld_UC, by="Connect_ID")
-
-fig1_UC_inc <- fig1_UC %>%  filter(Site=="University of Chicago Medicine")
-
-
-help_fig1 <- fig1_UC_inc %>% select(col.Monday.date, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
-  mutate(#incomp_blood = case_when(bld.complt=="BloodIncomplet"~"Partial Blood",
-    #bld.complt=="NoBlood" ~"No Blood"))
-    partial_blood= case_when(bld.complt=="BloodIncomplet"~1,
-                             TRUE ~0),
-    no_blood=case_when(bld.complt=="NoBlood"~1,
-                       TRUE ~0))
-
-
-
-
-help_fig1 <- help_fig1 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !is.na(no_blood) ~ 1, TRUE ~ 0)) #all participants per week
-#all_blood=case_when(incomp_blood=="Partial Blood" | incomp_blood=="No Blood" ~1,TRUE ~ 0))
-
-
-help2_1_fig1 <- help_fig1 %>%  group_by(col.Monday.date,  partial_blood, no_blood, all_blood) #%>%  tally()
-
-help2_1_fig1 <- help2_1_fig1 %>%  mutate(incomp_blood = case_when( (partial_blood==1 |no_blood==1) ~1,
-                                                                   TRUE ~ 0))
-
-help2_1_fig1_inc <- help2_1_fig1 %>%  select(col.Monday.date,  partial_blood, no_blood, all_blood, incomp_blood) %>%  group_by(col.Monday.date)
-
-
-final_fig1_table <- help2_1_fig1_inc %>%  group_by(col.Monday.date) %>%  dplyr::summarize( incomplete=sum(incomp_blood),
-                                                                                           partial=sum(partial_blood),
-                                                                                           none_blood=sum(no_blood),
-                                                                                           all_collections=sum(all_blood),
-                                                                                           All_Incomplete=100*(incomplete/all_collections),
-                                                                                           Partial__Blood=100*(partial/all_collections),
-                                                                                           No__Blood=100*(none_blood/all_collections))
-
-
-research.1_1 <- ggplot() +
-  geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = All_Incomplete, color = "All_Incomplete"), na.rm = TRUE) +
-  geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = Partial__Blood, color = "Partial__Blood"), na.rm = TRUE) +
-  geom_line(data = final_fig1_table, aes(x = as.Date(col.Monday.date), y = No__Blood, color = "No__Blood"), na.rm = TRUE) +
-  geom_point(width = 0.2) +
-  scale_y_continuous(name = "Percent %", limits = c(0, 100), expand = c(0, 0), breaks = seq(0, 100, 25)) +
-  scale_x_date(name = "Date", date_labels = "%y-%m-%d", date_breaks = "2 weeks",
-               limits = c(as.Date("2022-06-20"), (as.Date(currentDate) - 1)), expand = c(0, 0))  +
-  scale_color_manual(name = "Incompletion Level",
-                     values = c("All_Incomplete" = "#FDBE19", "No__Blood" = "#3C989E", "Partial__Blood" = "#164C71"),
-                     labels = c("Total","No Blood",  "Partial Blood"),
-                     guide = guide_legend(nrow = 2, byrow = TRUE)) +
-  ggtitle(label = "Figure 2.1: Baseline- Weekly Percent of Incomplete Blood Collections, \n University of Chicago Medicine") +
-  theme(panel.background = element_blank(),
-        legend.position = "bottom",
-        axis.line = element_line(size = 0.2),
-        axis.text.x = element_text(angle = 60, hjust = 1),
-        axis.title.x = element_text(size = 14, face = "bold"),
-        axis.title.y = element_text(size = 14, face = "bold", color = "black"),
-        plot.title = element_text(hjust = 0.5, size = 12, face = "bold")) +
-  labs(caption = "Note: NCI notified UChicago of incomplete blood draws on January 26, 2023.") +
-  theme(plot.caption = element_text(hjust = 0))
-
-research.1_1
-
-
-```
-
-```{r KnitrTables2.5,echo=FALSE,error=FALSE,message=FALSE, warning=FALSE, results='asis'}
-
-
-knitr::kable(bldcol_research_HF1, 
-             col.names=c("Collection Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Research Collections"), 
-             caption='Table 2.5: Baseline Blood Collection Completeness Among Research Collections \n by Collection Location, Henry Ford Health', 
-             row.names=FALSE, align=c("l","c","c","c","c"), booktabs = TRUE) %>% 
-  kable_styling(latex_options = "scale_down")
-```
-
-\FloatBarrier
-```{r Figure2, eval=TRUE,echo=FALSE, warning=FALSE}
-
-
-Inc_bld_HF <- tube_research_HF %>%  select(Connect_ID, Site_location, bld.complt)
-Inc_bld_HF$Connect_ID <- as.numeric(Inc_bld_HF$Connect_ID)
-research.survey$Connect_ID <- as.numeric(research.survey$Connect_ID)
-fig2_HF <- left_join(research.survey, Inc_bld_HF, by="Connect_ID")
-
-fig2_HF_inc <- fig2_HF %>%  filter(Site=="Henry Ford Health")
-
-
-help_fig2 <- fig2_HF_inc %>% select(col.Monday.date, bld.complt) %>%  # %>%  filter(bld.complt=="BloodIncomplet" | bld.complt=="NoBlood")
-  mutate(#incomp_blood = case_when(bld.complt=="BloodIncomplet"~"Partial Blood",
-    #bld.complt=="NoBlood" ~"No Blood"))
-    partial_blood= case_when(bld.complt=="BloodIncomplet"~1,
-                             TRUE ~0),
-    no_blood=case_when(bld.complt=="NoBlood"~1,
-                       TRUE ~0))
-
-
-help_fig2 <- help_fig2 %>% mutate(all_blood=case_when(!is.na(partial_blood) & !is.na(no_blood) ~ 1, TRUE ~ 0)) #all participants per week
-
-
-help2_1_fig2 <- help_fig2 %>%  group_by(col.Monday.date,  partial_blood, no_blood, all_blood) #%>%  tally()
-
-help2_1_fig2 <- help2_1_fig2 %>%  mutate(incomp_blood = case_when( (partial_blood==1 |no_blood==1) ~1,
-                                                                   TRUE ~ 0))
-
-help2_1_fig2_inc <- help2_1_fig2 %>%  select(col.Monday.date,  partial_blood, no_blood, all_blood, incomp_blood) %>%  group_by(col.Monday.date)
-
-final_fig2_table <- help2_1_fig2_inc %>%  group_by(col.Monday.date) %>% dplyr::summarize( incomplete=sum(incomp_blood),
-                                                                                          partial=sum(partial_blood),
-                                                                                          none_blood=sum(no_blood),
-                                                                                          all_collections=sum(all_blood),
-                                                                                          All_Incomplete=100*(incomplete/all_collections),
-                                                                                          Partial__Blood=100*(partial/all_collections),
-                                                                                          No__Blood=100*(none_blood/all_collections))
-
-research.1_2 <- ggplot() + #, color=UC_Sites) + #,fill=Site, color=Site)) +
-  geom_line(data=final_fig2_table, aes(x=as.Date(col.Monday.date), y=All_Incomplete, colour="All_Incomplete"),na.rm=T) +
-  geom_line(data=final_fig2_table, aes(x=as.Date(col.Monday.date), y=Partial__Blood, colour="Partial__Blood"), na.rm=T) +
-  geom_line(data=final_fig2_table, aes(x=as.Date(col.Monday.date), y=No__Blood, colour="No__Blood"), na.rm=T) +
-  geom_point(width = 0.2) +
-  scale_y_continuous(name="Percent %", limits=c(0,100),expand = c(0, 0), breaks=seq(0,100,25)) +
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-1) ,expand=c(0,0))  +
-  scale_color_manual(name = "Incompletion Level",
-                     values = c("All_Incomplete" = "#FDBE19", "No__Blood" = "#3C989E", "Partial__Blood" = "#164C71"),
-                     labels = c("Total","No Blood",  "Partial Blood"),
-                     guide = guide_legend(nrow = 2, byrow = TRUE)) +
-  ggtitle(label="Figure 2.2: Baseline- Weekly Percent of Incomplete Blood Collections, \n Henry Ford Health") +
-  labs(color = "Incompletion Level") +
-  theme(panel.background = element_blank(),
-        #legend.title = element_text(size=7),
-        legend.position="bottom",
-        axis.line = element_line(size=0.2),
-        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
-        axis.title.y = element_text(size = 14, face = "bold",color="black"),
-        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) +
-  labs(caption = "Note: NCI notified Henry Ford of incomplete blood draws on April 19, 2023.") +
-  theme(plot.caption = element_text(hjust=0)) +
-  guides(fill=guide_legend(nrow=2,byrow=TRUE))
-
-research.1_2
-
-
-```
-
-
-
 ```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
-
-knitr::kable(bloodcomp_clinloc,
-             col.names=c("Clinic Location","All Blood Collected","Partial Blood Collected","No Blood Collected","Total Clinical Collections"),
-             caption='Table 2.6: Baseline Blood Collection Completeness Among Clinical Collections \n by Clinic Location, \n Henry Ford Health',
-             row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE) %>%
-  kable_styling(latex_options = "scale_down") %>%  
-  add_indent(seq(1, nrow(bloodcomp_clinloc) - 1))
-
-
-
-
-
-tab2_7= knitr::kable(bloodtube_R, 
-                     caption='Table 2.7: Baseline- Total Blood Tubes Collected Among Research Collections', 
-                     row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c", "c"), booktabs = TRUE) %>%  
-  add_indent(seq(1, nrow(bloodtube_R) - 1))  %>% 
-  kable_styling(latex_options = "scale_down")
-add_footnote(tab2_7, "Note: Research collections are expected to have a total of 5 blood tubes collected.", notation = "none")
-#add_footnote(tab2_7, "Note: As of 3/31/2025: Research Collections for BSWH, HFH, MFH, SFH and UChicago are expected to have 3 tubes; Research Collections for HP are expected to have 4 tubes. Prior to 3/31/2025, Research Collections for all sites were expected to have 4-5 tubes.", notation = "none")
-
-
 
 
 
 tab2_8= knitr::kable(bloodtubetype_R, 
-                     caption='Table 2.8: Baseline Blood Tubes Collected Among Research Collections by Tube Type', 
+                     caption='Table 2.3: Baseline Blood Tubes Collected Among Research Collections by Tube Type', 
                      row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c", "c"), booktabs = TRUE) %>%  
   add_indent(seq(1, nrow(bloodtubetype_R) - 1))  %>% 
   kable_styling(latex_options = "scale_down")
-add_footnote(tab2_8, "Note: Research collections are expected to include 2 SSTs, 1 Heparin, 1 EDTA, and either 1 ACD or 1 STRECK.", notation = "none")
-#add_footnote(tab2_8, "Note: Research collections are expected to include 2 SSTs, 1 EDTA, and, for HP, 1 Streck. ACD and Heparin tubes are no longer collected.", notation = "none")
+add_footnote(tab2_8, "Note: Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 03/26/2025; Streck tube is only collected at certain sites .", notation = "none")
 
 
 
-
-tab10_2= knitr::kable(bloodtubes_bysite, 
-                      caption='Table 2.9: Baseline- Total Blood Tubes Collected Among Clinical Biospecimen Collections', 
-                      row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c", "c"), booktabs = TRUE) %>%  
-  add_indent(seq(1, nrow(bloodtubes_bysite) - 1))  %>% 
-  kable_styling(latex_options = "scale_down")
-add_footnote(tab10_2, "Note: The expected total blood collection tubes vary by site and are as follows: KPHI-9, KPGA-7, KPNW-9, KPCO-8, HFH-5, HP-5, SFH-9, UChicago- 4", notation = "none") 
 
 
 
 tab8=knitr::kable(bloodtubetype_C,
-                  caption='Table 2.10: Baseline Blood Tubes Collected Among Clinical Biospecimen Collections by Tube Type',
+                  caption='Table 2.4: Baseline Blood Tubes Collected Among Clinical Biospecimen Collections by Tube Type',
                   row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%  
   add_indent(seq(1, nrow(bloodtubetype_C) - 1))  %>% 
   kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% 
   landscape()
-add_footnote(tab8, "Note: The expected collected tube type varies by site and is as follows: (1)KPCO: 4 SST, 2 Heparin, 2 EDTA. (2)KPGA: 4 SST, 1 Heparin, 2 EDTA. (3)KPHI: 4 SST, 2 Heparin, 3 EDTA. (4)KPNW: 5 SST, 2 Heparin, 2 EDTA. (5)HFH: 2 SST, 1 Heparin, 1 EDTA, 1 ACD. (6) HP: 2 SST, 1 Heparin, 1 EDTA, 1 STRECK. (7) SFH: 4 SST, 2 Heparin, 3 EDTA. (8) UChicago- 2 SST, 1 Heparin, 1 EDTA", notation = "none") 
+add_footnote(tab8, "Note: Tube configuration/quantity varies by site based on clincal lab supply in order to achieve the closes to collection volume to 20mL SST, 10mL EDTA, 10mL Heparin, 6mL ACD and 10mL Streck. Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 06/01/2025; Streck tube is collection was introduced at different time points and is only collected at certain sites.", notation = "none") 
 
 
 
 devns <- knitr::kable(Deviation_Freq[,c(7,5,6,4)],
              col.names=c("Site","Any Deviations","No Deviations", "Total Tubes Collected"), 
-             caption='Table 2.11: Baseline- Deviation Status Among Biospecimen Tubes Collected',
+             caption='Table 2.5: Baseline- Deviation Status Among Biospecimen Tubes Collected',
              row.names=FALSE, align=c("l","c","c","c"), booktabs = TRUE )
 add_footnote(devns, "Note: This table includes deviations on all baseline specimens except home mouthwash.", notation = "none") 
 ```
@@ -3631,14 +3252,14 @@ add_footnote(devns, "Note: This table includes deviations on all baseline specim
 
 
 tabe2_12 <- knitr::kable(reason_notcol,  
-                         caption='Table 2.12: Baseline- Reason Not Collected Among Research Collection Tubes Not Collected', 
+                         caption='Table 2.6: Baseline- Reason Not Collected Among Research Collection Tubes Not Collected', 
                          row.names=FALSE,align=c("l","c","c","c","c","c","c", "c"), booktabs = TRUE) %>%  
   add_indent(seq(1, nrow(reason_notcol) - 1)) %>% 
   kable_styling(latex_options = "scale_down")
 add_footnote(tabe2_12,"Note: The 'Short Draw' is applicable to blood collection tubes only.", notation="none")
 
 tubes2_12 <- knitr::kable(tube_type_notcolreasons,  
-                          caption='Table 2.13: Baseline- Reason Not Collected Among Research Collection Tubes Not Collected by Tube Type',
+                          caption='Table 2.7: Baseline- Reason Not Collected Among Research Collection Tubes Not Collected by Tube Type',
                           row.names=FALSE,align=c("l","c","c","c","c","c","c", "c"), booktabs = TRUE)  %>%  
   add_indent(seq(1, nrow(tube_type_notcolreasons) - 1))  %>% 
   kable_styling(latex_options = "scale_down")
@@ -3646,10 +3267,9 @@ add_footnote(tubes2_12, "Note: 'Short Draw' reason applicable to blood collectio
 
 
 knitr::kable(discard.site, 
-             caption='Table 2.14: Baseline- Discarded Tubes Among Biospecimen Collections by Tube Type', 
+             caption='Table 2.8: Baseline- Discarded Tubes Among Biospecimen Collections by Tube Type', 
              row.names=FALSE,  
-             col.names=c("Site",  "SST 1", "SST 2", "SST 5", "Heparin 1", "Heparin 2", "EDTA 1, 2, or 3", "ACD", "Urine", "Total Discarded Tubes"), 
-             align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%
+             align=c("l","c","c","c","c","c","c","c","c","c","c"), booktabs = TRUE) %>%
   kable_styling(latex_options = "scale_down")
 #col.names=c("Site",  "SS Tube1", "SS Tube2", "SS Tube5", "Heparin Tubes", "EDTA Tubes", "ACD Tubes", "Urine Tubes", "Total Tubes"), align=c("l","c","c","c","c","c","c","c","c"),
 ```
@@ -3829,6 +3449,7 @@ tab23=knitr::kable(research.vt.length.table,
                    row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% 
   kable_styling(latex_options = "scale_down") #%>% landscape()
 add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1) HealthPartners: 25-60 minutes, (2) Henry Ford: 25-60 minutes, (3) Sanford: 10-45 minutes, (4) Marshfield: 10-45 minutes, (5) UChicago: 15-180 minute, and (6) BSWH: 25-60 minutes", notation = "none") #and greater than 500 minutes 
+
 
 
 uc_col_time <- knitr::kable(research.vt.length.UC.table,
@@ -4800,26 +4421,30 @@ clc_both_vt.site.NW
 
 
 
+
 ```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
-#not dead of wd or refused
-kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_827220437, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_826941471 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and 
-d_987563196='104430631'"
+
+kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_827220437, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_826941471,d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_826941471,d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_541483796_d_379252329, d_173836415_d_266600170_d_541483796_d_221592017,
+d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491,
+d_173836415_d_266600170_d_641006239_d_379252329, d_173836415_d_266600170_d_641006239_d_221592017,
+d_173836415_d_266600170_d_448660695
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
+where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631'" #not dead or wd or refused
 kitstatus_table <- bq_project_query(project, kitstatus)
 kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
-
-
-
-kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-where Connect_ID is not null and d_820476880 LIKE 'CHA%'"
-kitdate_table <- bq_project_query(project, kitdate)
-kit_data <- bq_table_download(kitdate_table, bigint="integer64",n_max = Inf, page_size = 10000)
-kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
-
-
-
-
+ 
+ 
+ 
+# kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+# where Connect_ID is not null and d_820476880 LIKE 'CHA%'"
+# kitdate_table <- bq_project_query(project, kitdate)
+# kit_data <- bq_table_download(kitdate_table, bigint="integer64",n_max = Inf, page_size = 10000)
+# kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
+ 
+ 
+ 
+ 
 kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Kaiser Permanente Colorado",
                                                     d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                                     d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
@@ -4830,126 +4455,278 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
                                                     d_827220437==303349821 ~ "Marshfield",
                                                     d_827220437==809703864 ~ "University of Chicago Medicine",
                                                     d_827220437==472940358 ~ "Baylor Scott and White Health"),
-                                   Kit_Status = case_when(#d_173836415_d_266600170_d_319972665_d_221592017==517216441	~"Pending", -- no one will have this
-                                     d_173836415_d_266600170_d_319972665_d_221592017==728267588	~"Initialized",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==849527480	~"Address Printed",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==241974920	~ "Assigned",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==277438316	~ "Shipped",
-                                     d_173836415_d_266600170_d_319972665_d_221592017==375535639	~ "Received",
-                                     is.na(d_173836415_d_266600170_d_319972665_d_221592017) ~ "No Status"))
-
-kit_table$Kit_Status<- factor(kit_table$Kit_Status,levels=c("No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))
-
-kit_date <- left_join( kit_data, kit_table,  by="Connect_ID")
-
+                                   Kit_Status_int = case_when(#d_173836415_d_266600170_d_319972665_d_221592017==517216441             ~"Pending", -- no one will have this
+                                     d_173836415_d_266600170_d_319972665_d_221592017==728267588    ~"Initialized",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==849527480    ~"Address Printed",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==241974920    ~ "Assigned",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==277438316    ~ "Shipped",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==375535639    ~ "Received",
+                                     d_173836415_d_266600170_d_319972665_d_221592017==332067457    ~ "Undeliverable",
+                                     is.na(d_173836415_d_266600170_d_319972665_d_221592017) ~ "No Status"),
+                                   Kit_Status_r1 = case_when(#d_173836415_d_266600170_d_541483796_d_221592017==517216441             ~"Pending", -- no one will have this
+                                     d_173836415_d_266600170_d_541483796_d_221592017==728267588    ~"Initialized",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==849527480    ~"Address Printed",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==241974920    ~ "Assigned",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==277438316    ~ "Shipped",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==375535639    ~ "Received",
+                                     d_173836415_d_266600170_d_541483796_d_221592017==332067457    ~ "Undeliverable",
+                                     is.na(d_173836415_d_266600170_d_541483796_d_221592017) ~ "No Status"),
+                                   Kit_Status_r2 = case_when(#d_173836415_d_266600170_d_641006239_d_221592017==517216441             ~"Pending", -- no one will have this
+                                     d_173836415_d_266600170_d_641006239_d_221592017==728267588    ~"Initialized",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==849527480    ~"Address Printed",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==241974920    ~ "Assigned",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==277438316    ~ "Shipped",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==375535639    ~ "Received",
+                                     d_173836415_d_266600170_d_641006239_d_221592017==332067457    ~ "Undeliverable",
+                                     is.na(d_173836415_d_266600170_d_641006239_d_221592017) ~ "No Status"),
+                                   Kit_Status_int = factor(Kit_Status_int,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
+                                   Kit_Status_r1 = factor(Kit_Status_r1,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
+                                   Kit_Status_r2 = factor(Kit_Status_r2,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")))
+ 
+ 
+ 
 kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID IS NOT NULL"
 kitassembly_table <- bq_project_query(project, kitassembly)
 kitassembly_data <- bq_table_download(kitassembly_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kitassembly_data$Connect_ID <- as.numeric(kitassembly_data$Connect_ID)
 kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
-
-
-#Removing duplicates 
-kit_assembly <- kit_assembly %>%
-  distinct(Connect_ID, .keep_all = TRUE)
-
-```
-
-
-
-```{r tbl7.1, include=FALSE, echo=FALSE, warning=FALSE}
-
-## Merging the biospecimen table in to use this kit_sett table as a Figure later
-
-kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+ 
+ 
+## Merging the biospecimen table in to use this kit_sett table as a Figure later.
+kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471,  d_556788178, d_820476880
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
 where Connect_ID is not null "
 kitsetting_table <- bq_project_query(project, kitsetting)
 kit_set <- bq_table_download(kitsetting_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kit_set$Connect_ID <- as.numeric(kit_set$Connect_ID)
 
+## Need to remove blood/urine duplicates with the same logic as in the beginning of the code
+## Keep the HMW collections and only the first blood/urine collection to properly remove duplicates
+# 1. Keep all CHA rows (HMW)
+cha_rows <- kit_set %>%
+  filter(grepl("^CHA", d_820476880))
 
-location_stat <- kit_table %>%  select(Connect_ID, Kit_Status, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_982213346,
-                                       d_173836415_d_266600170_d_139245758, d_547363263, Site)
-kit_sett <- left_join(location_stat, kit_set,   by="Connect_ID") #%>% left_join(recrver1,  by="Connect_ID")
-
+# 2. Among CXA rows, keep earliest finalized collection timestamp per Connect_ID-- this is what we did with the original biospecimen table duplicates
+cxa_rows <- kit_set %>%
+  filter(grepl("^CXA", d_820476880)) %>%
+  group_by(Connect_ID) %>%
+  slice_min(order_by = d_556788178, with_ties = FALSE) %>%
+  ungroup()
+ 
+# 3. Combine the two sets
+kit_set_clean <- bind_rows(cha_rows, cxa_rows)
+ 
+```
+ 
+ 
+ 
+```{r HomeMW_Data_Merging, include=FALSE, echo=FALSE, warning=FALSE}
+ 
+location_stat <- kit_table %>%  select(Connect_ID, Kit_Status_int,Kit_Status_r1,Kit_Status_r2, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_982213346,
+                                       d_173836415_d_266600170_d_139245758, d_547363263, Site, d_195145666, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_319972665_d_379252329)
+kit_sett <- left_join(location_stat, kit_set_clean,   by="Connect_ID") 
+ 
 #"Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to March 29, 2024. Home mouthwash collections were launched for eligible participants in March 29, 2024. Home mouthwash collections for backlog collections (before March 29, 2024) will be launched at a later date.
+table27_elg <- kit_sett %>% filter( (d_173836415_d_266600170_d_982213346>=as.Date("2024-03-29") | is.na(d_173836415_d_266600170_d_982213346)) &
+                                    (d_173836415_d_266600170_d_139245758>=as.Date("2024-03-29") | is.na(d_173836415_d_266600170_d_139245758)) &
+                                      !(is.na(d_173836415_d_266600170_d_982213346) & is.na(d_173836415_d_266600170_d_139245758))) # needs at least one collection
+                                     #Kit_Status!="Unknown")
+ 
+ 
+#Updates: need kit assembly merged in to determine kit replacement status
+kitassembly_data2 <- kitassembly_data %>%  select(Connect_ID, d_426588510, d_194252513, d_137401245,
+                                                  d_633640710_d_100618603, d_633640710_d_205954477, d_633640710_d_289239334, d_633640710_d_427719697,
+                                                  d_633640710_d_541085383, d_633640710_d_545319575, d_633640710_d_938338155, d_633640710_d_950521660,
+                                                  d_633640710_d_992420392)  %>%
+  mutate(kit_level= case_when(d_426588510 == 772116457 ~ "Replacement Kit 2",
+                              d_426588510 == 389478821 ~ "Replacement Kit 1",
+                              TRUE ~ "Initial Kit"))
 
-table27_elg <- kit_sett %>% filter((d_173836415_d_266600170_d_982213346>=as.Date("2024-03-29") & d_173836415_d_266600170_d_139245758>=as.Date("2024-03-29")))
+table27_elg_kit <- left_join(table27_elg, kitassembly_data2, by="Connect_ID")
 
 
-#table27_elg$Site<- droplevels(table27_elg$Site)
-table27_elg<- table27_elg %>%  filter(Kit_Status!="Unknown")
 
-#Removing duplicates 
-table27_elg_distinct <- table27_elg %>%
-  distinct(Connect_ID, .keep_all = TRUE)
+# when participants get replacement kits, then get an additional row in the kit_assembly table
+# those with initial kits will have a null d_426588510 value if kit sent before implementation, or d_426588510==663273321 if its more recent
+# those with replacement kit 1 have one row with a null d_426588510 value, and one row with d_426588510==389478821
+# those with replacement kit 2 have one row with a null d_426588510 value, and one row with d_426588510==389478821 AND one row with d_426588510 == 772116457
+table27_elg_kit <- table27_elg_kit %>%
+  filter(d_650516960=='664882224' | is.na(d_650516960)) #remove research collections 
+
+## Somehow the NAs are being separated
+table27_elg_kit$kit_level[is.na(table27_elg_kit$kit_level)]= "Initial Kit"
 
 
-#clinical blood or urine given after 4/1/24
-status_elg <- table27_elg_distinct %>%  
-  distinct(Connect_ID, .keep_all = TRUE) %>%
+#The merge isn't fully correct up until this point. 
+#For participants with more then one home collection received, we need to keep the row where the first 9 characters of the Supply Kit ID = the Collection ID
+## Supply Kit ID always has the Collection ID in it. Any other combos were incorrect and created falsely during the merge
+
+# Step 1: Identify Connect_IDs with >1 'CHA'-starting rows
+cha_ids <- table27_elg_kit %>%
+  filter(grepl("^CHA", d_820476880)) %>%
+  group_by(Connect_ID) %>%
+  filter(n() > 1) %>%
+  pull(Connect_ID) %>%
+  unique()
+
+# Step 2: Split data into two parts
+processed <- table27_elg_kit %>%
+  filter(Connect_ID %in% cha_ids) %>%
+  mutate(cha_flag = grepl("^CHA", d_820476880)) %>%
+  group_by(Connect_ID) %>%
+  # Keep all non-CHA rows, and the matching CHA row if available
+  filter(
+    !cha_flag |
+    d_820476880 == substr(d_194252513, 1, 9)
+  ) %>%
+  ungroup() %>%
+  select(-cha_flag)
+
+# Step 3: Add back all other data (those not in cha_ids)
+table27_elg_distinct <- bind_rows(
+  processed,
+  table27_elg_kit %>% filter(!Connect_ID %in% cha_ids)
+)
+
+
+
+
+
+ 
+ 
+## Participants are getting Kit_Status and kit_level values for both their HMW and blood/urine collection, causing duplicate rows
+## Blood urine collections will have all kit statuses, HMW collections will only include the received collections and some shipped collections
+## Using blood urine collections (Collection ID starts with CXA) to ensure all kits are counted.
+## This will ONLY work for the first table to get the kit status counts as the CHA rows don't have values for d_678166505 and d_143615646_d_826941471
+ 
+kit_status_table_7.1 <- table27_elg_distinct %>% filter(d_650516960=='664882224')
+ 
+## I think 'undeliverable', 'no status', 'initialized', 'address printed', and 'assigned' don't show up in the kit assembly table?
+ 
+```
+ 
+ 
+```{r tbl7.1, include=FALSE, echo=FALSE, warning=FALSE}
+
+#### Need Tables for every level of kit. If they EVER had an initial kit, they need to be in the initial table, ect.
+## On a kit level, NOT a participant level
+ 
+### Initial Kit
+status_elgA <- kit_status_table_7.1 %>%
+  filter(kit_level=="Initial Kit") %>%
   tbl_cross(
     row = Site,
-    col = Kit_Status,
+    col = Kit_Status_int,
     digits=c(0,1),
     percent = "row",
     label=list(Site="Site",
-               Kit_Status = "Kit Status"),
+               Kit_Status_int = "Kit Status"),
     missing="ifany",
-    margin_text="Total Eligible") 
-
-
-status_elg_kn <- status_elg %>%
+    margin_text="Total Eligible")
+ 
+ 
+status_elg_knA <- status_elgA %>%
   modify_header(stat_0 = "Total") %>%
-  modify_caption("Table 7.1:  Baseline- Home Mouthwash Kit Status Among Eligible Participants") %>%
-  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down") 
+  modify_caption("Table 7.1a:  Baseline- Home Mouthwash Initial Kit Status Among Eligible Participants") %>%
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down")
+ 
+ 
+ 
+ 
 
+### Replacement Kit 1
+status_elgB <- kit_status_table_7.1 %>%
+  filter(kit_level=="Replacement Kit 1") %>%
+  tbl_cross(
+    row = Site,
+    col = Kit_Status_r1,
+    digits=c(0,1),
+    percent = "row",
+    label=list(Site="Site",
+               Kit_Status_r1 = "Kit Status"),
+    missing="ifany",
+    margin_text="Total Eligible")
+ 
+ 
+status_elg_knB <- status_elgB %>%
+  modify_header(stat_0 = "Total") %>%
+  modify_caption("Table 7.1b:  Baseline- Home Mouthwash Replacement Kit 1 Status \n Among All R1 Kits Requested") %>%
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down")
+ 
+ 
+ 
+ 
+ 
+### Replacement Kit 2
+status_elgC <- kit_status_table_7.1 %>%
+  filter(kit_level=="Replacement Kit 2") %>%
+  tbl_cross(
+    row = Site,
+    col = Kit_Status_r2,
+    digits=c(0,1),
+    percent = "row",
+    label=list(Site="Site",
+               Kit_Status_r2 = "Kit Status"),
+    missing="ifany",
+    margin_text="Total Eligible")
+ 
+ 
+status_elg_knC <- status_elgC %>%
+  modify_header(stat_0 = "Total") %>%
+  modify_caption("Table 7.1c:  Baseline- Home Mouthwash Replacement Kit 1 Status \n Among All R2 Kits Requested") %>%
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%  kable_styling(latex_options = "scale_down")
+ 
+ 
 
 ```
-
-
-
+ 
+ 
+ 
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, warning=FALSE,results='hold'}
-
-filtered_data <- filter(table27_elg_distinct, Kit_Status %in% c("Received", "Shipped"))
-
+ 
+filtered_data <- filter(kit_status_table_7.1, Kit_Status_int %in% c("Received", "Shipped"))
+ 
 summary_table2_all<- filtered_data %>%
+  filter(kit_level=="Initial Kit") %>%
   group_by(Site) %>%
-  summarise(Shipped = sum(Kit_Status %in% c("Received", "Shipped")),
-            Shipped_OneWeek = sum(Kit_Status %in% c("Received", "Shipped") & 
-                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < currentDate-7),
-            Received = sum(Kit_Status == "Received"))
-
+  summarise(Shipped = sum(Kit_Status_int %in% c("Received", "Shipped")), #kits received were once shipped
+            Shipped_TwoWeeks = sum(Kit_Status_int %in% c("Received", "Shipped") &
+                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < currentDate-14),
+            Received = sum(Kit_Status_int == "Received"))
+ 
+ 
 
 total_shipped <- sum(summary_table2_all$Shipped)
 total_received <- sum(summary_table2_all$Received)
-total_ship_previous_week <- sum(summary_table2_all$Shipped_OneWeek)
+total_ship_previous_week <- sum(summary_table2_all$Shipped_TwoWeeks)
 total_received_percentage <- paste(total_received, "(", round(total_received/total_ship_previous_week*100, digits = 1), "%)")
 total_row <- c("Total", total_shipped, total_ship_previous_week, total_received)
-
+ 
 # Create a new data frame for the "Total" row
 total_df <- data.frame(t(total_row), stringsAsFactors = FALSE)
-
+ 
 # Set column names
 colnames(total_df) <- colnames(summary_table2_all)
-
+ 
 # Append the "Total" row to summary_table2_all
 all_shipped_2 <- rbind(summary_table2_all, total_df)
-
-
+ 
+ 
 ```
-
-
+ 
+ 
 ```{r new_Figs7.3, include=FALSE, echo=FALSE, warning=FALSE}
-
-
+ 
+#site names too long and getting cut off 
 all_shipped_2_filtered <- all_shipped_2 %>%
-  filter(Site != "Total")  %>% 
+  filter(Site != "Total")  %>%
   mutate(Site = gsub("Kaiser Permanente", "KP", Site),
-         Site = gsub("University of ", "U", Site))
+         Site = gsub("University of Chicago Medicine", "UChicago", Site),
+         Site = gsub("Henry Ford Health", "Henry Ford", Site))
+ 
 
 fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
-  geom_bar(aes(y = as.numeric(Shipped_OneWeek), fill = "Shipped"), stat = "identity", width = 0.8, position = position_dodge(width = 0.8)) +
+  geom_bar(aes(y = as.numeric(Shipped_TwoWeeks), fill = "Shipped"), stat = "identity", width = 0.8, position = position_dodge(width = 0.8)) +
   geom_bar(aes(y = as.numeric(Received), fill = "Received"), stat = "identity", width = 0.8, position = position_dodge(width = 0.8)) +
   scale_fill_manual(values = c("Shipped" = "#FDBE19", "Received" = "#164C71")) +
   labs(x = NULL, y = "Counts", fill = "") +
@@ -4962,131 +4739,100 @@ fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
     axis.text.x = element_text(angle = 25, vjust = 0.5, hjust = 1, size = 7),
     axis.line = element_line(color = "black", size = 0.5)
   ) +
-  ggtitle("Figure 7.1. Baseline- Total Kits Received of Total Kits Shipped \n Up To 1 Week Ago, by Site")
-
+  ggtitle("Figure 7.1. Baseline- Total Initial Kits Received of Total Initial Kits Shipped \n Up To 2 Weeks Ago, by Site")
 
 ```
-
-
-
+ 
+ 
+ 
 ```{r Table7.3_7.6, include=FALSE, echo=FALSE, warning=FALSE}
-
-
+ 
+ 
+## Here we need the CXA collections only- received or shipped and has values for d_678166505 and d_143615646_d_826941471
+ 
+kits_hmw <- table27_elg_distinct %>% filter(is.na(d_650516960))
+ 
+ 
 ####################
-all_completed <- left_join(table27_elg_distinct,kit_assembly, by=c("Connect_ID", "Site",  "Kit_Status", "d_173836415_d_266600170_d_319972665_d_661940160", 'd_547363263'))
 
-Coll_Card_Table <- all_completed %>% filter(d_173836415_d_266600170_d_319972665_d_221592017 ==375535639) %>% 
-  mutate(Card_Status = case_when(d_137401245==353358909	~"Collection Card Not Included",
+Coll_Card_Table <- kits_hmw %>%
+  filter(Kit_Status_int=="Received" & kit_level=="Initial Kit") %>%
+  mutate(Card_Status = case_when(d_137401245==353358909           ~"Collection Card Not Included",
+
                                  TRUE ~ "Collection Card Included"))
-
+ 
 Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>% tbl_cross(
   row = Site,
-  col = Card_Status, 
+  col = Card_Status,
   digits=c(0,1),
   percent = "row",
   label=list(Site ~ "Site", Card_Status ~ " "),
   missing="ifany",
   missing_text="0 (0%") %>%
   modify_header() %>%
-  modify_caption("Table 7.3: Baseline- Collection Card Status Among Home Mouthwash Kits Received") %>%
+  modify_caption("Table 7.3: Baseline- Collection Card Status Among Home Mouthwash Initial Kits Received") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
-
-
-
-
+ 
+ 
+ 
+ 
 ############
-#d_265193023==231311385 --- had to remove, no one finished yet
-
-test30 <- table27_elg %>%  filter(!is.na(d_143615646_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) 
-
-test30 <-  test30 %>% 
-  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_143615646_d_826941471)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),units="days"))) %>%  
+ 
+test30 <- Coll_Card_Table %>%  filter(!is.na(d_143615646_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+ 
+test30 <-  test30 %>%
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_143615646_d_826941471)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),units="days"))) %>% 
   filter(ctime>0)
-
-Table7.4 = test30 %>% group_by(Site) %>% 
+ 
+Table7.4 = test30 %>% group_by(Site) %>%
   dplyr::summarize(N=n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
                    Median = median(ctime),
                    Mean = mean(ctime),
-                   #SD=sd(ctime),
                    Q3 = quantile(ctime, 0.75),
-                   #Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
-
-
+ 
+ 
+ 
 #################
-firstcoltime <- tube_col %>% select(Connect_ID, collection.tm)
-first_col_time <- left_join(table27_elg_distinct, firstcoltime, by=c("Connect_ID", "Site"))
-test31 <- first_col_time %>%  filter(!is.na(collection.tm) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) 
-test31 <-  test31 %>% mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),
-                                                         min(as.POSIXct(ymd_hms(collection.tm))),units="days")))
-test31b <-  test31 %>%  filter(ctime>0) 
-
-
-Table7.5 = test31b %>% group_by(Site) %>% 
+ 
+firstcoltime <- tube_col %>% filter(all_settings=="Clinical")  %>% select(Connect_ID, collection.tm)
+firstcoltime$Connect_ID <- as.numeric(firstcoltime$Connect_ID)
+kit_status_table_7.1$Connect_ID <- as.numeric(kit_status_table_7.1$Connect_ID)
+first_col_time <- left_join(kit_status_table_7.1, firstcoltime, by=c("Connect_ID", "Site"))
+ 
+test31 <- first_col_time %>% 
+  filter(!is.na(collection.tm) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160) & kit_level=="Initial Kit")
+ 
+test31 <-  test31 %>%
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160)),
+                                     as.POSIXct(ymd_hms(collection.tm)),units="days")))
+test31b <-  test31 %>%  filter(ctime>0)
+ 
+ 
+Table7.5 = test31b %>% group_by(Site) %>%
   dplyr::summarize(N =n(),
                    Min = min(ctime),
                    Q1 = quantile(ctime, 0.25),
                    Median = median(ctime),
                    Mean = mean(ctime),
-                   #SD=sd(ctime),
                    Q3 = quantile(ctime, 0.75),
-                   #Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
-
-
-
+ 
+ 
+ 
+ 
 ##################################
-
-conditions <- all_completed[,c("Connect_ID","d_173836415_d_266600170_d_319972665_d_221592017", "d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477",
-                               "d_633640710_d_289239334","d_633640710_d_992420392","d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603")]
-conds <- c("d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477", "d_633640710_d_289239334","d_633640710_d_992420392",
+condition_cols <- c("d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477", "d_633640710_d_289239334","d_633640710_d_992420392",
            "d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603")
-conditions$conditions <- 0
-conditions$none <-0
-for(i in 1:length(conds)){
-  condition <- conditions[,conds[i]]
-  count <- ifelse((!is.na(condition) & condition ==353358909), 1, 0)
-  conditions$conditions <- count+conditions$conditions
-  count1 <- ifelse((!is.na(condition) & condition==104430631), 1, 0)
-  conditions$none <- count1+conditions$none
-}
-
-all_completed <- all_completed %>%
-  mutate(multi_cond = 0)  # Initialize the multi_cond column with zeros
-
-# Filter columns based on pattern
-columns_to_sum <- colnames(all_completed)[grepl("d_633640710_d_", colnames(all_completed))]
-
-# Loop through each column and apply the operation
-for (col in columns_to_sum) {
-  all_completed <- all_completed %>%
-    mutate(multi_cond = ifelse(.data[[col]] == 353358909, 1, 0) + .data$multi_cond)
-}
-
-if(dim(table(all_completed$multi_cond))==0){multi_cond==0}
-
-
-
-all_completed <- all_completed %>%
-  mutate(multc1 = 0)  # Initialize the multc1 column with zeros
-
-# Filter columns based on pattern
-columns_to_sum <- colnames(all_completed)[grepl("d_633640710_d_", colnames(all_completed))]
-
-# Loop through each column and apply the operation
-for (col in columns_to_sum) {
-  all_completed <- all_completed %>%
-    mutate(multc1 = ifelse(.data[[col]] == 1, 1, 0) + .data$multc1)
-}
-
-
-table_32 <- all_completed %>% filter(d_173836415_d_266600170_d_319972665_d_221592017==375535639) %>%  
-  mutate(kit_condition = case_when(multc1>1 & d_633640710_d_950521660!=353358909 ~ "Two of More Conditions Selected", #-- right now no one with multiple selected
-                                   #d_633640710_d_950521660==353358909 ~ "Package in Good Conditon",
+kits_hmw <- kits_hmw %>%
+  mutate(
+    multi_cond = rowSums(across(all_of(condition_cols), ~ .x == 353358909, .names = NULL), na.rm = TRUE)
+  )
+ 
+table_32 <- kits_hmw %>% filter(Kit_Status_int=="Received" & kit_level=="Initial Kit") %>% 
+  mutate(kit_condition = case_when(multi_cond>1 & d_633640710_d_950521660!=353358909 ~ "Two of More Conditions Selected", #-- right now no one with multiple selected
                                    d_633640710_d_545319575==353358909 ~ "Package Crushed",
                                    d_633640710_d_938338155==353358909 ~ "Improper Packaging",
                                    d_633640710_d_205954477==353358909 ~ "Collection Cup Damaged",
@@ -5097,97 +4843,101 @@ table_32 <- all_completed %>% filter(d_173836415_d_266600170_d_319972665_d_22159
                                    d_633640710_d_950521660==353358909 ~ "Package in Good Conditon",
                                    d_633640710_d_100618603==353358909 ~ "Other",
                                    TRUE ~ "No Conditions Selected"))
-
-
+ 
+ 
 table__32 <- table_32 %>% select(kit_condition) %>%  group_by(kit_condition) %>%  tally()
-
-
+ 
+ 
 table__32$Percentage <- paste0(
   table__32$n,
   " (",
-  sprintf("%.0f%%", (table__32$n / sum(table__32$n)) * 100),
+  sprintf("%.2f%%", (table__32$n / sum(table__32$n)) * 100),
   ")"
 )
-
+ 
 db <- dim(table__32)[[1]]
 table__32[(db+1),2] <- sum(table__32$n)
 table__32[(db+1),1] <- "Total"
 table__32[nrow(table__32),3] <- paste(table__32$n[nrow(table__32)], " (100%)")
-
-
-
+ 
+ 
+ 
 table32_pct <- table__32[,c(1,3)]
-
+ 
 colnames(table32_pct) <- c("Condition", "Total Received Kits")
-
+ 
 table32_pct
-
-
+ 
+ 
 ```
-
-
-
+ 
+ 
+ 
 \FloatBarrier
-
+ 
 ```{r FigMW1, include=FALSE, echo=FALSE, warning=FALSE}
-
-
+ 
+ 
 #NOTE: MUST change currentDate to Mondays date in order for this to run correctly when testing for fixes
 #currentDate= recent Monday date
-
-##Received 
-kit_set_col_1 <- kit_set %>% select(Connect_ID, d_143615646_d_826941471)
-
+ 
+##Received-- need one set of data for the received line
+kit_set_col_1 <- kit_set_clean %>% select(Connect_ID, d_143615646_d_826941471)
+ 
 kit_set_col_1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_set_col_1$d_143615646_d_826941471,as.Date(veristart.date-days(2)),units="days"))/7)
-kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1$col.Sunday.week-1) 
+kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1$col.Sunday.week-1)
 kit_set_col_1$col.Monday.date <- kit_set_col_1$col.Sunday.date-days(6)
-
+ 
 kit_fig_1 <- inner_join(kit_set_col_1,kit_table,   by="Connect_ID")
 
 fig5_new_1 <- kit_fig_1 %>%
   filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
-
-
+ 
+ 
 fig5_week_total_1 <- fig5_new_1 %>%
-  group_by(col.Monday.date) %>% 
+  group_by(col.Monday.date) %>%
   summarise(total_received = sum(!is.na(d_143615646_d_826941471)))
-
+ 
 # Create a data frame with all Mondays from April 1st, 2024, until today
 all_mondays <- data.frame(col.Monday.date = seq(as.Date("2024-04-01"), currentDate-7, by = "week"))
-
-
+ 
+ 
 fig5_week_total_1 <- left_join(all_mondays, fig5_week_total_1, by = "col.Monday.date") %>%
   mutate(total_received = replace(total_received, is.na(total_received), 0))
+ 
 
 
-
-
-kit_table$col.Sunday.week <- ceiling(as.numeric(difftime(kit_table$d_173836415_d_266600170_d_319972665_d_661940160,as.Date(veristart.date-days(2)),units="days"))/7)
-kit_table$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_table$col.Sunday.week-1) 
-kit_table$col.Monday.date <- kit_table$col.Sunday.date-days(6)
-
-
-fig5_new_2 <- kit_table %>%
-  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate) 
-
-fig5_week_total_2 <- fig5_new_2 %>%
+## Shipped-- need another set of data for the shipped line
+kit_table1 <- kit_status_table_7.1 %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+ 
+kit_table1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_table1$d_173836415_d_266600170_d_319972665_d_661940160,as.Date(veristart.date-days(2)),units="days"))/7)
+kit_table1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_table1$col.Sunday.week-1)
+kit_table1$col.Monday.date <- kit_table1$col.Sunday.date-days(6)
+ 
+ 
+fig5_new_2 <- kit_table1 %>%
+  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
+ 
+fig5_week_totals_2 <- fig5_new_2 %>%
   group_by(col.Monday.date) %>%
   summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)))
-
-
-fig5_week_total_2 <- left_join(all_mondays, fig5_week_total_2, by = "col.Monday.date") %>%
+ 
+ 
+fig5_week_total_2 <- left_join(all_mondays, fig5_week_totals_2, by = "col.Monday.date") %>%
   mutate(total_shipped = replace(total_shipped, is.na(total_shipped), 0))
+ 
+ 
 
 
-
+## Combine the shipped and received data 
 fig5_week_final <- fig5_week_total_1
-
+ 
 fig5_week_final[,3] <- fig5_week_total_2[,2]
-
+ 
 colnames(fig5_week_final) <- c("col.Monday.date", "total_received", "total_shipped")
-
-
-
+ 
+ 
+ 
 MW_Coll_Kits <- ggplot(fig5_week_final, aes(x = as.Date(col.Monday.date))) +
   geom_line(aes(y = total_shipped, color = "Total Shipped"), linetype = "dashed", size = 1) +
   geom_line(aes(y = total_received, color = "Total Received"), linetype = "dashed", size = 1) +
@@ -5208,43 +4958,100 @@ MW_Coll_Kits <- ggplot(fig5_week_final, aes(x = as.Date(col.Monday.date))) +
         axis.title.x = element_text(size = 14, face = "bold"),
         axis.title.y = element_text(size = 14, face = "bold", color = "black"),
         plot.title = element_text(hjust = 0.5, size = 12, face = "bold")) +
-  guides(fill = guide_legend(nrow = 2, byrow = TRUE)) 
-  #labs(caption = "This figure includes all home mouthwsh kit types: Initial, Replacement Kit 1 and Replacement Kit 2 ") +
-  #theme(plot.caption = element_text(hjust=0))
-
-
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE)) +
+  labs(caption = "This figure includes all home mouthwsh kit types: Initial, Replacement Kit 1 and Replacement Kit 2 ") +
+  theme(plot.caption = element_text(hjust=0))
+ 
+ 
 ```
-
-
-
+ 
 ```{r FigMW2, include=FALSE, echo=FALSE, warning=FALSE}
-
-
-fig5_week_total2 <- fig5_week_final %>%
+ 
+##Received
+kit_set_col_2 <- kit_set_clean %>% select(Connect_ID, d_143615646_d_826941471)
+ 
+kit_set_col_2$col.Sunday.week <- ceiling(as.numeric(difftime(kit_set_col_2$d_143615646_d_826941471,as.Date(veristart.date-days(2)),units="days"))/7)
+kit_set_col_2$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_2$col.Sunday.week-1)
+kit_set_col_2$col.Monday.date <- kit_set_col_2$col.Sunday.date-days(6)
+ 
+ 
+kit_table_int <- kit_table %>%  filter(Kit_Status_int=="Received")
+ 
+kit_fig_2 <- inner_join(kit_set_col_2,kit_table_int,   by="Connect_ID")
+ 
+ 
+fig5_new_2 <- kit_fig_2 %>%
+  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
+ 
+ 
+fig5_week_total_2 <- fig5_new_2 %>%
+  group_by(col.Monday.date) %>%
+  summarise(total_received = sum(!is.na(d_143615646_d_826941471)))
+ 
+# Create a data frame with all Mondays from April 1st, 2024, until today
+all_mondays <- data.frame(col.Monday.date = seq(as.Date("2024-04-01"), currentDate-7, by = "week"))
+ 
+ 
+fig5_week_total_2 <- left_join(all_mondays, fig5_week_total_2, by = "col.Monday.date") %>%
+  mutate(total_received = replace(total_received, is.na(total_received), 0))
+ 
+ 
+##Shipped
+kit_table2 <- kit_status_table_7.1 %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_661940160) & kit_level=="Initial Kit")
+ 
+kit_table2$col.Sunday.week <- ceiling(as.numeric(difftime(kit_table2$d_173836415_d_266600170_d_319972665_d_661940160,as.Date(veristart.date-days(2)),units="days"))/7)
+kit_table2$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_table2$col.Sunday.week-1)
+kit_table2$col.Monday.date <- kit_table2$col.Sunday.date-days(6)
+ 
+ 
+fig5_new_3 <- kit_table2 %>%
+  filter(d_173836415_d_266600170_d_319972665_d_379252329 == 976461859 & as.Date(col.Monday.date) >= "2024-03-29" & as.Date(col.Monday.date) < currentDate)
+ 
+fig5_week_totals_3 <- fig5_new_3 %>%
+  group_by(col.Monday.date) %>%
+  summarise(total_shipped = sum(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)))
+ 
+ 
+fig5_week_total_3 <- left_join(all_mondays, fig5_week_totals_3, by = "col.Monday.date") %>%
+  mutate(total_shipped = replace(total_shipped, is.na(total_shipped), 0))
+ 
+ 
+ 
+## Combine received and shipped 
+fig_7.3_totals <- fig5_week_total_2
+ 
+fig_7.3_totals[,3] <- fig5_week_total_3[,2]
+ 
+colnames(fig_7.3_totals) <- c("col.Monday.date", "total_received", "total_shipped")
+ 
+ 
+fig5_week_total2 <- fig_7.3_totals %>%
   arrange(col.Monday.date) %>%
   mutate(cumulative_shipped = cumsum(total_shipped),
          cumulative_received = cumsum(total_received))
-
+ 
 fig5_week_total2 <- fig5_week_total2 %>%
   mutate(percentage_received_to_shipped = round(cumulative_received / cumulative_shipped * 100, digits=2))
-
-
-#Percentage they want is the total received as of today/total shipped as of end of week prior
-thus_far <- round(sum(as.numeric(all_shipped_2_filtered$Received))/sum(as.numeric(all_shipped_2_filtered$Shipped_OneWeek))*100, digits=2)
-
+ 
+ 
+##Percentage they want is the total received as of today/total shipped as of end of week prior
+#all_shipped_2_filtered already looks at initial kits only
+thus_far <- round(sum(as.numeric(all_shipped_2_filtered$Received))/sum(as.numeric(all_shipped_2_filtered$Shipped_TwoWeeks))*100, digits=2)
+ 
+ 
 
 MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
   geom_ribbon(aes(ymin = 0, ymax = cumulative_shipped, fill = "Total Shipped"), alpha = 0.3) +
   geom_ribbon(aes(ymin = 0, ymax = cumulative_received, fill = "Return Rate"), alpha = 0.3) +
   geom_text(data = fig5_week_total2 %>% filter(col.Monday.date == max(col.Monday.date)),
-            aes(x = as.Date(col.Monday.date), 
+            aes(x = as.Date(col.Monday.date),
                 label = paste0(thus_far, "%")),
             y = thus_far, vjust = -0.5, hjust = 1.2,  color = "black",  size = 3) +
   scale_x_date(name = "Date", date_labels = "%y-%m-%d", date_breaks = "2 weeks",
                limits = c(as.Date("2024-03-25"), as.Date(currentDate-7)), expand = c(0,0)) +
   scale_y_continuous(name = "# Kits Shipped") +
   scale_fill_manual(name = "", values = c("Total Shipped" = "#CC7D15", "Return Rate" = "#0072B2")) +
-  ggtitle(label = "Figure 7.3: Baseline− Home Mouthwash Kit Return Rate \n for Kits Shipped Up To 1 Week Ago") +
+  ggtitle(label = "Figure 7.3: Baseline − Home Mouthwash Initial Kit Return Rate \n for Kits Shipped Up To 2 Weeks Ago") +
   labs(caption = paste("Note: Shipped data are current through",as.Date(currentDate)-7, ".")) +
   theme(panel.background = element_blank(),
         legend.position = "bottom",
@@ -5253,106 +5060,123 @@ MW_overtime <- ggplot(fig5_week_total2, aes(x = as.Date(col.Monday.date))) +
         axis.title.x = element_text(size = 14, face = "bold"),
         axis.title.y = element_text(size = 14, face = "bold", color = "black"),
         plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))
-
-
+ 
 ```
-
-
-
-
+ 
+ 
+ 
+ 
+ 
 \FloatBarrier
-```{r newTables7.1,eval=TRUE,echo=FALSE,results='asis'} 
+```{r newTables7.1A,eval=TRUE,echo=FALSE,results='asis'}
 #results='asis'
-
-add_footnote(status_elg_kn, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none") 
+ 
+status_elg_knA
 ```
-
+ 
+\FloatBarrier
+```{r newTables7.1B,eval=TRUE,echo=FALSE,results='asis'}
+#results='asis'
+ 
+status_elg_knB
+```
+ 
+\FloatBarrier
+```{r newTables7.1C,eval=TRUE,echo=FALSE,results='asis'}
+#results='asis'
+ 
+add_footnote(status_elg_knC, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none")
+```
+ 
 \FloatBarrier
 ```{r KnitrTables7.2,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
-
+ 
 knitr::kable(all_shipped_2,format.args = list(big.mark = ","),
-             caption='Table 7.2 Baseline- Total Home Mouthwash Kit Return Rate for Packages Shipped up to 1 Week Ago',
+             caption='Table 7.2 Baseline- Total Home Mouthwash Initial Kit Return Rate for Packages Shipped up to 2 Weeks Ago',
              row.names=FALSE, align=c("l","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-
+ 
 ```
-
-
-
+ 
+ 
+ 
 \FloatBarrier
 ```{r Fig7_1, eval=TRUE,echo=FALSE}
-#fig.height = 5, fig.width = 5, 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
-
+#fig.height = 5, fig.width = 5,
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+ 
 fig7_1
-
+ 
 ```
-
-
+ 
+ 
 \FloatBarrier
 ```{r Fig7_2, eval=TRUE,echo=FALSE}
-#fig.height = 5, fig.width = 5, 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
-
+#fig.height = 5, fig.width = 5,
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+ 
 MW_Coll_Kits
-
+ 
 ```
-
+ 
 \FloatBarrier
 ```{r Fig7_3, eval=TRUE,echo=FALSE}
-#fig.height = 5, fig.width = 5, 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+#fig.height = 5, fig.width = 5,
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 MW_overtime
-
+ 
 ```
-
+ 
 \FloatBarrier
 ```{r KnitrTables7.3_7.4,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, results='asis'}
-
+ 
 Coll_Card_StatusBF %>% kable_styling(latex_options = "HOLD_position")
-
-
+ 
+ 
 ```
-
-
-
+ 
+ 
+ 
 \FloatBarrier
 ```{r KnitrTables7.5_7.8,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, results='asis'}
-
-
+ 
+ 
 #all these will move down a table number
 table7.4 <- knitr::kable(Table7.4,
-                               caption='Table 7.4: Baseline- Time (in Days) from Home Mouthwash Kit Shipment to BPTL Receipt \n (kits shipped before 6/17/2024)',
+                               caption='Table 7.4: Baseline- Time (in Days) from Home Mouthwash Initial Kit Shipment to \n BPTL Receipt',
                                row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 add_footnote(table7.4, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
-
-
-
+ 
+ 
+ 
 knitr::kable(Table7.5,
-             caption='Table 7.5: Baseline- Time (in Days) from Clinical Collection to Home Mouthwash Kit Shipment',
+             caption='Table 7.5: Baseline- Time (in Days) from Clinical Collection to Home Mouthwash Initial Kit Shipment',
              row.names=FALSE, align=c("l","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
-
-
+ 
+ 
 knitr::kable(table32_pct,
-             caption='Table 7.6: Baseline- Kit Conditions Among Received Home Mouthwash Kits',
+             caption='Table 7.6: Baseline- Kit Conditions Among Received Home Mouthwash Initial Kits',
              row.names=FALSE, align=c("l","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 ```
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
 \FloatBarrier
-
+ 
 ```{r Tables7.9_7.12, eval=TRUE,echo=FALSE,results='asis'}
-
-
-
-table7_8 <- table27_elg_distinct %>%  filter(Kit_Status=="Received") %>%
+ 
+ 
+######### Need on a participant level- can have multiple kits but only one survey
+ 
+ 
+ 
+table7_8 <- kit_table %>%  filter(Kit_Status_r2=="Received" | Kit_Status_r1=="Received" | Kit_Status_int=="Received") %>%
   mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
                                    d_547363263==615768760 ~ "Started",
-                                   d_547363263==231311385 ~ "Submitted")) %>%  
-  mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>% 
+                                   d_547363263==231311385 ~ "Submitted")) %>% 
+  mutate(MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) %>% dplyr::select(Site, MWSrvy_status )  %>%
   tbl_cross(
     row = Site,
     col = MWSrvy_status,
@@ -5362,35 +5186,36 @@ table7_8 <- table27_elg_distinct %>%  filter(Kit_Status=="Received") %>%
                MWSrvy_status = " "),
     missing="ifany",
     margin_text="Total")
-
+ 
 table7_8_totals <- as.data.frame(table7_8)
 table7_8_totals <- table7_8_totals[c(-1),]
-
-
+ 
+ 
 tab7_8 <- knitr::kable(table7_8_totals ,
-                       col.names=c("Site", "Not Started","Started","Submitted","Total Received Kits"), 
-                       caption='Table 7.7: Baseline- Mouthwash Biospecimen Survey Status Among Received Home Mouthwash Kits', 
+                       col.names=c("Site","Not Started","Started","Submitted","Total Participants with Received Kits"),
+                       caption='Table 7.7: Baseline- Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits',
                        row.names=FALSE,align=c("l","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
-
-
+ 
+ 
 num_rows <- nrow(table7_8_totals)
 tab7_8 <- tab7_8 %>%
   row_spec(1:(num_rows - 1), extra_css = "text-indent: 20px;")
-
+ 
 kable_styling(tab7_8, latex_options = "scale_down")
-
-
-
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 #Before MW Survey description Fix
-
-table7_9 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==104430631 &  as.Date(d_173836415_d_266600170_d_319972665_d_661940160)<"2024-05-22") %>%
+ 
+table7_9 <- kits_hmw %>%  filter((Kit_Status_r2=="Received" | Kit_Status_r1=="Received" | Kit_Status_int=="Received") & d_137401245==104430631 &
+                                   as.Date(d_173836415_d_266600170_d_319972665_d_661940160)<"2024-05-22") %>%
   mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
                                    d_547363263==615768760 ~ "Started",
                                    d_547363263==231311385 ~ "Submitted"),
@@ -5418,28 +5243,26 @@ table7_9 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==10443
                MW_comp_diff = " "),
     missing="ifany",
     margin_text="Total")
-
-
-
+ 
+ 
+ 
 tbl_7_9 <- table7_9 %>%
-  #bold_labels() %>%
-  #italicize_levels() %>%
   modify_header(stat_0 = "Total") %>%
   modify_caption("Table 7.8: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n(Pre-update to survey description on PWA)") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down")
-
-
+ 
+ 
 tbl_7_9 <- tbl_7_9 %>%
-  footnote("Only includes data from mouthwash kits returned with completed Collection Card")
-
+  footnote("Only includes data from mouthwash kits returned with completed Collection Card.")
 landscape(tbl_7_9)
-
-
-
-
+ 
+ 
+ 
+ 
 #After MW Survey description Fix
-table7_10 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==104430631 &  as.Date(d_173836415_d_266600170_d_319972665_d_661940160)>"2024-05-22") %>%
+table7_10 <- kits_hmw %>%  filter((Kit_Status_r2=="Received" | Kit_Status_r1=="Received" | Kit_Status_int=="Received") & d_137401245==104430631 &
+                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160)>="2024-05-22") %>%
   mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
                                    d_547363263==615768760 ~ "Started",
                                    d_547363263==231311385 ~ "Submitted"),
@@ -5453,11 +5276,11 @@ table7_10 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==1044
                                  as.numeric(MW_completion)==1 ~ "1 Day after Collection",
                                  as.numeric(MW_completion)==2 ~ "2 Days after Collection",
                                  as.numeric(MW_completion)==3 ~ "3 Days after Collection",
-                                 as.numeric(MW_completion)>=4 ~ "4+ Days after Collection", 
+                                 as.numeric(MW_completion)>=4 ~ "4+ Days after Collection",
                                  TRUE~"4+ Days before Collection")) %>%
   mutate(MW_comp_diff = factor(MW_comp_diff, levels=c("Not Submitted","4+ Days before Collection", "3 Days before Collection","2 Days before Collection","1 Day before Collection",
                                                       "Same Day as Collection","1 Day after Collection", "2 Days after Collection",
-                                                      "3 Days after Collection", "4+ Days after Collection"))) %>% 
+                                                      "3 Days after Collection", "4+ Days after Collection"))) %>%
   dplyr::select(Site, MW_comp_diff)  %>%
   tbl_cross(
     row = Site,
@@ -5468,9 +5291,9 @@ table7_10 <- all_completed %>% filter(Kit_Status=="Received" & d_137401245==1044
                MW_comp_diff = " "),
     missing="ifany",
     margin_text="Total")
-
-
-
+ 
+ 
+ 
 tbl_7_10 <- table7_10 %>%
   #bold_labels() %>%
   #italicize_levels() %>%
@@ -5478,11 +5301,46 @@ tbl_7_10 <- table7_10 %>%
   modify_caption("Table 7.9: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n (Post-update to survey description on PWA)") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down")
-
+ 
 tbl_7_10 <- tbl_7_10 %>%
-  footnote("Only includes data from mouthwash kits returned with completed Collection Card")
+  footnote("Only includes data from mouthwash kits returned with completed Collection Card.")
 
 landscape(tbl_7_10)
+ 
+ 
+```
+ 
+ 
+\FloatBarrier
+ 
+```{r Tables10s, eval=TRUE,echo=FALSE,results='asis'}
 
+
+
+
+###### Initial 
+survey_cc_int <- Coll_Card_Table %>%  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & as.Date(d_195145666) > "2025-05-01") 
+
+survey_cc_int <-  survey_cc_int %>% 
+  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="hours"))) %>%  
+  filter(ctime>0)
+
+Table7.10a = survey_cc_int %>% group_by(Site) %>% 
+  dplyr::summarize(N=n(),
+                   Min = min(ctime),
+                   Q1 = quantile(ctime, 0.25),
+                   Median = median(ctime),
+                   Mean = mean(ctime),
+                   #SD=sd(ctime),
+                   Q3 = quantile(ctime, 0.75),
+                   #Perc.95= quantile(ctime, 0.95),
+                   Max = max(ctime))
+ 
+Table7_10a <- knitr::kable(Table7.10a,
+                           caption='Table 7.10a Baseline- Mouthwash Biospecimen Survey Completion Time (in Days) Relative to Collection Time \n Reported on Collection Card for Initial Kit (Post update to  survey introduction)',
+                           row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>%
+  kable_styling(latex_options = "HOLD_position")
+add_footnote(Table7_10a, "Note: Only includes data from mouthwash kits returned with completed Collection Card.", notation = "none")
+         
 
 ```
