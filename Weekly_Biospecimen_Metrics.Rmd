@@ -1920,10 +1920,13 @@ colnames(BUM_status)[ncol(BUM_status)] = "Total Research Surveys"
 
 
 ##Check in until completion
-precovR <- research.survey %>%  filter(research.sv == "Submitted" & 
-                                         d_222161762<as.Date("2023-07-05") | (is.na(d_222161762) & d_331584571_d_266600170_d_840048338<as.Date("2023-07-05")))
-postcovR <- research.survey %>%  filter(research.sv == "Submitted" & 
-                                          d_222161762>=as.Date("2023-07-05") | (is.na(d_222161762) & d_331584571_d_266600170_d_840048338>=as.Date("2023-07-05")))
+
+research.survey_sec3 <- research.survey %>% filter(checktmvisit!="Not Submitted")
+research.survey_sec3$checktmvisit <- droplevels(research.survey_sec3$checktmvisit)
+  
+precovR <- research.survey_sec3 %>%  filter(research.sv == "Submitted" & d_222161762<as.Date("2023-07-05"))
+
+postcovR <- research.survey_sec3 %>%  filter(research.sv == "Submitted" & d_222161762>=as.Date("2023-07-05"))
 
 precovid_BUMtime <- create_tbl_cross(precovR, "checktmvisit", "Site", "column", " ", " ")
 colnames(precovid_BUMtime)[ncol(precovid_BUMtime)] = "Total Research Surveys"
@@ -2006,7 +2009,9 @@ BU_status <- create_tbl_cross(clinical.survey, "clin.sv", "Site", "column", " ",
 colnames(BU_status)[ncol(BU_status)] = "Total Clinical Surveys"
 
 
-clin_comp <- clinical.survey %>%  filter(clin.sv == "Submitted")
+clin_comp <- clinical.survey %>%  filter(clin.sv == "Submitted" & checktmvisit!="Not Submitted")
+clin_comp$checktmvisit <- droplevels(clin_comp$checktmvisit)
+
 coll_comp_BU <- create_tbl_cross(clin_comp, "checktmvisit", "Site", "column", " ", " ")
 
 colnames(coll_comp_BU)[ncol(coll_comp_BU)] <- "Total Submitted Clinical Surveys"
