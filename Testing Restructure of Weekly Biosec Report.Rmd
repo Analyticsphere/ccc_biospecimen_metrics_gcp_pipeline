@@ -127,7 +127,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 bio_tb <- bq_project_query(project, 
-                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null and Connect_ID is not null')  
+                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where d_410912345 is not null and Connect_ID is not null')  
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -141,7 +141,7 @@ for (i in 1: length(cnames)){
 }
 
 
-tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
+tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes`")
 box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
 
 
@@ -167,7 +167,7 @@ for (i in 1: length(cnames)){
 
 
 ##to select biospecimen data in recruitment 
-recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants_JP'")
+recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants'")
 recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
@@ -185,7 +185,7 @@ tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,C
                                d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713,
                                state_d_706256705, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491,",
                                select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
                                d_831041022 = '104430631'\")",
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
@@ -1460,33 +1460,7 @@ tube_col <- coll_sett_all %>% group_by(as.character(Connect_ID),Site,all_setting
                    schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505))))
 
 
-
-# #table(tube_col$d_650516960)
-# 
-# tube_col$Connect_ID <- as.numeric(tube_col$`as.character(Connect_ID)`)
-# tube_research <- tube_col %>% filter(all_settings=="Research") %>%
-#   mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01") | Site=="HealthPartners", bldcol_max==5, bldcol_max==4),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-# #Up until 3/1/24 all sits required 5. Up until 3/31/2025 HP required 5. Then up until 3/31/2025 all sites required 4. Starting 3/31/25 HP requires 4 and all other sites require 3. (Heparin tube dropped)
-#   # mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01") | Site=="HealthPartners", bldcol_max==5,
-#   #                                   ifelse(collection.tm < as.Date("2025-03-31") | Site=="HealthPartners", bldcol_max==4,
-#   #                                          bldcol_max==3)),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
-# 
-# table.bldcol <- ctable(tube_research$Site,tube_research$bld.complt)
-# bldcol_research <- as.data.frame(cbind(table.bldcol$cross_table,table.bldcol$proportions))
-# bldcol_research$Site <-trimws(rownames(bldcol_research))
-# 
-# 
-# bldcol_research$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,1],big.mark=",")," (", round(100*bldcol_research[,5],1),"%)"), format(bldcol_research[,1],big.mark="," ))
-# bldcol_research$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,2],big.mark=",")," (", round(100*bldcol_research[,6],1),"%)"), format(bldcol_research[,2],big.mark="," ))
-# bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,3],big.mark=",")," (", round(100*bldcol_research[,7],1),"%)"), format(bldcol_research[,3],big.mark="," ))
-# # bldcol_research$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,1],big.mark=","),"(", round(100*bldcol_research[,5],1),"%)",sep=" "), format(bldcol_research[,1],big.mark="," ))
-# # bldcol_research$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,2],big.mark=","),"(", round(100*bldcol_research[,6],1),"%)",sep=" "), format(bldcol_research[,2],big.mark="," ))
-# # bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,3],big.mark=","),"(", round(100*bldcol_research[,7],1),"%)",sep=" "), format(bldcol_research[,3],big.mark="," ))
-# 
-# bldcol_research1 <- bldcol_research[c(1:6),c(9:12,4)] #c(9:12,4)
-
 ```
-
 
 
 
@@ -1747,7 +1721,6 @@ dev_tube2 <- base::merge(dev,dev_tube1[,c("dev_type","TubeID","tubeID","deviatio
 
 ```{r Table2.7_2.8, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
-
 research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 353358909) %>% 
   mutate(Site=droplevels(Site),
          tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "STRECK Tube1")))  
@@ -1859,7 +1832,6 @@ colnames(reason_notcol)[1] <- "Site"
 
 
 
-
 tube_type_notcolreasons <- create_tbl_cross(research.notcol, "tube_type", "notcol.notes", "row", "Tube Type", " ")
 colnames(tube_type_notcolreasons)[ncol(tube_type_notcolreasons)] <- "Total Tubes Not Collected"
 colnames(tube_type_notcolreasons)[1] <- "Tube Type"
@@ -1948,10 +1920,13 @@ colnames(BUM_status)[ncol(BUM_status)] = "Total Research Surveys"
 
 
 ##Check in until completion
-precovR <- research.survey %>%  filter(research.sv == "Submitted" & 
-                                         d_222161762<as.Date("2023-07-05") | (is.na(d_222161762) & d_331584571_d_266600170_d_840048338<as.Date("2023-07-05")))
-postcovR <- research.survey %>%  filter(research.sv == "Submitted" & 
-                                          d_222161762>=as.Date("2023-07-05") | (is.na(d_222161762) & d_331584571_d_266600170_d_840048338>=as.Date("2023-07-05")))
+
+research.survey_sec3 <- research.survey %>% filter(checktmvisit!="Not Submitted")
+research.survey_sec3$checktmvisit <- droplevels(research.survey_sec3$checktmvisit)
+  
+precovR <- research.survey_sec3 %>%  filter(research.sv == "Submitted" & d_222161762<as.Date("2023-07-05"))
+
+postcovR <- research.survey_sec3 %>%  filter(research.sv == "Submitted" & d_222161762>=as.Date("2023-07-05"))
 
 precovid_BUMtime <- create_tbl_cross(precovR, "checktmvisit", "Site", "column", " ", " ")
 colnames(precovid_BUMtime)[ncol(precovid_BUMtime)] = "Total Research Surveys"
@@ -2034,7 +2009,9 @@ BU_status <- create_tbl_cross(clinical.survey, "clin.sv", "Site", "column", " ",
 colnames(BU_status)[ncol(BU_status)] = "Total Clinical Surveys"
 
 
-clin_comp <- clinical.survey %>%  filter(clin.sv == "Submitted")
+clin_comp <- clinical.survey %>%  filter(clin.sv == "Submitted" & checktmvisit!="Not Submitted")
+clin_comp$checktmvisit <- droplevels(clin_comp$checktmvisit)
+
 coll_comp_BU <- create_tbl_cross(clin_comp, "checktmvisit", "Site", "column", " ", " ")
 
 colnames(coll_comp_BU)[ncol(coll_comp_BU)] <- "Total Submitted Clinical Surveys"
@@ -3240,7 +3217,6 @@ knitr::kable(spec_by_site_C,
 
 
 ```
-
 
 
 ```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
@@ -4457,7 +4433,7 @@ kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329
 d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491,
 d_173836415_d_266600170_d_641006239_d_379252329, d_173836415_d_266600170_d_641006239_d_221592017,
 d_173836415_d_266600170_d_448660695
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
 where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631'" #not dead or wd or refused
 kitstatus_table <- bq_project_query(project, kitstatus)
 kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -4465,7 +4441,7 @@ kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
  
  
  
-# kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+# kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 # where Connect_ID is not null and d_820476880 LIKE 'CHA%'"
 # kitdate_table <- bq_project_query(project, kitdate)
 # kit_data <- bq_table_download(kitdate_table, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -4514,7 +4490,7 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
  
  
  
-kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID IS NOT NULL"
+kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` where Connect_ID IS NOT NULL"
 kitassembly_table <- bq_project_query(project, kitassembly)
 kitassembly_data <- bq_table_download(kitassembly_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kitassembly_data$Connect_ID <- as.numeric(kitassembly_data$Connect_ID)
@@ -4523,7 +4499,7 @@ kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
  
 ## Merging the biospecimen table in to use this kit_sett table as a Figure later.
 kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471,  d_556788178, d_820476880
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 where Connect_ID is not null "
 kitsetting_table <- bq_project_query(project, kitsetting)
 kit_set <- bq_table_download(kitsetting_table, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -4909,8 +4885,10 @@ table32_pct
  
 #NOTE: MUST change currentDate to Mondays date in order for this to run correctly when testing for fixes
 #currentDate= recent Monday date
-
+ 
+##Received-- need one set of data for the received line
 kit_set_col_1 <- kit_set_clean %>% select(Connect_ID, d_143615646_d_826941471)
+ 
 kit_set_col_1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_set_col_1$d_143615646_d_826941471,as.Date(veristart.date-days(2)),units="days"))/7)
 kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1$col.Sunday.week-1)
 kit_set_col_1$col.Monday.date <- kit_set_col_1$col.Sunday.date-days(6)
@@ -5341,7 +5319,6 @@ landscape(tbl_7_10)
 \FloatBarrier
  
 ```{r Tables10s, eval=TRUE,echo=FALSE,results='asis'}
-
 
 
 
