@@ -1460,7 +1460,33 @@ tube_col <- coll_sett_all %>% group_by(as.character(Connect_ID),Site,all_setting
                    schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505))))
 
 
+
+# #table(tube_col$d_650516960)
+# 
+# tube_col$Connect_ID <- as.numeric(tube_col$`as.character(Connect_ID)`)
+# tube_research <- tube_col %>% filter(all_settings=="Research") %>%
+#   mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01") | Site=="HealthPartners", bldcol_max==5, bldcol_max==4),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
+# #Up until 3/1/24 all sits required 5. Up until 3/31/2025 HP required 5. Then up until 3/31/2025 all sites required 4. Starting 3/31/25 HP requires 4 and all other sites require 3. (Heparin tube dropped)
+#   # mutate(bld.complt = ifelse(ifelse(collection.tm < as.Date("2024-03-01") | Site=="HealthPartners", bldcol_max==5,
+#   #                                   ifelse(collection.tm < as.Date("2025-03-31") | Site=="HealthPartners", bldcol_max==4,
+#   #                                          bldcol_max==3)),"BloodCompletion",ifelse(bldcol_max==0, "NoBlood","BloodIncomplet")))
+# 
+# table.bldcol <- ctable(tube_research$Site,tube_research$bld.complt)
+# bldcol_research <- as.data.frame(cbind(table.bldcol$cross_table,table.bldcol$proportions))
+# bldcol_research$Site <-trimws(rownames(bldcol_research))
+# 
+# 
+# bldcol_research$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,1],big.mark=",")," (", round(100*bldcol_research[,5],1),"%)"), format(bldcol_research[,1],big.mark="," ))
+# bldcol_research$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,2],big.mark=",")," (", round(100*bldcol_research[,6],1),"%)"), format(bldcol_research[,2],big.mark="," ))
+# bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,3],big.mark=",")," (", round(100*bldcol_research[,7],1),"%)"), format(bldcol_research[,3],big.mark="," ))
+# # bldcol_research$n_pct_BloodCompletion <- ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,1],big.mark=","),"(", round(100*bldcol_research[,5],1),"%)",sep=" "), format(bldcol_research[,1],big.mark="," ))
+# # bldcol_research$n_pct_BloodInompletion = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,2],big.mark=","),"(", round(100*bldcol_research[,6],1),"%)",sep=" "), format(bldcol_research[,2],big.mark="," ))
+# # bldcol_research$n_pct_NoBlood = ifelse(!grepl("Total",rownames(bldcol_research)),  paste(format(bldcol_research[,3],big.mark=","),"(", round(100*bldcol_research[,7],1),"%)",sep=" "), format(bldcol_research[,3],big.mark="," ))
+# 
+# bldcol_research1 <- bldcol_research[c(1:6),c(9:12,4)] #c(9:12,4)
+
 ```
+
 
 
 
@@ -1721,6 +1747,7 @@ dev_tube2 <- base::merge(dev,dev_tube1[,c("dev_type","TubeID","tubeID","deviatio
 
 ```{r Table2.7_2.8, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
+
 research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 353358909) %>% 
   mutate(Site=droplevels(Site),
          tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "STRECK Tube1")))  
@@ -1829,6 +1856,7 @@ notcol.reasons.research <- rbind(reseachnotes.notcol,reseachnotes.coltype)
 reason_notcol <- create_tbl_cross(research.notcol, "Site", "notcol.notes", "column", "Site", " ")
 colnames(reason_notcol)[ncol(reason_notcol)] <- "Total Tubes Not Collected"
 colnames(reason_notcol)[1] <- "Site"
+
 
 
 
@@ -3212,6 +3240,7 @@ knitr::kable(spec_by_site_C,
 
 
 ```
+
 
 
 ```{r KnitrTables7.3_11,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
@@ -4880,10 +4909,8 @@ table32_pct
  
 #NOTE: MUST change currentDate to Mondays date in order for this to run correctly when testing for fixes
 #currentDate= recent Monday date
- 
-##Received-- need one set of data for the received line
+
 kit_set_col_1 <- kit_set_clean %>% select(Connect_ID, d_143615646_d_826941471)
- 
 kit_set_col_1$col.Sunday.week <- ceiling(as.numeric(difftime(kit_set_col_1$d_143615646_d_826941471,as.Date(veristart.date-days(2)),units="days"))/7)
 kit_set_col_1$col.Sunday.date <- veristart.date + days(5) + dweeks(kit_set_col_1$col.Sunday.week-1)
 kit_set_col_1$col.Monday.date <- kit_set_col_1$col.Sunday.date-days(6)
@@ -5314,6 +5341,7 @@ landscape(tbl_7_10)
 \FloatBarrier
  
 ```{r Tables10s, eval=TRUE,echo=FALSE,results='asis'}
+
 
 
 
