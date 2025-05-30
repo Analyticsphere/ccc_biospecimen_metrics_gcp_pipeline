@@ -669,13 +669,18 @@ openxlsx::write.xlsx(biospe1_final,glue("Connect_prod_Biospe_Formats_{currentDat
 
 
 
-#########################################           CSV3:  veriBiospe_Formats            ##########################################################
+#########################################           CSV3:  prod_recr_veriBiospe_Formats            ##########################################################
 
-kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, 
-d_173836415_d_266600170_d_319972665_d_661940160, d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, 
+kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, 
 d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_827220437, 
 d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, 
-d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_826941471 
+d_253883960, 
+d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_826941471,d_173836415_d_266600170_d_319972665_d_661940160, #d_173836415_d_266600170_d_319972665_d_759651991, 
+d_173836415_d_266600170_d_319972665_d_687158491, 
+d_173836415_d_266600170_d_541483796_d_379252329, 
+d_173836415_d_266600170_d_541483796_d_221592017,d_173836415_d_266600170_d_541483796_d_826941471,d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491,
+d_173836415_d_266600170_d_641006239_d_379252329, 
+d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491 #,d_173836415_d_266600170_d_641006239_d_826941471
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
 where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631'"
 kitstatus_table <- bq_project_query(project, kitstatus)
@@ -683,7 +688,17 @@ kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, 
 
 
 #Adding mw variables to this csv
-mw_addons <- kit_table %>% select(Connect_ID, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_826941471)
+mw_addons <- kit_table %>% select(Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329, 
+                                  d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_826941471,d_173836415_d_266600170_d_319972665_d_661940160, 
+                                  #d_173836415_d_266600170_d_319972665_d_759651991, 
+                                  d_173836415_d_266600170_d_319972665_d_687158491, 
+                                  d_173836415_d_266600170_d_541483796_d_379252329, 
+                                  d_173836415_d_266600170_d_541483796_d_221592017,d_173836415_d_266600170_d_541483796_d_826941471,d_173836415_d_266600170_d_541483796_d_661940160, 
+                                  d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491,
+                                  d_173836415_d_266600170_d_641006239_d_379252329, 
+                                  d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, 
+                                  d_173836415_d_266600170_d_641006239_d_687158491) #, d_173836415_d_266600170_d_641006239_d_826941471
+
 
 recr.bio$Connect_ID <- as.character(recr.bio$Connect_ID)
 mw_addons$Connect_ID <- as.character(mw_addons$Connect_ID)
@@ -711,6 +726,31 @@ y$order <- rownames(y)
 recrvar_CID_dd <- base::merge(recrver_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value","order")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 recrvar_CID_dd <-recrvar_CID_dd %>% arrange(CID, variable,as.numeric(order),Variable.Name) #before remove the duplicates
+
+
+## The participants table variables regarding Initial Kit, Replacement Kit1, and Reoacement Kit 2 all have the same names. Need to manually differentiate to avoid deletion during duplicate removal.
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_319972665_d_379252329']="BioKit_Mouthwash_Initial_BioKit_KitTypeBL_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_319972665_d_661940160']="BioKit_Mouthwash_Initial_BioKit_KitShipTm_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_319972665_d_221592017']="BioKit_Mouthwash_Initial_BioKit_KitStatus_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_319972665_d_826941471']="BioKit_Mouthwash_Initial_BioKit_KitRecdTm_v1r0"
+#recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_319972665_d_759651991']="BioKit_Mouthwash_Initial_BioKit_DtKitReq_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_319972665_d_687158491']="BioKit_Mouthwash_Initial_BioKit_KitAssembledID_v1r0" 
+
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_541483796_d_379252329']="BioKit_Mouthwash_R1_BioKit_KitTypeBL_v1r0" 
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_541483796_d_661940160']="BioKit_Mouthwash_R1_BioKit_KitShipTm_v1r0" 
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_541483796_d_221592017']="BioKit_Mouthwash_R1_BioKit_KitStatus_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_541483796_d_826941471']="BioKit_Mouthwash_R1_BioKit_KitRecdTm_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_541483796_d_759651991.x']="BioKit_Mouthwash_R1_BioKit_DtKitReq_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_541483796_d_687158491']="BioKit_Mouthwash_R1_BioKit_KitAssembledID_v1r0" 
+
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_641006239_d_379252329']="BioKit_Mouthwash_R2_BioKit_KitTypeBL_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_641006239_d_661940160']="BioKit_Mouthwash_R2_BioKit_KitShipTm_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_641006239_d_221592017']="BioKit_Mouthwash_R2_BioKit_KitStatus_v1r0"
+#recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_641006239_d_826941471']="BioKit_Mouthwash_R2_BioKit_KitRecdTm_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_641006239_d_759651991.x']="BioKit_Mouthwash_R2_BioKit_DtKitReq_v1r0"
+recrvar_CID_dd$Variable.Name[recrvar_CID_dd$variable=='d_173836415_d_266600170_d_641006239_d_687158491']="BioKit_Mouthwash_R2_BioKit_KitAssembledID_v1r0"
+
+
 
 
 recrvar_CID_dd <-recrvar_CID_dd[!duplicated(recrvar_CID_dd[,c("CID","variable")]),]
@@ -795,23 +835,30 @@ for (i in 1:length(yes_no)){
 
 
 #need to make sure BioChk_CompleteBL_v1r0 is not in their twice--cols 39 & 40 right now
-recrbio_1 <- recrbio1[!duplicated(names(recrbio1))]
+recrbio__1 <- recrbio1[!duplicated(names(recrbio1))]
 
 
 #new column order requested 11/22/23
-recrbio_1 <- recrbio_1[, c("Connect_ID","RcrtES_Site_v1r0","BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMouthCol_v1r0","BioSpm_BloodSettingBL_v1r0",
-                           "BioSpm_UrineSettingBL_v1r0","BioSpm_MWSettingBL_v1r0","BioChk_CompleteBL_v1r0","BioChk_TimeBL_v1r0","BioFin_CheckOutTmBL_v1r0","BioFin_ResearchBldTmBL_v1r0",
-                           "BioFin_ResearchUrnTmBL_v1r0","BioFin_BMTimeBL_v1r0", "SMMet_BLSamplesColl_v1r0","BioClin_SiteBldLocBL_v1r0","BioClin_SiteUrLocatBL_v1r0","BioClin_SntBloodAccIDBL_v1r0",
-                           "BioClin_SntUrineAccIDBL_v1r0", "BioClin_PolyBloodIDBL_v1r0","BioClin_PolyUrineIDBL_v1r0","BioClin_SiteBloodCollBL_v1r0","BioClin_ClinBloodTmBL_v1r0",
-                           "BioClin_SiteUrineCollBL_v1r0", "BioClin_ClinicalUrnTmBL_v1r0","BioClin_SiteBloodRRLBL_v1r0","BioClin_SiteBldRRLDtBL_v1r0","BioClin_SiteUrineRRLBL_v1r0",
-                           "BioClin_SiteUrnRRLDtBL_v1r0", "BioClin_BldOrUrnPlcdBL_v1r0","BioClin_BldUrnPlcdTmBL_v1r0","BioClin_BldOrderPlcdBL_v1r0","BioClin_BldOrdPlacdDtBL_v1r0",
-                           "BioClin_UrnOrdPlacedBL_v1r0", "BioClin_UrnOrdPlcdDtBL_v1r0","BioClin_DBBloodRRLBL_v1r0","BioClin_DBBloodRRLDtBL_v1r0","BioClin_DBUrineRRLBL_v1r0",
-                           "BioClin_DBUrineRRLDtBL_v1r0","BioClin_AnySpecRRLBL_v1r0", "BioClin_AnySpecRRLTmBL_v1r0","BioClin_AnyBldUrnRecBL_v1r0","RcrtSI_RecruitType_v1r0",
-                           "RcrtUP_Submitted_v1r0","RcrtV_Verification_v1r0","RcrtV_VerificationTm_V1R0", "SrvBLM_ResSrvCompl_v1r0","SrvBLM_TmComplete_v1r0","SrvBLM_TmStart_v1r0",
-                           "SrvBlU_BaseComplete_v1r0","SrvBlU_TmComplete_v1r0","SrvBlU_TmStart_v1r0",
-                           "BioClin_BldAndUrnRef_v1r0", "HdRef_Baseblood_v1r0","HdRef_DateBaseblood_v1r0",
-                           "SrvMtW_TmComplete_v1r0", "SrvMtW_TmStart_v1r0", "SrvMtW_BaseComplete_v1r0", 
-                           "BioKit_KitTypeBL_v1r0" , "BioKit_KitStatusBL_v1r0", "BioKit_KitShipTmBL_v1r0", "BioKit_KitRecdTmBL_v1r0", "token")]
+recrbio_1 <- recrbio__1[, c("Connect_ID","RcrtES_Site_v1r0","BioFin_BaseBloodCol_v1r0","BioFin_BaseUrineCol_v1r0","BioFin_BaseMouthCol_v1r0","BioSpm_BloodSettingBL_v1r0",
+                            "BioSpm_UrineSettingBL_v1r0","BioSpm_MWSettingBL_v1r0","BioChk_CompleteBL_v1r0","BioChk_TimeBL_v1r0","BioFin_CheckOutTmBL_v1r0","BioFin_ResearchBldTmBL_v1r0",
+                            "BioFin_ResearchUrnTmBL_v1r0","BioFin_BMTimeBL_v1r0", "SMMet_BLSamplesColl_v1r0","BioClin_SiteBldLocBL_v1r0","BioClin_SiteUrLocatBL_v1r0","BioClin_SntBloodAccIDBL_v1r0",
+                            "BioClin_SntUrineAccIDBL_v1r0", "BioClin_PolyBloodIDBL_v1r0","BioClin_PolyUrineIDBL_v1r0","BioClin_SiteBloodCollBL_v1r0","BioClin_ClinBloodTmBL_v1r0",
+                            "BioClin_SiteUrineCollBL_v1r0", "BioClin_ClinicalUrnTmBL_v1r0","BioClin_SiteBloodRRLBL_v1r0","BioClin_SiteBldRRLDtBL_v1r0","BioClin_SiteUrineRRLBL_v1r0",
+                            "BioClin_SiteUrnRRLDtBL_v1r0", "BioClin_BldOrUrnPlcdBL_v1r0","BioClin_BldUrnPlcdTmBL_v1r0","BioClin_BldOrderPlcdBL_v1r0","BioClin_BldOrdPlacdDtBL_v1r0",
+                            "BioClin_UrnOrdPlacedBL_v1r0", "BioClin_UrnOrdPlcdDtBL_v1r0","BioClin_DBBloodRRLBL_v1r0","BioClin_DBBloodRRLDtBL_v1r0","BioClin_DBUrineRRLBL_v1r0",
+                            "BioClin_DBUrineRRLDtBL_v1r0","BioClin_AnySpecRRLBL_v1r0", "BioClin_AnySpecRRLTmBL_v1r0","BioClin_AnyBldUrnRecBL_v1r0","RcrtSI_RecruitType_v1r0",
+                            "RcrtUP_Submitted_v1r0","RcrtV_Verification_v1r0","RcrtV_VerificationTm_V1R0", "SrvBLM_ResSrvCompl_v1r0","SrvBLM_TmComplete_v1r0","SrvBLM_TmStart_v1r0",
+                            "SrvBlU_BaseComplete_v1r0","SrvBlU_TmComplete_v1r0","SrvBlU_TmStart_v1r0",
+                            "BioClin_BldAndUrnRef_v1r0", "HdRef_Baseblood_v1r0","HdRef_DateBaseblood_v1r0",
+                            "SrvMtW_TmComplete_v1r0", "SrvMtW_TmStart_v1r0", "SrvMtW_BaseComplete_v1r0", 
+                            "BioKit_Mouthwash_Initial_BioKit_KitTypeBL_v1r0","BioKit_Mouthwash_Initial_BioKit_KitShipTm_v1r0","BioKit_Mouthwash_Initial_BioKit_KitStatus_v1r0",
+                            "BioKit_Mouthwash_Initial_BioKit_KitRecdTm_v1r0", #"BioKit_Mouthwash_Initial_BioKit_DtKitReq_v1r0",
+                            "BioKit_Mouthwash_Initial_BioKit_KitAssembledID_v1r0",
+                            "BioKit_Mouthwash_R1_BioKit_KitTypeBL_v1r0","BioKit_Mouthwash_R1_BioKit_KitShipTm_v1r0", "BioKit_Mouthwash_R1_BioKit_KitStatus_v1r0",
+                            "BioKit_Mouthwash_R1_BioKit_KitRecdTm_v1r0","BioKit_Mouthwash_R1_BioKit_DtKitReq_v1r0","BioKit_Mouthwash_R1_BioKit_KitAssembledID_v1r0", 
+                            "BioKit_Mouthwash_R2_BioKit_KitTypeBL_v1r0","BioKit_Mouthwash_R2_BioKit_KitShipTm_v1r0","BioKit_Mouthwash_R2_BioKit_KitStatus_v1r0",
+                            "BioKit_Mouthwash_R2_BioKit_DtKitReq_v1r0","BioKit_Mouthwash_R2_BioKit_KitAssembledID_v1r0",
+                            "token")]
 #BioClin_DBUrineRRLBL_v1r0    showing as null but in the DD 
 #"BioClin_PolyBloodIDBL_v1r0" "BioClin_PolyUrineIDBL_v1r0" showing as not in this df but variable name hasn't changed in DD
 
