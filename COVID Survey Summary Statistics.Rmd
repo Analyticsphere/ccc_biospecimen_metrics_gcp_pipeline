@@ -4,7 +4,12 @@ author: "Kelsey Dowling"
 date: "`r Sys.Date()`"
 header-includes:  
     \usepackage[labelformat=empty]{caption}
-
+    \usepackage{placeins} 
+    \usepackage{booktabs}
+    \usepackage{pdflscape}
+    \usepackage{float}
+    \usepackage{threeparttable}
+    \usepackage{makecell}
 
 output:
   pdf_document:
@@ -337,7 +342,7 @@ refactor_variables <- function(dataframe, variable_pattern, levels) {
 
 \newpage
 
-```{r COVID, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r COVID, warning=FALSE, echo=FALSE,  message=FALSE, fig.pos='H', results='asis'}
 
 
 #COV1
@@ -350,7 +355,7 @@ hist_funct(D_860011428, "Times Having COVID-19", "Times", "Frequency")
 ```
 
 
-```{r First_time, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r First_time, warning=FALSE, echo=FALSE,  message=FALSE, fig.pos='H', results='asis'}
 ## First Time Having COVID 
 had_covid= CVD_tib %>%  filter(as.numeric(D_860011428)>=1 | D_494226443=="353358909")
 
@@ -368,6 +373,8 @@ CVD_tib$year_month1 <- ifelse(!is.na(CVD_tib$D_980800222_V2_1_1), CVD_tib$D_9808
 
 CVD_tib$year_month1 <- ym(CVD_tib$year_month1)
 
+
+cat("\\FloatBarrier")
 date_hist_funct(year_month1, "First Occurance of COVID-19", "Date", "Cases")
 
 
@@ -693,6 +700,7 @@ one_skip_funct(D_775313030_1_1, "Overnight Hospital Stay the First Time Having C
 
 
 #COV13
+cat("\\FloatBarrier")
 hist_funct(D_744230001_1_1, "Nights in the Hospital the First Time Having COVID-19", "Nights", "Count")
 
 #COV14A
@@ -705,23 +713,26 @@ hist_funct(D_930944000_1_1, "Days Treated with Oxygen in the Hospital the First 
 one_skip_funct(D_984121390_1_1, "Given Breathing Tube or Ventilator in the Hospital the First Time Having COVID-19", D_775313030_1_1, "353358909")
 
 #COV15B
+cat("\\FloatBarrier")
 hist_funct(D_930944000_1_1, "Days Treated with Breathing Tube or Ventilator the First Time Having COVID-19", "Days", "Count")
 
 #COV16A
 one_skip_funct(D_179406442_1_1, "ICU monitoring in the Hospital the First Time Having COVID-19", D_775313030_1_1, "353358909")
 
 #COV16B
+cat("\\FloatBarrier")
 hist_funct(D_803339020_1_1, "Days Treated with ICU monitoring the First Time Having COVID-19", "Days", "Count")
 
 #COV17A
 one_skip_funct(D_893966847_1_1, "Receive Dialysis Treatment in the Hospital the First Time Having COVID-19", D_775313030_1_1, "353358909")
 
 #COV17B
+cat("\\FloatBarrier")
 hist_funct(D_169509213_1_1, "Days Treated with Dialysis the First Time Having COVID-19", "Days", "Count")
 
 ```
 
-```{r second_time, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r second_time, warning=FALSE, echo=FALSE,  message=FALSE, fig.pos='H', results='asis'}
 ## Second Time Having COVID
 had_covid2= CVD_tib %>%  filter(as.numeric(D_860011428)>=2)
 
@@ -735,6 +746,7 @@ CVD_tib$year_month2 <- ifelse(!is.na(CVD_tib$D_980800222_V2_2_2), CVD_tib$D_9808
 
 CVD_tib$year_month2 <- ym(CVD_tib$year_month2)
 
+cat("\\FloatBarrier")
 date_hist_funct(year_month2, "Second Occurance of COVID-19", "Date", "Cases")
 
 
@@ -1058,30 +1070,35 @@ one_skip_funct(D_389465772_2_2, "Diagnosed with Bood Clots the Second Time Havin
 one_skip_funct(D_775313030_2_2, "Overnight Hospital Stay the Second Time Having COVID-19", D_694503437_2_2, "353358909")
 
 #COV13
+cat("\\FloatBarrier")
 hist_funct(D_744230001_2_2, "Nights in the Hospital the Second Time Having COVID-19", "Nights", "Count")
 
 #COV14A
 one_skip_funct(D_782396371_2_2, "Given Oxygen in the Hospital the Second Time Having COVID-19", D_775313030_2_2, "353358909")
 
 #COV14B
+cat("\\FloatBarrier")
 hist_funct(D_930944000_2_2, "Days Treated with Oxygen in the Hospital the Second Time Having COVID-19", "Days", "Count")
 
 #COV15A
 one_skip_funct(D_984121390_2_2, "Given Breathing Tube or Ventilator in the Hospital the Second Time Having COVID-19", D_775313030_2_2, "353358909")
 
 #COV15B
+cat("\\FloatBarrier")
 hist_funct(D_930944000_2_2, "Days Treated with Breathing Tube or Ventilator the Second Time Having COVID-19", "Days", "Count")
 
 #COV16A
 one_skip_funct(D_179406442_2_2, "ICU monitoring in the Hospital the Second Time Having COVID-19", D_775313030_2_2, "353358909")
 
 #COV16B
+cat("\\FloatBarrier")
 hist_funct(D_803339020_2_2, "Days Treated with ICU monitoring the Second Time Having COVID-19", "Days", "Count")
 
 #COV17A
 one_skip_funct(D_893966847_2_2, "Receive Dialysis Treatment in the Hospital the Second Time Having COVID-19", D_775313030_2_2, "353358909")
 
 #COV17B-- no one answered yet 
+cat("\\FloatBarrier")
 hist_funct(D_169509213_2_2, "Days Treated with Dialysis the Second Time Having COVID-19", "Days", "Count")
 ```
 
@@ -1529,12 +1546,13 @@ one_skip_funct(D_934384452, "Length of Time Other Symptom Experienced", D_110872
 ```
 
 
-```{r recovery, warning=FALSE, echo=FALSE,  message=FALSE}
+```{r recovery, warning=FALSE, echo=FALSE,  message=FALSE, fig.pos='H', results='asis'}
 
 #COV21
 one_skip_funct(D_273371161, "Feel Like You Have Fully Recovered from COVID-19", D_110872086_D_110872086, "707601969")
 
 #COV22
+cat("\\FloatBarrier")
 COV22_Months=hist_funct(D_959877599_D_700620868, "Time to Fully Recover from COVID-19", "Months", "Count")
 COV22_Days=hist_funct(D_959877599_D_908044428, "Time to Fully Recover from COVID-19", "Days", "Count")
 grid.arrange(COV22_Months, COV22_Days, nrow=2)
@@ -2044,10 +2062,12 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 #COV26
 #incorporate older versions
 CVD_tib <- CVD_tib  %>%  mutate(D_877074400_V2 = ifelse(!is.na(D_877074400_V2), as.numeric(D_877074400_V2), as.numeric(D_877074400)))
+cat("\\FloatBarrier")
 hist_funct(D_877074400_V2, "Number of COVID-19 Vaccinations", "Vaccinations", "Count")
+```
 
 
-
+```{r vaccine_plots, warning=FALSE, echo=FALSE,  message=FALSE, fig.pos='H', results='asis'}
 #COV27 (up to 10 vaccines)
 
 CVD_tib$D_715581797_1_1 <- ifelse(!is.na(CVD_tib$D_715581797_1_1), CVD_tib$D_715581797_1_1, 
@@ -2069,19 +2089,32 @@ CVD_tib$D_715581797_8_8 <- ifelse(!is.na(CVD_tib$D_715581797_8_8), CVD_tib$D_715
 CVD_tib$D_715581797_9_9 <- ifelse(!is.na(CVD_tib$D_715581797_9_9), CVD_tib$D_715581797_9_9, 
                                   ifelse(!is.na(CVD_tib$D_715581797_V2_9_9), CVD_tib$D_715581797_V2_9_9, CVD_tib$D_71558179_V2_9_9))
 
-
+cat("\\FloatBarrier")
 date_hist_funct(D_715581797_1_1, "Date of First COVID-19 vaccine", "Date", "Cases")
+cat("\\FloatBarrier")
 date_hist_funct(D_715581797_2_2, "Date of Second COVID-19 vaccine", "Date", "Cases")
+cat("\\FloatBarrier")
 date_hist_funct(D_715581797_3_3, "Date of Third COVID-19 vaccine", "Date", "Cases")
-date_hist_funct(D_715581797_4_4, "Date of Fourth COVID-19 vaccine", "Date", "Cases")
-date_hist_funct(D_715581797_5_5, "Date of Fifth COVID-19 vaccine", "Date", "Cases")
-date_hist_funct(D_715581797_6_6, "Date of Sixth COVID-19 vaccine", "Date", "Cases")
-date_hist_funct(D_715581797_7_7, "Date of Seventh COVID-19 vaccine", "Date", "Cases")
-date_hist_funct(D_715581797_8_8, "Date of Eighth COVID-19 vaccine", "Date", "Cases")
-date_hist_funct(D_715581797_9_9, "Date of Ninth COVID-19 vaccine", "Date", "Cases")
+
+# cat("\\clearpage")
+# cat("\\FloatBarrier")
+# date_hist_funct(D_715581797_4_4, "Date of Fourth COVID-19 vaccine", "Date", "Cases")
+# cat("\\FloatBarrier")
+# date_hist_funct(D_715581797_5_5, "Date of Fifth COVID-19 vaccine", "Date", "Cases")
+# cat("\\FloatBarrier")
+# date_hist_funct(D_715581797_6_6, "Date of Sixth COVID-19 vaccine", "Date", "Cases")
+# 
+# cat("\\clearpage")
+# cat("\\FloatBarrier")
+# date_hist_funct(D_715581797_7_7, "Date of Seventh COVID-19 vaccine", "Date", "Cases")
+# cat("\\FloatBarrier")
+# date_hist_funct(D_715581797_8_8, "Date of Eighth COVID-19 vaccine", "Date", "Cases")
+# cat("\\FloatBarrier")
+# date_hist_funct(D_715581797_9_9, "Date of Ninth COVID-19 vaccine", "Date", "Cases")
+```
 
 
-
+```{r vaccine2, warning=FALSE, echo=FALSE,  message=FALSE, fig.pos='H', results='asis'}
 #COV28
 CVD_tib <- CVD_tib %>% mutate(vaccinated = ifelse(!is.na(D_890156588_V2), D_890156588_V2, D_890156588),
                               vacc_num = ifelse(!is.na(D_877074400_V2), as.numeric(D_877074400_V2), as.numeric(D_877074400)))
