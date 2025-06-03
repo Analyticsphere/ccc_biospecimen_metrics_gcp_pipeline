@@ -61,22 +61,22 @@ project <- "nih-nci-dceg-connect-prod-6d04"
 
 
 # bio <- "WITH T AS (
-#   SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+#   SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 #   GROUP BY Connect_ID
 #   HAVING COUNT(Connect_ID) =1) 
-# SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-# INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Connect_ID = T.Connect_ID ;"
+# SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
+# INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`.Connect_ID = T.Connect_ID ;"
 
 
 bio <- "WITH T AS (
   SELECT Connect_ID
-  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
   WHERE d_820476880 LIKE 'CXA%'
   GROUP BY Connect_ID
   HAVING COUNT(Connect_ID) = 1
 )
 SELECT * 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 WHERE (d_820476880 LIKE 'CHA%') 
    OR (d_820476880 LIKE 'CXA%' AND d_410912345='353358909' AND Connect_ID IN (SELECT Connect_ID FROM T));"
 
@@ -86,7 +86,7 @@ d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_54148
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
 d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491 #,d_173836415_d_266600170_d_641006239_d_826941471
 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
 
@@ -1043,7 +1043,8 @@ bioqc1 <- bioqc %>%
 #remove any brackets or blank spaces around polyID
 str1 <- bioqc1$d_173836415_d_266600170_d_543608829
 str1 <- str_trim(str1)
-PolyBloodID <- unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) 
+#PolyBloodID <- unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) 
+PolyBloodID <- str_trim(unlist(strsplit(gsub("\\[|\\]", "", str1), ",")))
 bioqc1$d_646899796_integer <- str_trim(bioqc1$d_646899796_integer)
 
 #Sometimes this poly accession comes in as an array, sometimes it doesn't, so just selecting the integer version of the variable
@@ -1075,7 +1076,9 @@ bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_
 #remove any brackets around polyID
 str2 <- bioqc2$d_173836415_d_266600170_d_110349197
 str2 <- str_trim(str2)
-PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ",")) 
+#PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ",")) 
+PolyUrineID <- str_trim(unlist(strsplit(gsub("\\[|\\]", "", str2), ",")))
+
 bioqc2$d_928693120_integer <- str_trim(bioqc2$d_928693120_integer) 
 
 
@@ -1102,7 +1105,7 @@ knitr::kable(polyurine) %>% kable_styling(latex_options =  "scale_down") %>% row
 ```{r home_collections_merge, include=FALSE}
 
 MW <- "SELECT  Connect_ID, d_143615646_d_593843561, d_143615646_d_825582494, d_820476880, d_650516960, d_556788178
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`  where Connect_ID IS NOT NULL"
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`  where Connect_ID IS NOT NULL"
 MW_table <- bq_project_query(project, MW)
 MW_data <- bq_table_download(MW_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
@@ -1128,15 +1131,13 @@ MW_data_clean <- bind_rows(cha_rows, cxa_rows)
 
 
 
-kit <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID is not null"
+kit <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` where Connect_ID is not null"
 kit_table <- bq_project_query(project, kit)
 kit_data <- bq_table_download(kit_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
 MW_data$Connect_ID <- as.numeric(MW_data$Connect_ID)
 kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
-
-
-
+parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
 
 HMW= left_join(parts_data, kit_data, by="Connect_ID" ) 
 
@@ -1152,9 +1153,25 @@ HMW <- HMW %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartners",
                                       d_827220437 == 452412599 ~ "Kaiser Permanente Northwest",
                                       d_827220437 == 472940358 ~ "Baylor Scott and White Health"))
 
+HMW <- HMW %>%
+  mutate(across(everything(), ~ case_when(
+    . == 772116457 ~ "Replacement Kit 2",
+    . == 389478821 ~ "Replacement Kit 1",
+    . == 663273321 ~ "Initil Kit",
+    . == 849527480 ~"Address Printed",
+    . == 241974920 ~ "Assigned",
+    . == 277438316 ~ "Shipped",
+    . == 375535639 ~ "Received",
+    . == 332067457 ~ "Undeliverable",
+    TRUE ~ as.character(.)
+  )))
+
+
+
+
+HMW$Connect_ID <- as.numeric(HMW$Connect_ID)
+
 Bio_HMW_merged = left_join(HMW, MW_data,  by="Connect_ID") 
-
-
 
 
 # when participants get replacement kits, then get an additional row in the kit_assembly table
@@ -1502,14 +1519,14 @@ knitr::kable(invalid_rows) %>% kable_styling(latex_options = "scale_down", full_
 
 dup <- "WITH T AS (
   SELECT Connect_ID 
-  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
   WHERE d_820476880 LIKE 'CXA%' 
   AND d_820476880 NOT LIKE 'CHA%'
   GROUP BY Connect_ID
   HAVING COUNT(Connect_ID) > 1
 ) 
 SELECT * 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 WHERE Connect_ID IN (SELECT Connect_ID FROM T) and d_820476880 NOT LIKE 'CHA%'"
 
 
@@ -1921,7 +1938,7 @@ knitr::kable(r1_r2_undeliverable)
 # Column and table settings
 project_id <- "nih-nci-dceg-connect-prod-6d04"
 dataset <- "FlatConnect"
-table <- "participants_JP"
+table <- "participants"
 column_to_check <- "d_173836415_d_266600170_d_319972665_d_759651991"
 
 # Step 1: Check if the column exists
@@ -1967,7 +1984,7 @@ when '772116457' then 'Replacement Kit 2'
 when'389478821' then 'Replacement Kit 1'
 else 'Initial Kit' 
 end as Kit_Level
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` 
 group by Connect_ID, d_426588510
 having count(*) >1"
 
