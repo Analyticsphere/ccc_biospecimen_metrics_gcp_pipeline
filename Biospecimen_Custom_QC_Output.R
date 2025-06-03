@@ -337,7 +337,7 @@ bioqc_csv <- bioqc %>%
          
          Rule18_HEP1 = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & 
                                 d_838567176_d_593843561==353358909 & d_838567176_d_762124027==104430631 &  is.na(d_838567176_d_926457119) & 
-                                !(Connect_ID %in% c("3409243008", "8193439990")), "Rule 18-HEP1", " "),
+                                !(Connect_ID %in% c("3409243008", "8193439990", "5842989867")), "Rule 18-HEP1", " "),
          
          Rule18_URN = ifelse(d_650516960==534621077 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 &  
                                d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119) & 
@@ -455,7 +455,11 @@ bioqc_csv <- bioqc %>%
          
          #30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.
          Rule30b = ifelse(!is.na(d_173836415_d_266600170_d_139245758) & 
-                            ((d_173836415_d_266600170_d_718172863=="Research" | is.na(d_173836415_d_266600170_d_718172863)) | d_167958071=="No"), "Rule 30b", " "),
+                            ((d_173836415_d_266600170_d_718172863=="Research" | is.na(d_173836415_d_266600170_d_718172863)) | d_167958071=="No") & 
+                            !(Connect_ID %in% c('6862754687', '1371560328', '1176687465', '5885436394', '1850586900', '3319331872', '6575901705', '6862754687',
+                                               '9258958214', '1250934825', '7882825421', '3287102562', '1215003341', '7352978604', '1140047316', '4479873637',
+                                               '8633594373', '2755205973', '3862626013', '8184138489', '4980503471', '2039357566', '6321294709', '2300063524',
+                                               '5899565591')), "Rule 30b", " "),
          
          
          #49. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clinical, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteBldLocBL_v1r0 must be populated.
