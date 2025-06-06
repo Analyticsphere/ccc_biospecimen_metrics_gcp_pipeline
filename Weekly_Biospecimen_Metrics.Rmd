@@ -1903,7 +1903,9 @@ research.survey <- coll_sett_all %>% filter(all_settings == "Research") %>%
                                    12 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 3 ~ "> 3 hrs to 12 hrs",  
                                    3 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) >= 0 ~ "0 hrs to 3 hrs",
                                    d_265193023 != 231311385 ~ "Not Submitted", 
-                                   TRUE ~ "Missing Time"), #changed from NA to "Missing"
+                                   TRUE ~ "Missing Time"),
+                                   #tm_biocolsuv < 0 ~ "QC error,
+                                   #is.na(tm_biocolsuv) ~ "Missing Time"),
          time_biochk = difftime(as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998)),as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),units="mins"),
          biochk_outlier = ifelse(is.na(time_biochk), "Missing (not checked out)", 
                                  ifelse( 0<= as.numeric(time_biochk)/60 & as.numeric(time_biochk)/60 <= 24, "No Outlier", 

@@ -56,22 +56,22 @@ project <- "nih-nci-dceg-connect-prod-6d04"
 
 
 # bio <- "WITH T AS (
-#   SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+#   SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 #   GROUP BY Connect_ID
 #   HAVING COUNT(Connect_ID) =1) 
-# SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-# INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`.Connect_ID = T.Connect_ID ;"
+# SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
+# INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`.Connect_ID = T.Connect_ID ;"
 
 
 bio <- "WITH T AS (
   SELECT Connect_ID
-  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
   WHERE d_820476880 LIKE 'CXA%'
   GROUP BY Connect_ID
   HAVING COUNT(Connect_ID) = 1
 )
 SELECT * 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 WHERE (d_820476880 LIKE 'CHA%') 
    OR (d_820476880 LIKE 'CXA%' AND d_410912345='353358909' AND Connect_ID IN (SELECT Connect_ID FROM T));"
 
@@ -81,7 +81,7 @@ WHERE (d_820476880 LIKE 'CHA%')
 # d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, 
 # d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, 
 # d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666
-# FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
+# FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_266600170_d_156605577, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_185243482, d_173836415_d_266600170_d_198261154, d_173836415_d_266600170_d_210921343, d_173836415_d_266600170_d_224596428, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_341570479, d_173836415_d_266600170_d_398645039, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_452847912, d_173836415_d_266600170_d_453452655, d_173836415_d_266600170_d_530173840, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_561681068, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_693370086, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780, d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717, d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_880794013, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_982213346, d_684635302, d_254109640, d_878865966, d_167958071, d_827220437, d_173836415_d_266600170_d_543608829, d_173836415_d_266600170_d_110349197, d_831041022, d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_661940160, d_195145666, d_173836415_d_266600170_d_319972665_d_826941471, #d_173836415_d_266600170_d_319972665_d_759651991, 
 d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_541483796_d_379252329, 
@@ -89,7 +89,7 @@ d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_54148
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
 d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491 #,d_173836415_d_266600170_d_641006239_d_826941471
 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` where Connect_ID IS NOT NULL and d_831041022='104430631'"
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
 
@@ -726,7 +726,7 @@ bioqc_csv$Rule32 = ifelse(bioqc_csv$Connect_ID %in% polyurine$Connect_ID, "Rule 
 
 
 MW <- "SELECT  Connect_ID, d_143615646_d_593843561, d_143615646_d_825582494, d_820476880, d_650516960, d_556788178
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`  where Connect_ID IS NOT NULL"
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`  where Connect_ID IS NOT NULL"
 MW_table <- bq_project_query(project, MW)
 MW_data <- bq_table_download(MW_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
@@ -752,7 +752,7 @@ MW_data_clean <- bind_rows(cha_rows, cxa_rows)
 
 
 
-kit <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID is not null"
+kit <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` where Connect_ID is not null"
 kit_table <- bq_project_query(project, kit)
 kit_data <- bq_table_download(kit_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
@@ -1100,14 +1100,14 @@ openxlsx::write.xlsx(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs
 
 dup <- "WITH T AS (
   SELECT Connect_ID 
-  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
   WHERE d_820476880 LIKE 'CXA%' 
   AND d_820476880 NOT LIKE 'CHA%'
   GROUP BY Connect_ID
   HAVING COUNT(Connect_ID) > 1
 ) 
 SELECT * 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 WHERE Connect_ID IN (SELECT Connect_ID FROM T) and d_820476880 NOT LIKE 'CHA%'"
 
 
@@ -1252,7 +1252,7 @@ split_setting <- split_setting %>%  select(Connect_ID, Collection_ID)
 ###	67. If kit is an Initial kit, BioKit_DtKitReq_v1r0 should be null.
 project_id <- "nih-nci-dceg-connect-prod-6d04"
 dataset <- "FlatConnect"
-table <- "participants_JP"
+table <- "participants"
 column_to_check <- "d_173836415_d_266600170_d_319972665_d_759651991"
 
 # Step 1: Check if the column exists
@@ -1298,7 +1298,7 @@ when '772116457' then 'Replacement Kit 2'
 when'389478821' then 'Replacement Kit 1'
 else 'Initial Kit' 
 end as Kit_Level
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` 
 group by Connect_ID, d_426588510
 having count(*) >1"
 

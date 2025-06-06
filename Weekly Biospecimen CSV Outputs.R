@@ -201,7 +201,7 @@ box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
 box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
 box1 <- box1 %>%  filter(as.Date(BioShip_ShipTime_v1r0) >= as.Date(currentDate - 31)) %>% #limiting to the last month 
   mutate(BioBPTL_ShipRec_v1r0= case_when(BioBPTL_ShipRec_v1r0==353358909 ~ "Yes",
-                                                         BioBPTL_ShipRec_v1r0==104430631  ~ "No"))
+                                         BioBPTL_ShipRec_v1r0==104430631  ~ "No"))
 box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_ModifiedTime_v1r0,	BioShip_ShipTime_v1r0,	BioPack_BoxStrtTime_v1r0,	BioBPTL_ShipComments_v1r0,	d_885486943,
                          BioBPTL_DateRec_v1r0,	BioShip_SignEmail_v1r0,	BioPack_TrackScan1_v1r0,	BioPack_Courier_v1r0,	BioShip_LocalID_v1r0,	BioShip_LogSite_v1r0,	BioPack_TempProbe_v1r0,
                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
@@ -250,26 +250,26 @@ y$conceptId.4 <- as.numeric(y$conceptId.4)
 biospe_CID_dd <- base::merge(biospe_CID, y[,c("Formula.for.Index","Primary.Source","conceptId.1","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
 
 biospe_CID_dd <- biospe_CID_dd %>% mutate(category = case_when(conceptId.4 == 104430631~1,
-                                                                 !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
-                                                                 is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
-                                            firstCID = sapply(strsplit(variable,"_"),"[",2),
-                                            
-                                            label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ,
-                                                                  sapply(strsplit(variable,"_"),"[",2) == "505347689"  ~ "STRECKTube1" ))
+                                                               !is.na(conceptId.4) & conceptId.4 !='104430631' &  nchar(conceptId.4)>0 ~ 2,
+                                                               is.na(conceptId.4) | nchar(conceptId.4) == 0 ~0),
+                                          firstCID = sapply(strsplit(variable,"_"),"[",2),
+                                          
+                                          label.1st = case_when(sapply(strsplit(variable,"_"),"[",2) == "973670172"  ~ "UrineTube1",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "143615646"  ~ "MWTube1",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "299553921"  ~ "SSTube1",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "703954371"  ~ "SSTube2",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "454453939"  ~ "EDTATube1",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "838567176"  ~ "HeparinTube1",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "652357376"  ~ "ACDTube1",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "677469051"  ~ "EDTATube2",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "683613884"  ~ "EDTATube3",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "376960806"  ~ "SSTube3",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "232343615"  ~ "SSTube4",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "589588440"  ~ "SSTube5",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "958646668"  ~ "HeparinTube2",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "223999569"  ~ "BiohazardMW",
+                                                                sapply(strsplit(variable,"_"),"[",2) == "787237543"  ~ "BiohazardBIU" ,
+                                                                sapply(strsplit(variable,"_"),"[",2) == "505347689"  ~ "STRECKTube1" ))
 
 
 biospe_CID_dd$matched <- ifelse(nchar(biospe_CID_dd$variable) <12 , 1, ifelse(nchar(biospe_CID_dd$variable) >12 & biospe_CID_dd$conceptId.1 == biospe_CID_dd$firstCID, 1, 0))
@@ -992,5 +992,4 @@ kitA_table$BioKit_ReturnKitTrack_v1r0 <- as.numeric(kitA_table$BioKit_ReturnKitT
 
 
 openxlsx::write.xlsx(kitA_table,glue("Connect_prod_KitAssembly_Table_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
-
 
