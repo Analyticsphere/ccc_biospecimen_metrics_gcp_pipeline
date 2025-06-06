@@ -1175,16 +1175,15 @@ Bio_HMW_merged = left_join(HMW, MW_data,  by="Connect_ID")
 
 
 # when participants get replacement kits, then get an additional row in the kit_assembly table
-# those with initial kits will have a null d_426588510 value if kit sent before implementation, or d_426588510==663273321 if its more recent
-# those with replacement kit 1 have one row with a null d_426588510 value, and one row with d_426588510==389478821
-# those with replacement kit 2 have one row with a null d_426588510 value, and one row with d_426588510==389478821 AND one row with d_426588510 == 772116457
+# those with replacement kit 1 have one row with d_426588510==663273321, and one row with d_426588510==389478821
+# those with replacement kit 2 have one row with d_426588510==663273321, and one row with d_426588510==389478821 AND one row with d_426588510 == 772116457
 Bio_HMW_merged <- Bio_HMW_merged %>% filter(d_650516960=='664882224') %>%  #remove research collections 
   mutate(kit_level= case_when(d_426588510 == 772116457 ~ "Replacement Kit 2",
                               d_426588510 == 389478821 ~ "Replacement Kit 1",
-                              TRUE ~ "Initial Kit"))
+                              d_426588510 == 663273321 ~ "Initial Kit"))
 
 ## Somehow the NAs are being separated
-Bio_HMW_merged$kit_level[is.na(Bio_HMW_merged$kit_level)]= "Initial Kit"
+#Bio_HMW_merged$kit_level[is.na(Bio_HMW_merged$kit_level)]= "Initial Kit" ## variable was backfilled so shouldn't be null anymore
 
 
 #The merge isn't fully correct up until this point. 
@@ -1294,30 +1293,26 @@ knitr::kable(hmw2) %>% kable_styling(latex_options = "HOLD_position")
 ```
 
 
-### 37. If kit status is Assigned, then supply kit tracking number should populate
+### 37. If kit status is Assigned, then supply kit tracking number and kit level should populate
 ```{r assigned, echo=FALSE, warning=FALSE, message=FALSE}
-##and kit level (BioKit_KitLevel_v1r0)
-
 
 asgn <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==241974920 | d_173836415_d_266600170_d_541483796_d_221592017==241974920 | d_173836415_d_266600170_d_641006239_d_221592017==241974920) & 
                           (is.na(d_531858099) | is.na(d_426588510))) %>% 
-  select(Site, Connect_ID, d_531858099) %>%  safe_arrange(Site)
+  select(Site, Connect_ID, d_531858099, d_426588510) %>%  safe_arrange(Site)
 
-colnames(asgn) <- c("Site", "Connect ID", "BioKit_SupplyKitTrack")
+colnames(asgn) <- c("Site", "Connect ID", "BioKit_SupplyKitTrack", "BioKit_KitLevel_v1r0")
 knitr::kable(asgn) %>% kable_styling(latex_options = "HOLD_position")
 
 ```
 
 
-### 38. If kit status is Shipped, then supply kit tracking number and date/time kit shipped should populate
+### 38. If kit status is Shipped, then supply kit tracking number, date/time kit shipped, and kit level should populate
 ```{r shipped, echo=FALSE, warning=FALSE, message=FALSE}
-##and kit level (BioKit_KitLevel_v1r0)
-# | is.na(d_426588510))) %>% 
 
 
-shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160))) |
-                           d_173836415_d_266600170_d_541483796_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160)) |
-                           d_173836415_d_266600170_d_641006239_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160))) %>%  
+shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160)  | is.na(d_426588510))) |
+                           (d_173836415_d_266600170_d_541483796_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160)  | is.na(d_426588510))) |
+                           (d_173836415_d_266600170_d_641006239_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160)  | is.na(d_426588510)))) %>%  
   select(Site, Connect_ID, d_531858099, d_173836415_d_266600170_d_319972665_d_661940160) %>%  safe_arrange(Site)
 
 colnames(shipt) <- c("Site", "Connect ID", "BioKit_SupplyKitTrack", "BioKit_KitShipTm")
@@ -1325,17 +1320,18 @@ knitr::kable(shipt) %>% kable_styling(latex_options = "HOLD_position")
 
 ```
 
-### 39. If kit status is Received, then supply kit tracking number, date/time kit shipped and date/time kit received should populate
+### 39. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received, and and kit level should populate
 ```{r recvd, echo=FALSE, warning=FALSE, message=FALSE}
 ##and kit level (BioKit_KitLevel_v1r0)
 
 
 
-recvd <- Bio_HMW %>%  filter(((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & kit_level=="Initial Kit") |
-                               (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & kit_level=="Replacement Kit 1") | 
-                               (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & kit_level=="Replacement Kit 2")) & 
-                           (is.na(d_531858099) | is.na(d_661940160) |
-                                                                        is.na(d_826941471) |  is.na(d_137401245))) %>%  #| is.na(d_426588510))) %>% 
+recvd <- Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & kit_level=="Initial Kit" & 
+                                 (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) |
+                               (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & kit_level=="Replacement Kit 1" & 
+                                  (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) | 
+                               (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & kit_level=="Replacement Kit 2" & 
+                                  (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510)))) %>%  
   select(Site, Connect_ID, kit_level, d_531858099, d_661940160, d_826941471, d_137401245) %>%  safe_arrange(Site)
 
 colnames(recvd) <- c("Site", "Connect ID", "SupplyKitTrack", "KitShipTm", "KitRecdTm", "CollCardRet")

@@ -127,7 +127,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 bio_tb <- bq_project_query(project, 
-                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where d_410912345 is not null and Connect_ID is not null')  
+                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null and Connect_ID is not null')  
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -141,7 +141,7 @@ for (i in 1: length(cnames)){
 }
 
 
-tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes`")
+tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
 box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
 
 
@@ -167,7 +167,7 @@ for (i in 1: length(cnames)){
 
 
 ##to select biospecimen data in recruitment 
-recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants'")
+recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants_JP'")
 recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
@@ -185,7 +185,7 @@ tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,C
                                d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713,
                                state_d_706256705, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491,",
                                select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
                                d_831041022 = '104430631'\")",
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
@@ -1903,7 +1903,9 @@ research.survey <- coll_sett_all %>% filter(all_settings == "Research") %>%
                                    12 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 3 ~ "> 3 hrs to 12 hrs",  
                                    3 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) >= 0 ~ "0 hrs to 3 hrs",
                                    d_265193023 != 231311385 ~ "Not Submitted", 
-                                   TRUE ~ "Missing Time"), #changed from NA to "Missing"
+                                   TRUE ~ "Missing Time"),
+                                   #tm_biocolsuv < 0 ~ "QC error,
+                                   #is.na(tm_biocolsuv) ~ "Missing Time"),
          time_biochk = difftime(as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998)),as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),units="mins"),
          biochk_outlier = ifelse(is.na(time_biochk), "Missing (not checked out)", 
                                  ifelse( 0<= as.numeric(time_biochk)/60 & as.numeric(time_biochk)/60 <= 24, "No Outlier", 
@@ -4433,7 +4435,7 @@ kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329
 d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491,
 d_173836415_d_266600170_d_641006239_d_379252329, d_173836415_d_266600170_d_641006239_d_221592017,
 d_173836415_d_266600170_d_448660695
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
 where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631'" #not dead or wd or refused
 kitstatus_table <- bq_project_query(project, kitstatus)
 kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -4441,7 +4443,7 @@ kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
  
  
  
-# kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
+# kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
 # where Connect_ID is not null and d_820476880 LIKE 'CHA%'"
 # kitdate_table <- bq_project_query(project, kitdate)
 # kit_data <- bq_table_download(kitdate_table, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -4490,7 +4492,7 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
  
  
  
-kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` where Connect_ID IS NOT NULL"
+kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID IS NOT NULL"
 kitassembly_table <- bq_project_query(project, kitassembly)
 kitassembly_data <- bq_table_download(kitassembly_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kitassembly_data$Connect_ID <- as.numeric(kitassembly_data$Connect_ID)
@@ -4499,7 +4501,7 @@ kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
  
 ## Merging the biospecimen table in to use this kit_sett table as a Figure later.
 kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471,  d_556788178, d_820476880
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
 where Connect_ID is not null "
 kitsetting_table <- bq_project_query(project, kitsetting)
 kit_set <- bq_table_download(kitsetting_table, bigint="integer64",n_max = Inf, page_size = 10000)

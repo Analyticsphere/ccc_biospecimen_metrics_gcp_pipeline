@@ -875,20 +875,21 @@ asgn <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==241974
 
 
 
-# 38. If kit status is Shipped, then supply kit tracking number and date/time kit shipped should populate
+# 38. If kit status is Shipped, then supply kit tracking number, date/time kit shipped, and kit level should populate
 # BioKit_SupplyKitTrack_v1r0  is all null here, but 39 rows in prod
-shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160))) |
-                           d_173836415_d_266600170_d_541483796_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160)) |
-                           d_173836415_d_266600170_d_641006239_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160))) 
+shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160)  | is.na(d_426588510))) |
+                           (d_173836415_d_266600170_d_541483796_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160)  | is.na(d_426588510))) |
+                           (d_173836415_d_266600170_d_641006239_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160)  | is.na(d_426588510)))) 
 
 
 
-# 39. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received should populate
-recvd <-Bio_HMW %>%  filter(((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & kit_level=="Initial Kit") |
-                            (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & kit_level=="Replacement Kit 1") | 
-                            (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & kit_level=="Replacement Kit 2")) & 
-                           (is.na(d_531858099) | is.na(d_661940160) |
-                              is.na(d_826941471) |  is.na(d_137401245))) #| is.na(d_426588510))) 
+# 39. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received, and and kit level should populate
+recvd <-Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & kit_level=="Initial Kit" & 
+                               (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) |
+                              (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & kit_level=="Replacement Kit 1" & 
+                                 (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) | 
+                              (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & kit_level=="Replacement Kit 2" & 
+                                 (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))))
 
 
 
