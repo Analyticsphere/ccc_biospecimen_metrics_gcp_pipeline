@@ -1981,6 +1981,7 @@ when'389478821' then 'Replacement Kit 1'
 else 'Initial Kit' 
 end as Kit_Level
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` 
+where Connect_ID!='7030029736'
 group by Connect_ID, d_426588510
 having count(*) >1"
 
