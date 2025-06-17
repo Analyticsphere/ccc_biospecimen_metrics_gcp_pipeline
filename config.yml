@@ -22,7 +22,7 @@ weekly_biospecimen_metrics_csvs:
   r_file_name: "Weekly Biospecimen CSV Outputs.R"
   report_file_name: ""
   box_folders:
-    - "204235111776" 
+    - "221280601453" 
   gcp_info:
     cloud_scheduler: ccc-weekly-biospecimen-metrics-csvs
     frequency: "15 11 * * 1" # every Monday at 11:15 AM"
