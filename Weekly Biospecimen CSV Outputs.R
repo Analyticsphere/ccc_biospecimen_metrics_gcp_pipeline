@@ -128,7 +128,7 @@ order by DATE(d_656548982) asc, bagID ASC"
 boxes_bq <- bq_project_query(project, query=boxes_bq_pull)  
 box1 <- bq_table_download(boxes_bq,bigint="integer64",n_max = Inf)
 
-openxlsx::write.xlsx(box1,glue("Formatted_prod_flatBoxes_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(box1,as.character(glue("Formatted_prod_flatBoxes_{currentDate}_boxfolder_{boxfolder}.xlsx")),row.names = F,na="")
 
 log_info("Boxes table finished")
 
@@ -259,7 +259,7 @@ kitA_table$BioKit_ReturnKitTrack_v1r0 <- gsub("[()]", "", kitA_table$BioKit_Retu
 kitA_table$BioKit_ReturnKitTrack_v1r0 <- as.numeric(kitA_table$BioKit_ReturnKitTrack_v1r0)
 
 
-openxlsx::write.xlsx(kitA_table,glue("Connect_prod_KitAssembly_Table_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(kitA_table,as.character(glue("Connect_prod_KitAssembly_Table_{currentDate}_boxfolder_{boxfolder}.xlsx")),row.names = F,na="")
 
 log_info("Finished Kit Assmebly Table")
 
@@ -645,7 +645,7 @@ recr_mw <- recr_mw %>%
   )))
 
 
-openxlsx::write.xlsx(recr_mw,glue("Connect_prod_recr_veriBiospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(recr_mw,as.character(glue("Connect_prod_recr_veriBiospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx")),row.names = F,na="")
 
 
 log_info("Completed recr_veri_prod file")
@@ -1227,7 +1227,7 @@ log_info("Pulled all variables")
 
 log_info("Pulled all variables")
 
-openxlsx::write.xlsx(biospe1_final,glue("Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(biospe1_final,as.character(glue("Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx")),row.names = F,na="")
 
 log_info("Finished Biospe_Formats csv")
 
@@ -1236,13 +1236,6 @@ log_info("Finished Biospe_Formats csv")
 ## Clearing up space in GCP memory 
 #rm(list = setdiff(ls(), c('currentDate', 'boxfolder', 'project', 'y', 'recr.bio', 'recrver')))
 #gc()
-
-
-## Clearing up space in GCP memory 
-rm(list = setdiff(ls(), c('currentDate', 'boxfolder', 'project', 'y', 'recr.bio', 'recrver')))
-gc()
-
-
 
 
 
