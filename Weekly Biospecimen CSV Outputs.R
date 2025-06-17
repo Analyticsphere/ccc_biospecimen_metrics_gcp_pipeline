@@ -1225,6 +1225,8 @@ biospe1_final <- biospe1 %>% select(all_of(names_set))
 
 log_info("Pulled all variables")
 
+log_info("Pulled all variables")
+
 openxlsx::write.xlsx(biospe1_final,glue("Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 log_info("Finished Biospe_Formats csv")
