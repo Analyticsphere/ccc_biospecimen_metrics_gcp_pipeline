@@ -759,6 +759,7 @@ gc()
 
 ###########################################     CSV 3: Biospe_Formats                 ###############################################
 
+
 log_info("Starting Biospe_Formats_csv")
 
 ###to get the formats and variable names from DD
@@ -1235,6 +1236,9 @@ log_info("Finished Biospe_Formats csv")
 #gc()
 
 
+## Clearing up space in GCP memory 
+rm(list = setdiff(ls(), c('currentDate', 'boxfolder', 'project', 'y', 'recr.bio', 'recrver')))
+gc()
 
 
 
@@ -1246,6 +1250,5 @@ log_info("Finished Biospe_Formats csv")
 
 
 log_info("FINISHED THE ENTIRE CODE")
-
 
 
