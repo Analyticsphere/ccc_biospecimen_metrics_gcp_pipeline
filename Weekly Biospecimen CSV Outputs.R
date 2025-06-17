@@ -1221,7 +1221,7 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
                "token")
 
 
-biospe1_final <- biospe1 %>% select(names_set)
+biospe1_final <- biospe1 %>% select(all_of(names_set))
 
 log_info("Pulled all variables")
 
