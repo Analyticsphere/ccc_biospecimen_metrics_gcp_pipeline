@@ -219,7 +219,7 @@ qc2_1a <- bioqc %>%  filter( d_973670172_d_593843561=="No"  & d_173836415_d_2666
                                                    "5972658064", "8553891957", "9121406600", "9575612025", "4057490101", "9167792140",
                                                    "8924667241", "9694753790", "5899565591", "6568449334", "1371560328", "8625295305",
                                                    "6862754687", "9143436002", "3319331872", "7276829171", "9262617255",
-                                                   "2431356225", "1703960468")))
+                                                   "2431356225", "1703960468", '6437389686', '7338222763')))
 
 qc2_1a <- qc2_1a  %>% select(Site, Connect_ID, d_973670172_d_593843561, d_173836415_d_266600170_d_786930107)  %>%  safe_arrange(Site)
 
@@ -970,7 +970,8 @@ knitr::kable(c_blood3.1)
 
 c_blood3.4 <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_982213346) & 
                                   ((d_173836415_d_266600170_d_592099155=="Research" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="No") &
-                                  !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", "3467573584", "1274744512"))) %>% 
+                                  !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", "3467573584", "1274744512",
+                                                       '3362078899'))) %>% 
     select(Site, Connect_ID, d_878865966, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_982213346) %>%  safe_arrange(Site)
 
 
@@ -1006,7 +1007,11 @@ c_urine3.4 <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_139245758) &
                                   !(Connect_ID %in% c('6862754687', '1371560328', '1176687465', '5885436394', '1850586900', '3319331872', '6575901705', '6862754687',
                                                '9258958214', '1250934825', '7882825421', '3287102562', '1215003341', '7352978604', '1140047316', '4479873637',
                                                '8633594373', '2755205973', '3862626013', '8184138489', '4980503471', '2039357566', '6321294709', '2300063524',
-                                               '5899565591')))   %>%  
+                                               '5899565591', '8625295305', '9167792140', '9143436002', '7276829171', '8625295305', '1274744512', '9262617255',
+                                               '4838682809', '2887898061', '2871811858', '4207529981', '3456526723', '9366425281', '7106367407', '6523900663',
+                                               '3992444928', '6538980272', '6467484794', '1375421153', '1102086935', '9672292896', '9652100378', '3362078899',
+                                               '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
+                                               '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101')))   %>%  
     select(Site, Connect_ID, d_167958071, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
 
 
@@ -1035,7 +1040,7 @@ bioqc1 <- bioqc %>%
              "4462616750","9111871102","8476952861","2974054638" ,"3544623873","3293040395","7571439842","3165368475",
              "6954174713","6361337944","1629086681","3544623873","3293040395","7571439842","3165368475","6954174713",
              "6361337944","1629086681","9768745029","3770024701","8836251245","3312148528",# HFH exclusions
-             "4782195164", "6229346420",# UC exclusions
+             "4782195164", "6229346420", '1271036774','6288600449',# UC exclusions
              "8336144924","7515171846","9963945282" ,"9554775290" ,"8570090186", "4727512872","5506703775","8123989364","9843228847", "7152112646")) & #SF exclusions 
            !(Connect_ID %in% qc_8$`Connect ID`) # Don't count the empty bracket people if they're in rule #8, because those would be expected
   )
@@ -1069,7 +1074,7 @@ bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_
                                (Site=="Henry Ford Health System" | Site=="University of Chicago Medicine") & #only HP and UC sends this
                                !is.na(d_928693120_integer) & #d_173836415_d_266600170_d_110349197!="[]" & 
                                !(Connect_ID %in% c("1629086681", "3165368475", "3293040395", "3544623873", "6361337944", "6954174713", "7571439842",
-                                                   "3770024701", "8836251245", "9768745029", "5461650381", "4900116130", "4435276749",  
+                                                   "3770024701", "8836251245", "9768745029", "5461650381", "4900116130", "4435276749",  '6288600449',
                                                    "6473532641", "6336258662", "8589481620", "4688823720", "3759939890", "2824989966")) & #HFH exclusions
                                !(Connect_ID %in% qc_7$`Connect ID`)) # Don't count the empty bracket people if they're in rule #7, because those would be expected
 
@@ -1621,7 +1626,7 @@ colnames(dup_list) <- c("Connect ID", "Site", "Collection Setting", "Collection 
 # Identify Connect_IDs with different d_650516960 values
 different_values <- bio_dup_with_status %>%
   filter(d_410912345=="353358909" & 
-           !(Connect_ID %in% c("2589415525", "4545815202", "4545815202", "2589415525"))) %>% #Biospecimen team has handled these ones
+           !(Connect_ID %in% c("2589415525", "4545815202", "4545815202", "2589415525", '9055246833', '4987045154'))) %>% #Biospecimen team has handled these ones
   group_by(Connect_ID) %>% 
   summarize(unique_values = n_distinct(d_650516960), .groups = "drop") %>%
   filter(unique_values > 1) %>%
@@ -1676,7 +1681,7 @@ knitr::kable(blood_locPL)
 
 
 urine_loc <- bioqc %>%  filter(d_167958071=="Yes" & d_173836415_d_266600170_d_718172863=="Clinical" & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
-                           is.na(d_173836415_d_266600170_d_452847912)) %>% 
+                           is.na(d_173836415_d_266600170_d_452847912) & Connect_ID!="8047468301") %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_452847912) %>%  safe_arrange(Site)
 
 
@@ -1998,12 +2003,22 @@ knitr::kable(Dup_kits_rule)
 ###	69. BioFin_BMTimeBL_v1r0 must occur after BioKit_KitShipTm_v1r0 or before BioKit_KitRecdTm_v1r0.
 ```{r Github212, echo=FALSE, warning=FALSE, message=FALSE}
 
-issue212 <- HMW %>%  filter( (as.Date(d_173836415_d_266600170_d_448660695) <  d_173836415_d_266600170_d_319972665_d_661940160) |
-                               (as.Date(d_173836415_d_266600170_d_448660695) > d_826941471)) %>% 
+issue212 <- HMW %>%  filter( ((as.Date(d_173836415_d_266600170_d_448660695) <  d_173836415_d_266600170_d_319972665_d_661940160) |
+                               (as.Date(d_173836415_d_266600170_d_448660695) > d_826941471))  & 
+                               #If BioFin_BMTimeBL_v1r0 is in the same month OR the month on either side of BioKit_KitShipTm_v1r0 or BioKit_KitRecdTm_v1r0 then ignore the error.
+                                (abs(as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7)) - as.numeric(str_sub(d_173836415_d_266600170_d_319972665_d_661940160, 6, 7)))>1 |
+                                    abs(as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7)) - as.numeric(str_sub(d_826941471, 6, 7)))>1 ) &
+                               #Exclude those with December(12)/January(01) dates, won't be caught 
+                               !( (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==12 & as.numeric(str_sub(d_173836415_d_266600170_d_319972665_d_661940160, 6, 7))==1) | 
+                                    (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==1 & as.numeric(str_sub(d_173836415_d_266600170_d_319972665_d_661940160, 6, 7))==12) | 
+                                    (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==12 & as.numeric(str_sub(d_826941471, 6, 7))==1) | 
+                                    (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==1 & as.numeric(str_sub(d_826941471, 6, 7))==12))) %>%
   select(Site, Connect_ID, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_319972665_d_661940160, d_826941471) %>% safe_arrange(Site)
 
+
+
 colnames(issue212) <- c("Site", "Connect ID", "BioFin_BMTimeBL"	,"BioKit_KitShipTm",	"BioKit_KitRecdTm")
-knitr::kable(issue212)
+knitr::kable(issue212) %>% add_footnote("Excludes those where BioFin_BMTimeBL_v1r0 is in the same month OR the month on either side of BioKit_KitShipTm_v1r0 or BioKit_KitRecdTm_v1r0", notation= "none")
 
 ```
 

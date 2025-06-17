@@ -113,103 +113,206 @@ mouthwash <- dd[grepl("Mouthwash",dd$`Variable Label`),]
 ###########################################     CSV1:      flatBoxes     #############################################
 
 
-###download the biospecimen data
-box_CID <- as.data.frame(as.numeric(sapply((strsplit(colnames(box_wl_flat),"d_")),tail,1)))
-box_CID$variable <- colnames(box_wl_flat)
-colnames(box_CID)[1] <-"CID"
-box_CID$CID <- ifelse(is.na(box_CID$CID), 0, box_CID$CID)
-box_CID_dd <- base::merge(box_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
-box_CID_dd$Variable.Name <- ifelse(is.na(box_CID_dd$Variable.Name), box_CID_dd$variable,box_CID_dd$Variable.Name)
-box_CID_dd$category<- ifelse(is.na(box_CID_dd$conceptId.4), 0,ifelse(!is.na(box_CID_dd$conceptId.4) &  box_CID_dd$conceptId.4 !=104430631, 2, 1))
-select1 <- box_CID_dd$variable[which(box_CID_dd$category==0)]
-yes_no <- box_CID_dd$variable[which(box_CID_dd$category==1)]
-box1 <- subset(box_wl_flat,select=select1)
-colnames(box1) <- box_CID_dd$Variable.Name[which(box_CID_dd$category==0)]
-##for the categorical variables
-box1$BioPack_Courier_v1r0 <- ifelse(box_wl_flat$d_666553960==712278213, "FedEx",ifelse(box_wl_flat$d_666553960==149772928, "World Courier",NA))
-box_wl_flat$d_560975149 <- as.factor(box_wl_flat$d_560975149)
-d_560975149_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-box1$d_560975149 <- plyr::mapvalues(box_wl_flat$d_560975149,from=d_560975149_CIDs$V1,to=d_560975149_CIDs$V2)
-colnames(box1)[which(colnames(box1)=="d_560975149") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_560975149")]
-box_wl_flat$d_789843387 <- as.factor(box_wl_flat$d_789843387)
-d_789843387_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)], "="),tail,1)))))
+# ###download the biospecimen data
+# box_CID <- as.data.frame(as.numeric(sapply((strsplit(colnames(box_wl_flat),"d_")),tail,1)))
+# box_CID$variable <- colnames(box_wl_flat)
+# colnames(box_CID)[1] <-"CID"
+# box_CID$CID <- ifelse(is.na(box_CID$CID), 0, box_CID$CID)
+# box_CID_dd <- base::merge(box_CID, y[,c("Primary.Source","conceptId.2","conceptId.3","Variable.Name","Variable.Label","conceptId.4","Current.Format.Value")],by.x="CID",by.y="conceptId.3",all.x=TRUE)
+# box_CID_dd$Variable.Name <- ifelse(is.na(box_CID_dd$Variable.Name), box_CID_dd$variable,box_CID_dd$Variable.Name)
+# box_CID_dd$category<- ifelse(is.na(box_CID_dd$conceptId.4), 0,ifelse(!is.na(box_CID_dd$conceptId.4) &  box_CID_dd$conceptId.4 !=104430631, 2, 1))
+# select1 <- box_CID_dd$variable[which(box_CID_dd$category==0)]
+# yes_no <- box_CID_dd$variable[which(box_CID_dd$category==1)]
+# box1 <- subset(box_wl_flat,select=select1)
+# colnames(box1) <- box_CID_dd$Variable.Name[which(box_CID_dd$category==0)]
+# ##for the categorical variables
+# box1$BioPack_Courier_v1r0 <- ifelse(box_wl_flat$d_666553960==712278213, "FedEx",ifelse(box_wl_flat$d_666553960==149772928, "World Courier",NA))
+# box_wl_flat$d_560975149 <- as.factor(box_wl_flat$d_560975149)
+# d_560975149_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_560975149),collapse="|"),y$conceptId.4)], "="),tail,1)))))
+# box1$d_560975149 <- plyr::mapvalues(box_wl_flat$d_560975149,from=d_560975149_CIDs$V1,to=d_560975149_CIDs$V2)
+# colnames(box1)[which(colnames(box1)=="d_560975149") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_560975149")]
+# box_wl_flat$d_789843387 <- as.factor(box_wl_flat$d_789843387)
+# d_789843387_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(box_wl_flat$d_789843387),collapse="|"),y$conceptId.4)], "="),tail,1)))))
+# 
+# box1$d_789843387 <- plyr::mapvalues(box_wl_flat$d_789843387,from=d_789843387_CIDs$V1,to=d_789843387_CIDs$V2)
+# colnames(box1)[which(colnames(box1)=="d_789843387") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_789843387")]
+# ##for binary variables
+# for (i in 1:length(yes_no)){
+#   x <- yes_no[i]
+#   
+#   varname <- box_CID_dd$Variable.Name[grepl(x,box_CID_dd$variable)]
+#   #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
+#   check <- as.data.frame(box_wl_flat[,grepl(x, colnames(box_wl_flat))])
+#   check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
+#   colnames(check)[2] <- varname
+#   box1 <-   cbind(box1,subset(check,select=varname))
+# }
+# #gsub("[^[:alnum:][:blank:]+?&/\\-]", "", c) #to remove any specific character in a variable in r
+# box1 <- box1  %>% mutate(d_238268405=gsub("^[:alnum:][:blank:]","",d_238268405),
+#                          d_238268405_1=case_when(substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"121149986"~"Crushed",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"200183516" ~"Vials - Incorrect Material Type",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"289322354" ~ "Material Thawed",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"387564837" ~ "Damaged Vials",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"399948893" ~ "Vials - Missing Labels",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"405513630" ~ "Cold Packs - none",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"442684673" ~ "Participant Refusal",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"595987358" ~ "Cold Packs - warm",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"613022284" ~ "No Refrigerant",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"631290535" ~ "Vials - Empty",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"678483571" ~ "Damaged Container (outer and/or inner)",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"679749262" ~ "Package in good condition",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"842171722" ~ "No Pre-notification",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"847410060" ~ "Improper Packaging",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"853876696" ~ "Manifest - not provided",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	 "909529446" ~ "Cold Packs - insufficient",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"922995819" ~ "Manifest/Paperwork/Vial information do not match",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"933646000" ~ "Other- Package Condition",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"958000780" ~ "Shipment Delay") ,
+#                          d_238268405_2=case_when(substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"121149986"~"Crushed",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"200183516" ~"Vials - Incorrect Material Type",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"289322354" ~ "Material Thawed",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"387564837" ~ "Damaged Vials",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"399948893" ~ "Vials - Missing Labels",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"405513630" ~ "Cold Packs - none",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"442684673" ~ "Participant Refusal",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"595987358" ~ "Cold Packs - warm",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"613022284" ~ "No Refrigerant",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"631290535" ~ "Vials - Empty",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"678483571" ~ "Damaged Container (outer and/or inner)",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"679749262" ~ "Package in good condition",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"842171722" ~ "No Pre-notification",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"847410060" ~ "Improper Packaging",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"853876696" ~ "Manifest - not provided",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	 "909529446" ~ "Cold Packs - insufficient",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"922995819" ~ "Manifest/Paperwork/Vial information do not match",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"933646000" ~ "Other- Package Condition",
+#                                                  substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"958000780" ~ "Shipment Delay"))
+# box1<- box1 %>% mutate(BioPack_ShipCondtion_v1r0=ifelse(is.na(d_238268405_2), d_238268405_1, paste(d_238268405_1,d_238268405_2,sep=",")))
+# #box1 <- box1[, c(1:4, 6:22, 25)] --- why are some columns missing???
+# #missing: BioPack_BoxID_v1r0	BioPack_ModifiedTime_v1r0	BioShip_ShipTime_v1r0	BioPack_BoxStrtTime_v1r0	BioBPTL_ShipComments_v1r0	BioBPTL_DateRec_v1r0	BioShip_SignEmail_v1r0	BioPack_TrackScan1_v1r0		BioBPTL_ShipRec_v1r0
+# box1$BioPack_BoxID_v1r0 <- box_wl_flat$d_132929440
+# box1$BioPack_ModifiedTime_v1r0 <- box_wl_flat$d_555611076
+# box1$BioShip_ShipTime_v1r0 <- box_wl_flat$d_656548982
+# box1$BioPack_BoxStrtTime_v1r0 <- box_wl_flat$d_672863981
+# box1$BioBPTL_ShipComments_v1r0 <- box_wl_flat$d_870456401
+# box1$BioBPTL_DateRec_v1r0 <- box_wl_flat$d_926457119
+# box1$BioShip_SignEmail_v1r0 <- box_wl_flat$d_948887825
+# box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
+# box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
+# box1 <- box1 %>%  filter(as.Date(BioShip_ShipTime_v1r0) >= as.Date(currentDate - 31)) %>% #limiting to the last month 
+#   mutate(BioBPTL_ShipRec_v1r0= case_when(BioBPTL_ShipRec_v1r0==353358909 ~ "Yes",
+#                                          BioBPTL_ShipRec_v1r0==104430631  ~ "No"))
+# box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_ModifiedTime_v1r0,	BioShip_ShipTime_v1r0,	BioPack_BoxStrtTime_v1r0,	BioBPTL_ShipComments_v1r0,	d_885486943,
+#                          BioBPTL_DateRec_v1r0,	BioShip_SignEmail_v1r0,	BioPack_TrackScan1_v1r0,	BioPack_Courier_v1r0,	BioShip_LocalID_v1r0,	BioShip_LogSite_v1r0,	BioPack_TempProbe_v1r0,
+#                          BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
+# box1 <- box1[, c(1:8, 10:21)]
 
-box1$d_789843387 <- plyr::mapvalues(box_wl_flat$d_789843387,from=d_789843387_CIDs$V1,to=d_789843387_CIDs$V2)
-colnames(box1)[which(colnames(box1)=="d_789843387") ]<- box_CID_dd$Variable.Name[which(box_CID_dd$variable=="d_789843387")]
-##for binary variables
-for (i in 1:length(yes_no)){
-  x <- yes_no[i]
-  
-  varname <- box_CID_dd$Variable.Name[grepl(x,box_CID_dd$variable)]
-  #type.labels <- dd$`Variable Label`[grepl(CID,dd$CID)]
-  check <- as.data.frame(box_wl_flat[,grepl(x, colnames(box_wl_flat))])
-  check$variable <- ifelse(check[,1]== 353358909, "Yes",ifelse(check[,1]==104430631,"No",NA))
-  colnames(check)[2] <- varname
-  box1 <-   cbind(box1,subset(check,select=varname))
-}
-#gsub("[^[:alnum:][:blank:]+?&/\\-]", "", c) #to remove any specific character in a variable in r
-box1 <- box1  %>% mutate(d_238268405=gsub("^[:alnum:][:blank:]","",d_238268405),
-                         d_238268405_1=case_when(substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"121149986"~"Crushed",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"200183516" ~"Vials - Incorrect Material Type",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"289322354" ~ "Material Thawed",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"387564837" ~ "Damaged Vials",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"399948893" ~ "Vials - Missing Labels",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"405513630" ~ "Cold Packs - none",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"442684673" ~ "Participant Refusal",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"595987358" ~ "Cold Packs - warm",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"613022284" ~ "No Refrigerant",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"631290535" ~ "Vials - Empty",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"678483571" ~ "Damaged Container (outer and/or inner)",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"679749262" ~ "Package in good condition",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"842171722" ~ "No Pre-notification",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"847410060" ~ "Improper Packaging",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"853876696" ~ "Manifest - not provided",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	 "909529446" ~ "Cold Packs - insufficient",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"922995819" ~ "Manifest/Paperwork/Vial information do not match",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"933646000" ~ "Other- Package Condition",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),2,10)==	"958000780" ~ "Shipment Delay") ,
-                         d_238268405_2=case_when(substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"121149986"~"Crushed",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"200183516" ~"Vials - Incorrect Material Type",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"289322354" ~ "Material Thawed",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"387564837" ~ "Damaged Vials",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"399948893" ~ "Vials - Missing Labels",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"405513630" ~ "Cold Packs - none",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"442684673" ~ "Participant Refusal",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"595987358" ~ "Cold Packs - warm",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"613022284" ~ "No Refrigerant",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"631290535" ~ "Vials - Empty",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"678483571" ~ "Damaged Container (outer and/or inner)",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"679749262" ~ "Package in good condition",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"842171722" ~ "No Pre-notification",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"847410060" ~ "Improper Packaging",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"853876696" ~ "Manifest - not provided",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	 "909529446" ~ "Cold Packs - insufficient",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"922995819" ~ "Manifest/Paperwork/Vial information do not match",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"933646000" ~ "Other- Package Condition",
-                                                 substring(gsub("^[:alnum:][:blank:]","",d_238268405),12,20)==	"958000780" ~ "Shipment Delay"))
-box1<- box1 %>% mutate(BioPack_ShipCondtion_v1r0=ifelse(is.na(d_238268405_2), d_238268405_1, paste(d_238268405_1,d_238268405_2,sep=",")))
-#box1 <- box1[, c(1:4, 6:22, 25)] --- why are some columns missing???
-#missing: BioPack_BoxID_v1r0	BioPack_ModifiedTime_v1r0	BioShip_ShipTime_v1r0	BioPack_BoxStrtTime_v1r0	BioBPTL_ShipComments_v1r0	BioBPTL_DateRec_v1r0	BioShip_SignEmail_v1r0	BioPack_TrackScan1_v1r0		BioBPTL_ShipRec_v1r0
-box1$BioPack_BoxID_v1r0 <- box_wl_flat$d_132929440
-box1$BioPack_ModifiedTime_v1r0 <- box_wl_flat$d_555611076
-box1$BioShip_ShipTime_v1r0 <- box_wl_flat$d_656548982
-box1$BioPack_BoxStrtTime_v1r0 <- box_wl_flat$d_672863981
-box1$BioBPTL_ShipComments_v1r0 <- box_wl_flat$d_870456401
-box1$BioBPTL_DateRec_v1r0 <- box_wl_flat$d_926457119
-box1$BioShip_SignEmail_v1r0 <- box_wl_flat$d_948887825
-box1$BioPack_TrackScan1_v1r0 <- box_wl_flat$d_959708259
-box1$BioBPTL_ShipRec_v1r0 <- box_wl_flat$d_333524031 #check for yes/no structuring
-box1 <- box1 %>%  filter(as.Date(BioShip_ShipTime_v1r0) >= as.Date(currentDate - 31)) %>% #limiting to the last month 
-  mutate(BioBPTL_ShipRec_v1r0= case_when(BioBPTL_ShipRec_v1r0==353358909 ~ "Yes",
-                                         BioBPTL_ShipRec_v1r0==104430631  ~ "No"))
-box1 <- box1 %>%  select(bagID,	bagType,	tubeID,	BioPack_BoxID_v1r0,	BioPack_ModifiedTime_v1r0,	BioShip_ShipTime_v1r0,	BioPack_BoxStrtTime_v1r0,	BioBPTL_ShipComments_v1r0,	d_885486943,
-                         BioBPTL_DateRec_v1r0,	BioShip_SignEmail_v1r0,	BioPack_TrackScan1_v1r0,	BioPack_Courier_v1r0,	BioShip_LocalID_v1r0,	BioShip_LogSite_v1r0,	BioPack_TempProbe_v1r0,
-                         BioShip_ShipSubmit_v1r0,	BioPack_OrphanBag_v1r0,	BioBPTL_ShipRec_v1r0,	BioPack_ContainsOrphan_v1r0,	BioPack_ShipCondtion_v1r0)
-box1 <- box1[, c(1:8, 10:21)]
+
+
+boxes_bq_pull <- "SELECT 
+bagID, 
+bagType, 
+tubeID, 
+d_132929440 as BioPack_BoxID_v1r0, 
+d_555611076 as BioPack_ModifiedTime_v1r0, 
+d_656548982 as BioShip_ShipTime_v1r0, 
+d_672863981 as BioPack_BoxStrtTime_v1r0, 
+d_870456401 as BioBPTL_ShipComments_v1r0, 
+d_926457119 as BioBPTL_DateRec_v1r0, 
+d_948887825 as BioShip_SignEmail_v1r0, 
+d_959708259 as BioPack_TrackScan1_v1r0,   
+
+case when d_666553960='712278213' then 'FedEx'
+when d_666553960='149772928' then  'World Courier' 
+end as BioPack_Courier_v1r0,  
+
+CASE d_560975149
+  WHEN '777644826' THEN 'UC-DCAM'
+  WHEN '692275326' THEN 'Marshfield'
+  WHEN '813701399' THEN 'Weston'
+  WHEN '698283667' THEN 'Lake Hallie'
+  WHEN '834825425' THEN 'HP Research Clinic'
+  WHEN '589224449' THEN 'Sioux Falls Imagenetics'
+  WHEN '763273112' THEN 'KPCO RRL'
+  WHEN '531313956' THEN 'KPHI RRL'
+  WHEN '715632875' THEN 'KPNW RRL'
+  WHEN '767775934' THEN 'KPGA RRL'
+  WHEN '752948709' THEN 'Henry Ford Main Campus'
+  WHEN '570271641' THEN 'Henry Ford West Bloomfield Hospital'
+  WHEN '838480167' THEN 'Henry Ford Medical Center- Fairlane'
+  WHEN '706927479' THEN 'HFH Livonia Research Clinic'
+  WHEN '145191545' THEN 'Ingalls Harvey'
+  WHEN '489380324' THEN 'River East'
+  WHEN '120264574' THEN 'South Loop'
+  WHEN '691714762' THEN 'Rice Lake'
+  WHEN '487512085' THEN 'Wisconsin Rapids'
+  WHEN '983848564' THEN 'Colby Abbotsford'
+  WHEN '261931804' THEN 'Minocqua'
+  WHEN '665277300' THEN 'Merrill'
+  WHEN '467088902' THEN 'Fargo South University'
+  WHEN '940329442' THEN 'Orland Park'
+  WHEN '574368418' THEN 'HP Park Nicollet'
+  WHEN '322059622' THEN 'HFH Pop-Up'
+  WHEN '127626388' THEN 'Bismarck Medical Center'
+  WHEN '246137578' THEN 'Sioux Falls Sanford Center'
+  WHEN '723351427' THEN 'BCC- HWC, BC'
+  WHEN '807443231' THEN 'BCC- All Saints (FW)'
+  WHEN '475614532' THEN 'BCC- Plano'
+  WHEN '809370237' THEN 'BCC- Worth St'
+  WHEN '856158129' THEN 'BCC- Irving'
+  WHEN '436956777' THEN 'NTX Biorepository'
+  WHEN '288564244' THEN 'BCC- Fort Worth'
+  WHEN '433070901' THEN 'Sioux Falls Edith Center'
+  WHEN '769594361' THEN 'Fargo Amber Valley'
+  WHEN '246153539' THEN 'Bemidji Clinic'
+  WHEN '255636184' THEN 'Stevens Point'
+  WHEN '813412950' THEN 'Neillsville'
+  WHEN '755034888' THEN 'HFH Jackson'
+  WHEN '483909879' THEN 'North Garland'
+  WHEN '962830330' THEN 'Waco - MacArthur'
+  WHEN '911683679' THEN 'HFH Detroit Northwest'
+  WHEN '397883980' THEN 'Irving'
+  WHEN '117840593' THEN 'Temple CDM'
+  WHEN '574104518' THEN 'Temple Roney'
+  else 'Missing'
+END as BioShip_LocalID_v1r0, 
+CASE d_789843387
+  WHEN '531629870' THEN 'HealthPartners'
+  WHEN '548392715' THEN 'Henry Ford Health System'
+  WHEN '125001209' THEN 'Kaiser Permanente Colorado'
+  WHEN '327912200' THEN 'Kaiser Permanente Georgia'
+  WHEN '300267574' THEN 'Kaiser Permanente Hawaii'
+  WHEN '452412599' THEN 'Kaiser Permanente Northwest'
+  WHEN '303349821' THEN 'Marshfield Clinic Health System'
+  WHEN '657167265' THEN 'Sanford Health'
+  WHEN '809703864' THEN 'University of Chicago Medicine'
+  WHEN '517700004' THEN 'National Cancer Institute'
+  WHEN '181769837' THEN 'Other'
+END as BioShip_LogSite_v1r0, 
+
+case when d_105891443='353358909' then 'Yes'
+else 'No' end as BioPack_TempProbe_v1r0, 
+case when d_145971562='353358909' then 'Yes'
+else 'No' end as BioShip_ShipSubmit_v1r0, 
+case when d_333524031='353358909' then 'Yes'
+else 'No' end as  BioBPTL_ShipRec_v1r0, 
+case when d_842312685='353358909' then 'Yes'
+else 'No' end as  BioPack_ContainsOrphan_v1r0, 
+
+ FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP` 
+WHERE DATE(d_656548982) >= DATE_SUB(CURRENT_DATE(), INTERVAL 31 DAY)
+order by DATE(d_656548982) asc, bagID ASC"
+
+boxes_bq <- bq_project_query(project, query=boxes_bq_pull)  
+box1 <- bq_table_download(boxes_bq,bigint="integer64",n_max = Inf)
+
 openxlsx::write.xlsx(box1,glue("Formatted_prod_flatBoxes_JP_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
+## Clearing up space in GCP memory 
+rm(list = setdiff(ls(), c('currentDate', 'boxfolder', 'project', 'y', 'recr.bio', 'recrver', 'biospe', 'numbers_only')))
+gc()
 
 
 
@@ -660,6 +763,9 @@ openxlsx::write.xlsx(biospe1_final,glue("Connect_prod_Biospe_Formats_{currentDat
 
 
 
+## Clearing up space in GCP memory 
+rm(list = setdiff(ls(), c('currentDate', 'boxfolder', 'project', 'y', 'recr.bio', 'recrver')))
+gc()
 
 
 
@@ -875,6 +981,11 @@ openxlsx::write.xlsx(recrbio_1,glue("Connect_prod_recr_veriBiospe_Formats_{curre
 
 
 
+
+
+## Clearing up space in GCP memory 
+rm(list = setdiff(ls(), c('currentDate', 'boxfolder', 'project')))
+gc()
 
 
 

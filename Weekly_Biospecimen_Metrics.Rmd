@@ -4443,15 +4443,6 @@ kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
  
  
  
-# kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-# where Connect_ID is not null and d_820476880 LIKE 'CHA%'"
-# kitdate_table <- bq_project_query(project, kitdate)
-# kit_data <- bq_table_download(kitdate_table, bigint="integer64",n_max = Inf, page_size = 10000)
-# kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
- 
- 
- 
- 
 kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Kaiser Permanente Colorado",
                                                     d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                                     d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
@@ -5094,6 +5085,13 @@ status_elg_knB
  
 add_footnote(status_elg_knC, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none")
 ```
+ 
+```{r, include=FALSE}
+
+## Add a new Table 7.2: Of participants where "Kit Request Eligible" = yes and "Kit Request Eligible" date was at least 24 hours ago, how many have kit status that is not null. (distrbution of kit statuses) https://github.com/episphere/connect/issues/1326#issuecomment-2960611399
+
+```
+ 
  
 \FloatBarrier
 ```{r KnitrTables7.2,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
