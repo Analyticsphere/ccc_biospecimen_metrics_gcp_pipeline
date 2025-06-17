@@ -440,11 +440,12 @@ bioqc_csv <- bioqc %>%
                             is.na(d_173836415_d_266600170_d_982213346), "Rule 29a", " "),
          
          
-         #29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
-         Rule29b = ifelse(!is.na(d_173836415_d_266600170_d_982213346) & 
-                            ((d_173836415_d_266600170_d_592099155=="534621077" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="104430631") &
-                            !(Connect_ID %in%  c(7848933050, 5885436394, 9258958214, 2300063524, "1176687465", "1850586900","6575901705", "3467573584", "1274744512", 3362078899)), 
-                          "Rule 29b", " "),
+         # #29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
+         # Rule29b = ifelse(!is.na(d_173836415_d_266600170_d_982213346) & 
+         #                    ((d_173836415_d_266600170_d_592099155=="534621077" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="104430631") &
+         #                    !(Connect_ID %in%  c(7848933050, 5885436394, 9258958214, 2300063524, "1176687465", "1850586900","6575901705", "3467573584", "1274744512", 3362078899,
+         #                                         '6248007969', '5021933788', '3882691411')), 
+         #                  "Rule 29b", " "),
          
          
          #30.a. 30.a. If BioFin_BaseUrineCol_v1r0= yes, and BioSpm_UrineSettingBL_v1r0= Clinical, and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, then BioClin_ClinicalUrnTmBL_v1r0 must be populated.
@@ -453,18 +454,18 @@ bioqc_csv <- bioqc %>%
                             Connect_ID!="8047468301", "Rule 30a", " "),
          
          
-         #30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.
-         Rule30b = ifelse(!is.na(d_173836415_d_266600170_d_139245758) & 
-                            ((d_173836415_d_266600170_d_718172863=="Research" | is.na(d_173836415_d_266600170_d_718172863)) | d_167958071=="No") & 
-                            !(Connect_ID %in% c('6862754687', '1371560328', '1176687465', '5885436394', '1850586900', '3319331872', '6575901705', '6862754687',
-                                               '9258958214', '1250934825', '7882825421', '3287102562', '1215003341', '7352978604', '1140047316', '4479873637',
-                                               '8633594373', '2755205973', '3862626013', '8184138489', '4980503471', '2039357566', '6321294709', '2300063524',
-                                               '5899565591', '8625295305', '9167792140', '9143436002', '7276829171', '8625295305', '1274744512', '9262617255',
-                                               '4838682809', '2887898061', '2871811858', '4207529981', '3456526723', '9366425281', '7106367407', '3362078899',
-                                               '3992444928', '6538980272', '6467484794', '1375421153', '1102086935', '9672292896', '9652100378','6523900663',
-                                               '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
-                                               '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101')), 
-                          "Rule 30b", " "),
+         # #30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.
+         # Rule30b = ifelse(!is.na(d_173836415_d_266600170_d_139245758) & 
+         #                    ((d_173836415_d_266600170_d_718172863=="Research" | is.na(d_173836415_d_266600170_d_718172863)) | d_167958071=="No") & 
+         #                    !(Connect_ID %in% c('6862754687', '1371560328', '1176687465', '5885436394', '1850586900', '3319331872', '6575901705', '6862754687',
+         #                                       '9258958214', '1250934825', '7882825421', '3287102562', '1215003341', '7352978604', '1140047316', '4479873637',
+         #                                       '8633594373', '2755205973', '3862626013', '8184138489', '4980503471', '2039357566', '6321294709', '2300063524',
+         #                                       '5899565591', '8625295305', '9167792140', '9143436002', '7276829171', '8625295305', '1274744512', '9262617255',
+         #                                       '4838682809', '2887898061', '2871811858', '4207529981', '3456526723', '9366425281', '7106367407', '3362078899',
+         #                                       '3992444928', '6538980272', '6467484794', '1375421153', '1102086935', '9672292896', '9652100378','6523900663',
+         #                                       '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
+         #                                       '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101')), 
+         #                  "Rule 30b", " "),
          
          
          #49. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clinical, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteBldLocBL_v1r0 must be populated.
@@ -1324,14 +1325,52 @@ Dup_kits_rule <- bq_table_download(Dup_kits_table, bigint = "integer64")
 bioqc_csv$Rule68 = ifelse(bioqc_csv$Connect_ID %in% Dup_kits_rule$Connect_ID, "Rule 68", " ")
 
 
+
+
+######################. These rules need to include those with no biospecimen collections ###########################
+
+parts_data <- parts_data %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
+                                                    d_827220437==531629870 ~ "HealthPartners",
+                                                    d_827220437==548392715 ~ "Henry Ford Health System",
+                                                    d_827220437==303349821 ~ "Marshfield Clinical Health System",
+                                                    d_827220437==657167265 ~ "Sanford Health",
+                                                    d_827220437==809703864 ~ "University of Chicago Medicine",
+                                                    d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+                                                    d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+                                                    d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+                                                    d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
+
+### 29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
+c_blood3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_982213346) & 
+                                       ((d_173836415_d_266600170_d_592099155=="Research" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="No") &
+                                       !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", "3467573584", "1274744512",
+                                                            '3362078899',  now)))
+
+
+### 30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.
+c_urine3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_139245758) & 
+                                       ((d_173836415_d_266600170_d_718172863=="Research" | is.na(d_173836415_d_266600170_d_718172863)) | d_167958071=="No") &
+                                       !(Connect_ID %in% c('6862754687', '1371560328', '1176687465', '5885436394', '1850586900', '3319331872', '6575901705', '6862754687',
+                                                           '9258958214', '1250934825', '7882825421', '3287102562', '1215003341', '7352978604', '1140047316', '4479873637',
+                                                           '8633594373', '2755205973', '3862626013', '8184138489', '4980503471', '2039357566', '6321294709', '2300063524',
+                                                           '5899565591', '8625295305', '9167792140', '9143436002', '7276829171', '8625295305', '1274744512', '9262617255',
+                                                           '4838682809', '2887898061', '2871811858', '4207529981', '3456526723', '9366425281', '7106367407', '6523900663',
+                                                           '3992444928', '6538980272', '6467484794', '1375421153', '1102086935', '9672292896', '9652100378', '3362078899',
+                                                           '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
+                                                           '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101')))
+
+
+
 ####################### Only want the output to contain those with errors
 bioqc_csv2 <-  bioqc_csv %>% filter(!if_all(starts_with("Rule"), ~ . == " " | is.na(.)))
 
 
-bioqc_csv3 <- full_join(bioqc_csv2, split_setting, by=c("Connect_ID", "Collection_ID"))
+bioqc_csv_3 <- full_join(bioqc_csv2, split_setting, by=c("Connect_ID", "Collection_ID"))
+bioqc_csv__3 <- full_join(bioqc_csv_3, c_blood3.4, by=c("Connect_ID", "Site"))
+bioqc_csv3 <- full_join(bioqc_csv__3, c_urine3.4, by=c("Connect_ID", "Site"))
 bioqc_csv3$Rule48 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, "Rule 48", " ")
-
-
+bioqc_csv3$Rule29b = ifelse(bioqc_csv3$Connect_ID %in% c_blood3.4$Connect_ID, "Rule 29.b", " ")
+bioqc_csv3$Rule30b = ifelse(bioqc_csv3$Connect_ID %in% c_urine3.4$Connect_ID, "Rule 30.b", " ")
 
 
 

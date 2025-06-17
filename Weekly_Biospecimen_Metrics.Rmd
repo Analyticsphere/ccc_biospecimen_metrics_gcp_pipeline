@@ -141,29 +141,8 @@ for (i in 1: length(cnames)){
 }
 
 
-tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
-box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
-
-
-urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github
-y <- read.csv(urlfile) #the masterDD has just been updated which can't easily pulled from github directly as before. I need to download from the raw file in the github
-
-
 dictionary <- rio::import("https://episphere.github.io/conceptGithubActions/aggregate.json",format = "json")
 dd<-rbindlist(dictionary,fill=TRUE,use.names=TRUE,idcol="CID") #THIS TABLE HAS REPLICATED (CIDS+LABELS) WITH DIFFERENT VARIABLE NAMES,
-
-
-
-#to convert the numeric variables
-numbers_only <- function(x) !grepl("\\D", x)
-cnames <- names(box_wl_flat)
-###to check variables in recr_noinact_wl1
-data2 <- box_wl_flat
-for (i in 1: length(cnames)){
-  varname <- cnames[i]
-  var<-pull(data2,varname)
-  data2[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
-}
 
 
 ##to select biospecimen data in recruitment 
