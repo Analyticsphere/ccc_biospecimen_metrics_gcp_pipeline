@@ -1223,9 +1223,9 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
 
 biospe1_final <- biospe1 %>% select(all_of(names_set))
 
-log_info("Pulled all variables")
 
 log_info("Pulled all variables")
+
 
 openxlsx::write.xlsx(biospe1_final,as.character(glue("Connect_prod_Biospe_Formats_{currentDate}_boxfolder_{boxfolder}.xlsx")),row.names = F,na="")
 
