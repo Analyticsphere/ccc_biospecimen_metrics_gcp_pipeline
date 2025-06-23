@@ -127,8 +127,8 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 bio_tb <- bq_project_query(project, 
-                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null and Connect_ID is not null')  
-biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
+                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where d_410912345 is not null and Connect_ID is not null')  
+biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
@@ -141,33 +141,12 @@ for (i in 1: length(cnames)){
 }
 
 
-tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
-box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
-
-
-urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github
-y <- read.csv(urlfile) #the masterDD has just been updated which can't easily pulled from github directly as before. I need to download from the raw file in the github
-
-
 dictionary <- rio::import("https://episphere.github.io/conceptGithubActions/aggregate.json",format = "json")
 dd<-rbindlist(dictionary,fill=TRUE,use.names=TRUE,idcol="CID") #THIS TABLE HAS REPLICATED (CIDS+LABELS) WITH DIFFERENT VARIABLE NAMES,
 
 
-
-#to convert the numeric variables
-numbers_only <- function(x) !grepl("\\D", x)
-cnames <- names(box_wl_flat)
-###to check variables in recr_noinact_wl1
-data2 <- box_wl_flat
-for (i in 1: length(cnames)){
-  varname <- cnames[i]
-  var<-pull(data2,varname)
-  data2[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
-}
-
-
 ##to select biospecimen data in recruitment 
-recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants_JP'")
+recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants'")
 recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
@@ -185,7 +164,7 @@ tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,C
                                d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713,
                                state_d_706256705, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491,",
                                select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` Where Connect_ID is not null and d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and 
                                d_831041022 = '104430631'\")",
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
@@ -4435,20 +4414,11 @@ kitstatus <- "SELECT Connect_ID, d_173836415_d_266600170_d_319972665_d_379252329
 d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491,
 d_173836415_d_266600170_d_641006239_d_379252329, d_173836415_d_266600170_d_641006239_d_221592017,
 d_173836415_d_266600170_d_448660695
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
 where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631'" #not dead or wd or refused
 kitstatus_table <- bq_project_query(project, kitstatus)
 kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
- 
- 
- 
-# kitdate <- "SELECT Connect_ID, d_143615646_d_826941471, d_650516960, d_820476880, d_678166505 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
-# where Connect_ID is not null and d_820476880 LIKE 'CHA%'"
-# kitdate_table <- bq_project_query(project, kitdate)
-# kit_data <- bq_table_download(kitdate_table, bigint="integer64",n_max = Inf, page_size = 10000)
-# kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
- 
  
  
  
@@ -4492,7 +4462,7 @@ kit_table <- kit_table %>%  mutate(Site = case_when(d_827220437==125001209 ~ "Ka
  
  
  
-kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` where Connect_ID IS NOT NULL"
+kitassembly <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` where Connect_ID IS NOT NULL"
 kitassembly_table <- bq_project_query(project, kitassembly)
 kitassembly_data <- bq_table_download(kitassembly_table, bigint="integer64",n_max = Inf, page_size = 10000)
 kitassembly_data$Connect_ID <- as.numeric(kitassembly_data$Connect_ID)
@@ -4501,7 +4471,7 @@ kit_assembly <- left_join(kitassembly_data, kit_table, by="Connect_ID")
  
 ## Merging the biospecimen table in to use this kit_sett table as a Figure later.
 kitsetting <- "SELECT Connect_ID, d_650516960, d_678166505,d_143615646_d_826941471,  d_556788178, d_820476880
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP`
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
 where Connect_ID is not null "
 kitsetting_table <- bq_project_query(project, kitsetting)
 kit_set <- bq_table_download(kitsetting_table, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -5094,6 +5064,13 @@ status_elg_knB
  
 add_footnote(status_elg_knC, "Note: “Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to April 2024. Home mouthwash collections were launched for eligible participants in April 2024. Home mouthwash collections for backlog collections (before April 2024) will be launched at a later date.", notation = "none")
 ```
+ 
+```{r, include=FALSE}
+
+## Add a new Table 7.2: Of participants where "Kit Request Eligible" = yes and "Kit Request Eligible" date was at least 24 hours ago, how many have kit status that is not null. (distrbution of kit statuses) https://github.com/episphere/connect/issues/1326#issuecomment-2960611399
+
+```
+ 
  
 \FloatBarrier
 ```{r KnitrTables7.2,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
