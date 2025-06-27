@@ -18,6 +18,11 @@ output:
     df_print: paged 
 ---
 
+```{r note, include=FALSE}
+
+############# Note: Participants with errors whose data we will not correct will be excluded from the rule. Github contains records of these exclusions as well.
+
+```
 
 
 ```{r library, include=FALSE}
@@ -34,29 +39,18 @@ library(glue)
 library(expss) # needed for xlxs
 bq_auth()
 
+currentDate <- Sys.Date()
 
-### Set Box folders for output CSV files #######################################
-use_test_box_folder <- FALSE # Local user sets this (Jake or Kelsey)
 
-# TODO: Fix conditional box folder configuration.
+### Set Box folders for output CSV files 
 
-# Over-ride if using plumber api on GCP (USER DOESN'T TOUCH THIS!)
-# Check if the environment variable exists and is not empty
-#if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
-#    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
-#  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
-#}
+boxfolder <- 221297686961
 
-if (use_test_box_folder) {
-  boxfolder <- 222593912729 # test box folder
-} else {
-  boxfolder <- 221297686961 # destination of CSV files (not pdf)
-}
-################################################################################
 ```
 
 
 ```{r BQ_pull, include=FALSE}
+
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 
@@ -76,7 +70,7 @@ parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_
 d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_541483796_d_379252329, 
 d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_541483796_d_826941471,
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
-d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491 #,d_173836415_d_266600170_d_641006239_d_826941471
+d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471
 
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
@@ -145,10 +139,10 @@ write_to_local_drive = F #F
 ### This function below determines whether the file will be created locally or not.
 local_drive= ifelse(write_to_local_drive, "~/Biospecimen/data/", "")
 
+```
 
 
-
-#################
+```{r functions, include=FALSE}
 
 ## Sorting by Site causes an error message when there are no rows. This function eliminates that problem
 safe_arrange <- function(df, ...) {
@@ -162,10 +156,8 @@ safe_arrange <- function(df, ...) {
 
 ```
 
+
 \newpage
-
-
-
 
 ### 1. (Derived) Clinical DB Blood RRL Received (BioClin_DBBloodRRL_v1r0): If all blood tubes are not collected, this should be no
 ```{r BioClin_DBBloodRRL_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
@@ -302,8 +294,6 @@ knitr::kable(qc3_2, longtable = TRUE)
 ###	7. If BioFin_BaseUrineCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clincial, and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, BioClin_SiteUrineColl_v1r0 must be yes
 ```{r BioClin_SiteUrineColl_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
-currentDate <- Sys.Date()
-
 qc_7 <- bioqc %>%  filter(d_167958071=="Yes" & d_650516960=="Clinical" & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
                            is.na(d_173836415_d_266600170_d_786930107)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_786930107) %>%  safe_arrange(Site)
@@ -317,7 +307,6 @@ knitr::kable(qc_7, longtable = TRUE)
 ###	8. If BioFin_BaseBloodCol_v1r0 = yes, collection setting is Clincial and BioClin_DBBloodRRLDtBL_v1r0 occurred more than 7 days ago, BioClin_SiteBloodColl_v1r0 must be yes
 ```{r BioClin_SiteBloodColl_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
 
-currentDate <- Sys.Date()
 
 qc_8 <- bioqc %>%  filter(d_878865966=="Yes" & d_650516960=="Clinical" & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & 
                            is.na(d_173836415_d_266600170_d_693370086)) %>% 
@@ -439,6 +428,8 @@ knitr::kable(BloodDtTm_noHP, longtable = TRUE)
 
 ```{r HPExcluded6, echo=FALSE, warning=FALSE, message=FALSE}
 
+##Rule exlcuded for now
+
 ### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_BldOrderPlaced_v1r0 = 1. HP Excluded
 
 BloodDtTmVs_noHP <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_769615780) & d_173836415_d_266600170_d_530173840!="Yes"	& 
@@ -468,6 +459,9 @@ knitr::kable(UrineDtTm_noHP, longtable = TRUE)
 
 
 ```{r HPExcluded4, echo=FALSE, warning=FALSE, message=FALSE}
+
+##Rule exlcuded for now
+
 ### IF  BioClin_BldOrderPlacdDt_v1r0 is populated, THEN BioClin_UrnOrdPlaced must = 1. HP Excluded
 
 UrineDtTmVs_noHP <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_939818935) & d_173836415_d_266600170_d_860477844!="Yes"	& 
@@ -488,10 +482,10 @@ colnames(UrineDtTmVs_noHP) <- c("Site", "Connect ID", "BioClin_UrnOrdPlaced")
 ```{r BioBPTL_DateRecClinical, echo=FALSE, warning=FALSE, message=FALSE}
 
 
- ###########chnage to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
+rule17<- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4)
 
 
-qc13_tube2 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_299553921_d_593843561=="Yes" & d_299553921_d_762124027=="No" & is.na(d_299553921_d_926457119)
+qc13_tube2 <- rule17 %>%  filter(d_299553921_d_593843561=="Yes" & d_299553921_d_762124027=="No" & is.na(d_299553921_d_926457119)
                                 & Connect_ID!="7609852429") %>% 
   select(Site, Connect_ID, d_299553921_d_926457119) %>%  safe_arrange(Site)
 
@@ -499,40 +493,35 @@ colnames(qc13_tube2) <- c("Site", "Connect ID", "Serum Separator Tube 1- Date Re
 knitr::kable(qc13_tube2, longtable = TRUE)
 
 
-qc13_tube5 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_703954371_d_593843561=="Yes" & 
-                                  d_703954371_d_762124027=="No" & is.na(d_703954371_d_926457119)
+qc13_tube5 <- rule17 %>%  filter(d_703954371_d_593843561=="Yes" & d_703954371_d_762124027=="No" & is.na(d_703954371_d_926457119)
                                 & Connect_ID!="7609852429") %>% 
   select(Site, Connect_ID, d_703954371_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube5) <- c("Site", "Connect ID", "Serum Separator Tube 2- Date Received")
 knitr::kable(qc13_tube5, longtable = TRUE)
 
-qc13_tube_sst3 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_376960806_d_593843561=="Yes" & 
-                                    d_376960806_d_762124027=="No" & is.na(d_376960806_d_926457119) & 
+qc13_tube_sst3 <- rule17 %>%  filter(d_376960806_d_593843561=="Yes" & d_376960806_d_762124027=="No" & is.na(d_376960806_d_926457119) & 
                                     Connect_ID!="9729007313" & Connect_ID!="7609852429" & Connect_ID!="6380609394") %>% 
   select(Site, Connect_ID, d_376960806_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube_sst3) <- c("Site", "Connect ID", "Serum Separator Tube 3- Date Received")
 knitr::kable(qc13_tube_sst3, longtable = TRUE)
 
-qc13_tube_sst4 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_232343615_d_593843561=="Yes" & 
-                                      d_232343615_d_762124027=="No" & is.na(d_232343615_d_926457119) & 
+qc13_tube_sst4 <- rule17 %>%  filter(d_232343615_d_593843561=="Yes" & d_232343615_d_762124027=="No" & is.na(d_232343615_d_926457119) & 
                                       Connect_ID!="9729007313" & Connect_ID!="7609852429" & Connect_ID!="6380609394") %>% 
   select(Site, Connect_ID, d_232343615_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube_sst4) <- c("Site", "Connect ID", "Serum Separator Tube 4- Date Received")
 knitr::kable(qc13_tube_sst4, longtable = TRUE)
 
-qc13_tube_sst5 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_589588440_d_593843561=="Yes" & 
-                                      d_589588440_d_762124027=="No" & is.na(d_589588440_d_926457119) & 
+qc13_tube_sst5 <- rule17 %>%  filter(d_589588440_d_593843561=="Yes" & d_589588440_d_762124027=="No" & is.na(d_589588440_d_926457119) & 
                                       !(Connect_ID %in% c("6877720616", "1158253659"))) %>% 
   select(Site, Connect_ID, d_589588440_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube_sst5) <- c("Site", "Connect ID", "Serum Separator Tube 5- Date Received")
 knitr::kable(qc13_tube_sst5, longtable = TRUE)
 
-qc13_tube3 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_454453939_d_593843561=="Yes" & 
-                                  d_454453939_d_762124027=="No" & is.na(d_454453939_d_926457119) & 
+qc13_tube3 <- rule17 %>%  filter(d_454453939_d_593843561=="Yes" & d_454453939_d_762124027=="No" & is.na(d_454453939_d_926457119) & 
                                   Connect_ID!="9729007313" & Connect_ID!="7609852429") %>% 
   select(Site, Connect_ID, d_454453939_d_926457119) %>%  safe_arrange(Site)
 
@@ -540,8 +529,7 @@ colnames(qc13_tube3) <- c("Site", "Connect ID", "EDTA Tube 1- Date Received")
 knitr::kable(qc13_tube3, longtable = TRUE)
 
 
-qc13_tube_edat2 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_677469051_d_593843561=="Yes" & 
-                                       d_677469051_d_762124027=="No" & is.na(d_677469051_d_926457119) & 
+qc13_tube_edat2 <- rule17 %>%  filter(d_677469051_d_593843561=="Yes" & d_677469051_d_762124027=="No" & is.na(d_677469051_d_926457119) & 
                                        Connect_ID!="9729007313" & Connect_ID!="7609852429") %>% 
   select(Site, Connect_ID, d_677469051_d_926457119) %>%  safe_arrange(Site)
 
@@ -549,8 +537,7 @@ colnames(qc13_tube_edat2) <- c("Site", "Connect ID", "EDTA Tube 2- Date Received
 knitr::kable(qc13_tube_edat2, longtable = TRUE)
 
 
-qc13_tube_edat3 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_683613884_d_593843561=="Yes" & 
-                                       d_683613884_d_762124027=="No" & is.na(d_683613884_d_926457119) & 
+qc13_tube_edat3 <- rule17 %>%  filter(d_683613884_d_593843561=="Yes" & d_683613884_d_762124027=="No" & is.na(d_683613884_d_926457119) & 
                                        Connect_ID!="9729007313" & Connect_ID!="7609852429") %>% 
   select(Site, Connect_ID, d_683613884_d_926457119) %>%  safe_arrange(Site)
 
@@ -559,8 +546,8 @@ knitr::kable(qc13_tube_edat3, longtable = TRUE)
 
 
 
-qc13_tube4 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_652357376_d_593843561=="Yes" & 
-                                  d_652357376_d_762124027=="No" & is.na(d_652357376_d_926457119) & d_827220437==548392715 & d_650516960=="Clinical") %>% # | d_827220437==657167265 once Sanford is hybrid
+qc13_tube4 <- rule17 %>%  filter(d_652357376_d_593843561=="Yes" & d_652357376_d_762124027=="No" & is.na(d_652357376_d_926457119) & 
+                                   (d_827220437==548392715 | d_827220437==657167265) & d_650516960=="Clinical") %>% 
   select(Site, Connect_ID, d_652357376_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube4) <- c("Site", "Connect ID", "ACD Tube 1- Date Received")
@@ -568,13 +555,8 @@ knitr::kable(qc13_tube4, longtable = TRUE)
 
 
 
-
-
-
-
-
-
-qc13_tube6 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_838567176_d_593843561=="Yes" & d_838567176_d_762124027=="No" &  is.na(d_838567176_d_926457119) & Connect_ID!="7609852429") %>% 
+qc13_tube6 <- rule17 %>%  filter(d_838567176_d_593843561=="Yes" & d_838567176_d_762124027=="No" &  is.na(d_838567176_d_926457119) & 
+                                   Connect_ID!="7609852429") %>% 
   select(Site, Connect_ID, d_838567176_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube6) <- c("Site", "Connect ID", "Heparin Tube 1- Date Received")
@@ -582,7 +564,8 @@ knitr::kable(qc13_tube6, longtable = TRUE)
 
 
 
-qc13_tube8 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_958646668_d_593843561=="Yes" & d_958646668_d_762124027=="No" &  is.na(d_958646668_d_926457119) & Connect_ID!="7609852429") %>% 
+qc13_tube8 <- rule17 %>%  filter(d_958646668_d_593843561=="Yes" & d_958646668_d_762124027=="No" &  is.na(d_958646668_d_926457119) & 
+                                   Connect_ID!="7609852429") %>% 
   select(Site, Connect_ID, d_958646668_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube8) <- c("Site", "Connect ID", "Heparin Tube 2- Date Received")
@@ -593,9 +576,7 @@ knitr::kable(qc13_tube8, longtable = TRUE)
 
 qc13_tube7 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & 
                                   d_973670172_d_593843561=="Yes" & d_973670172_d_762124027=="No" & is.na(d_973670172_d_926457119) & 
-                                  Connect_ID!="2215062576" & #KPNW exclusion
-                                  Connect_ID!="4002548016" &  #HF exclusion
-                                  Connect_ID!="7609852429") %>%  #SF exclusion
+                                  !(Connect_ID %in% c("2215062576","4002548016","7609852429"))) %>% 
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube7) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
@@ -603,7 +584,7 @@ knitr::kable(qc13_tube7, longtable = TRUE)
 
 
 
-qc13_tube9 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & d_505347689_d_593843561=="Yes" & d_505347689_d_762124027=="No" & is.na(d_505347689_d_926457119)) %>%
+qc13_tube9 <- rule17 %>%  filter(d_505347689_d_593843561=="Yes" & d_505347689_d_762124027=="No" & is.na(d_505347689_d_926457119)) %>%
   select(Site, Connect_ID, d_505347689_d_926457119) %>%  safe_arrange(Site)
 
 
@@ -617,13 +598,15 @@ knitr::kable(qc13_tube9, longtable = TRUE)
 
 
 
-### 18. Tube Date Received Research - If (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
+### 18. Tube Date Received Research - If BioFin_ResearchBldTmBL_v1r0 occured more then 4 days ago, (tube type) was collected, and (tube type) was not discarded, then BioBPTL_DateRec_v1r0 for that tube type should be populated 
 ```{r BioBPTL_DateRecResearch, echo=FALSE, warning=FALSE, message=FALSE}
 
 
  ###########chnage to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
 
 bioqcR <- bioqc %>%  filter(d_650516960=="Research")
+
+rule18 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4)
 
 
 qc13_Rtube1 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_448660695, units="days"), digits=0))>4 & d_143615646_d_593843561=="Yes" & d_143615646_d_762124027=="No" & is.na(d_143615646_d_926457119) & 
@@ -637,7 +620,7 @@ knitr::kable(qc13_Rtube1, longtable = TRUE)
 
 
 
-qc13_Rtube2 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_299553921_d_593843561=="Yes" & d_299553921_d_762124027=="No" & is.na(d_299553921_d_926457119) &
+qc13_Rtube2 <- rule18 %>%  filter(d_299553921_d_593843561=="Yes" & d_299553921_d_762124027=="No" & is.na(d_299553921_d_926457119) &
                                     Connect_ID!="3409243008" & Connect_ID!="8598143342") %>% 
   select(Site, Connect_ID, d_299553921_d_926457119) %>%  safe_arrange(Site)
 
@@ -647,7 +630,7 @@ knitr::kable(qc13_Rtube2, longtable = TRUE)
 
 
 
-qc13_Rtube3 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_454453939_d_593843561=="Yes" & d_454453939_d_762124027=="No" & is.na(d_454453939_d_926457119) &
+qc13_Rtube3 <- rule18 %>%  filter(d_454453939_d_593843561=="Yes" & d_454453939_d_762124027=="No" & is.na(d_454453939_d_926457119) &
                                     !(Connect_ID %in% c("3409243008", "8193439990", "5743151720", 
                                                         "5861017989", "8598143342"))) %>% 
   select(Site, Connect_ID, d_454453939_d_926457119) %>%  safe_arrange(Site)
@@ -658,7 +641,7 @@ knitr::kable(qc13_Rtube3, longtable = TRUE)
 
 
 
-qc13_Rtube4 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_652357376_d_593843561=="Yes" & d_652357376_d_762124027=="No" & is.na(d_652357376_d_926457119) & #| d_827220437==657167265 once Sanford is hybrid
+qc13_Rtube4 <- rule18 %>%  filter(d_652357376_d_593843561=="Yes" & d_652357376_d_762124027=="No" & is.na(d_652357376_d_926457119) & #| d_827220437==657167265 once Sanford is hybrid
                                     !(Connect_ID %in% c("1735874266", "3409243008"))) %>% # HF exclusion
 
   select(Site, Connect_ID, d_652357376_d_926457119) %>%  safe_arrange(Site)
@@ -669,7 +652,7 @@ knitr::kable(qc13_Rtube4, longtable = TRUE)
 
 
 
-qc13_Rtube5 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_703954371_d_593843561=="Yes" & d_703954371_d_762124027=="No" & is.na(d_703954371_d_926457119) &
+qc13_Rtube5 <- rule18 %>%  filter(d_703954371_d_593843561=="Yes" & d_703954371_d_762124027=="No" & is.na(d_703954371_d_926457119) &
                                     Connect_ID!="3409243008") %>% 
   select(Site, Connect_ID, d_703954371_d_926457119) %>%  safe_arrange(Site)
 
@@ -679,7 +662,7 @@ knitr::kable(qc13_Rtube5, longtable = TRUE)
 
 
 
-qc13_Rtube6 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 & d_838567176_d_593843561=="Yes" & d_838567176_d_762124027=="No" &  is.na(d_838567176_d_926457119) & 
+qc13_Rtube6 <- rule18 %>%  filter(d_838567176_d_593843561=="Yes" & d_838567176_d_762124027=="No" &  is.na(d_838567176_d_926457119) & 
                                     !(Connect_ID %in% c("3409243008", "8193439990", "5842989867"))) %>% 
   select(Site, Connect_ID, d_838567176_d_926457119) %>%  safe_arrange(Site)
 
@@ -687,7 +670,7 @@ colnames(qc13_Rtube6) <- c("Site", "Connect ID", "Heparin Tube 1- Date Received"
 knitr::kable(qc13_Rtube6, longtable = TRUE)
 
 
-qc13_Rtube7 <- bioqcR %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_561681068, units="days"), digits=0))>4 &  d_973670172_d_593843561=="Yes" & d_973670172_d_762124027=="No" & is.na(d_973670172_d_926457119) & !(Connect_ID %in% c(9145733933,9618974099,8527264977,6473532641,4174960021, 4435276749, 1834747483))) %>% #Sanford exclusion
+qc13_Rtube7 <- rule18 %>%  filter( d_973670172_d_593843561=="Yes" & d_973670172_d_762124027=="No" & is.na(d_973670172_d_926457119) & !(Connect_ID %in% c(9145733933,9618974099,8527264977,6473532641,4174960021, 4435276749, 1834747483))) %>% #Sanford exclusion
 
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  safe_arrange(Site)
 
@@ -696,7 +679,7 @@ knitr::kable(qc13_Rtube7, longtable = TRUE)
 
 
 
-qc13_Rtube8 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & d_505347689_d_593843561=="Yes" & d_505347689_d_762124027=="No" & is.na(d_505347689_d_926457119) & d_827220437=="548392715" & d_650516960=="Clinical") %>% # | d_827220437==657167265 once Sanford is hybrid
+qc13_Rtube8 <- rule18 %>%  filter(d_505347689_d_593843561=="Yes" & d_505347689_d_762124027=="No" & is.na(d_505347689_d_926457119)) %>% 
   select(Site, Connect_ID, d_505347689_d_926457119) %>%  safe_arrange(Site)
 
 
@@ -1051,7 +1034,6 @@ bioqc1 <- bioqc %>%
 #remove any brackets or blank spaces around polyID
 str1 <- bioqc1$d_173836415_d_266600170_d_543608829
 str1 <- str_trim(str1)
-#PolyBloodID <- unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) 
 PolyBloodID <- str_trim(unlist(strsplit(gsub("\\[|\\]", "", str1), ",")))
 bioqc1$d_646899796_integer <- str_trim(bioqc1$d_646899796_integer)
 
@@ -1084,7 +1066,6 @@ bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_
 #remove any brackets around polyID
 str2 <- bioqc2$d_173836415_d_266600170_d_110349197
 str2 <- str_trim(str2)
-#PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ",")) 
 PolyUrineID <- str_trim(unlist(strsplit(gsub("\\[|\\]", "", str2), ",")))
 
 bioqc2$d_928693120_integer <- str_trim(bioqc2$d_928693120_integer) 
@@ -1186,9 +1167,9 @@ Bio_HMW_merged = left_join(HMW, MW_data,  by="Connect_ID")
 # those with replacement kit 1 have one row with d_426588510==663273321, and one row with d_426588510==389478821
 # those with replacement kit 2 have one row with d_426588510==663273321, and one row with d_426588510==389478821 AND one row with d_426588510 == 772116457
 Bio_HMW_merged <- Bio_HMW_merged %>% filter(d_650516960=='664882224') %>%  #remove research collections 
-  mutate(kit_level= case_when(d_426588510 == 772116457 ~ "Replacement Kit 2",
-                              d_426588510 == 389478821 ~ "Replacement Kit 1",
-                              d_426588510 == 663273321 ~ "Initial Kit"))
+  mutate(kit_level= case_when(d_426588510 == "Replacement Kit 2" ~ "Replacement Kit 2",
+                              d_426588510 == "Replacement Kit 1" ~ "Replacement Kit 1",
+                              d_426588510 == "Initil Kit" ~ "Initial Kit"))
 
 ## Somehow the NAs are being separated
 #Bio_HMW_merged$kit_level[is.na(Bio_HMW_merged$kit_level)]= "Initial Kit" ## variable was backfilled so shouldn't be null anymore
@@ -1230,43 +1211,27 @@ Bio_HMW <- bind_rows(
 
 
 
-
-```{r pending, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
-
-### 33. If kit status is Pending, then date/time kit pending should populate
-
-pend <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==517216441 | d_173836415_d_266600170_d_541483796_d_221592017==517216441 |
-                           d_173836415_d_266600170_d_641006239_d_221592017==517216441) & is.na(d_341636034)) %>% 
-  select(Site, Connect_ID, d_341636034) %>%  safe_arrange(Site)
-
-colnames(pend) <- c("Site", "Connect ID", "BioKit_KitDatePend")
-knitr::kable(pend) %>% kable_styling(latex_options = "HOLD_position")
-
-```
-
-
-
 ### 34. If kit type is Mouthwash, then return kit tracking number, supply kit ID, return kit ID, collection cup ID, and collection card ID should populate.
 
 ```{r all_populate, echo=FALSE, warning=FALSE, message=FALSE}
 
 all_populate <- HMW %>%  filter(((d_173836415_d_266600170_d_319972665_d_379252329==976461859 & 
-                                  (d_173836415_d_266600170_d_319972665_d_221592017==241974920 | 
-                                     d_173836415_d_266600170_d_319972665_d_221592017==277438316 |
-                                     d_173836415_d_266600170_d_319972665_d_221592017==375535639)) | 
+                                  (d_173836415_d_266600170_d_319972665_d_221592017=="Assigned" | 
+                                     d_173836415_d_266600170_d_319972665_d_221592017=="Shipped" |
+                                     d_173836415_d_266600170_d_319972665_d_221592017=="Received")) | 
                                    (d_173836415_d_266600170_d_541483796_d_379252329==976461859 & 
-                                  (d_173836415_d_266600170_d_541483796_d_221592017==241974920 | 
-                                     d_173836415_d_266600170_d_541483796_d_221592017==277438316 |
-                                     d_173836415_d_266600170_d_541483796_d_221592017==375535639)) | 
+                                  (d_173836415_d_266600170_d_541483796_d_221592017=="Assigned" | 
+                                     d_173836415_d_266600170_d_541483796_d_221592017=="Shipped" |
+                                     d_173836415_d_266600170_d_541483796_d_221592017=="Received")) | 
                                    (d_173836415_d_266600170_d_641006239_d_379252329==976461859 & 
-                                  (d_173836415_d_266600170_d_641006239_d_221592017==241974920 | 
-                                     d_173836415_d_266600170_d_641006239_d_221592017==277438316 |
-                                     d_173836415_d_266600170_d_641006239_d_221592017==375535639))) &
+                                  (d_173836415_d_266600170_d_641006239_d_221592017=="Assigned" | 
+                                     d_173836415_d_266600170_d_641006239_d_221592017=="Shipped" |
+                                     d_173836415_d_266600170_d_641006239_d_221592017=="Received"))) &
                                   (is.na(d_972453354) | is.na(d_690210658) | is.na(d_194252513) | is.na(d_259846815) | is.na(d_786397882) )) %>% 
   select(Site, Connect_ID, d_972453354, d_690210658, d_194252513, d_259846815, d_786397882) %>%  safe_arrange(Site)
 
 colnames(all_populate) <- c("Site", "Connect ID", "ReturnKitTrack", "SupplyKitID", "ReturnKitID", "MWCupID", "MWCardID")
-knitr::kable(all_populate, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_position")
+knitr::kable(all_populate, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_position", font_size=7)
 
 ```
 
@@ -1300,7 +1265,7 @@ knitr::kable(hmw2, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_pos
 ### 37. If kit status is Assigned, then supply kit tracking number and kit level should populate
 ```{r assigned, echo=FALSE, warning=FALSE, message=FALSE}
 
-asgn <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==241974920 | d_173836415_d_266600170_d_541483796_d_221592017==241974920 | d_173836415_d_266600170_d_641006239_d_221592017==241974920) & 
+asgn <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017=="Assigned" | d_173836415_d_266600170_d_541483796_d_221592017=="Assigned" | d_173836415_d_266600170_d_641006239_d_221592017=="Assigned") & 
                           (is.na(d_531858099) | is.na(d_426588510))) %>% 
   select(Site, Connect_ID, d_531858099, d_426588510) %>%  safe_arrange(Site)
 
@@ -1314,9 +1279,9 @@ knitr::kable(asgn, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_pos
 ```{r shipped, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160)  | is.na(d_426588510))) |
-                           (d_173836415_d_266600170_d_541483796_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160)  | is.na(d_426588510))) |
-                           (d_173836415_d_266600170_d_641006239_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160)  | is.na(d_426588510)))) %>%  
+shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017=="Shipped" & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160)  | is.na(d_426588510))) |
+                           (d_173836415_d_266600170_d_541483796_d_221592017=="Shipped" & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160)  | is.na(d_426588510))) |
+                           (d_173836415_d_266600170_d_641006239_d_221592017=="Shipped" & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160)  | is.na(d_426588510)))) %>%  
   select(Site, Connect_ID, d_531858099, d_173836415_d_266600170_d_319972665_d_661940160) %>%  safe_arrange(Site)
 
 colnames(shipt) <- c("Site", "Connect ID", "BioKit_SupplyKitTrack", "BioKit_KitShipTm")
@@ -1328,11 +1293,11 @@ knitr::kable(shipt, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ```{r recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-recvd <- Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & kit_level=="Initial Kit" & 
+recvd <- Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017=="Received" & kit_level=="Initial Kit" & 
                                  (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) |
-                               (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & kit_level=="Replacement Kit 1" & 
+                               (d_173836415_d_266600170_d_541483796_d_221592017=="Received" & kit_level=="Replacement Kit 1" & 
                                   (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) | 
-                               (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & kit_level=="Replacement Kit 2" & 
+                               (d_173836415_d_266600170_d_641006239_d_221592017=="Received" & kit_level=="Replacement Kit 2" & 
                                   (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510)))) %>%  
   select(Site, Connect_ID, kit_level, d_531858099, d_661940160, d_826941471, d_137401245) %>%  safe_arrange(Site)
 
@@ -1346,9 +1311,9 @@ knitr::kable(recvd, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ### 40. If kit status is Received, then the mouthwash sample is collected.
 ```{r collected, echo=FALSE, warning=FALSE, message=FALSE}
 
-collctd <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & (d_173836415_d_266600170_d_319972665_d_221592017==375535639 | 
-                                                                    d_173836415_d_266600170_d_541483796_d_221592017==375535639 |
-                                                                    d_173836415_d_266600170_d_641006239_d_221592017==375535639) &
+collctd <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & (d_173836415_d_266600170_d_319972665_d_221592017=="Received" | 
+                                                                    d_173836415_d_266600170_d_541483796_d_221592017=="Received" |
+                                                                    d_173836415_d_266600170_d_641006239_d_221592017=="Received") &
                                  (is.na(d_143615646_d_593843561) | d_143615646_d_593843561=="No")) %>% 
   select(Site, Connect_ID, d_143615646_d_593843561) %>%  safe_arrange(Site)
 
@@ -1363,11 +1328,9 @@ knitr::kable(collctd, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_
 ```{r mwtubeid, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-#IF BioKit_KitStatus_v1r0 (221592017) = 4 THEN MWTube1_BioCol_TubeID_v1r0 (d_143615646_d_825582494) = populate
-
-mwtubeid <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & (d_173836415_d_266600170_d_319972665_d_221592017==375535639 | 
-                                                                    d_173836415_d_266600170_d_541483796_d_221592017==375535639 |
-                                                                    d_173836415_d_266600170_d_641006239_d_221592017==375535639) & is.na(d_143615646_d_825582494)) %>% 
+mwtubeid <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & (d_173836415_d_266600170_d_319972665_d_221592017=="Received" | 
+                                                                    d_173836415_d_266600170_d_541483796_d_221592017=="Received" |
+                                                                    d_173836415_d_266600170_d_641006239_d_221592017=="Received") & is.na(d_143615646_d_825582494)) %>% 
   select(Site, Connect_ID, d_143615646_d_825582494) %>%  safe_arrange(Site)
 
 colnames(mwtubeid) <- c("Site", "Connect ID", "MWTube1_BioCol_TubeID")
@@ -1381,8 +1344,7 @@ knitr::kable(mwtubeid, longtable = TRUE) %>% kable_styling(latex_options = "HOLD
 ```{r HC_Rules3, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-#IF BioKit_KitStatus_v1r0 from the particpants table (221592017) = 4  AND BioKit_KitType_v1r0 (379252329) = 0, THEN MWTube1_BioCol_TubeID_v1r0 (d_143615646_d_825582494) = BioKit_MWCupID_v1r0 (259846815)
-hmw3 <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & ((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & d_173836415_d_266600170_d_319972665_d_379252329==976461859) | (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & d_173836415_d_266600170_d_541483796_d_379252329==976461859) | (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & d_173836415_d_266600170_d_641006239_d_379252329==976461859)) & d_143615646_d_825582494!=d_259846815) %>% 
+hmw3 <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & ((d_173836415_d_266600170_d_319972665_d_221592017=="Received" & d_173836415_d_266600170_d_319972665_d_379252329==976461859) | (d_173836415_d_266600170_d_541483796_d_221592017=="Received" & d_173836415_d_266600170_d_541483796_d_379252329==976461859) | (d_173836415_d_266600170_d_641006239_d_221592017=="Received" & d_173836415_d_266600170_d_641006239_d_379252329==976461859)) & d_143615646_d_825582494!=d_259846815) %>% 
   select(Site, Connect_ID, d_143615646_d_825582494) %>%  safe_arrange(Site)
 
 colnames(hmw3) <- c("Site", "Connect ID", "Mouthwash Sample Tube ID (Full Specimen ID)")
@@ -1396,17 +1358,13 @@ knitr::kable(hmw3, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_pos
 
 ```{r homsetting, echo=FALSE, warning=FALSE, message=FALSE}
 
-
-
-# IF BioKit_KitStatus_v1r0 (221592017) = 4 AND BioKit_KitType_v1r0 (379252329) = 0 THEN BioSpm_MWSettingBL_v1r0 (915179629) = 2
-homsetting <- HMW %>%  filter(((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & d_173836415_d_266600170_d_319972665_d_379252329==976461859) | (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & d_173836415_d_266600170_d_541483796_d_379252329==976461859) | (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & d_173836415_d_266600170_d_641006239_d_379252329==976461859)) & d_173836415_d_266600170_d_915179629!=103209024) %>% 
+homsetting <- HMW %>%  filter(((d_173836415_d_266600170_d_319972665_d_221592017=="Received" & d_173836415_d_266600170_d_319972665_d_379252329==976461859) | (d_173836415_d_266600170_d_541483796_d_221592017=="Received" & d_173836415_d_266600170_d_541483796_d_379252329==976461859) | (d_173836415_d_266600170_d_641006239_d_221592017=="Received" & d_173836415_d_266600170_d_641006239_d_379252329==976461859)) & d_173836415_d_266600170_d_915179629!=103209024) %>% 
   mutate(BioSpm_MWSettingBL = case_when(d_173836415_d_266600170_d_915179629=="103209024" ~ "Home",
                                         d_173836415_d_266600170_d_915179629=="534621077" ~ "Research",
                                         d_173836415_d_266600170_d_915179629=="664882224" ~ "Clinical",
                                         TRUE ~ "NA")) %>% 
   select(Site, Connect_ID, BioSpm_MWSettingBL) %>%  safe_arrange(Site)
 
-#colnames(homsetting) <- c("Site", "Connect ID", "BioSpm_MWSettingBL")
 knitr::kable(homsetting, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_position")
 
 
@@ -1418,7 +1376,6 @@ knitr::kable(homsetting, longtable = TRUE) %>% kable_styling(latex_options = "HO
 
 
 
-# If BioSpm_MWSettingBL_v1r0 (915179629) = 2 AND MWTube1_BioCol_TubeCollected_v1r0 (d_143615646_d_593843561) = 1 THEN BioFin_BaseMouthCol_v1r0 (684635302) = 1
 bl_mw <-  Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_266600170_d_915179629==103209024 & d_143615646_d_593843561=="Yes" & 
                            (d_684635302=="No" | is.na(d_684635302)) ) %>% 
   select(Site, Connect_ID, d_684635302) %>%  safe_arrange(Site)
@@ -1435,8 +1392,6 @@ knitr::kable(bl_mw, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ```{r mw_dt, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-
-# If BioSpm_MWSettingBL_v1r0 (915179629) = 2 AND MWTube1_BioCol_TubeCollected_v1r0 (d_143615646_d_593843561) = 1 THEN BioFin_BMTimeBL_v1r0 (448660695) = populate
 mw_dt <-  Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_266600170_d_915179629==103209024 & d_143615646_d_593843561=="Yes" & 
                            is.na(d_173836415_d_266600170_d_448660695)) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_448660695) %>%  safe_arrange(Site)
@@ -1452,31 +1407,36 @@ knitr::kable(mw_dt, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ```{r kit_recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
 ### Need them on a kit level to review
-
 kits_recvd <- Bio_HMW %>%
-  mutate(
-    kit_level = factor(kit_level, levels = c("Initial Kit", "Replacement Kit 1", "Replacement Kit 2")),
-    flagged = case_when(
-      kit_level == "Replacement Kit 2" & d_173836415_d_266600170_d_641006239_d_221592017 == "375535639" ~ TRUE,
-      kit_level == "Replacement Kit 1" & d_173836415_d_266600170_d_541483796_d_221592017 == "375535639" ~ TRUE,
-      kit_level == "Initial Kit"       & d_173836415_d_266600170_d_319972665_d_221592017 == "375535639" ~ TRUE,
-      TRUE ~ FALSE
-    )
-  ) %>%
-  group_by(Connect_ID) %>%
-  filter(!any(flagged)) %>%
-  ungroup() %>%
-  filter(as.numeric(round(difftime(currentDate, d_195145666, units = "days"), digits = 0)) > 10) %>% 
+  filter(as.numeric(round(difftime(currentDate, d_195145666, units = "days"), digits = 0)) > 10 & 
+           ((kit_level == "Replacement Kit 2" & d_173836415_d_266600170_d_641006239_d_221592017 != "Received") |
+              (kit_level == "Replacement Kit 1" & d_173836415_d_266600170_d_541483796_d_221592017 != "Received") |
+              (kit_level == "Initial Kit" & d_173836415_d_266600170_d_319972665_d_221592017 != "Received"))) %>% 
   select(Site, Connect_ID, kit_level, d_195145666, d_972453354,
          d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_641006239_d_221592017) %>%  safe_arrange(Site)
+
 
 
 colnames(kits_recvd) <- c("Site", "Connect ID", "Kit_Level", "SrvMtW_TmComplete_v1r0", "BioKit_ReturnKitTrack", 
                           "Initial_BioKit_KitStatusBL_v1r0", "R1_BioKit_KitStatusBL_v1r0", "R2_BioKit_KitStatusBL_v1r0")
 
-cat(paste0("There are ", nrow(kits_recvd), " rows. This has been made into a separate XLXS file called", "\n", "'Biospecimen_QC_Rule46_Errors[current date]_[box folder number].xlxs'"))
+if (nrow(kits_recvd) < 50) {
+  knitr::kable(mw_dt, longtable = TRUE) %>%
+    kable_styling(latex_options = "HOLD_position")
+} else {
+  cat(paste0(
+    "There are ", nrow(kits_recvd), " rows. This has been made into a separate XLXS file called\n",
+    "'Biospecimen_QC_Rule46_Errors", currentDate, "_boxfolder_", boxfolder, ".xlsx'\n"
+  ))
+  
+  openxlsx::write.xlsx(
+    kits_recvd,
+    glue("{local_drive}Biospecimen_QC_Rule46_Errors{currentDate}_boxfolder_{boxfolder}.xlsx"),
+    row.names = FALSE,
+    na = ""
+  )
+}
 
-openxlsx::write.xlsx(kits_recvd,glue("{local_drive}Biospecimen_QC_Rule46_Errors{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 ```
 
@@ -1682,7 +1642,7 @@ urine_loc <- bioqc %>%  filter(d_167958071=="Yes" & d_173836415_d_266600170_d_71
   select(Site, Connect_ID, d_173836415_d_266600170_d_541311218, d_173836415_d_266600170_d_452847912) %>%  safe_arrange(Site)
 
 
-colnames(urine_loc) <- c("Site", "Connect ID", "BioClin_DBUrineRRLBL_v1r0", "BioClin_SiteUrLocatBL_v1r0")
+colnames(urine_loc) <- c("Site", "Connect ID", "BioClin_DBUrineRRLBL", "BioClin_SiteUrLocatBL")
 knitr::kable(urine_loc, longtable = TRUE)
 
 ```
@@ -1868,21 +1828,15 @@ knitr::kable(kit_rule1_r2, longtable = TRUE)
 ```
 
 
-
+###	63. If Replacement Kit 2 is received, BioKit_KitRecdTm_v1r0 should be populated.
 ```{r kit_rule2_r2, echo=FALSE, warning=FALSE, message=FALSE}
 
-#### NONE YET
+kit_rule2_r2 <- bioqc %>%  filter(d_173836415_d_266600170_d_641006239_d_221592017=="375535639" & is.na(d_173836415_d_266600170_d_641006239_d_826941471)) %>%
+  select(Site, Connect_ID, d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_826941471) %>%  safe_arrange(Site)
 
 
-###	63. If Replacement Kit 2 is received, BioKit_KitRecdTm_v1r0 should be populated.
-
-
-# kit_rule2_r2 <- bioqc %>%  filter(d_173836415_d_266600170_d_641006239_d_221592017=="375535639" & is.na(d_173836415_d_266600170_d_641006239_d_826941471)) %>% 
-#   select(Site, Connect_ID, d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_826941471) %>%  safe_arrange(Site)
-# 
-# 
-# colnames(kit_rule2_r2) <- c("Site", "Connect ID", "R2_BioKit_KitStatus_v1r0", "BioKit_KitRecdTm_v1r0")
-# knitr::kable(kit_rule2_r2)
+colnames(kit_rule2_r2) <- c("Site", "Connect ID", "R2_BioKit_KitStatus_v1r0", "BioKit_KitRecdTm_v1r0")
+knitr::kable(kit_rule2_r2)
 
 ```
 
@@ -1921,7 +1875,7 @@ knitr::kable(kit_rule4_r2, longtable = TRUE)
 ```{r r1_r2_undeliverable, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-r1_r2_undeliverable <- HMW %>%  filter(d_173836415_d_266600170_d_641006239_d_221592017=="332067457" & (d_426588510=="389478821" | d_426588510=="772116457")) %>% 
+r1_r2_undeliverable <- HMW %>%  filter(d_173836415_d_266600170_d_641006239_d_221592017=="332067457" & (d_426588510=="Replacement Kit 1" | d_426588510=="Replacement Kit 2")) %>% 
   select(Site, Connect_ID, d_173836415_d_266600170_d_641006239_d_221592017, d_426588510) %>%  safe_arrange(Site)
 
 
@@ -1933,7 +1887,7 @@ knitr::kable(r1_r2_undeliverable, longtable = TRUE)
 ###	67. If kit is an Initial kit, BioKit_DtKitReq_v1r0 should be null.
 ```{r kit_rule5, echo=FALSE, warning=FALSE, message=FALSE}
 
-# Column and table settings
+
 project_id <- "nih-nci-dceg-connect-prod-6d04"
 dataset <- "FlatConnect"
 table <- "participants"
@@ -2030,7 +1984,7 @@ GH262_tube2 <- bioqc %>%  filter(d_299553921_d_593843561=="Yes" & d_299553921_d_
   select(Site, Connect_ID, d_299553921_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube2) <- c("Site", "Connect ID", "SST1 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube2, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube2, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 GH262_tube5 <- bioqc %>%  filter(d_703954371_d_593843561=="Yes" & d_703954371_d_762124027=="No" &
@@ -2039,7 +1993,7 @@ GH262_tube5 <- bioqc %>%  filter(d_703954371_d_593843561=="Yes" & d_703954371_d_
   select(Site, Connect_ID, d_703954371_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube5) <- c("Site", "Connect ID", "SSST2 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube5, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube5, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube_sst3 <- bioqc %>%  filter(d_376960806_d_593843561=="Yes" & d_376960806_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_534041351!="Yes" | is.na(d_173836415_d_266600170_d_398645039)) &
@@ -2047,7 +2001,7 @@ GH262_tube_sst3 <- bioqc %>%  filter(d_376960806_d_593843561=="Yes" & d_37696080
   select(Site, Connect_ID, d_376960806_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_sst3) <- c("Site", "Connect ID", "SST3 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube_sst3, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_sst3, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube_sst4 <- bioqc %>%  filter(d_232343615_d_593843561=="Yes" & d_232343615_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_534041351!="Yes" | is.na(d_173836415_d_266600170_d_398645039))  &
@@ -2055,7 +2009,7 @@ GH262_tube_sst4 <- bioqc %>%  filter(d_232343615_d_593843561=="Yes" & d_23234361
   select(Site, Connect_ID, d_232343615_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_sst4) <- c("Site", "Connect ID", "SST4 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube_sst4, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_sst4, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube_sst5 <- bioqc %>%  filter(d_589588440_d_593843561=="Yes" & d_589588440_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_534041351!="Yes" | is.na(d_173836415_d_266600170_d_398645039)) &
@@ -2063,7 +2017,7 @@ GH262_tube_sst5 <- bioqc %>%  filter(d_589588440_d_593843561=="Yes" & d_58958844
   select(Site, Connect_ID, d_589588440_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_sst5) <- c("Site", "Connect ID", "SST5 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube_sst5, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_sst5, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube3 <- bioqc %>%  filter(d_454453939_d_593843561=="Yes" & d_454453939_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_534041351!="Yes" | is.na(d_173836415_d_266600170_d_398645039)) &
@@ -2071,7 +2025,7 @@ GH262_tube3 <- bioqc %>%  filter(d_454453939_d_593843561=="Yes" & d_454453939_d_
   select(Site, Connect_ID, d_454453939_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube3) <- c("Site", "Connect ID", "EDTA1 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube3, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube3, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 GH262_tube_edat2 <- bioqc %>%  filter(d_677469051_d_593843561=="Yes" & d_677469051_d_762124027=="No" &
@@ -2080,7 +2034,7 @@ GH262_tube_edat2 <- bioqc %>%  filter(d_677469051_d_593843561=="Yes" & d_6774690
   select(Site, Connect_ID, d_677469051_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_edat2) <- c("Site", "Connect ID", "EDTA2 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube_edat2, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_edat2, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 GH262_tube_edat3 <- bioqc %>%  filter(d_683613884_d_593843561=="Yes" & d_683613884_d_762124027=="No"  &
@@ -2089,7 +2043,7 @@ GH262_tube_edat3 <- bioqc %>%  filter(d_683613884_d_593843561=="Yes" & d_6836138
   select(Site, Connect_ID, d_683613884_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_edat3) <- c("Site", "Connect ID", "EDTA3 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube_edat3, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_edat3, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2100,7 +2054,7 @@ GH262_tube4 <- bioqc %>%  filter(d_652357376_d_593843561=="Yes" & d_652357376_d_
   select(Site, Connect_ID, d_652357376_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube4) <- c("Site", "Connect ID", "ACD Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube4, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube4, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2111,7 +2065,7 @@ GH262_tube6 <- bioqc %>%  filter(d_838567176_d_593843561=="Yes" & d_838567176_d_
   select(Site, Connect_ID, d_838567176_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube6) <- c("Site", "Connect ID", "Hep1 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube6, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube6, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2121,7 +2075,7 @@ GH262_tube8 <- bioqc %>%  filter(d_958646668_d_593843561=="Yes" & d_958646668_d_
   select(Site, Connect_ID, d_958646668_d_593843561, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039) %>%  safe_arrange(Site)
 
 colnames(GH262_tube8) <- c("Site", "Connect ID", "Hep2 Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube8, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube8, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2133,7 +2087,7 @@ GH262_tube9 <- bioqc %>%  filter(d_505347689_d_593843561=="Yes" & d_505347689_d_
 
 
 colnames(GH262_tube9) <- c("Site", "Connect ID", "STRECK Collected", "BioClin_DBBloodRRLB", "BioClin_DBBloodRRLDtBL")
-knitr::kable(GH262_tube9, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube9, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 ```
@@ -2165,7 +2119,7 @@ GH262_tube2 <- bioqc %>%  filter(d_299553921_d_593843561=="Yes" & d_299553921_d_
   select(Site, Connect_ID, d_299553921_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube2) <- c("Site", "Connect ID", "SST1 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube2, longtable = TRUE, font_size=7, font_size=7)
+knitr::kable(GH262_tube2, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 GH262_tube5 <- bioqc %>%  filter(d_703954371_d_593843561=="Yes" & d_703954371_d_762124027=="No" &
@@ -2174,7 +2128,7 @@ GH262_tube5 <- bioqc %>%  filter(d_703954371_d_593843561=="Yes" & d_703954371_d_
   select(Site, Connect_ID, d_703954371_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube5) <- c("Site", "Connect ID", "SSST2 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube5, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube5, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube_sst3 <- bioqc %>%  filter(d_376960806_d_593843561=="Yes" & d_376960806_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_316824786!="Yes" | is.na(d_173836415_d_266600170_d_740582332))  &
@@ -2182,7 +2136,7 @@ GH262_tube_sst3 <- bioqc %>%  filter(d_376960806_d_593843561=="Yes" & d_37696080
   select(Site, Connect_ID, d_376960806_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_sst3) <- c("Site", "Connect ID", "SST3 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube_sst3, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_sst3, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube_sst4 <- bioqc %>%  filter(d_232343615_d_593843561=="Yes" & d_232343615_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_316824786!="Yes" | is.na(d_173836415_d_266600170_d_740582332))  &
@@ -2190,7 +2144,7 @@ GH262_tube_sst4 <- bioqc %>%  filter(d_232343615_d_593843561=="Yes" & d_23234361
   select(Site, Connect_ID, d_232343615_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_sst4) <- c("Site", "Connect ID", "SST4 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube_sst4, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_sst4, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube_sst5 <- bioqc %>%  filter(d_589588440_d_593843561=="Yes" & d_589588440_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_316824786!="Yes" | is.na(d_173836415_d_266600170_d_740582332)) &
@@ -2198,7 +2152,7 @@ GH262_tube_sst5 <- bioqc %>%  filter(d_589588440_d_593843561=="Yes" & d_58958844
   select(Site, Connect_ID, d_589588440_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_sst5) <- c("Site", "Connect ID", "SST5 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube_sst5, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_sst5, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 GH262_tube3 <- bioqc %>%  filter(d_454453939_d_593843561=="Yes" & d_454453939_d_762124027=="No" &
                                  (d_173836415_d_266600170_d_316824786!="Yes" | is.na(d_173836415_d_266600170_d_740582332)) &
@@ -2206,7 +2160,7 @@ GH262_tube3 <- bioqc %>%  filter(d_454453939_d_593843561=="Yes" & d_454453939_d_
   select(Site, Connect_ID, d_454453939_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube3) <- c("Site", "Connect ID", "EDTA1 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube3, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube3, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 GH262_tube_edat2 <- bioqc %>%  filter(d_677469051_d_593843561=="Yes" & d_677469051_d_762124027=="No" &
@@ -2215,7 +2169,7 @@ GH262_tube_edat2 <- bioqc %>%  filter(d_677469051_d_593843561=="Yes" & d_6774690
   select(Site, Connect_ID, d_677469051_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_edat2) <- c("Site", "Connect ID", "EDTA2 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube_edat2, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_edat2, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 GH262_tube_edat3 <- bioqc %>%  filter(d_683613884_d_593843561=="Yes" & d_683613884_d_762124027=="No"  &
@@ -2224,7 +2178,7 @@ GH262_tube_edat3 <- bioqc %>%  filter(d_683613884_d_593843561=="Yes" & d_6836138
   select(Site, Connect_ID, d_683613884_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube_edat3) <- c("Site", "Connect ID", "EDTA3 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube_edat3, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube_edat3, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2235,7 +2189,7 @@ GH262_tube4 <- bioqc %>%  filter(d_652357376_d_593843561=="Yes" & d_652357376_d_
   select(Site, Connect_ID, d_652357376_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube4) <- c("Site", "Connect ID", "ACD Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube4, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube4, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2246,7 +2200,7 @@ GH262_tube6 <- bioqc %>%  filter(d_838567176_d_593843561=="Yes" & d_838567176_d_
   select(Site, Connect_ID, d_838567176_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube6) <- c("Site", "Connect ID", "Hep1 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube6, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube6, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2256,7 +2210,7 @@ GH262_tube8 <- bioqc %>%  filter(d_958646668_d_593843561=="Yes" & d_958646668_d_
   select(Site, Connect_ID, d_958646668_d_593843561, d_173836415_d_266600170_d_316824786, d_173836415_d_266600170_d_740582332) %>%  safe_arrange(Site)
 
 colnames(GH262_tube8) <- c("Site", "Connect ID", "Hep2 Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube8, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube8, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 
@@ -2268,7 +2222,7 @@ GH262_tube9 <- bioqc %>%  filter(d_505347689_d_593843561=="Yes" & d_505347689_d_
 
 
 colnames(GH262_tube9) <- c("Site", "Connect ID", "STRECK Collected", "BioClin_AnySpecRRLBL", "BioClin_AnySpecRRLBTmL")
-knitr::kable(GH262_tube9, longtable = TRUE, font_size=7)
+knitr::kable(GH262_tube9, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 Github262_spec_tubeU <- bioqc %>%  filter(d_973670172_d_593843561=="Yes" & d_973670172_d_762124027=="No" & 
@@ -2278,7 +2232,7 @@ Github262_spec_tubeU <- bioqc %>%  filter(d_973670172_d_593843561=="Yes" & d_973
 
 
 colnames(Github262_spec_tubeU) <- c("Site", "Connect ID", "BioClin_DBUrineRRLBL", "BioClin_DBUrineRRLDtBL")
-knitr::kable(Github262_spec_tubeU, longtable = TRUE, font_size=7)
+knitr::kable(Github262_spec_tubeU, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 
 ```
