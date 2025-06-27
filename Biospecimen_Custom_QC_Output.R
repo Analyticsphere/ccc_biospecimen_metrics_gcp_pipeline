@@ -16,23 +16,9 @@ bq_auth()
 2
 
 
-### Set Box folders for output CSV files #######################################
-use_test_box_folder <- FALSE # Local user sets this (Jake or Kelsey)
+### Set Box folders for output CSV files 
 
-# TODO: Fix conditional box folder configuration.
-
-# Over-ride if using plumber api on GCP (USER DOESN'T TOUCH THIS!)
-# Check if the environment variable exists and is not empty
-#if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
-#    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
-#  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
-#}
-
-if (use_test_box_folder) {
-  boxfolder <- 222593912729 # test box folder
-} else {
-  boxfolder <- 221297686961 # destination of CSV files (not pdf)
-}
+boxfolder <- 221297686961
 
 
 
@@ -54,13 +40,6 @@ if (use_test_box_folder) {
 
 project <- "nih-nci-dceg-connect-prod-6d04"
 
-
-# bio <- "WITH T AS (
-#   SELECT Connect_ID FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
-#   GROUP BY Connect_ID
-#   HAVING COUNT(Connect_ID) =1) 
-# SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
-# INNER JOIN T ON `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`.Connect_ID = T.Connect_ID ;"
 
 
 bio <- "WITH T AS (
@@ -87,7 +66,7 @@ parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_
 d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_541483796_d_379252329, 
 d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_541483796_d_826941471,
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
-d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491 #,d_173836415_d_266600170_d_641006239_d_826941471
+d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471
 
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
@@ -309,7 +288,7 @@ bioqc_csv <- bioqc %>%
                                d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119) & 
                                !(Connect_ID %in% c("2215062576","4002548016","7609852429")), "Rule 17-URN", " "),
          
-         Rule17_STRECK = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & 
+         Rule17_STRECK = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                   d_505347689_d_593843561==353358909 & d_505347689_d_762124027==104430631 & is.na(d_505347689_d_926457119), "Rule 17-STRECK", " "),
          
          
@@ -439,34 +418,10 @@ bioqc_csv <- bioqc %>%
                             as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7 & 
                             is.na(d_173836415_d_266600170_d_982213346), "Rule 29a", " "),
          
-         
-         # #29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
-         # Rule29b = ifelse(!is.na(d_173836415_d_266600170_d_982213346) & 
-         #                    ((d_173836415_d_266600170_d_592099155=="534621077" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="104430631") &
-         #                    !(Connect_ID %in%  c(7848933050, 5885436394, 9258958214, 2300063524, "1176687465", "1850586900","6575901705", "3467573584", "1274744512", 3362078899,
-         #                                         '6248007969', '5021933788', '3882691411')), 
-         #                  "Rule 29b", " "),
-         
-         
          #30.a. 30.a. If BioFin_BaseUrineCol_v1r0= yes, and BioSpm_UrineSettingBL_v1r0= Clinical, and BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago, then BioClin_ClinicalUrnTmBL_v1r0 must be populated.
          Rule30a = ifelse(d_167958071=="353358909" & d_173836415_d_266600170_d_718172863=="664882224" & is.na(d_173836415_d_266600170_d_139245758) & 
                             as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7 & 
                             Connect_ID!="8047468301", "Rule 30a", " "),
-         
-         
-         # #30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.
-         # Rule30b = ifelse(!is.na(d_173836415_d_266600170_d_139245758) & 
-         #                    ((d_173836415_d_266600170_d_718172863=="Research" | is.na(d_173836415_d_266600170_d_718172863)) | d_167958071=="No") & 
-         #                    !(Connect_ID %in% c('6862754687', '1371560328', '1176687465', '5885436394', '1850586900', '3319331872', '6575901705', '6862754687',
-         #                                       '9258958214', '1250934825', '7882825421', '3287102562', '1215003341', '7352978604', '1140047316', '4479873637',
-         #                                       '8633594373', '2755205973', '3862626013', '8184138489', '4980503471', '2039357566', '6321294709', '2300063524',
-         #                                       '5899565591', '8625295305', '9167792140', '9143436002', '7276829171', '8625295305', '1274744512', '9262617255',
-         #                                       '4838682809', '2887898061', '2871811858', '4207529981', '3456526723', '9366425281', '7106367407', '3362078899',
-         #                                       '3992444928', '6538980272', '6467484794', '1375421153', '1102086935', '9672292896', '9652100378','6523900663',
-         #                                       '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
-         #                                       '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101')), 
-         #                  "Rule 30b", " "),
-         
          
          #49. If BioFin_BaseBloodCol_v1r0 was collected, BioSpm_BloodSettingBL_v1r0 is clinical, and BioClin_DBBloodRRLDtBL_v1r0 occurred more than seven days ago, BioClin_SiteBldLocBL_v1r0 must be populated.
          Rule49 = ifelse(d_878865966==353358909 & d_173836415_d_266600170_d_592099155==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7  & 
@@ -518,7 +473,7 @@ bioqc_csv <- bioqc %>%
         Rule62 = ifelse(d_173836415_d_266600170_d_641006239_d_221592017=="277438316" & is.na(d_173836415_d_266600170_d_641006239_d_661940160), "Rule 62", " "),
 
         ###	63. If Replacement Kit 2 is received, BioKit_KitRecdTm_v1r0 should be populated.
-          ##filter(d_173836415_d_266600170_d_641006239_d_221592017=="375535639" & is.na(d_173836415_d_266600170_d_641006239_d_826941471)) 
+        Rule63 = ifelse(d_173836415_d_266600170_d_641006239_d_221592017=="375535639" & is.na(d_173836415_d_266600170_d_641006239_d_826941471), "Rule 63", " "),
 
 
         ###	64. If Replacement Kit 2 BioKit_KitStatus_v1r0 is Assigned, Shipped or Received, then BioKit_KitAssembledID_v1r0 should be populated.
@@ -836,10 +791,6 @@ Bio_HMW <- bind_rows(
 
 
 
-# 33. If kit status is Pending, then date/time kit pending should populate
-##pend <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==517216441 | d_173836415_d_266600170_d_541483796_d_221592017==517216441 | d_173836415_d_266600170_d_641006239_d_221592017==517216441) & is.na(d_341636034)) 
-
-
 # 34. If kit type is Mouthwash, then return kit tracking number, supply kit ID, return kit ID, collection cup ID, and collection card ID should populate.
 all_populate <- HMW %>%  filter(((d_173836415_d_266600170_d_319972665_d_379252329==976461859 & 
                                     (d_173836415_d_266600170_d_319972665_d_221592017==241974920 | 
@@ -955,19 +906,10 @@ mw_dt <-  Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_26
 
 # 46. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 10 days ago, BioKit_KitStatusBL_v1r0 should be Received
 kits_recvd <- Bio_HMW %>%
-  mutate(
-    kit_level = factor(kit_level, levels = c("Initial Kit", "Replacement Kit 1", "Replacement Kit 2")),
-    flagged = case_when(
-      kit_level == "Replacement Kit 2" & d_173836415_d_266600170_d_641006239_d_221592017 == "375535639" ~ TRUE,
-      kit_level == "Replacement Kit 1" & d_173836415_d_266600170_d_541483796_d_221592017 == "375535639" ~ TRUE,
-      kit_level == "Initial Kit"       & d_173836415_d_266600170_d_319972665_d_221592017 == "375535639" ~ TRUE,
-      TRUE ~ FALSE
-    )
-  ) %>%
-  group_by(Connect_ID) %>%
-  filter(!any(flagged)) %>%
-  ungroup() %>%
-  filter(as.numeric(round(difftime(currentDate, d_195145666, units = "days"), digits = 0)) > 10)
+  filter(as.numeric(round(difftime(currentDate, d_195145666, units = "days"), digits = 0)) > 10 & 
+         ((kit_level == "Replacement Kit 2" & d_173836415_d_266600170_d_641006239_d_221592017 != "375535639") |
+            (kit_level == "Replacement Kit 1" & d_173836415_d_266600170_d_541483796_d_221592017 != "375535639") |
+            (kit_level == "Initial Kit" & d_173836415_d_266600170_d_319972665_d_221592017 != "375535639")))
 
 
 #47.BioFin_BMTimeBL_v1r0 must be in the structure of YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM:SS.SSSZ
@@ -1025,7 +967,6 @@ colnames(token_match) <- c("Site", "Connect ID", "Collection ID", "Bio Table Tok
 
 
 
-##bioqc_csv$Rule33 = ifelse(bioqc_csv$Connect_ID %in% pend$Connect_ID, "Rule 33", " ")
 bioqc_csv$Rule34 = ifelse(bioqc_csv$Connect_ID %in% all_populate$Connect_ID, "Rule 34", " ")
 bioqc_csv$Rule35 = ifelse(bioqc_csv$Connect_ID %in% hmw1$Connect_ID, "Rule 35", " ")
 bioqc_csv$Rule36 = ifelse(bioqc_csv$Connect_ID %in% hmw2$Connect_ID, "Rule 36", " ")
@@ -1083,8 +1024,7 @@ colnames(qc1_blood) <- c("Site", "Connect ID", "Accession ID sent from site", "A
 
 qc1_blood <- qc1_blood %>% arrange(Site, `Collection Date/Time`)
 
-#write.csv(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
-openxlsx::write.xlsx(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
@@ -1101,8 +1041,7 @@ colnames(qc1_urine) <- c("Site", "Connect ID", "Accession ID sent from site", "A
 
 qc1_urine <- qc1_urine %>% arrange(Site, `Collection Date/Time`)
 
-#write.csv(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
-openxlsx::write.xlsx(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(qc1_urine,glue("{local_drive}Mismatched_Urine_Accession_IDs_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
@@ -1216,9 +1155,7 @@ colnames(dup_list_by_tube) <- c("Connect ID", "Site", "Collection Setting", "Col
 
 
 
-
-#write.csv(dup_list,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.csv"),row.names = F,na="")
-openxlsx::write.xlsx(dup_list_by_tube,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+openxlsx::write.xlsx(dup_list_by_tube,glue("{local_drive}Duplicate_Baseline_Biospecimen_Collections_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 
