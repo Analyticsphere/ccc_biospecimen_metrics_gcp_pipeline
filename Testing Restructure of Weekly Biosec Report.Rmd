@@ -4156,15 +4156,17 @@ kitstatus <- "SELECT Connect_ID,
   END AS Kit_Status_r2,
 
 d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_319972665_d_826941471,
-d_173836415_d_266600170_d_319972665_d_379252329,
-
-d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_173836415_d_266600170_d_641006239_d_379252329, 
+d_173836415_d_266600170_d_319972665_d_379252329, #d_173836415_d_266600170_d_319972665_d_759651991
 
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_541483796_d_826941471, d_173836415_d_266600170_d_541483796_d_379252329,
 
+d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_173836415_d_266600170_d_641006239_d_379252329, 
+
 d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631' and 
+where Connect_ID IS NOT NULL and d_906417725='104430631'  and 
+(d_747006172='104430631' or DATE(d_659990606) > '2024-03-29') and 
+(d_987563196='104430631' or DATE(d_772354119) > '2024-03-29') and 
   ((DATE(d_173836415_d_266600170_d_982213346) >=  '2024-03-29' OR d_173836415_d_266600170_d_982213346 IS NULL) AND
   (DATE(d_173836415_d_266600170_d_139245758) >= '2024-03-29' OR d_173836415_d_266600170_d_139245758 IS NULL) AND
   NOT (d_173836415_d_266600170_d_982213346 IS NULL AND d_173836415_d_266600170_d_139245758 IS NULL))"
@@ -4172,8 +4174,6 @@ where Connect_ID IS NOT NULL and d_906417725='104430631'  and d_747006172='10443
 
 kitstatus_table <- bq_project_query(project, kitstatus)
 kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
-kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
-kit_table$d_173836415_d_266600170_d_319972665_d_687158491 <- as.numeric(kit_table$d_173836415_d_266600170_d_319972665_d_687158491)
 
 
 
@@ -4184,28 +4184,63 @@ kit_table <- kit_table %>%
 
 
 ## Need BioKit_CollCardMissing_v1r0 and Kit Conditions from the KitAssembly Table
-### Table that look at these look at initial kits only
-#### Participants table KitAssembledIDs and ConnectID match those in the KitAssembly Table
-kitA_bq <- "SELECT Connect_ID,
+### These variables are in tables that look at these look at initial, received kits only
+#### Participants table KitAssembledIDs and ConnectID match those in the KitAssembly Table, though the KitAssembly table has more
+
+kitA_bq <- "SELECT pts.Connect_ID,
+CASE d_827220437
+    WHEN '125001209' THEN 'Kaiser Permanente Colorado'
+    WHEN '327912200' THEN 'Kaiser Permanente Georgia'
+    WHEN '300267574' THEN 'Kaiser Permanente Hawaii'
+    WHEN '452412599' THEN 'Kaiser Permanente Northwest'
+    WHEN '657167265' THEN 'Sanford Health'
+    WHEN '548392715' THEN 'Henry Ford Health'
+    WHEN '531629870' THEN 'HealthPartners'
+    WHEN '303349821' THEN 'Marshfield'
+    WHEN '809703864' THEN 'University of Chicago Medicine'
+    WHEN '472940358' THEN 'Baylor Scott and White Health'
+    ELSE NULL
+  END AS Site,
+d_687158491 as KitAssembledID,
+d_173836415_d_266600170_d_319972665_d_687158491 as KitID,
+kt.Connect_ID as ktCID ,
 case when d_137401245='353358909'  then 'Collection Card Not Included'
 ELSE 'Collection Card Included'
 END AS Card_Status,
-d_687158491 as KitAssembledID,
-d_633640710_d_950521660, d_633640710_d_545319575, d_633640710_d_938338155, d_633640710_d_205954477, d_633640710_d_289239334,d_633640710_d_992420392, d_633640710_d_541085383,d_633640710_d_427719697, d_633640710_d_100618603,
- FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` 
- where Connect_ID is not null and d_426588510='663273321'"
+d_633640710_d_950521660, d_633640710_d_545319575, d_633640710_d_938338155, d_633640710_d_205954477, d_633640710_d_289239334,d_633640710_d_992420392, d_633640710_d_541085383,d_633640710_d_427719697, d_633640710_d_100618603, d_426588510, d_221592017
+ FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` pts
+ left join `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` kt
+ on pts.d_173836415_d_266600170_d_319972665_d_687158491=kt.d_687158491
+ where --((kt.Connect_ID is not null and d_426588510='663273321' and d_221592017 = '375535639') or ##confirmed these are the values, but adding this condition changes the counts...
+ (pts.Connect_ID is not null and d_173836415_d_266600170_d_319972665_d_221592017 = '375535639' ) 
+ and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631' and 
+  ((DATE(d_173836415_d_266600170_d_982213346) >=  '2024-03-29' OR d_173836415_d_266600170_d_982213346 IS NULL) AND
+  (DATE(d_173836415_d_266600170_d_139245758) >= '2024-03-29' OR d_173836415_d_266600170_d_139245758 IS NULL) AND
+  NOT (d_173836415_d_266600170_d_982213346 IS NULL AND d_173836415_d_266600170_d_139245758 IS NULL))"
 kit_assmb_table <- bq_project_query(project, kitA_bq)
 kit_assembly <- bq_table_download(kit_assmb_table, bigint="integer64",n_max = Inf, page_size = 10000)
-kit_assembly$Connect_ID <- as.numeric(kit_assembly$Connect_ID)
-kit_assembly$KitAssembledID <- as.character(kit_assembly$KitAssembledID)
 
 
-dim(kit_table)
-dim(kit_assembly)
 
-joined_kit_table <- left_join(kit_table, kit_assembly, by="Connect_ID")
-
-dim(joined_kit_table)
+# ### Need only a subset if the participants table for this join
+# kit_table_int_rec <- kit_table %>%  filter(Kit_Status_int=="Received")
+# 
+# dim(kit_table_int_rec)
+# dim(kit_assembly)
+# 
+# kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
+# kit_table$d_173836415_d_266600170_d_319972665_d_687158491 <- as.character(kit_table$d_173836415_d_266600170_d_319972665_d_687158491)
+# 
+# kit_assembly$Connect_ID <- as.numeric(kit_assembly$Connect_ID)
+# kit_assembly$KitAssembledID <- as.character(kit_assembly$KitAssembledID)
+# 
+# joined_kit_table <- left_join(kit_table_int_rec, kit_assembly, by = c("d_173836415_d_266600170_d_319972665_d_687158491" = "KitAssembledID"))
+# joined_kit_table2 <- left_join(kit_assembly, kit_table_int_rec, by = "Connect_ID")
+# 
+# dim(joined_kit_table)
+# 
+# table(joined_kit_table$Card_Status)
+# table(kit_assembly$Card_Status)
 
 
 ```
@@ -4242,6 +4277,7 @@ status_elg_knA <- status_elgA %>%
 
 ### Replacement Kit 1
 status_elgB <-kit_table %>%
+  filter(!is.na(d_173836415_d_266600170_d_541483796_d_759651991)) %>% 
   tbl_cross(
     row = Site,
     col = Kit_Status_r1,
@@ -4264,6 +4300,7 @@ status_elg_knB <- status_elgB %>%
  
 ### Replacement Kit 2
 status_elgC <- kit_table %>%
+  filter(!is.na(d_173836415_d_266600170_d_641006239_d_759651991)) %>% 
   tbl_cross(
     row = Site,
     col = Kit_Status_r2,
@@ -4355,10 +4392,7 @@ fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
  
 ####################
 
-Coll_Card_Table <- joined_kit_table %>%
-  filter(Kit_Status_int=="Received") 
- 
-Coll_Card_StatusBF <- Coll_Card_Table %>% dplyr::select(Site, Card_Status )  %>% tbl_cross(
+Coll_Card_StatusBF <- kit_assembly %>% dplyr::select(Site, Card_Status )  %>% tbl_cross(
   row = Site,
   col = Card_Status,
   digits=c(0,1),
@@ -4424,12 +4458,12 @@ Table7.5 = test31b %>% group_by(Site) %>%
 ##################################
 condition_cols <- c("d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477", "d_633640710_d_289239334","d_633640710_d_992420392",
            "d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603")
-joined_kit_table <- joined_kit_table %>%
+kit_assembly <- kit_assembly %>%
   mutate(
     multi_cond = rowSums(across(all_of(condition_cols), ~ .x == 353358909, .names = NULL), na.rm = TRUE)
   )
  
-table_32 <-joined_kit_table %>% filter(Kit_Status_int=="Received" ) %>% 
+table_32 <- kit_assembly %>% 
   mutate(kit_condition = case_when(multi_cond>1 & d_633640710_d_950521660!=353358909 ~ "Two of More Conditions Selected",
                                    d_633640710_d_545319575==353358909 ~ "Package Crushed",
                                    d_633640710_d_938338155==353358909 ~ "Improper Packaging",
