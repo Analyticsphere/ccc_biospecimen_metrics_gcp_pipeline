@@ -161,8 +161,8 @@ d_661940160 as BioKit_KitShipTmBL_v1r0,
 d_687158491 as BioKit_KitAssembledIDBL_v1r0,
 d_755095663 as BioKit_MWKitComments_v1r0,
 d_826941471 as BioKit_KitRecdTmBL_v1r0,
-#CAST(d_972453354 AS NUMERIC) as BioKit_ReturnKitTrack_v1r0,
-#CAST(REGEXP_REPLACE(d_972453354, r'[^0-9]', '') AS NUMERIC) AS BioKit_ReturnKitTrack_v1r0,
+--CAST(d_972453354 AS NUMERIC) as BioKit_ReturnKitTrack_v1r0,
+--CAST(REGEXP_REPLACE(d_972453354, r'[^0-9]', '') AS NUMERIC) AS BioKit_ReturnKitTrack_v1r0,
 d_972453354 as BioKit_ReturnKitTrack_v1r0,
 
 
@@ -359,7 +359,7 @@ d_173836415_d_266600170_d_319972665_d_379252329 as BioKit_Mouthwash_Initial_BioK
 d_173836415_d_266600170_d_319972665_d_221592017 as BioKit_Mouthwash_Initial_BioKit_KitStatusBL_v1r0,
 d_173836415_d_266600170_d_319972665_d_661940160 as BioKit_Mouthwash_Initial_BioKit_KitShipTm_v1r0, 
 d_173836415_d_266600170_d_319972665_d_687158491 as BioKit_Mouthwash_Initial_BioKit_KitAssembledlD_v1r0,
-d_173836415_d_266600170_d_319972665_d_826941471 BioKit_Mouthwash_Initial_BioKit_KitRecdTm_v1r0, 
+d_173836415_d_266600170_d_319972665_d_826941471 as BioKit_Mouthwash_Initial_BioKit_KitRecdTm_v1r0, 
 #d_173836415_d_266600170_d_319972665_d_759651991 as BioKit_Mouthwash_Initial_BioKit_DtKitReq_v1r0, 
 
 d_173836415_d_266600170_d_541483796_d_379252329 as BioKit_Mouthwash_R1_BioKit_KitTypeBL_v1r0, 
