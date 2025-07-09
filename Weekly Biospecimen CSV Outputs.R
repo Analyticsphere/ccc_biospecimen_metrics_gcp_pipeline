@@ -439,17 +439,6 @@ gc()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 #############. Prepping data for the Biospecimen and Participant table merged outputs #################################
 
 
@@ -1016,6 +1005,17 @@ log_info("Finished Biospe_Formats csv")
 ## Clearing up space in GCP memory 
 #rm(list = setdiff(ls(), c('currentDate', 'boxfolder', 'project', 'y', 'recr.bio', 'recrver')))
 #gc()
+
+
+
+
+
+
+
+
+
+
+
 
 
 
