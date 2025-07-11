@@ -4770,7 +4770,7 @@ landscape(tbl_7_10)
  
 \FloatBarrier
  
-```{r Tables10s, eval=TRUE,echo=FALSE,results='asis'}
+```{r Tables10s, eval=TRUE,echo=FALSE, message=FALSE,warning=FALSE, results='asis'}
 
 
 
