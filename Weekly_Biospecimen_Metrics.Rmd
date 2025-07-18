@@ -2573,7 +2573,6 @@ gt::tab_options(table.width = "95%", # Adjust the width as needed
 ```
 
 
-
 ```{r Figures20_23, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 clinical.survey_specs <- clinical.survey %>%   group_by(Connect_ID, Site) %>% 
@@ -3113,6 +3112,13 @@ knitr::kable(coll_comp_BU,
 
 
 
+# knitr::kable(BU_trig_comp,
+#              caption='Table 3.5.b Baseline Clinical Biospecimen Survey Complete Time From Survey Becoming Available',
+#              row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>%
+#   kable_styling(latex_options = "scale_down")
+
+
+
 tab21_rb=knitr::kable(Table21R_Before,
                       caption='Table 3.6: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted \n Research Surveys (Pre-COVID-19 Questions Removal)',
                       row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
@@ -3323,6 +3329,7 @@ add_footnote(clin_bptl, paste0("At the time of reporting, ", dim(biospe_adhoc2_m
 crosstable.coll_bptl_2
 
 ```
+
 
 
 \newpage
