@@ -576,7 +576,7 @@ knitr::kable(qc13_tube8, longtable = TRUE)
 
 qc13_tube7 <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & 
                                   d_973670172_d_593843561=="Yes" & d_973670172_d_762124027=="No" & is.na(d_973670172_d_926457119) & 
-                                  !(Connect_ID %in% c("2215062576","4002548016","7609852429"))) %>% 
+                                  !(Connect_ID %in% c("2215062576","4002548016","7609852429", '5400707754'))) %>% 
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc13_tube7) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
@@ -956,8 +956,8 @@ parts_data <- parts_data %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Ba
 
 c_blood3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_982213346) & 
                                   ((d_173836415_d_266600170_d_592099155=="Research" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="No") &
-                                  !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", "3467573584", "1274744512",
-                                                       '3362078899',  now))) %>% 
+                                  !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", 
+                                                       "3467573584", "1274744512", '3362078899',  '7789082855', '8148304740'))) %>% 
     select(Site, Connect_ID, d_878865966, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_982213346) %>%  safe_arrange(Site, Connect_ID)
 
 
@@ -998,7 +998,7 @@ c_urine3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_139245758)
                                                '3992444928', '6538980272', '6467484794', '1375421153', '1102086935', '9672292896', '9652100378', '3362078899',
                                                '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
                                                '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101', '5213644501',
-                                               '3137297902', '8370075725')))   %>%  
+                                               '3137297902', '8370075725', '7789082855', '8148304740')))   %>%  
     select(Site, Connect_ID, d_167958071, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
 
 
@@ -2236,6 +2236,54 @@ Github262_spec_tubeU <- bioqc %>%  filter(d_973670172_d_593843561=="Yes" & d_973
 colnames(Github262_spec_tubeU) <- c("Site", "Connect ID", "BioClin_DBUrineRRLBL", "BioClin_DBUrineRRLDtBL")
 knitr::kable(Github262_spec_tubeU, longtable = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
+
+```
+
+
+
+
+
+
+```{r KitReq_KitStatus_Int, echo=FALSE, warning=FALSE, message=FALSE}
+####	73. If an Inital Kit is requested, then the Initial Kit Status must be populated. 
+
+# KitReq_KitStatus_Int <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) &
+#                                    is.na(d_173836415_d_266600170_d_319972665_d_221592017)) %>% 
+#   select(Site, Connect_ID, d_173836415_d_266600170_d_319972665_d_759651991, d_173836415_d_266600170_d_319972665_d_221592017) %>%  safe_arrange(Site)
+# 
+# 
+# colnames(KitReq_KitStatus_Int) <- c("Site", "Connect ID", "BioKit_MW_Int_BioKit_DtKitReq", "BioKit_Maw_Int_BioKit_KitStatusBL")
+# knitr::kable(KitReq_KitStatus_Int, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
+
+```
+
+
+###	74. If an Replacement 1 Kit is requested, then the Replacement1 Kit Status must be populated. 
+```{r KitReq_KitStatus_R1, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+KitReq_KitStatus_R1 <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_541483796_d_759651991) &
+                                   is.na(d_173836415_d_266600170_d_541483796_d_221592017)) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_221592017) %>%  safe_arrange(Site)
+
+
+colnames(KitReq_KitStatus_R1) <- c("Site", "Connect ID", "BioKit_MW_R1_BioKit_DtKitReq", "BioKit_MW_R1_BioKit_KitStatusBL")
+knitr::kable(KitReq_KitStatus_R1, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
+
+```
+
+
+###	75. If an Replacement 2 is requested, then the Replacement2 Kit Status must be populated. 
+```{r KitReq_KitStatus_R2, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+KitReq_KitStatus_R2 <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_641006239_d_759651991) &
+                                   is.na(d_173836415_d_266600170_d_641006239_d_221592017)) %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_221592017) %>%  safe_arrange(Site)
+
+
+colnames(KitReq_KitStatus_R2) <- c("Site", "Connect ID", "BioKit_MW_R2_BioKit_DtKitReq_v1r0", "BioKit_Mw_R2_BioKit_KitStatusBL")
+knitr::kable(KitReq_KitStatus_R2, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 ```
 

@@ -287,7 +287,7 @@ bioqc_csv <- bioqc %>%
          
          Rule17_URN = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & 
                                d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119) & 
-                               !(Connect_ID %in% c("2215062576","4002548016","7609852429")), "Rule 17-URN", " "),
+                               !(Connect_ID %in% c("2215062576","4002548016","7609852429", "5400707754")), "Rule 17-URN", " "),
          
          Rule17_STRECK = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                   d_505347689_d_593843561==353358909 & d_505347689_d_762124027==104430631 & is.na(d_505347689_d_926457119), "Rule 17-STRECK", " "),
@@ -591,7 +591,13 @@ bioqc_csv <- bioqc %>%
         
         Rule72_URINE = ifelse(d_973670172_d_593843561=="Yes" & d_973670172_d_762124027=="No" & 
                                                     (d_173836415_d_266600170_d_210921343!="Yes" | is.na(d_173836415_d_266600170_d_541311218)) &
-                                                    d_650516960=="Clinical", "Rule 72-URINE", " ")) 
+                                                    d_650516960=="Clinical", "Rule 72-URINE", " "),
+        ###	73. If an Inital Kit is requested, then the Initial Kit Status must be populated. 
+        #Rule73 = ifelse(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) & is.na(d_173836415_d_266600170_d_319972665_d_221592017), "Rule 73", " "),
+        ###	74. If an Replacement 1 Kit is requested, then the Replacement1 Kit Status must be populated. 
+        Rule74 = ifelse(!is.na(d_173836415_d_266600170_d_541483796_d_759651991) & is.na(d_173836415_d_266600170_d_541483796_d_221592017), "Rule 74", " "),
+        ###	75. If an Replacement 2 is requested, then the Replacement2 Kit Status must be populated. 
+        Rule75 = ifelse(!is.na(d_173836415_d_266600170_d_641006239_d_759651991) & is.na(d_173836415_d_266600170_d_641006239_d_221592017), "Rule 75", " ")) 
 
  
 
@@ -1282,8 +1288,8 @@ parts_data <- parts_data %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Ba
 ### 29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
 c_blood3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_982213346) & 
                                        ((d_173836415_d_266600170_d_592099155=="Research" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="No") &
-                                       !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", "3467573584", "1274744512",
-                                                            '3362078899',  now)))
+                                       !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", 
+                                                            "3467573584", "1274744512", '3362078899',  '7789082855', '8148304740')))
 
 
 ### 30.b. If BioClin_ClinicalUrnTmBL_v1r0 is populated, then BioSpm_UrineSettingBL_v1r0 must be Clinical and BioFin_BaseUrineCol_v1r0 must be yes.
@@ -1297,7 +1303,7 @@ c_urine3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_139245758)
                                                            '3992444928', '6538980272', '6467484794', '1375421153', '1102086935', '9672292896', '9652100378', '3362078899',
                                                            '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
                                                            '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101', '5213644501',
-                                                           '3137297902', '8370075725')))
+                                                           '3137297902', '8370075725', '7789082855', '8148304740')))
 
 
 

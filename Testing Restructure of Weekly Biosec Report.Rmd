@@ -1634,7 +1634,7 @@ research__blood <- research__blood %>% filter(!is.na(tube_type))
 
 
 bloodtubetype_R <- create_tbl_cross(research__blood, "Site", "tube_type", "none", "Site", " ")
-colnames(bloodtubetype_R)[ncol(bloodtubetype_R)] <- "Total Blood Tubes Collections"
+colnames(bloodtubetype_R)[ncol(bloodtubetype_R)] <- "Total Blood Tubes Collected"
 colnames(bloodtubetype_R)[1] <- "Site"
 
 ```
@@ -1878,6 +1878,7 @@ Table21R_After = postcovR_comp %>% group_by(Site) %>%
 
 
 
+
 ```{r Clin_Srvy_Status, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 clinical.survey <- coll_sett_all %>% filter(all_settings == "Clinical") %>%
@@ -1954,6 +1955,32 @@ ClinSrvy_Lgth_After = postcovC_comp %>% group_by(Site) %>%
                    Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
 
+
+
+
+##### Clinical Bio Collection to Bio Dashboard Entry
+
+
+
+
+
+######BUM complete time from Survey Trigger Date
+
+clinical.survey <- clinical.survey %>%  
+  mutate(trig_to_comp_BU = as.numeric(difftime(as.POSIXct(ymd_hms(d_764863765)),as.POSIXct(ymd_hms(d_915838974)),units="hours")))
+
+
+BU_trig_comp = clinical.survey %>% group_by(Site) %>% 
+  dplyr::summarize('Number of Research Collection Visits'=n(),
+                   Min = round(min(trig_to_comp_BU,na.rm = TRUE), digits=1),
+                   Q1 = round(quantile(trig_to_comp_BU, 0.25,na.rm = TRUE), digits=1),
+                   Median = round(median(trig_to_comp_BU,na.rm = TRUE), digits=1),
+                   Mean = round(mean(trig_to_comp_BU,na.rm = TRUE), digits=1),
+                   SD= round(sd(trig_to_comp_BU,na.rm = TRUE), digits=1),
+                   Q3= round(quantile(trig_to_comp_BU, 0.75,na.rm = TRUE), digits=1),
+                   'Perc.95'= round(quantile(trig_to_comp_BU, 0.95,na.rm = TRUE), digits=1),
+                   Max = round(max(trig_to_comp_BU,na.rm = TRUE), digits=1))
+
 ```
 
 
@@ -1988,19 +2015,6 @@ research.vt.length.UC <- research.vt.length %>% filter(Site=="University of Chic
                                    d_951355211==120264574 ~ "South Loop",
                                    d_951355211==319518299 ~ "UCM Pop-Up",
                                    d_951355211==940329442 ~ "Orland Park"))
-research.vt.length.UC.table = research.vt.length.UC %>%group_by(Site_location) %>%
-  dplyr::summarize('Number of Research Collection Visits'=n(),
-                   Min = min(time,na.rm = TRUE),
-                   Q1 = quantile(time, 0.25,na.rm = TRUE),
-                   Median = median(time,na.rm = TRUE),
-                   Mean = mean(time,na.rm = TRUE),
-                   Q3 = quantile(time, 0.75,na.rm = TRUE),
-                   Perc.90= quantile(time, 0.90,na.rm = TRUE),
-                   Perc.95= quantile(time, 0.95,na.rm = TRUE),
-                   Perc.98= quantile(time, 0.98,na.rm = TRUE),
-                   Max = max(time,na.rm = TRUE))
-
-
 
 
 ```
@@ -2013,25 +2027,6 @@ research.vt.length.UC.table = research.vt.length.UC %>%group_by(Site_location) %
 ```{r Table21a21b, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 baseline_colct <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) & all_settings=="Research")
-
-## BEFORE 2/1/23
-baseline_colctC <- baseline_colct %>%  filter(d_914594314<as.Date("2022-08-01"))
-
-BSL_colctC <- baseline_colctC %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
-                                          "Number of Participants" = n(),
-                                          'Number of Baseline Collections' = case_when(!is.na(d_556788178) ~ n()))
-
-
-verif_BSL_colctC = BSL_colctC %>%group_by(Site) %>%
-  dplyr::summarize('Number of Research Cllection Visits'=n(),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
-
-
 
 
 ## ON OR AFTER 2/1/23
@@ -2050,6 +2045,7 @@ verif_BSL_colctD = BSL_colctD %>%group_by(Site) %>%
                    Mean = round(mean(time,na.rm = TRUE), digits=1),
                    SD= round(sd(time,na.rm = TRUE), digits=1),
                    Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
+                   'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
                    Max = round(max(time,na.rm = TRUE), digits=1))
 
 
@@ -2228,7 +2224,7 @@ Table_bld_draw= recrver1 %>%  filter(d_827220437==125001209 | d_827220437==32791
   missing_text="Unknown") %>%
   bold_labels() %>%
   modify_header() %>%
-  modify_caption("Table 4.11: Baseline Blood Draw Order Status Among Verified Participants") %>%
+  modify_caption("Table 4.9: Baseline Blood Draw Order Status Among Verified Participants") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
 
 
@@ -2576,110 +2572,6 @@ colnames(SF_coll_rcpt)[1] <- "Collection Location"
 
 ```
 
-```{r Table30, include=FALSE, echo=FALSE, warning=FALSE}
-
-
-coll_bptl_diff <- coll_bptl_diff %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_678166505)), units="hours"))
-coll_bptl_diff$hrs_past <- as.numeric(coll_bptl_diff$hrs_past)
-coll_bptl_diff<- coll_bptl_diff %>%  filter(hrs_past>0)
-Hrs_bptl_rsch_summ <- coll_bptl_diff %>% group_by(Site_location) %>% dplyr::summarise('Min' = format_with_decimal(min(hrs_past)),
-                                                                                'Q1' = format_with_decimal(quantile(hrs_past, 0.25)),
-                                                                                'Median' = format_with_decimal(median(hrs_past)),
-                                                                                'Mean' = format_with_decimal(mean(hrs_past)),
-                                                                                'Q3' = format_with_decimal(quantile(hrs_past, 0.75)),
-                                                                                'Perc.90' = format_with_decimal(quantile(hrs_past, 0.90)),
-                                                                                'Perc.98' = format_with_decimal(quantile(hrs_past, 0.98)))
-
-
-
-colnames(Hrs_bptl_rsch_summ)[1] <- "Collection Location"
-
-Hrs_bptl_rsch_summ <- Hrs_bptl_rsch_summ %>%
-  mutate(Site_Group = case_when(
-    `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", 
-                                 "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
-    `Collection Location` %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
-    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", 
-                                 "Merrill", "Stevens Point",
-                                 "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
-    `Collection Location` %in% c("Sioux Falls Imagenetics", "Edith Sanford Breast Center (coded as Sanford Center)", 
-                                  "Edith Sanford Breast Center","Fargo Amber Valley","Fargo South University", "Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
-                                 "HFH Detroit Northwest","In-home Collection","HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
-    `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", 
-                                 "North Garland","Temple CDM","Temple Roney","Waco - MacArthur", "Missing BSWH location") ~ "Baylor Scott and White Health",
-    TRUE ~ " "
-  )) 
-
-#Footnote, if any data missing
-footnote5.5 <- coll_bptl_diff %>% filter(is.na(any_collection) | is.na(d_678166505))
-
-hrs_rsch_55 <- Hrs_bptl_rsch_summ %>%
-  arrange(Site_Group, `Collection Location`)
-
-
-hrs_rsch_55$Site_Group <- factor(hrs_rsch_55$Site_Group, levels = unique(hrs_rsch_55$Site_Group))
-
-# Count occurrences of each Site_Group to ensure proper grouping
-site_group_counts <- table(hrs_rsch_55$Site_Group)
-
-
-knit_hrs_rsch_55 <- knitr::kable(hrs_rsch_55[, c(1:8)], 
-             caption='Table 5.5: Baseline- Time (in Hours) from Research Collection to Receipt by Collection Location',
-             align=c("l","c","c","c","c","c","c","c"), 
-             booktabs = TRUE, longtable = TRUE) %>%  
-  pack_rows(index = site_group_counts) %>% 
-  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) 
-
-
-
-```
-
-
-```{r Table31, include=FALSE, echo=FALSE, warning=FALSE}
-
-coll_bptl_diff2 <- coll_bptl_diff2 %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(clin_coll_bu)), units="hours"))
-coll_bptl_diff2$hrs_past <- as.numeric(coll_bptl_diff2$hrs_past)
-Hrs_bptl_clin_summ <- coll_bptl_diff2 %>% group_by(Clin_Site_location) %>% dplyr::summarise('Min' = format_with_decimal(min(hrs_past, na.rm=T)),
-                                                                                  'Q1' = format_with_decimal(quantile(hrs_past, 0.25, na.rm=T)),
-                                                                                  'Median' = format_with_decimal(median(hrs_past, na.rm=T)),
-                                                                                  'Mean' = format_with_decimal(mean(hrs_past, na.rm=T)),
-                                                                                  'Q3' = format_with_decimal(quantile(hrs_past, 0.75, na.rm=T)),
-                                                                                  'Perc.90' = format_with_decimal(quantile(hrs_past, 0.9, na.rm=T)),
-                                                                                  'Perc.98' = format_with_decimal(quantile(hrs_past, 0.98, na.rm=T)))
-
-colnames(Hrs_bptl_clin_summ)[1] <- "Collection Location"
-
-Hrs_bptl_clin_summ <- Hrs_bptl_clin_summ %>%
-  mutate(Site_Group = case_when(
-    `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", "Missing HFH location") ~ "Henry Ford Health", 
-    `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic", 
-                                 "NSC", "Missing HP location") ~ "HealthPartners", 
-    `Collection Location`== "Kaiser Permanente Colorado" ~ "Kaiser Permanente Colorado",
-    `Collection Location`== "Kaiser Permanente Georgia" ~ "Kaiser Permanente Georgia",
-    `Collection Location` %in% c("Oahu Clinics", "Non-Oahu Clinics", "Missing Both Location IDs","Missing KPHI location") ~ "Kaiser Permanente Hawaii",
-    `Collection Location`== "Kaiser Permanente Northwest" ~ "Kaiser Permanente Northwest",
-    `Collection Location`== "Sanford Health" ~ "Sanford Health",
-    `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", 
-                                 "DCAM (Hyde Park)","Crown Point", "Missing UC location") ~ "University of Chicago Medicine",
-    TRUE ~ " "
-  )) 
-
-#Footnote, if any data missing
-footnote5.5 <- coll_bptl_diff2 %>% filter(is.na(any_collection) | is.na(clin_coll_bu))
-
-Hrs_bptl_clin <- Hrs_bptl_clin_summ  %>%
-  gt::gt(groupname_col = "Site_Group") %>% 
-  tab_header('Table 5.6: Baseline- Time (in Hours) from Clinical Collection to Receipt by Clinic Location')  %>% 
-  gt::tab_style(style = list(gt::cell_text(weight = "bold")),
-                locations = gt::cells_row_groups()) %>% 
-  gt::tab_options(table.width = "90%", table.align = "left", table.font.size = "7pt") #table.font.size = "smaller")
-
-
-
-```
-
 
 
 ```{r SF_table5_6, include=FALSE, echo=FALSE, warning=FALSE}
@@ -2850,7 +2742,7 @@ research.4_1 <- ggplot(visit_wk_site4, aes(x=as.Date(col.Monday.date), y=pct3)) 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-1),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
 
-  ggtitle(label="Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Henry Ford Health  ") +
+  ggtitle(label="Figure 3.1: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Henry Ford Health  ") +
   theme(panel.background = element_blank(),
         axis.line = element_line(size=0.2),
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
@@ -2886,7 +2778,7 @@ research.4_2 <- ggplot(visit_wk_site4__2, aes(x=as.Date(col.Monday.date), y=pct3
   scale_y_continuous(name="Percent %",breaks=seq(0,100,25)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-1),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 3.4: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Sanford Health") +
+  ggtitle(label="Figure 3.2: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Sanford Health") +
   theme(panel.background = element_blank(),
         axis.line = element_line(size=0.2),
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
@@ -2921,7 +2813,7 @@ research.4_3 <- ggplot(visit_wk_site4__3, aes(x=as.Date(col.Monday.date), pct3))
   scale_y_continuous(name="Percent %",breaks=seq(0,100,25)) +
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-1),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 3.5: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, University of Chicago Medicine") +
+  ggtitle(label="Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, University of Chicago Medicine") +
   theme(panel.background = element_blank(),
         axis.line = element_line(size=0.2),
         axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
@@ -3119,7 +3011,7 @@ tab8=knitr::kable(bloodtubetype_C,
   add_indent(seq(1, nrow(bloodtubetype_C) - 1))  %>% 
   kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% 
   landscape()
-add_footnote(tab8, "Note: Tube configuration/quantity varies by site based on clincal lab supply in order to achieve the closes to collection volume to 20mL SST, 10mL EDTA, 10mL Heparin, 6mL ACD and 10mL Streck. Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 06/01/2025; Streck tube is collection was introduced at different time points and is only collected at certain sites.", notation = "none") 
+add_footnote(tab8, "Tube configuration/quantity varies by site based on clinical lab supply to achieve collection closest to the desired volume of 20mL SST, 10mL EDTA, 10mL Heparin, 6mL ACD and 10mL Streck. Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 06/01/2025; Streck tube collection was introduced at different time points and is only collected at certain sites", notation = "none") 
 
 
 
@@ -3177,64 +3069,6 @@ knitr::kable(BUM_status,
 
 
 
-\FloatBarrier
-```{r Figure3, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-
-
-figsub3_final <- research.survey %>%
-    filter(Site == "University of Chicago Medicine", !is.na(research.sv)) %>%
-    droplevels() %>%
-    arrange(col.Monday.date, research.sv) %>%
-    group_by(col.Monday.date, research.sv) %>%
-    tally() %>%
-    group_by(col.Monday.date) %>%
-    mutate(per_week_parts = sum(n)) %>%
-    filter(research.sv == "Submitted") %>%
-    mutate(weekly_sub = n) %>% 
-    ungroup() %>% 
-    mutate(cum_sub = cumsum(n),
-        cumtotal = cumsum(per_week_parts),
-        percent_3 = 100 * (cum_sub / cumtotal))
-
-ggplot(figsub3_final, aes(x=as.Date(col.Monday.date), y=100*(cum_sub/cumtotal))) + 
-  geom_line(na.rm=T) + geom_point(width = 0.2) +
-  scale_y_continuous(name="Percent %",limits=c(0,100),expand=c(0,0)) + 
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-1),expand=c(0,0))  +
-  scale_fill_brewer(palette="Dark2") +
-  ggtitle(label="Figure 3.1: Baseline- Cumulative Percent of Biospecimen Surveys \n Submitted, University of Chicago Medicine") +
-  theme(panel.background = element_blank(),
-        axis.line = element_line(size=0.2),
-        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
-        axis.title.y = element_text(size = 14, face = "bold",color="black"),
-        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) + 
-  theme(plot.caption = element_text(hjust=0))
-
-
-```
-
-\newpage
-\FloatBarrier
-```{r Figure3.1, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-
-#Comparative Figure 3 of weekly not cumulative
-
-ggplot(figsub3_final, aes(x=as.Date(col.Monday.date), y=100*(weekly_sub/per_week_parts))) + 
-  geom_line(na.rm=T) + geom_point(width = 0.2) +
-  scale_y_continuous(name="Percent %",limits=c(0,100),expand=c(0,0)) + 
-  scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "2 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-1),expand=c(0,0))  +
-  ggtitle(label="Figure 3.2: Baseline- Weekly Percent of Biospecimen Surveys Submitted, \n University of Chicago Medicine") +
-  theme(panel.background = element_blank(),
-        axis.line = element_line(size=0.2),
-        axis.text.x=element_text(angle=60, hjust=1), axis.title.x = element_text( size = 14, face = "bold") ,
-        axis.title.y = element_text(size = 14, face = "bold",color="black"),
-        plot.title = element_text(hjust = 0.5,size = 12, face = "bold")) + 
-  theme(plot.caption = element_text(hjust=0))
-
-
-```
-
-
-
 ```{r KnitrTables15_16,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE, results='asis'}
 
 knitr::kable(BU_status, 
@@ -3280,6 +3114,13 @@ research.4_3
 knitr::kable(coll_comp_BU, 
              caption='Table 3.5: Baseline Clinical Biospecimen Survey Complete Time from Collection Time', 
              row.names=FALSE,align=c("l","c","c","c","c","c","c","c","c"), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
+
+
+
+# knitr::kable(BU_trig_comp,
+#              caption='Table 3.5.b Baseline Clinical Biospecimen Survey Complete Time From Survey Becoming Available',
+#              row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>%
+#   kable_styling(latex_options = "scale_down")
 
 
 
@@ -3329,14 +3170,6 @@ add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1)
 
 
 
-uc_col_time <- knitr::kable(research.vt.length.UC.table,
-                            caption='Table 4.2: Baseline Research Collection Visit Length (in Minutes) by Collection Location, University of Chicago Medicine', 
-                            col.names=c('Collection Location', 'Number of Research Collection Visits',"Min","Q1","Median","Mean","Q3" ,"Perc.90","Perc.95","Perc.98","Max"),
-                            row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)%>% 
-  kable_styling(latex_options = "scale_down")
-add_footnote(uc_col_time,"Note: Visit lengths at or above the 95th percentile and above are likely the result of delayed participant visit check-out and do not reflect accurate visit lengths", notation = "none") 
-
-
 
 ```
 \FloatBarrier
@@ -3375,34 +3208,41 @@ UC_Time
 
 ```{r KnitrTable21_26,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
-tabbA <- knitr::kable(verif_BSL_colctC,
-                      caption='Table 4.3: Baseline- Time (in Days) from Verification to Research Collection Among Participants Verified Before 8/01/2022',
-                      row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% kable_styling(latex_options = "scale_down")
-add_footnote(tabbA,"Note: August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near time of collection.", notation = "none")
+knitr::kable(verif_BSL_colctD,
+                      caption='Table 4.2: Baseline- Time (in Days) from Verification to Research Collection Among Participants Verified on or After 8/01/2022',
+                      row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% 
+  kable_styling(latex_options = "scale_down") %>% 
+  footnote(general = "August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near the time of collection.",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE) %>% 
+  footnote(paste0(nrow(BSL_colctD), " research collection visits occurred for participants verified before 8/1/2022."))
 
-tabbB <- knitr::kable(verif_BSL_colctD,
-                      caption='Table 4.4: Baseline- Time (in Days) from Verification to Research Collection Among Participants Verified on or After 8/01/2022',
-                      row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
-add_footnote(tabbB,"Note: August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near the time of collection.", notation = "none")
+# add_footnote(tabbB,
+#              paste0("Note: August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near the time of collection.
+#                     Note: ",
+#                nrow(BSL_colctD), 
+#                    " research collection visits occurred for participants verified before 8/1/2022. "),
+#              notation = "none")
 
 
 
 BSL_A <- knitr::kable(verif_BSL_colctA,
-                      caption='Table 4.5: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified Before 2/01/2023',
+                      caption='Table 4.3: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified Before 2/01/2023',
                       row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>%  kable_styling(latex_options = "scale_down")
-add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
+add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago and add 90th percentile.", notation = "none")
 
 
 
 BSL_B <-knitr::kable(verif_BSL_colctB,
-                     caption='Table 4.6: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified on or After 2/01/2023',
+                     caption='Table 4.4: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified on or After 2/01/2023',
                      row.names=FALSE,  align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>%  kable_styling(latex_options = "scale_down")
-add_footnote(BSL_B,"Note: Baseline Clinical Collections were launched in February 2023.", notation = "none")
+add_footnote(BSL_B,"Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago and add 90th percentile.", notation = "none")
 
 
 
 AF26 <- knitr::kable(verif_baseline_Af,
-                     caption = 'Table 4.7: Baseline- Time (in Days) from Verification to Collection Among Participants Verified on or After 6/01/2022 by Campaign Type',
+                     caption = 'Table 4.5: Baseline- Time (in Days) from Verification to Collection Among Participants Verified on or After 6/01/2022 by Campaign Type',
                      row.names=FALSE, booktabs = T, linesep = "", format.args = list(big.mark = ","), 
                      align = c("l", "c", "c","c", "c", "c", "c", "c", "c", "c", "c","c", "c","c"), 
                      col.names=c("Site",  'Number of Collections',"Min", "Median", "Mean", "SD", "Max", 'Number of Collections', 
@@ -3416,13 +3256,13 @@ add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment
 
 
 tabl27 <- knitr::kable(verif_draw_order,
-                       caption='Table 4.8: Baseline- Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
+                       caption='Table 4.6: Baseline- Time (in Days) from Verification to Draw Order Placement',row.names=FALSE, align=c("l","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 add_footnote(tabl27, "Note: Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data.", notation="none")
 
 
 tab4_9 <- knitr::kable(avg_draw_order, 
-                       caption='Table 4.9: Baseline- Time (in Days) from Draw Order Placement to Clinical Collection', 
+                       caption='Table 4.7: Baseline- Time (in Days) from Draw Order Placement to Clinical Collection', 
                        row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% 
   kable_styling(latex_options = "scale_down") 
 add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data.", notation="none")
@@ -3430,7 +3270,7 @@ add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and S
 
 
 tab4_10 <- knitr::kable(avg_bldorder_present, 
-                        caption='Table 4.10: Baseline- Time (in Days) from Draw Order Placement to Present Date by Site', 
+                        caption='Table 4.8: Baseline- Time (in Days) from Draw Order Placement to Present Date by Site', 
                         row.names=FALSE, align=c("l","c","c","c","c","c","c","c","c","c","c","c","c"),digits=1, booktabs = TRUE) %>% 
   kable_styling(latex_options = "scale_down") 
 add_footnote(tab4_10, "Note: Table includes information for Kaiser sites only, other clinical collection sites are excluded.", notation="none")
@@ -3444,7 +3284,7 @@ add_footnote(Table_bld_draw , "Note: Table includes information for Kaiser sites
 knitr::kable(crosstable.coll_bptl1, 
              col.names=c("Site", "< 30 Days", "30 to <60 Days","60 to <90 Days", "90 to <180 Days", "180 to <270 Days", 
                          "270 Days or More", "Total Participants with No Basline Collections"), 
-             caption='Table 4.12: Baseline- Time (in Days) Since Verification Among Participants with No Biospecimen Collection ', 
+             caption='Table 4.10: Baseline- Time (in Days) Since Verification Among Participants with No Biospecimen Collection ', 
              row.names=FALSE, align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 ```
@@ -3501,21 +3341,6 @@ knitr::kable(SF_coll_rcpt,
 
 ```
 
-\FloatBarrier
-```{r Coll_Time_Spread_Rsch,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
-
-add_footnote(knit_hrs_rsch_55, "Note: BPTL receipt time is assumed to be 11:30am ET.", notation="none")
-
-```
-
-
-\newpage
-
-\FloatBarrier
-```{r Coll_Time_Spread_Clin,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
-Hrs_bptl_clin
-```
-
 \newpage
 
 \FloatBarrier
@@ -3523,7 +3348,7 @@ Hrs_bptl_clin
 
 knitr::kable(Hrs_bptl_clinSF, 
              col.names=c("Collection Location", 'Min', 'Q1', 'Median', 'Mean', 'Q3','Perc.90','Perc.98'), 
-             caption='Table 5.6a: Baseline- Time (in Hours) from Clinical Collection to Receipt by Clinic Location \n Sanford Health', 
+             caption='Table 5.5: Baseline- Time (in Hours) from Clinical Collection to Receipt by Clinic Location \n Sanford Health', 
              row.names=FALSE, align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE, longtable = TRUE) %>% 
   kable_styling(latex_options = "scale_down", font_size=7) 
 
@@ -3535,6 +3360,19 @@ knitr::kable(Hrs_bptl_clinSF,
 \newpage
 
 ```{r Figs6_14_Plots, warning=FALSE, eval=TRUE,echo=FALSE, message=FALSE}
+
+
+coll_bptl_diff <- coll_bptl_diff %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_678166505)), units="hours"))
+coll_bptl_diff$hrs_past <- as.numeric(coll_bptl_diff$hrs_past)
+coll_bptl_diff<- coll_bptl_diff %>%  filter(hrs_past>0)
+
+
+
+coll_bptl_diff2 <- coll_bptl_diff2 %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(clin_coll_bu)), units="hours"))
+coll_bptl_diff2$hrs_past <- as.numeric(coll_bptl_diff2$hrs_past)
+
+
+
 
 coll_bptl_diff$Weekdays <- factor(weekdays(as.Date(coll_bptl_diff$d_678166505)))
 coll_bptl_diff$Weekdays<- factor(coll_bptl_diff$Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
@@ -4105,7 +3943,7 @@ clc_both_vt.site.NW
 ```{r HomeMW_DataPull, include=FALSE, echo=FALSE, warning=FALSE}
 
 #Not dead or wd or refused
-#"Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse, withdraw, or pass away prior to March 29, 2024. Home mouthwash collections were launched for eligible participants in March 29, 2024. Home mouthwash collections for backlog collections (before March 29, 2024) will be launched at a later date.
+#"Eligible participants” are those who had a clinical collection with blood or urine collected on or after March 29, 2024, and did not refuse (refuse all activities or refuse mw), withdraw, or pass away prior to March 29, 2024. Home mouthwash collections were launched for eligible participants in March 29, 2024. Home mouthwash collections for backlog collections (before March 29, 2024) will be launched at a later date.
 
 kitstatus <- "SELECT Connect_ID, 
   CASE d_827220437
@@ -4164,12 +4002,14 @@ d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_64100
 
 d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where Connect_ID IS NOT NULL and d_906417725='104430631'  and 
-(d_747006172='104430631' or DATE(d_659990606) > '2024-03-29') and 
+where Connect_ID IS NOT NULL and 
+(d_906417725='104430631'  or DATE(d_614264509) > '2024-03-29')  and
+ (d_685002411_d_277479354='104430631'  or DATE(d_262357957) > '2024-03-29')  and
+(d_747006172='104430631' or 
+DATE(SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', CAST(d_659990606 AS STRING))) > '2024-03-29') and 
 (d_987563196='104430631' or DATE(d_772354119) > '2024-03-29') and 
-  ((DATE(d_173836415_d_266600170_d_982213346) >=  '2024-03-29' OR d_173836415_d_266600170_d_982213346 IS NULL) AND
-  (DATE(d_173836415_d_266600170_d_139245758) >= '2024-03-29' OR d_173836415_d_266600170_d_139245758 IS NULL) AND
-  NOT (d_173836415_d_266600170_d_982213346 IS NULL AND d_173836415_d_266600170_d_139245758 IS NULL))"
+d_173836415_d_266600170_d_156605577='353358909' and 
+DATE(d_173836415_d_266600170_d_740582332) >= '2024-03-29'"
 
 
 kitstatus_table <- bq_project_query(project, kitstatus)
@@ -4181,6 +4021,7 @@ kit_table <- kit_table %>%
     mutate(Kit_Status_int = factor(Kit_Status_int,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
            Kit_Status_r1 = factor(Kit_Status_r1,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
            Kit_Status_r2 = factor(Kit_Status_r2,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")))
+
 
 
 ## Need BioKit_CollCardMissing_v1r0 and Kit Conditions from the KitAssembly Table
@@ -4212,35 +4053,16 @@ d_633640710_d_950521660, d_633640710_d_545319575, d_633640710_d_938338155, d_633
  left join `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly_JP` kt
  on pts.d_173836415_d_266600170_d_319972665_d_687158491=kt.d_687158491
  where --((kt.Connect_ID is not null and d_426588510='663273321' and d_221592017 = '375535639') or ##confirmed these are the values, but adding this condition changes the counts...
- (pts.Connect_ID is not null and d_173836415_d_266600170_d_319972665_d_221592017 = '375535639' ) 
- and d_906417725='104430631'  and d_747006172='104430631' and d_987563196='104430631' and 
-  ((DATE(d_173836415_d_266600170_d_982213346) >=  '2024-03-29' OR d_173836415_d_266600170_d_982213346 IS NULL) AND
-  (DATE(d_173836415_d_266600170_d_139245758) >= '2024-03-29' OR d_173836415_d_266600170_d_139245758 IS NULL) AND
-  NOT (d_173836415_d_266600170_d_982213346 IS NULL AND d_173836415_d_266600170_d_139245758 IS NULL))"
+ (pts.Connect_ID is not null and d_173836415_d_266600170_d_319972665_d_221592017 = '375535639' ) and
+(d_906417725='104430631'  or DATE(d_614264509) > '2024-03-29')  and
+ (d_685002411_d_277479354='104430631'  or DATE(d_262357957) > '2024-03-29')  and
+(d_747006172='104430631' or 
+DATE(SAFE.PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', CAST(d_659990606 AS STRING))) > '2024-03-29') and 
+(d_987563196='104430631' or DATE(d_772354119) > '2024-03-29') and 
+d_173836415_d_266600170_d_156605577='353358909' and 
+DATE(d_173836415_d_266600170_d_740582332) >= '2024-03-29'"
 kit_assmb_table <- bq_project_query(project, kitA_bq)
 kit_assembly <- bq_table_download(kit_assmb_table, bigint="integer64",n_max = Inf, page_size = 10000)
-
-
-
-# ### Need only a subset if the participants table for this join
-# kit_table_int_rec <- kit_table %>%  filter(Kit_Status_int=="Received")
-# 
-# dim(kit_table_int_rec)
-# dim(kit_assembly)
-# 
-# kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
-# kit_table$d_173836415_d_266600170_d_319972665_d_687158491 <- as.character(kit_table$d_173836415_d_266600170_d_319972665_d_687158491)
-# 
-# kit_assembly$Connect_ID <- as.numeric(kit_assembly$Connect_ID)
-# kit_assembly$KitAssembledID <- as.character(kit_assembly$KitAssembledID)
-# 
-# joined_kit_table <- left_join(kit_table_int_rec, kit_assembly, by = c("d_173836415_d_266600170_d_319972665_d_687158491" = "KitAssembledID"))
-# joined_kit_table2 <- left_join(kit_assembly, kit_table_int_rec, by = "Connect_ID")
-# 
-# dim(joined_kit_table)
-# 
-# table(joined_kit_table$Card_Status)
-# table(kit_assembly$Card_Status)
 
 
 ```
@@ -4250,11 +4072,16 @@ kit_assembly <- bq_table_download(kit_assmb_table, bigint="integer64",n_max = In
  
 ```{r tbl7.1, include=FALSE, echo=FALSE, message=FALSE,warning=FALSE}
 
+## 'No Status' kits will now be a QC issue and should not be in the tables 
+
 #### Need Tables for every level of kit. If they EVER had an initial kit, they need to be in the initial table, ect.
 ## On a kit level, NOT a participant level
  
 ### Initial Kit
 status_elgA <- kit_table %>%
+  filter(Kit_Status_int!="No Status") %>% 
+  mutate(Kit_Status_int = factor(Kit_Status_int,
+                                 levels=c("Undeliverable","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))) %>% 
   tbl_cross(
     row = Site,
     col = Kit_Status_int,
@@ -4277,7 +4104,9 @@ status_elg_knA <- status_elgA %>%
 
 ### Replacement Kit 1
 status_elgB <-kit_table %>%
-  filter(!is.na(d_173836415_d_266600170_d_541483796_d_759651991)) %>% 
+  filter(!is.na(d_173836415_d_266600170_d_541483796_d_759651991) & Kit_Status_r1!="No Status") %>% 
+  mutate(Kit_Status_r1 = factor(Kit_Status_r1,
+                                 levels=c("Undeliverable","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))) %>%
   tbl_cross(
     row = Site,
     col = Kit_Status_r1,
@@ -4300,7 +4129,9 @@ status_elg_knB <- status_elgB %>%
  
 ### Replacement Kit 2
 status_elgC <- kit_table %>%
-  filter(!is.na(d_173836415_d_266600170_d_641006239_d_759651991)) %>% 
+  filter(!is.na(d_173836415_d_266600170_d_641006239_d_759651991)  & Kit_Status_r2!="No Status") %>% 
+  mutate(Kit_Status_r2 = factor(Kit_Status_r2,
+                                 levels=c("Undeliverable","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))) %>%
   tbl_cross(
     row = Site,
     col = Kit_Status_r2,
