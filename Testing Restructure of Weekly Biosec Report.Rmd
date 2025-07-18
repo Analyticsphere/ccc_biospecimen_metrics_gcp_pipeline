@@ -3492,7 +3492,7 @@ visit_wk_site1 <- fig2_1 %>% arrange(col.Sunday.week,col.Monday.date) %>% group_
 
 research.vt1 <- ggplot(visit_wk_site1, aes(x=as.Date(col.Monday.date), y=n)) + #,fill=Site, color=Site)) +
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="Number of Collections",limits=c(0,100*round(max(visit_wk_site1$n/100,1)))) + 
+  scale_y_continuous(name="Number of Collections") + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "4 weeks", limits=c( as.Date("2022-06-20"),as.Date(currentDate)-7),expand=c(0,0)) +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 6.1: Baseline- Weekly Total Biospecimen Collections") +
@@ -3696,7 +3696,7 @@ complete_data <- edited_fig11_1_Clin_tally %>%
 
 clinical.vt_plotUC_locs <- ggplot(complete_data, aes(x = as.Date(col.Monday.date), y = n, color = Clin_Site_location)) +  
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name = "Number of Collections", limits = c(0, max(complete_data$n))) +
+  scale_y_continuous(name = "Number of Collections") + 
   scale_x_date(name = "Date", date_labels = "%y-%m-%d", date_breaks = "4 weeks", limits = c(as.Date("2024-05-20"), as.Date(currentDate)-7), expand = c(0,0)) +
   scale_color_manual(values = c("Orland Park" = "#2973A5", "River East" = "#FDBE19", 
                                 "South Loop" = "#565C65", "Kenwood" = "#3C989E", "Ingalls"="#B1C7D9",
@@ -3885,7 +3885,7 @@ research.vt_plBSW <- research.vt_plBSW %>% group_by(col.Monday.date) %>% mutate(
 
 ggplot(research.vt_plBSW, aes(x=as.Date(col.Monday.date), y=total_collections)) + 
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="Number Collections", limits = c(0, NA)) +
+  scale_y_continuous(name="Number Collections") + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week", limits=c( as.Date("2024-06-24"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   scale_fill_brewer(palette="Dark2") +
   ggtitle(label="Figure 6.16 Baseline- Weekly Biospecimen Collections, \n Baylor Scott and White Health") +
@@ -3902,7 +3902,7 @@ ggplot(research.vt_plBSW, aes(x=as.Date(col.Monday.date), y=total_collections)) 
 
   ggplot(research.vt_plBSW, aes(x=as.Date(col.Monday.date), y=n, color=Site_location)) +
   geom_line() + geom_point(width = 0.2) +
-  scale_y_continuous(name="Number Collections", limits = c(0, NA)) +
+  scale_y_continuous(name="Number Collections") + 
   scale_x_date(name="Date",date_labels = "%y-%m-%d", date_breaks = "1 week", limits=c( as.Date("2024-06-24"),(as.Date(currentDate)-7)),expand=c(0,0))  +
   scale_color_manual(values=c("BCC- Fort Worth"="#B1C7D9", "BCC- HWC"="#164C71", "BCC- Worth St"="#FDBE19", 
                               "FW All Saints"="#565C65", "NTX Biorepository"="#3C989E",

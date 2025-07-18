@@ -70,8 +70,8 @@ parts <- "SELECT Connect_ID, d_173836415_d_266600170_d_139245758, d_173836415_d_
 d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_541483796_d_379252329, 
 d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_541483796_d_826941471,
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
-d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471
-
+d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_331584571_d_266600170_d_840048338,
+d_914594314, d_685002411_d_194410742, d_685002411_d_949501163
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
@@ -2284,6 +2284,87 @@ KitReq_KitStatus_R2 <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_641006
 
 colnames(KitReq_KitStatus_R2) <- c("Site", "Connect ID", "BioKit_MW_R2_BioKit_DtKitReq_v1r0", "BioKit_Mw_R2_BioKit_KitStatusBL")
 knitr::kable(KitReq_KitStatus_R2, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
+
+```
+
+
+###	76. If the biospecimen collection setting (BioSpm_BloodSettingBL_v1r0), (BioSpm_UrineSettingBL_v1r0) or (BioSpm_MWSettingBL_v1r0)] is Research then the visit check-in time (BioChk_TimeBL_v1r0) must be populated. 
+```{r Rsett_BioChk_TimeBL_v1r0, echo=FALSE, warning=FALSE, message=FALSE}
+
+Rsett_BioChk_TimeBL_v1r0 <- parts_data %>%  filter((d_173836415_d_266600170_d_592099155=='534621077' |
+                                                      d_173836415_d_266600170_d_718172863=='534621077' |
+                                                      d_173836415_d_266600170_d_915179629=='534621077') & 
+                                                     is.na(d_331584571_d_266600170_d_840048338)) %>% 
+  select(Site, Connect_ID, d_331584571_d_266600170_d_840048338) %>%  safe_arrange(Site)
+
+
+colnames(Rsett_BioChk_TimeBL_v1r0) <- c("Site", "Connect ID", 'BioChk_TimeBL')
+knitr::kable(Rsett_BioChk_TimeBL_v1r0, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down")
+
+```
+
+###	77. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
+```{r BioChk_TimeBL_v1r0_RschTmBL, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+BioChk_TimeBL_v1r0_RschTmBL <- parts_data %>%  filter(as.POSIXct(d_331584571_d_266600170_d_840048338) > pmin(as.POSIXct(d_173836415_d_266600170_d_561681068), as.POSIXct(d_173836415_d_266600170_d_847159717), na.rm=T)) %>% 
+  select(Site, Connect_ID, d_331584571_d_266600170_d_840048338, d_173836415_d_266600170_d_561681068, 
+         d_173836415_d_266600170_d_847159717) %>%  safe_arrange(Site)
+
+
+colnames(BioChk_TimeBL_v1r0_RschTmBL) <- c("Site", "Connect ID", "BioChk_TimeBL", "BioFin_ResearchBldTmBL", "BioFin_ResearchUrnTmBL")
+knitr::kable(BioChk_TimeBL_v1r0_RschTmBL, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
+
+
+```
+
+
+```{r DrawOrder_Verif4, echo=FALSE, warning=FALSE, message=FALSE}
+###	78. Draw order placement (BioClin_BldUrnPlcdTmBL_v1r0 or BioClin_UrnOrdPlcdDtBL_v1r0) should not occur more than 4 days prior to verification (RcrtV_VerificationTm_v1r0).
+
+# DrawOrder_Verif4 <- bioqc %>%  filter(as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4 | 
+#                                         as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_939818935, units="days")) > 4) %>% 
+#   select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_939818935) %>%  safe_arrange(Site)
+# 
+# 
+# colnames(DrawOrder_Verif4) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL", "BioClin_UrnOrdPlcdDtBL")
+# knitr::kable(DrawOrder_Verif4, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
+
+
+```
+
+###	79. Draw orders (<184451682>BioClin_BldUrnPlcdTmBL_v1r0 or <939818935>BioClin_UrnOrdPlcdDtBL_v1r0)should be placed within 30 days of verification (<914594314>RcrtV_VerificationTm_v1r0).
+
+```{r DrawOrder_Verif30, echo=FALSE, warning=FALSE, message=FALSE}
+###	79. Draw orders (<184451682>BioClin_BldUrnPlcdTmBL_v1r0 or <939818935>BioClin_UrnOrdPlcdDtBL_v1r0)should be placed within 30 days of verification (<914594314>RcrtV_VerificationTm_v1r0).
+#Please be sure this rule excludes participants who refuse baseline samples, blood or urine
+
+# DrawOrder_Verif30 <- bioqc %>%  filter(d_685002411_d_194410742=="104430631" & d_685002411_d_949501163=="104430631" & 
+#                                                         (as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_914594314, units="days")) > 30 |
+#                                                            as.numeric(difftime(d_173836415_d_266600170_d_939818935, d_914594314, units="days")) > 30)) %>% 
+#   select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_939818935) %>%  safe_arrange(Site)
+# 
+# 
+# colnames(DrawOrder_Verif30) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL", "BioClin_UrnOrdPlcdDtBL")
+# knitr::kable(DrawOrder_Verif30, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
+
+
+```
+
+
+```{r DrawOrder_Colct2, echo=FALSE, warning=FALSE, message=FALSE}
+###	80. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
+
+# DrawOrder_Colct2 <- bioqc %>%  filter(as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, units="days")) > 2 | 
+#                                         as.numeric(difftime(d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_139245758, units="days")) > 2) %>% 
+#   select(Site, Connect_ID, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, d_173836415_d_266600170_d_939818935,
+#          d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
+# 
+# 
+# colnames(DrawOrder_Colct2) <- c("Site", "Connect ID", "BioClin_BldUrnPlcdTmBL", "BioClin_ClinBloodTmBL", 
+#                                 "BioClin_UrnOrdPlcdDtBL", "BioClin_ClinicalUrnTmBL")
+# knitr::kable(DrawOrder_Colct2, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
+
 
 ```
 
