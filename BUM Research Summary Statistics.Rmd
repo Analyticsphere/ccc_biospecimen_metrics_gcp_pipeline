@@ -34,6 +34,8 @@ library(tinytex)
 library(tidyr)
 library(knitr)
 library(kableExtra)
+library(stringr)
+library(lubridate)
 
 options(tinytex.verbose = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
@@ -44,15 +46,16 @@ bq_auth()
 ```{r merge, include=FALSE}
 project = "nih-nci-dceg-connect-prod-6d04"
 billing= "nih-nci-dceg-connect-prod-6d04"
-biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_v1_JP`  where Connect_ID is not null"
-parts <- "SELECT Connect_ID, token, D_512820379, D_471593703, state_d_934298480, D_230663853,
+biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_v1`  where Connect_ID is not null"
+parts <- "SELECT Connect_ID, token, D_512820379, D_471593703, state_d_934298480, D_230663853, d_827220437,
 D_335767902, D_982402227, D_919254129, D_699625233, D_564964481, D_795827569, D_544150384,
 D_371067537, D_430551721, D_821247024, D_914594314,  state_d_725929722, d_822499427, d_222161762,
-D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, d_331584571_d_266600170_d_840048338 
-FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
+D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, 
+d_331584571_d_266600170_d_840048338, d_173836415_d_266600170_d_448660695
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
 where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and d_821247024='197316935' and
 d_331584571_d_266600170_d_840048338 is not null and d_331584571_d_266600170_d_343048998 is not null and d_265193023='231311385'"
-specimenBUM <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null"
+specimenBUM <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where Connect_ID is not null"
 
 
 biospec_table <- bq_project_query(project, biospec, n_max = Inf, page_size = 1000)
@@ -393,41 +396,16 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 ```
 
 
-```{r merge2, include=FALSE, warning=FALSE}
 
-library(stringr)
-library(lubridate)
-
-avgP_ccc <-  "SELECT  Connect_ID, d_173836415_d_266600170_d_448660695, d_265193023, d_827220437 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where d_265193023='231311385' and d_173836415_d_266600170_d_448660695 is not null "
-avgB_ccc <-  "SELECT Connect_ID, D_191057574, D_191057574_V2, D_867307558 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_v1_JP` 
-where (D_191057574 is not null OR D_191057574_V2 is not null) "
+```{r Table4, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-avgP_table_cc <- bq_project_query(project, avgP_ccc)
-avgB_table_cc <- bq_project_query(project, avgB_ccc)
-
-avgP <- bq_table_download(avgP_table_cc, bigint = "integer64")
-avgB <- bq_table_download(avgB_table_cc, bigint = "integer64")
-
-avgP$Connect_ID <- as.numeric(avgP$Connect_ID)
-avgB$Connect_ID <- as.numeric(avgB$Connect_ID)
-
-average <- left_join(avgP, avgB , by="Connect_ID")
-
-avg <- as_tibble(average)
-
-```
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-
-
-avg_s <- avg %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | d_827220437==657167265 | d_827220437==809703864) & !is.na(D_867307558))
+avg_s <- BUM_tib %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | d_827220437==657167265 | d_827220437==809703864) & !is.na(D_867307558))
 #avg$Site<- droplevels(avg$Site)
 
 #(D_867307558==110092955 ~ "Same day",D_867307558==952212668 ~ "The Day before"))
 
-avg_coll2 <- avg_s %>%  mutate(D_191057574V=case_when(!is.na(D_191057574_V2) ~ D_191057574_V2,
-                                                      !is.na(D_191057574) ~ D_191057574))
+avg_coll2 <- avg_s %>%  mutate(D_191057574V=coalesce(D_191057574, D_191057574_V2))
 #avg_coll3 <- avg_s %>%  mutate(D_191057574V=ifelse(!is.na(D_191057574), D_191057574, D_191057574_V2))
 
 
@@ -879,7 +857,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
   #Version2
 dt_PERMTTHLOST2= BUM_tib %>%   
-  filter(BUM_tib$d_222161762>as.Date("2022-12-1"))
+  filter(BUM_tib$d_222161762>as.Date("2022-12-01"))
 
 #lost2= dt_PERMTTHLOST2 %>%  mutate(multb2 = ifelse(D_899251483_V2_D_812107266==1, 1, 0) + ifelse(D_899251483_V2_D_452438775==1, 1, 0) + ifelse(D_899251483_V2_D_886864375==1, 1, 0) + ifelse(D_899251483_V2_D_104430631==1, 1, 0))
 
@@ -887,14 +865,15 @@ dt_PERMTTHLOST2= BUM_tib %>%
 
                                                     
                                            
-lost2= dt_PERMTTHLOST2 %>%  mutate(products2= case_when((D_899251483_V2_D_812107266==1 & D_899251483_V2_D_452438775==1 & D_899251483_V2_D_886864375==1)~ "From Accident, Decay, and Other Reasons",
+lost2= dt_PERMTTHLOST2 %>%  
+  mutate(products2= case_when((D_899251483_V2_D_812107266==1 & D_899251483_V2_D_452438775==1 & D_899251483_V2_D_886864375==1)~ "From Accident, Decay, and Other Reasons",
                                            (D_899251483_V2_D_812107266==1 & D_899251483_V2_D_452438775==1) ~ "From Accident and Decay",
                                            (D_899251483_V2_D_812107266==1 & D_899251483_V2_D_886864375==1) ~ "From Accident and Other Reasons",
                                            (D_899251483_V2_D_452438775==1 & D_899251483_V2_D_886864375==1) ~ "From Decay and Other Reasons",
                                            D_899251483_V2_D_812107266==1 ~ "Yes from accident or injury",
                                              D_899251483_V2_D_452438775==1 ~ "Yes from tooth decay or disease",
                                              D_899251483_V2_D_886864375==1 ~ "Yes for some other reason",
-                                             D_899251483_V2_D_104430631==1  ~ "No",
+                                             D_899251483_V2_D_104430631==1 | D_899251483_V2_D_551489317==1  ~ "No",
                                              TRUE   ~ "Skipped this Question"))
 
 lost2$products2 <- factor(lost2$products2,levels=c("From Accident, Decay, and Other Reasons", "From Accident and Decay", "From Accident and Other Reasons", "From Decay and Other Reasons", "Yes from accident or injury", "Yes from tooth decay or disease", "Yes for some other reason", "No", "Skipped this Question"))
@@ -978,7 +957,7 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 
 
 #TEETHLOSTOTH
-TEETHLOSTOTH <- BUM_tib %>%  select(Connect_ID, D_360678252) %>%  filter((BUM_tib$D_899251483_V2_D_886864375==1| BUM_tib$D_899251483_V2_D_886864375==1) & (BUM_tib$d_822499427>as.Date("2022-12-1")))
+TEETHLOSTOTH <- BUM_tib %>%  select(Connect_ID, D_360678252) %>%  filter((BUM_tib$D_899251483_V2_D_886864375==1) & (BUM_tib$d_822499427>as.Date("2022-12-1")))
   #TEETHLOSTOTH_yn <- TEETHLOSTOTH  %>% group_by(D_360678252) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(D_360678252, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
       TEETHLOSTOTH_yn= TEETHLOSTOTH %>%  mutate(answer= case_when(D_360678252==349122068 ~ "One", # | D_542661394_D_167336253==1
                                              D_360678252==194129782~ "Two to Four",

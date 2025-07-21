@@ -49,14 +49,15 @@ bq_auth()
 ```{r merge, include=FALSE}
 project = "nih-nci-dceg-connect-prod-6d04"
 billing= "nih-nci-dceg-connect-prod-6d04"
-biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.clinicalBioSurvey_v1_JP` where Connect_ID is not null"
+biospec <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.clinicalBioSurvey_v1` where Connect_ID is not null"
 parts <- "SELECT Connect_ID, token, D_512820379, D_471593703, state_d_934298480, D_230663853,
 D_335767902, D_982402227, D_919254129, D_699625233, D_564964481, D_795827569, D_544150384,
 D_371067537, D_430551721, D_821247024, D_914594314,  state_d_725929722, 
-D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, 
-d_331584571_d_266600170_d_840048338,  d_534669573, d_764863765, d_827220437, d_253883960 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
+D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, d_173836415_d_266600170_d_448660695,
+d_331584571_d_266600170_d_840048338,  d_534669573, d_764863765, d_827220437, d_253883960 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
 where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and d_821247024='197316935' and d_253883960='231311385'"
-specimenBU <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null"
+specimenBU <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where Connect_ID is not null"
 
 
 biospec_table <- bq_project_query(project, biospec)
@@ -357,68 +358,25 @@ gt_functBU(D_867307558, "Table 3: When Last Food or Beverage Consumed")
 
 
 
-
-```{r merge2, include=FALSE, warning=FALSE}
-avgP_ccc <-  "SELECT  Connect_ID, d_173836415_d_266600170_d_448660695, d_265193023, d_827220437 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` 
-where d_265193023='231311385' and d_173836415_d_266600170_d_448660695 is not null "
-avgB_ccc <-  "SELECT Connect_ID, D_191057574, D_191057574_V2, D_867307558 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.bioSurvey_v1_JP` 
-where (D_191057574 is not null OR D_191057574_V2 is not null) "
-
-
-avgP_table_cc <- bq_project_query(project, avgP_ccc)
-avgB_table_cc <- bq_project_query(project, avgB_ccc)
-
-avgP <- bq_table_download(avgP_table_cc, bigint = "integer64")
-avgB <- bq_table_download(avgB_table_cc, bigint = "integer64")
-
-avgP$Connect_ID <- as.numeric(avgP$Connect_ID)
-avgB$Connect_ID <- as.numeric(avgB$Connect_ID)
-
-average <- left_join(avgP, avgB , by="Connect_ID")
-
-avg <- as_tibble(average)
-
-```
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-avg_s <- avg %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | d_827220437==657167265 | d_827220437==809703864) & !is.na(D_867307558))
-#avg$Site<- droplevels(avg$Site)
+avg_coll2 <- BU_tib %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | d_827220437==657167265 | d_827220437==809703864) & 
+                              !is.na(D_867307558)) %>% 
+  mutate(MW_date = as.Date(d_173836415_d_266600170_d_448660695))
 
-#(D_867307558==110092955 ~ "Same day",D_867307558==952212668 ~ "The Day before"))
-
-avg_coll2 <- avg_s %>%  mutate(D_191057574V=case_when(!is.na(D_191057574_V2) ~ D_191057574_V2,
-                                                      !is.na(D_191057574) ~ D_191057574))
-#avg_coll3 <- avg_s %>%  mutate(D_191057574V=ifelse(!is.na(D_191057574), D_191057574, D_191057574_V2))
-
-
-#avg_s$D_191057574 <- paste0("2023-", avg_s$D_191057574)
-#avg_s$D_191057574 <- as.Date(avg_s$D_191057574, format="MM-DD")
-avg_coll2$MW_date <- as.Date(avg_coll2$d_173836415_d_266600170_d_448660695) 
-#class(avg_coll2$MW_date) 
 avg_coll2$MW_dayb4 <- avg_coll2$MW_date - 1
-#avg_coll2$MW_dayb4 <- paste0((avg_coll2$MW_date - 1), str_sub(avg_coll2$d_173836415_d_266600170_d_448660695,11,24))
-#avg_coll2$MW_dayb4 <- avg_coll2$d_173836415_d_266600170_d_448660695-1
 
-avg_coll2 <- avg_coll2 %>%  mutate(eat= case_when(D_867307558==110092955 ~ paste0(str_sub(avg_coll2$d_173836415_d_266600170_d_448660695,1,11), avg_coll2$D_191057574V, ":00.000Z"),
-                                                  D_867307558==952212668 ~ paste0(avg_coll2$MW_dayb4, avg_coll2$D_191057574V, ":00.000Z" )))
-
-
-
-avg_coll <- avg_coll2 %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),as.POSIXct(ymd_hms(eat)),units="hours")))
-                                 # Site = case_when(d_827220437==531629870 ~ "HealthPartners",
-                                 #                  d_827220437==548392715 ~ "Henry Ford Health System",
-                                 #                  d_827220437==303349821 ~ "Marshfield Clinic Health System",
-                                 #                  d_827220437==657167265 ~ "Sanford Health",
-                                 #                  d_827220437==809703864 ~ "University of Chicago Medicine"))
-
-avg_coll <- avg_coll %>%  mutate(MW = case_when( as.numeric(abs(abs(time))) >72 ~">72hrs",
+avg_coll <- avg_coll2 %>%  mutate(eat= case_when(D_867307558==110092955 ~ paste0(str_sub(d_173836415_d_266600170_d_448660695,1,11), D_191057574_V2, ":00.000Z"),
+                                                  D_867307558==952212668 ~ paste0(MW_dayb4, D_191057574_V2, ":00.000Z" )),
+                                   time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),as.POSIXct(ymd_hms(eat)),units="hours")),
+                                  MW = case_when( as.numeric(abs(abs(time))) >72 ~">72hrs",
                                             72 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 48 ~ "> 48 hrs to 72 hrs",
                                             48 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 24 ~ "> 24 hrs to 48 hrs",   
                                             24 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 12 ~ "> 12 hrs to 24 hrs",
                                             12 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 3 ~ "> 3 hrs to 12 hrs",  
                                             3 >= as.numeric(abs(time)) & as.numeric(abs(time)) >= 0 ~ "0 hrs to 3 hrs",
-                                            TRUE ~ "Missing Time"),
+                                            is.na(time) ~ "Missing Time"),
                                  Site=case_when(d_827220437==531629870 ~ "HealthPartners",
                                                  d_827220437==548392715 ~ "Henry Ford Health System",
                                                  d_827220437==303349821 ~ "Marshfield Clinical Health System",
@@ -427,8 +385,9 @@ avg_coll <- avg_coll %>%  mutate(MW = case_when( as.numeric(abs(abs(time))) >72 
                                                 d_827220437==125001209 ~ "Kaiser Permanente Colorado",
                                                  d_827220437==327912200 ~ "Kaiser Permanente Georgia",
                                                  d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
-avg_coll$MW <- factor(avg_coll$MW, levels= c( "Missing Time", "0 hrs to 3 hrs", "> 3 hrs to 12 hrs", "> 12 hrs to 24 hrs", "> 24 hrs to 48 hrs", "> 48 hrs to 72 hrs", ">72hrs"))
+                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"),
+                                 MW = factor(MW, levels= c( "Missing Time", "0 hrs to 3 hrs", "> 3 hrs to 12 hrs", "> 12 hrs to 24 hrs",
+                                                         "> 24 hrs to 48 hrs", "> 48 hrs to 72 hrs", ">72hrs")))
 
 
 MW_time1 <- avg_coll %>% dplyr::group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) # %>% dplyr::ungroup() #------ why is it saying MW is not a column????
@@ -448,21 +407,14 @@ MW_time1 %>%  gt::gt()  %>%
 ```{r RemovedTables, warning=FALSE, echo=FALSE,  message=FALSE}
 
 #EATDRINKTIME
-EATDRINKTIME_V1=BU %>% filter(!is.na(D_191057574) & (D_867307558== "952212668"| D_867307558=="330461666")) %>% ggplot(aes(x=D_191057574))+ ylab("Count") + 
-  xlab("Time (Military Time)") +geom_bar()+  ggtitle("EATDRINKTIME(V1): Time Food or Beverage Last Consumed") +theme(axis.text.x = element_text(angle = 90))
 
 EATDRINKTIME_V2=BU %>% filter(!is.na(D_191057574_V2) & (D_867307558== "952212668"| D_867307558=="330461666")) %>% ggplot(aes(x=D_191057574_V2))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("EATDRINKTIME(V2): Time Food or Beverage Last Consumed") +theme(axis.text.x = element_text(angle = 90))
-#grid.arrange(EATDRINKTIME_V1, EATDRINKTIME_V2, nrow=2)
 
 
 #SLEEPTIME
-SLEEPTIME_V1=BU %>% filter(!is.na(D_299417266)) %>% ggplot(aes(x=D_299417266))+ ylab("Count") + 
-  xlab("Time (Military Time)") +geom_bar()+  ggtitle("SLEEPTIME(V1): Bedtime the Night Before Donation") +theme(axis.text.x = element_text(angle = 90))
-
 SLEEPTIME_V2=BU %>% filter(!is.na(D_299417266_V2)) %>% ggplot(aes(x=D_299417266_V2))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("SLEEPTIME(V2): Bedtime the Night Before Donation") +theme(axis.text.x = element_text(angle = 90))
-#grid.arrange(SLEEPTIME_V1, SLEEPTIME_V2, nrow=2)
 
 
 
@@ -490,12 +442,8 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 
 
 #WAKETIME
-WAKETIME_V1=BU %>% filter(!is.na(D_689861450)) %>% ggplot(aes(x=D_689861450))+ ylab("Count") + 
-  xlab("Time (Military Time)") +geom_bar()+  ggtitle("WAKETIME(V1): Wake-up Time the Day of Donation") +theme(axis.text.x = element_text(angle = 90))
-
 WAKETIME_V2=BU %>% filter(!is.na(D_689861450_V2)) %>% ggplot(aes(x=D_689861450_V2))+ ylab("Count") + 
   xlab("Time (Military Time)") +geom_bar()+  ggtitle("WAKETIME(V2): Wake-up Time the Day of Donation") +theme(axis.text.x = element_text(angle = 90))
-#grid.arrange(WAKETIME_V1, WAKETIME_V2, nrow=2)
 
 
 

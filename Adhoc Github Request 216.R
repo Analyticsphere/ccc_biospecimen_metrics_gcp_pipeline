@@ -78,7 +78,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 bio_tb <- bq_project_query(project, 
-                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where d_410912345 is not null')  
+                           query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimenboxes` where d_410912345 is not null')  
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -92,7 +92,7 @@ for (i in 1: length(cnames)){
 }
 
 
-tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
+tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes`")
 box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
 
 
@@ -118,7 +118,7 @@ for (i in 1: length(cnames)){
 
 
 ##to select biospecimen data in recruitment 
-recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants_JP'")
+recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participantsboxes'")
 recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
@@ -134,7 +134,7 @@ select <- paste(recrvar.bio$column_name,collapse=",")
 
 tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, d_222161762, state_d_667474224, ",
                                select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and d_831041022 = '104430631'\")",
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participantsboxes` Where d_821247024 = '197316935' and  (d_512820379='486306141' or d_512820379='854703046')  and d_831041022 = '104430631'\")",
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
 

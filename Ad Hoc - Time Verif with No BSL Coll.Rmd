@@ -103,7 +103,7 @@ local_drive= ifelse(write_to_local_drive, "C:/Users/dowlingk2/Documents/Module-M
 
 project <- "nih-nci-dceg-connect-prod-6d04"
 billing <- "nih-nci-dceg-connect-prod-6d04" ##project and billing should be consistent
-bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen_JP` where Connect_ID is not null')  #d_410912345 is not null
+bio_tb <- bq_project_query(project, query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where Connect_ID is not null')  #d_410912345 is not null
 biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
@@ -115,7 +115,7 @@ for (i in 1: length(cnames)){
   var<-pull(biospe,varname)
   biospe[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
 }
-tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes_JP`")
+tb_box <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes`")
 box_wl_flat <- bigrquery::bq_table_download(tb_box,bigint="integer64",n_max = Inf, page_size = 1000)
 #y <- read_table(urlfile1,header = TRUE, sep = "\t", na.strings = c("NA","N/A",""),fill = TRUE, quote='')
 library(rio)
@@ -165,7 +165,7 @@ pct_tb <- function(x,y){
 return(pct)
 }
 ##to select biospecimen data in recruitment 
-recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants_JP'")
+recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants'")
 recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
 urlfile<- "https://raw.githubusercontent.com/episphere/conceptGithubActions/master/csv/masterFile.csv" ###to grab the updated dd from github 
 y <- read.csv(urlfile)
@@ -176,9 +176,9 @@ recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source == "Biospe
 recrvar.bio <- recrvar.bio[!duplicated(recrvar.bio[,c("last.CID","column_name")]),] #53 updated 10/05/2023 due to the updated dictionary
 query <- recrvar.bio$column_name
 select <- paste(recrvar.bio$column_name,collapse=",")
-#tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
+#tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` Where d_821247024 = '197316935' \")",sep=" ")))
 
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, date,d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` Where d_821247024 = '197316935' \")",sep=" ")))
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233,d_265193023, d_822499427, d_222161762,", select,"FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` Where d_821247024 = '197316935' \")",sep=" ")))
  
 recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 10000)
 ##below are the commone variables in the recruitment table on Biospecimen to apply for the analysis. In case any new variables popping up, i would like #to use the one above directly from the resources (master DD and recruitment table schema to get the most updated version on this biospecimen data
@@ -192,7 +192,7 @@ recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, p
 # d_173836415_d_266600170_d_728696253, d_173836415_d_266600170_d_740582332, d_173836415_d_266600170_d_769615780,
 # d_173836415_d_266600170_d_786930107, d_173836415_d_266600170_d_822274939, d_173836415_d_266600170_d_847159717,
 # d_173836415_d_266600170_d_860477844, d_173836415_d_266600170_d_915179629, d_173836415_d_266600170_d_939818935,
-# d_173836415_d_266600170_d_951355211, d_173836415_d_266600170_d_982213346 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants_JP` WHERE d_821247024 = '197316935'")
+# d_173836415_d_266600170_d_951355211, d_173836415_d_266600170_d_982213346 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` WHERE d_821247024 = '197316935'")
 ##to convert to numeric
 cnames <- names(recr.bio)
 recrver <- recr.bio
@@ -369,7 +369,7 @@ crosstable.coll_bptl1 <- crosstable.coll_bptl[, c(15:21, 7)]
 library(kableExtra)
 
 
-coll_bplt_knitr <- knitr::kable(crosstable.coll_bptl1, col.names=c("Site", "< 30 Days", "30 to <60 Days","60 to <90 Days", "90 to <180 Days", "180 to <270 Days", "270 Days or More", "Total"), caption='Time (In Days) Since Verification Among Participants with No Baseline Biospecimen Collection by Site', row.names=FALSE, align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
+coll_bplt_knitr <- knitr::kable(crosstable.coll_bptl1, col.names=c("Site", "< 30 Days", "30 to <60 Days","60 to <90 Days", "90 to <180 Days", "180 to <270 Days", "270 Days or More", "Total"), caption='Time (In Days) Since Verification Among Participants with No Baseline Biospecimen Collection by Site', row.names=FALSE, align=c("l","c","c","c","c","c","c","c"), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% landscape()
 coll_bplt_knitr
 ```
 
