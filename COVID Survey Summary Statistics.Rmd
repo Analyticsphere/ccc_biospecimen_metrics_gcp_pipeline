@@ -172,22 +172,40 @@ covid_once_funct <- function(CID, Title){
   dt_select <- CVD_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter((as.numeric(CVD_tib$D_860011428)>=1 | CVD_tib$D_494226443=="353358909"))
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!CVD_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) 
+#   gt_yn %>%  gt::gt()  %>%  
+#   fmt_number(columns = "percentage", decimals = 1) %>% 
+#   tab_header(title = md(Title)) %>% 
+#   cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
+# grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
+#   tab_options(
+#       stub.font.weight = "bold"
+#     ) %>%
+#   tab_style(
+#     style = list(
+#       cell_text(weight = "bold")
+#     ),
+#     locations = cells_body(
+#       columns = answer,
+#     )
+#   ) 
+  
+  gt_yn_kable <- gt_yn %>%
+  mutate(percentage = round(percentage, 1)) %>%
+  rename("Answer" = answer,
+         "N" = n,
+         "%" = percentage) %>%
+  bind_rows(
+    summarise(gt_yn,
+              Answer = "Total",
+              N = sum(n, na.rm = TRUE),
+              `%` = round(sum(percentage, na.rm = TRUE), 1))
+  )
+
+# Create kable table
+kable(gt_yn_kable, 
+      caption = Title, align = "lrr",
+      booktabs = TRUE, longtable = TRUE) %>%
+  kable_styling(latex_options = c("scale_down"))
 }
 
 covid_twice_funct <- function(CID, Title){  
@@ -664,18 +682,25 @@ which_sympt8= COVID_tib8 %>%  mutate(symptom= case_when( #as.numeric(multb2)>1 ~
                                              D_705336878_1_1_D_705336878_1_1_D_807835037==1 ~ "Other",
                                              TRUE   ~ "Skipped this question"))
 
-#which_sympt8$symptom <- factor(which_sympt8$symptom,levels=c("Fever", "Body Chills", "Body or Muscle Aches", "Weakness or Fatigue", "Confusion", "Trouble Sleeping", "New Loss of Taste or Smell", "Nasal Congestion", "Sore Throat", "Cough", "Shortness of Breath", "Chest Tightness", "Stomach Pain", "Dirrhea", "Nausea", "Vomiting", "Rashes or Other Skin Changes", "Conjunctivitis", "Other", "Multiple Symptoms", "Skipped this question"))
 
 dt_cov8_2_summary <- which_sympt8  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
+dt_cov8_2_kable <- dt_cov8_2_summary %>%
+  mutate(percentage = round(percentage, 1)) %>%
+  rename("Answer" = symptom,
+         "N" = n,
+         "%" = percentage) %>%
+  bind_rows(
+    summarise(dt_cov8_2_summary,
+              Answer = "Total",
+              N = sum(n, na.rm = TRUE),
+              `%` = round(sum(percentage, na.rm = TRUE), 1))
+  )
 
-dt_cov8_2_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Had Any Sypmtoms the First Time Having COVID-19")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
+kable(dt_cov8_2_kable, 
+      caption = "Had Any Sypmtoms the First Time Having COVID-19", align = "lrr",
+      booktabs = TRUE, longtable = TRUE) %>%
+  kable_styling(latex_options = c("scale_down"))
 
 
 
@@ -1047,13 +1072,22 @@ which_sympt8_2= COVID_tib8 %>%  mutate(symptom= case_when( #as.numeric(multb2)>1
 
 dt_cov8_2_summary <-  which_sympt8_2  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
-dt_cov8_2_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Had Any Sypmtoms the Second Time Having COVID-19")) %>% 
-  cols_label(symptom = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
+dt_cov8_2_kable <- dt_cov8_2_summary %>%
+  mutate(percentage = round(percentage, 1)) %>%
+  rename("Answer" = symptom,
+         "N" = n,
+         "%" = percentage) %>%
+  bind_rows(
+    summarise(dt_cov8_2_summary,
+              Answer = "Total",
+              N = sum(n, na.rm = TRUE),
+              `%` = round(sum(percentage, na.rm = TRUE), 1))
+  )
+
+kable(dt_cov8_2_kable, 
+      caption = "Had Any Sypmtoms the First Time Having COVID-19", align = "lrr",
+      booktabs = TRUE, longtable = TRUE) %>%
+  kable_styling(latex_options = c("scale_down"))
 
 
 
@@ -1168,15 +1202,15 @@ which_symptA4= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_215996690=
                                              TRUE   ~ "Skipped this question"))
 
 which_symptA4$symptom <- factor(which_symptA4$symptom,levels=c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
-dt_COV19A4_summary <- which_symptA4  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, percentage)
+dt_COV19A4_summary <- which_symptA4  %>% dplyr::group_by(symptom) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(symptom, n, percentage)
 
 dt_COV19A4_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
+    fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Experienced Trouble Remembering Things Since COVID-19 Diagnosis")) %>% 
-  cols_label(symptom = md("**Answer**"), percentage = md("**%**")) %>% 
-  summary_rows( groups= FALSE,column = percentage, fns= list(Sum= ~sum(.)), decimals=0) %>%
+  cols_label(symptom = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
+grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
   tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,)) 
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = symptom,))
 
 ######
 which_symptA5= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_462737492==244354126 ~ "Never Experienced",
@@ -1552,7 +1586,7 @@ one_skip_funct(D_934384452, "Length of Time Other Symptom Experienced", D_110872
 one_skip_funct(D_273371161, "Feel Like You Have Fully Recovered from COVID-19", D_110872086_D_110872086, "707601969")
 
 #COV22
-cat("\\FloatBarrier")
+
 COV22_Months=hist_funct(D_959877599_D_700620868, "Time to Fully Recover from COVID-19", "Months", "Count")
 COV22_Days=hist_funct(D_959877599_D_908044428, "Time to Fully Recover from COVID-19", "Days", "Count")
 grid.arrange(COV22_Months, COV22_Days, nrow=2)
