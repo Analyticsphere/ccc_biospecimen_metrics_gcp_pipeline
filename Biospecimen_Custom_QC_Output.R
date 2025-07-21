@@ -1319,6 +1319,19 @@ BioChk_TimeBL_v1r0_RschTmBL <- parts_data %>%  filter(as.POSIXct(d_331584571_d_2
                                                                                                              as.POSIXct(d_173836415_d_266600170_d_847159717), na.rm=T))
 
 
+########## These rules need to allow for duplicates
+
+###	76. If the biospecimen collection setting (BioSpm_BloodSettingBL_v1r0), (BioSpm_UrineSettingBL_v1r0) or (BioSpm_MWSettingBL_v1r0)] is Research then the visit check-in time (BioChk_TimeBL_v1r0) must be populated.
+Rsett_BioChk_TimeBL_v1r0 <- parts_data %>%  filter((d_173836415_d_266600170_d_592099155=='534621077' |
+                                                      d_173836415_d_266600170_d_718172863=='534621077' |
+                                                      d_173836415_d_266600170_d_915179629=='534621077') & 
+                                                     is.na(d_331584571_d_266600170_d_840048338))
+
+###	77. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
+BioChk_TimeBL_v1r0_RschTmBL <- parts_data %>%  filter(as.POSIXct(d_331584571_d_266600170_d_840048338) > pmin(as.POSIXct(d_173836415_d_266600170_d_561681068), 
+                                                                                                             as.POSIXct(d_173836415_d_266600170_d_847159717), na.rm=T))
+
+
 
 ####################### Only want the output to contain those with errors
 bioqc_csv2 <-  bioqc_csv %>% filter(!if_all(starts_with("Rule"), ~ . == " " | is.na(.)))
