@@ -112,7 +112,7 @@ project <- "nih-nci-dceg-connect-prod-6d04"
 
 bio_tb <- bq_project_query(project, 
                            query='SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where d_410912345 is not null and Connect_ID is not null')  
-biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf) #, page_size = 1000)
+biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1000)
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
@@ -1045,8 +1045,7 @@ table1_4_locations$Region[table1_4_locations$Site_location=="Missing Both Locati
 # Aggregate counts by Site_location and Region
 count_all <- table1_4_locations %>%
   count(Region, Site_location) %>%
-  mutate(Count_Total = n) %>%
-  select(-n)
+  dplyr::rename(Count_Total = n)
 
 total_all <- sum(count_all$Count_Total)
 count_all <- count_all %>%
@@ -1059,8 +1058,7 @@ table1_4_locations_30days <- table1_4_locations %>% filter(d_556788178 >= curren
 
 count_all <- table1_4_locations %>%
   count(Region, Site_location) %>%
-  mutate(Count_Total = n) %>%
-  select(-n)
+   dplyr::rename(Count_Total = n)
 
 total_all <- sum(count_all$Count_Total)
 count_all <- count_all %>%
@@ -1071,8 +1069,7 @@ count_all <- count_all %>%
 # Similarly for 7-day and 30-day counts
 count_7days <- table1_4_locations_7days %>%
   count(Region, Site_location) %>%
-  mutate(Count_7days = n) %>%
-  select(-n)
+  dplyr::rename(Count_7days = n)
 
 total_7days <- sum(count_7days$Count_7days)
 count_7days <- count_7days %>%
@@ -1080,8 +1077,7 @@ count_7days <- count_7days %>%
 
 count_30days <- table1_4_locations_30days %>%
   count(Region, Site_location) %>%
-  mutate(Count_30days = n) %>%
-  select(-n)
+  dplyr::rename(Count_30days = n)
 
 total_30days <- sum(count_30days$Count_30days)
 count_30days <- count_30days %>%
@@ -1110,7 +1106,7 @@ final_col_num_1.5 <- bind_rows(final_col_num_1.5, total_row)
 final_col_num_1.5 <- final_col_num_1.5 %>%
   mutate(is_total = if_else(Region == "Total" & Site_location == "Total", 1, 0)) %>%
   arrange(is_total, Region, desc(Count_30days)) %>%
-  select(-is_total)  # Remove the helper column
+  dplyr::select(-is_total)  # Remove the helper column
 
 final_col_num_1.5$'In the Past 7 Days' <- paste0(final_col_num_1.5$Count_7days, " (", final_col_num_1.5$Percent_7days, ")")
 final_col_num_1.5$'In the Past 30 Days' <- paste0(final_col_num_1.5$Count_30days, " (", final_col_num_1.5$Percent_30days, ")")
@@ -1126,8 +1122,7 @@ SF_collections$Region <- factor(SF_collections$Region, levels=c("Bemidji","Bisma
 
 
 SF_collections_tbl <- SF_collections %>%
-
-  select(-Region) %>%  # Remove Region just before rendering
+  dplyr::select(-Region) %>%  # Remove Region just before rendering
   kbl(caption = "Table 1.5: Baseline Clinical Biospecimen Collections in the Past 30 Days at Sanford Health by Clinic Location",
       booktabs = TRUE, longtable = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE, font_size = 6) %>%
@@ -1151,7 +1146,7 @@ top10 <- count_all %>%
 colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "Total Percentage")
 
 SF_top10_collections <- top10 %>%
-  select(-Region) %>%  
+  dplyr::select(-Region) %>%  
    kbl(caption = "Table 1.6 Top Baseline Clinical Collection Locations at Sanford Health by Region",
        booktabs = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE) %>%
@@ -2129,7 +2124,7 @@ verif_BSL_colctB = BSL_colctB %>% group_by(Site) %>%
 
 
 ver_draw <- coll_sett_all %>%  filter(all_settings=="Clinical" & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2023-02-01")  & 
-                                    Site!='HealthPartners' & Site!='Sanford Health' & Site!='University of Chicago Medicine') %>% 
+                                    Site!='HealthPartners' & Site!='Sanford Health' & Site!='University of Chicago Medicine')  
                                       #& Site!='Henry Ford Health') %>% mutate(Site = droplevels(Site))
 
 verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
