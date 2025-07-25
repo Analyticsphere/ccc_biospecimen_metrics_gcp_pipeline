@@ -172,40 +172,22 @@ covid_once_funct <- function(CID, Title){
   dt_select <- CVD_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter((as.numeric(CVD_tib$D_860011428)>=1 | CVD_tib$D_494226443=="353358909"))
   gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!CVD_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-#   gt_yn %>%  gt::gt()  %>%  
-#   fmt_number(columns = "percentage", decimals = 1) %>% 
-#   tab_header(title = md(Title)) %>% 
-#   cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-# grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-#   tab_options(
-#       stub.font.weight = "bold"
-#     ) %>%
-#   tab_style(
-#     style = list(
-#       cell_text(weight = "bold")
-#     ),
-#     locations = cells_body(
-#       columns = answer,
-#     )
-#   ) 
-  
-  gt_yn_kable <- gt_yn %>%
-  mutate(percentage = round(percentage, 1)) %>%
-  rename("Answer" = answer,
-         "N" = n,
-         "%" = percentage) %>%
-  bind_rows(
-    summarise(gt_yn,
-              Answer = "Total",
-              N = sum(n, na.rm = TRUE),
-              `%` = round(sum(percentage, na.rm = TRUE), 1))
+  gt_yn %>%  gt::gt()  %>%
+  fmt_number(columns = "percentage", decimals = 1) %>%
+  tab_header(title = md(Title)) %>%
+  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>%
+grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
+  tab_options(
+      stub.font.weight = "bold"
+    ) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold")
+    ),
+    locations = cells_body(
+      columns = answer,
+    )
   )
-
-# Create kable table
-kable(gt_yn_kable, 
-      caption = Title, align = "lrr",
-      booktabs = TRUE, longtable = TRUE) %>%
-  kable_styling(latex_options = c("scale_down"))
 }
 
 covid_twice_funct <- function(CID, Title){  
