@@ -53,7 +53,7 @@ D_371067537, D_430551721, D_821247024, D_914594314,  state_d_725929722, d_822499
 D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, 
 d_331584571_d_266600170_d_840048338, d_173836415_d_266600170_d_448660695
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
-where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and d_821247024='197316935' and
+where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and d_831041022='104430631' and d_821247024='197316935' and
 d_331584571_d_266600170_d_840048338 is not null and d_331584571_d_266600170_d_343048998 is not null and d_265193023='231311385'"
 specimenBUM <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where Connect_ID is not null"
 
@@ -101,7 +101,7 @@ cat("Particiapnts with Blood, Urine, Mouthwash Survey Completed: ", dim(bisp)[[1
 ```{r functions, include=FALSE}
 ##FUNCTIONS
 
-BUM_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Unknown", "536341288"="Female", "576796184"="Unknown", "654207589"="Male",
+dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Unknown", "536341288"="Female", "576796184"="Unknown", "654207589"="Male",
                  "110092955"="The same day", "952212668"="The day before", "330461666"="More than a day before", "974230748"="Yes, in the past day",
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
                  "548628123"="A little bit", "567908725"="Somewhat", "760969884"="Quite a bit", "464631026"="Very Much", "707601969"="Yes, another",
@@ -117,175 +117,248 @@ BUM_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Unknown", "53
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
-gt_functBUM <- function(CID, Title){  
+simple_funct_BUM <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM)
-  gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
+
+       gt_yn <- BUM_tib %>%
+        filter(as.numeric(D_860011428)>=3) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  ) %>% opt_row_striping()
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
 }
 
 menstrual_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$D_522008539==536341288)
-  gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
+         gt_yn <- BUM_tib %>%
+        filter(D_522008539==536341288) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  ) %>% opt_row_striping()
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
 }
 
 
-covid_once_funct <- function(CID, Title){  
-  CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05") & (as.numeric(BUM_tib$D_860011428)>=1 | BUM_tib$D_494226443=="353358909"))
-  gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
-}
-
-covid_twice_funct <- function(CID, Title){  
-  CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05") & as.numeric(BUM_tib$D_860011428)>=2)
-  gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
-}
-
-covid_thrice_funct <- function(CID, Title){  
-  CID_SYM <- rlang::ensym(CID)
-  dt_select <- BUM_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BUM_tib$d_222161762<as.Date("2023-07-05")& as.numeric(BUM_tib$D_860011428)>=3)
-  gt_yn <- dt_select  %>% group_by(!!CID_SYM) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
-}
-
-
-#One skip logic (previous response)
-
-
+#One skip logic (previous response was one particular response)
 one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){  
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
-  dt_select <- BUM_tib %>%  filter(!!CID_SYM_P==Previous_Answer) %>%  select(Connect_ID, !!CID_SYM) 
-  gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),  percentage = md("**%**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
+  
+     gt_yn <- BUM_tib %>%
+        filter(!!CID_SYM_P==Previous_Answer) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  ) %>% opt_row_striping()
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
 }
 
 
-#Two skip logic (previous response)
+#Two skip logic (previous response has one of two responses)
 two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_CID2, Previous_Answer2){  
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
   CID_SYM_P2 <- rlang::ensym(Previous_CID2)
-  dt_select2 <- BUM_tib %>%  filter(!!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>% 
-    select(Connect_ID, !!CID_SYM) 
-  gt2_yn <- dt_select2  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=recode(!!CID_SYM, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-  gt2_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),  percentage = md("**%**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
+    
+      gt_yn <- BUM_tib %>%
+        filter(!!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  ) 
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
+
+      
 }
+
+
+
+create_kable_table <- function(df, group_by_vriable, Title){  
+  CID_SYM <- rlang::ensym(group_by_vriable)
+  
+  gt_yn <- df %>%
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+  
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
+    ) %>%
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
+    )
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
+}
+
+
+
+
+create_kable_table_w_footnote <- function(df, group_by_vriable, Title){  
+  CID_SYM <- rlang::ensym(group_by_vriable)
+  
+  gt_yn <- df %>%
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+  
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
+    ) %>%
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
+    )
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down")) %>% 
+    footnote(general="Participants may select multiple responses or skip the question.", general_title = "")
+}
+
+
 
 #Histogram Function
 hist_funct <- function(CID,Title, Xlab, Ylab) {
@@ -302,26 +375,7 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
 
 
 
-```{r intro, warning=FALSE, echo=FALSE,  message=FALSE, include=FALSE}
 
-
-### All required questions:
-
-
-
-#MENSTPRD
-BUM_tib %>%  select(Connect_ID, d_265193023, d_822499427, d_222161762) %>%  filter(is.na(BUM_tib$D_380603392) & BUM_tib$D_522008539==536341288) ## =0
-
-#MENST60
-BUM_tib %>%  select(Connect_ID, d_265193023, d_822499427, d_222161762) %>%  filter(is.na(BUM_tib$D_112151599) & BUM_tib$D_522008539==536341288 & BUM_tib$D_380603392==353358909) ## ==0, but not required for everyone
-
-#MENSTART
-BUM_tib %>%  select(Connect_ID, d_265193023, d_822499427, d_222161762) %>%  filter(is.na(BUM_tib$D_644459734) & BUM_tib$D_522008539==536341288 & BUM_tib$D_112151599==353358909) ##==0, but not required for everyone
-
-#COVID?
-BUM_tib %>%  select(Connect_ID, d_265193023, d_822499427, d_222161762) %>%  filter(is.na(BUM_tib$D_494226443) & BUM_tib$D_522008539==536341288)  ## =0
-
-```
 
 
 \newpage
@@ -331,66 +385,56 @@ BUM_tib %>%  select(Connect_ID, d_265193023, d_822499427, d_222161762) %>%  filt
 
 
 #SEX
-gt_functBUM(D_522008539, "SEX: Biological Sex at Birth")
+simple_funct_BUM(D_522008539, "SEX: Biological Sex at Birth")
 
 
 
 #SYMPTDAY
+dt_SYMPTDAY_flags <- BUM_tib %>%
+  mutate(
+    Cough = as.numeric(D_470484596_D_756774083 == 1),
+    Diarrhea = as.numeric(D_470484596_D_235386560 == 1),
+    Nasal_Congestion = as.numeric(D_470484596_D_955154600 == 1),
+    Sick_to_Your_Stomach_or_Vomitting = as.numeric(D_470484596_D_811126581 == 1),
+    Fever = as.numeric(D_470484596_D_406943303 == 1),
+    None_of_these = as.numeric(D_470484596_D_535003378 == 1),
+    Skipped = if_else(
+      rowSums(select(., starts_with("D_470484596_D_")) == 0, na.rm = FALSE) == ncol(select(., starts_with("D_470484596_D_"))), 1, 0))
 
-dt_SYMPTDAY= BUM_tib %>%  mutate(multb2 = ifelse(D_470484596_D_756774083==1, 1, 0) + ifelse(D_470484596_D_235386560==1, 1, 0) + ifelse(D_470484596_D_955154600==1, 1, 0) + 
-                                             ifelse(D_470484596_D_811126581==1, 1, 0) + ifelse(D_470484596_D_406943303==1, 1, 0))
+dt_SYMPTDAY_long <- dt_SYMPTDAY_flags %>%
+  pivot_longer(
+    cols = c(
+      Cough,
+      Diarrhea,
+      Nasal_Congestion,
+      Sick_to_Your_Stomach_or_Vomitting,
+      Fever,
+      None_of_these,
+      Skipped
+    ),
+    names_to = "symptom_flag",
+    values_to = "Flag"
+  ) %>%
+  filter(Flag == 1) %>%
+  mutate(
+    symptom = case_when(
+      symptom_flag == "Cough" ~ "Cough",
+      symptom_flag == "Diarrhea" ~ "Diarrhea",
+      symptom_flag == "Nasal_Congestion" ~ "Nasal Congestion",
+      symptom_flag == "Sick_to_Your_Stomach_or_Vomitting" ~ "Sick to Your Stomach or Vomitting",
+      symptom_flag == "Fever" ~ "Fever",
+      symptom_flag == "None_of_these" ~ "None of these",
+      symptom_flag == "Skipped" ~ "Skipped this Question"
+    )
+  )
 
 
+create_kable_table_w_footnote(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation")
 
- which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when(as.numeric(multb2)>1 ~ "Multiple Symptoms",
-                                                         D_470484596_D_756774083==1 ~ "Cough",
-                                                         D_470484596_D_235386560==1 ~ "Diarrhea",
-                                                         D_470484596_D_955154600==1 ~ "Nasal Congestion",
-                                                         D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting",
-                                                         D_470484596_D_406943303==1 ~ "Fever",
-                                                         D_470484596_D_535003378==1 ~ "None of these",
-                                                         TRUE   ~ "Skipped this Question"))
-
- which_sympt$symptom <- factor(which_sympt$symptom,levels=c("Multiple Symptoms", "Cough", "Diarrhea", "Nasal Congestion", "Sick to Your Stomach or Vomitting", "Fever",  "None of these", "Skipped this Question"))
-
-
-dt_SYMPTDAY_summary <- which_sympt %>% group_by(symptom) %>%  dplyr::summarize(n=n(), percentage=round(100*n/nrow(.), digits=2)) %>%  dplyr::select(symptom, n, percentage)
-
-
-dt_SYMPTDAY_summary  %>%  gt::gt() %>%
-  fmt_number(columns = "percentage", 
-             decimals = 2) %>%
-  tab_header(title = md("Table 2: Symptoms in the 24 hours Prior to Sample Donation")) %>%
-  cols_label(symptom = md("**Answer**"), n = md("**Number**"), percentage = md("**Percentage**")) %>%
-  grand_summary_rows(columns=c(n, percentage),
-                     fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),
-            locations = cells_body(columns = symptom))
 
 
 #EATDRINKBEFORE
-EATDRINKBEFORE <- gt_functBUM(D_867307558, "Table 3: When Last Food or Beverage Consumed")
-
-
-which_eattime= BUM_tib %>%  mutate(answer= case_when(D_867307558==110092955 ~ "The same day",
-                                             D_867307558==952212668 ~ "The day before",
-                                             D_867307558==330461666 ~ "More than a day before",
-                                             TRUE   ~ "Skipped this Question"))
-which_eattime$answer <- factor(which_eattime$answer,levels=c("The same day", "The day before", "More than a day before","Skipped this Question"))
-
-
-dt_eattime_summary <- which_eattime %>% group_by(answer) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(answer, n, percentage)
-
-
-dt_eattime_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 3: When Last Food or Beverage Consumed")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = answer,)) %>% opt_row_striping()
-
+simple_funct_BUM(D_867307558, "Table 3: When Last Food or Beverage Consumed")
 
 
 ```
@@ -400,65 +444,43 @@ grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
 ```{r Table4, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-avg_s <- BUM_tib %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | d_827220437==657167265 | d_827220437==809703864) & !is.na(D_867307558))
-#avg$Site<- droplevels(avg$Site)
-
-#(D_867307558==110092955 ~ "Same day",D_867307558==952212668 ~ "The Day before"))
-
-avg_coll2 <- avg_s %>%  mutate(D_191057574V=coalesce(D_191057574, D_191057574_V2))
-#avg_coll3 <- avg_s %>%  mutate(D_191057574V=ifelse(!is.na(D_191057574), D_191057574, D_191057574_V2))
-
-
-#avg_s$D_191057574 <- paste0("2023-", avg_s$D_191057574)
-#avg_s$D_191057574 <- as.Date(avg_s$D_191057574, format="MM-DD")
-avg_coll2$MW_date <- as.Date(avg_coll2$d_173836415_d_266600170_d_448660695) 
-avg_coll2$MW_dayb4 <- avg_coll2$MW_date - 1
-#avg_coll2$MW_dayb4 <- paste0((avg_coll2$MW_date - 1), str_sub(avg_coll2$d_173836415_d_266600170_d_448660695,11,24))
-#avg_coll2$MW_dayb4 <- avg_coll2$d_173836415_d_266600170_d_448660695-1
-
-avg_coll2 <- avg_coll2 %>%  mutate(eat= case_when(D_867307558==110092955 ~ paste0(str_sub(avg_coll2$d_173836415_d_266600170_d_448660695,1,11), avg_coll2$D_191057574V, ":00.000Z"),
-                                                  D_867307558==952212668 ~ paste0(avg_coll2$MW_dayb4, avg_coll2$D_191057574V, ":00.000Z" )))
-
-
-avg_coll <- avg_coll2 %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),as.POSIXct(ymd_hms(eat)),units="hours")))
-                                 # Site = case_when(d_827220437==531629870 ~ "HealthPartners",
-                                 #                  d_827220437==548392715 ~ "Henry Ford Health System",
-                                 #                  d_827220437==303349821 ~ "Marshfield Clinic Health System",
-                                 #                  d_827220437==657167265 ~ "Sanford Health",
-                                 #                  d_827220437==809703864 ~ "University of Chicago Medicine"))
-
-avg_coll <- avg_coll %>%  mutate(MW = case_when( as.numeric(abs(abs(time))) >72 ~">72hrs",
-                                            72 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 48 ~ "> 48 hrs to 72 hrs",
-                                            48 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 24 ~ "> 24 hrs to 48 hrs",   
-                                            24 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 12 ~ "> 12 hrs to 24 hrs",
-                                            12 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 3 ~ "> 3 hrs to 12 hrs",  
-                                            3 >= as.numeric(abs(time)) & as.numeric(abs(time)) >= 0 ~ "0 hrs to 3 hrs",
-                                            TRUE ~ "Missing Time"),
-                                 Site=case_when(d_827220437==531629870 ~ "HealthPartners",
-                                                 d_827220437==548392715 ~ "Henry Ford Health System",
-                                                 d_827220437==303349821 ~ "Marshfield Clinical Health System",
-                                                 d_827220437==657167265 ~ "Sanford Health",
-                                                 d_827220437==809703864 ~ "University of Chicago Medicine",
-                                                d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                                                 d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                                                 d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
-avg_coll$MW <- factor(avg_coll$MW, levels= c(  "Missing Time", "0 hrs to 3 hrs", "> 3 hrs to 12 hrs", "> 12 hrs to 24 hrs", "> 24 hrs to 48 hrs", "> 48 hrs to 72 hrs", ">72hrs"))
+avg_coll <- BUM_tib %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | 
+                                d_827220437==657167265 | d_827220437==809703864) & 
+                               !is.na(D_867307558)) %>%  
+  mutate(D_191057574V=coalesce(D_191057574, D_191057574_V2),
+         MW_date = as.Date(d_173836415_d_266600170_d_448660695),
+         MW_dayb4 = MW_date - days(1),
+         eat= case_when(D_867307558==110092955 ~ paste0(str_sub(d_173836415_d_266600170_d_448660695,1,11), D_191057574V, ":00.000Z"),
+                                                  D_867307558==952212668 ~ paste0(MW_dayb4, D_191057574V, ":00.000Z" )),
+         time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),as.POSIXct(ymd_hms(eat)),units="hours")),
+         MW = case_when( as.numeric(abs(abs(time))) >72 ~">72hrs",
+                         72 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 48 ~ "> 48 hrs to 72 hrs",
+                         48 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 24 ~ "> 24 hrs to 48 hrs",   
+                         24 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 12 ~ "> 12 hrs to 24 hrs",
+                         12 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 3 ~ "> 3 hrs to 12 hrs",  
+                         3 >= as.numeric(abs(time)) & as.numeric(abs(time)) >= 0 ~ "0 hrs to 3 hrs",
+                         TRUE ~ "Missing Time"),
+         MW = factor(MW, levels= c(  "Missing Time", "0 hrs to 3 hrs", "> 3 hrs to 12 hrs", "> 12 hrs to 24 hrs", 
+                                     "> 24 hrs to 48 hrs", "> 48 hrs to 72 hrs", ">72hrs")),
+         Site=case_when(d_827220437==531629870 ~ "HealthPartners",
+                        d_827220437==548392715 ~ "Henry Ford Health System",
+                        d_827220437==303349821 ~ "Marshfield Clinical Health System",
+                        d_827220437==657167265 ~ "Sanford Health",
+                        d_827220437==809703864 ~ "University of Chicago Medicine",
+                        d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+                        d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+                        d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+                        d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
 
-MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) # %>% dplyr::ungroup() #------ why is it saying MW is not a column????
-#MW_time <- MW_time1 %>%  sort_by(Site) 
+MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) 
   
 MW_time1 %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 4. Time from Last Meal to Time of Mouthwash Collection")) %>% 
-  cols_label(n= md("**Number**"), MW = md(" "), percentage = md("**Percent**")) %>%  
+  cols_label(n= md("**N**"), MW = md("**Answer**"), percentage = md("**Pct**")) %>%  
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))
-  # summary_rows(
-  #   columns = c(n,percentage),    
-  #   fns= list(
-  #     Sum= ~sum(.)
-  #   ), decimals=0)
+
 
 ```
 
@@ -559,11 +581,11 @@ BUM_tib$D_487532606_D_619765650 <- factor(BUM_tib$D_487532606_D_619765650,levels
 BUM_tib$D_487532606_D_520755310 <- factor(BUM_tib$D_487532606_D_520755310,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
 BUM_tib$D_487532606_D_839329467 <- factor(BUM_tib$D_487532606_D_839329467,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
 
-gt_functBUM(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
+simple_funct_BUM(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
 
-gt_functBUM(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
+simple_funct_BUM(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
 
-gt_functBUM(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken")
+simple_funct_BUM(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken")
 
 
 
@@ -586,7 +608,7 @@ one_skip_funct(D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days",
 
 
 #MENSTART
-BUM_tibM <- BUM_tib %>%  filter(!is.na(BUM_tib$D_644459734) & BUM_tib$D_112151599=="353358909")
+BUM_tibM <- BUM_tib %>%  filter(!is.na(D_644459734) & D_112151599=="353358909")
 BUM_tibM$Mdate <- as.Date(BUM_tibM$D_644459734)
 
 BUM_TimeM <- BUM_tibM  %>% dplyr::group_by(Mdate) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(Mdate, n)
@@ -626,24 +648,24 @@ one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the 
 
 #ORALHLTH
 BUM_tib$D_350251057 <- factor(BUM_tib$D_350251057,levels=c(670680466, 927477599, 719933364, 131550264, 138752522, 178420302, "Skipped this Question"))
-gt_functBUM(D_350251057, "Table 117: Overall Health Ranking")
+simple_funct_BUM(D_350251057, "Table 117: Overall Health Ranking")
 
 
 
 #MWBEFORE
-gt_functBUM(D_877878167, "Table 19: Brushed Teeth Within the Hour Before Sample Donation")
+simple_funct_BUM(D_877878167, "Table 19: Brushed Teeth Within the Hour Before Sample Donation")
 
 
 #RINSEBEFORE
-gt_functBUM(D_800703566, "Table 20: Rinsed Mouth Within the Hour Before Sample Donation")
+simple_funct_BUM(D_800703566, "Table 20: Rinsed Mouth Within the Hour Before Sample Donation")
 
 
 #GUMBEFORE
-gt_functBUM(D_294886836, "Table 21: Chewed Gum Within the Hour Before Sample Donation")
+simple_funct_BUM(D_294886836, "Table 21: Chewed Gum Within the Hour Before Sample Donation")
 
 
 #TOBACCOBEFORE
-gt_functBUM(D_642044281, "Table 22: Smoke, Vape or Chew Products Within the Hour Before Sample Donation")
+simple_funct_BUM(D_642044281, "Table 22: Smoke, Vape or Chew Products Within the Hour Before Sample Donation")
 ```
 
 \newpage
@@ -651,68 +673,59 @@ gt_functBUM(D_642044281, "Table 22: Smoke, Vape or Chew Products Within the Hour
 
 #HYGIENE
    
-  #for now excluding options without toothbrush                                           
-hy_prod= BUM_tib %>%  mutate(products= case_when((D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1 & D_479143504_D_184513726==1 & D_479143504_D_390351864==1) ~ "All Products",
-                                                 (D_479143504_D_184513726==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1 & D_479143504_D_390351864==1) ~ "All Products, Except Toothbrush",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1 & D_479143504_D_184513726==1 & D_479143504_D_390351864==1) ~ "All Products, Except Floss",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_578402172==1 & D_479143504_D_184513726==1 & D_479143504_D_390351864==1) ~ "All Products, Except Water Based Flosser",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_184513726==1 & D_479143504_D_390351864==1) ~ "All Products, Except Tongue Cleaner",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1 & D_479143504_D_390351864==1) ~ "All Products, Except Teeth Whitener",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1 & D_479143504_D_184513726==1) ~ "All Products, Except Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1) ~ "All Products, Except Teeth Whitener and Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_184513726==1) ~ "All Products, Except Tongue Cleaner and Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1 & D_479143504_D_390351864==1) ~ "All Products, Except Tongue Cleaner and Teeth Whitener",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1 & D_479143504_D_184513726==1) ~ "All Products, Except Floss and Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1 & D_479143504_D_390351864==1) ~ "All Products, Except Floss and Teeth Whitener",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_184513726==1 & D_479143504_D_578402172==1 & D_479143504_D_390351864==1) ~ "All Products, Except Floss and Water-based Flosser",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_165596977==1) ~ "Toothbrush, Floss, Water-based Flosser",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_578402172==1) ~ "Toothbrush, Floss, Tongue Cleaner",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_184513726==1) ~ "Toothbrush, Floss, Teeth Whitener",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1 & D_479143504_D_390351864==1) ~ "Toothbrush, Floss, Teeth Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_165596977==1 & D_479143504_D_578402172==1) ~ "Toothbrush, Water-based Flosser, Tongue Cleaner",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_165596977==1 & D_479143504_D_184513726==1) ~ "Toothbrush, Water-based Flosser, Teeth Whitener",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_165596977==1 & D_479143504_D_390351864==1) ~ "Toothbrush, Water-based Flosser, Teeth Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_578402172==1 & D_479143504_D_184513726==1) ~ "Toothbrush, Tongue Cleaner, Teeth Whitener",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_578402172==1 & D_479143504_D_390351864==1) ~ "Toothbrush, Tongue Cleaner, Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_184513726==1 & D_479143504_D_390351864==1) ~ "Toothbrush, Teeth Whitener, Mouthwash",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_807884576==1) ~ "Toothbrush, Floss",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_165596977==1) ~ "Toothbrush, Water-based Flosser",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_578402172==1) ~ "Toothbrush, Tongue Cleaner",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_184513726==1) ~ "Toothbrush, Teeth Whitener",
-                                                 (D_479143504_D_203919683==1 & D_479143504_D_390351864==1) ~ "Toothbrush, Mouthwash",
-                                                 D_479143504_D_203919683==1 ~ "Toothbrush",
-                                                 D_479143504_D_807884576==1 ~ "Floss",
-                                                 D_479143504_D_165596977==1 ~ "Water-based flosser or jet",
-                                                 D_479143504_D_578402172==1 ~ "Tongue Cleaner",
-                                                 D_479143504_D_184513726==1 ~ "Teeth Whitener",
-                                                 D_479143504_D_390351864==1 ~ "Mouthwash",
-                                                 TRUE   ~ "Skipped this Question"))
+hy_prod <- BUM_tib %>%
+  mutate(
+    toothbrush = D_479143504_D_203919683 == 1,
+    floss = D_479143504_D_807884576 == 1,
+    water_flosser = D_479143504_D_165596977 == 1,
+    tongue_cleaner = D_479143504_D_578402172 == 1,
+    whitener = D_479143504_D_184513726 == 1,
+    mouthwash = D_479143504_D_390351864 == 1,
+    
+    products = case_when(
+      toothbrush & floss & water_flosser & tongue_cleaner & whitener & mouthwash ~ "All Products",
+      floss & water_flosser & tongue_cleaner & whitener & mouthwash & !toothbrush ~ "All Products, Except Toothbrush",
+      toothbrush & water_flosser & tongue_cleaner & whitener & mouthwash & !floss ~ "All Products, Except Floss",
+      toothbrush & floss & tongue_cleaner & whitener & mouthwash & !water_flosser ~ "All Products, Except Water Based Flosser",
+      toothbrush & floss & water_flosser & whitener & mouthwash & !tongue_cleaner ~ "All Products, Except Tongue Cleaner",
+      toothbrush & floss & water_flosser & tongue_cleaner & mouthwash & !whitener ~ "All Products, Except Teeth Whitener",
+      toothbrush & floss & water_flosser & tongue_cleaner & whitener & !mouthwash ~ "All Products, Except Mouthwash",
+      
+      toothbrush & floss & water_flosser & tongue_cleaner & !whitener & !mouthwash ~ "All Products, Except Teeth Whitener and Mouthwash",
+      toothbrush & floss & water_flosser & whitener & !tongue_cleaner & !mouthwash ~ "All Products, Except Tongue Cleaner and Mouthwash",
+      toothbrush & floss & water_flosser & tongue_cleaner & !whitener ~ "All Products, Except Tongue Cleaner and Teeth Whitener",
+      toothbrush & water_flosser & tongue_cleaner & whitener & !floss & !mouthwash ~ "All Products, Except Floss and Mouthwash",
+      toothbrush & water_flosser & tongue_cleaner & mouthwash & !floss & !whitener ~ "All Products, Except Floss and Teeth Whitener",
+      toothbrush & whitener & tongue_cleaner & mouthwash & !floss & !water_flosser ~ "All Products, Except Floss and Water-based Flosser",
+      
+      toothbrush & floss & water_flosser ~ "Toothbrush, Floss, Water-based Flosser",
+      toothbrush & floss & tongue_cleaner ~ "Toothbrush, Floss, Tongue Cleaner",
+      toothbrush & floss & whitener ~ "Toothbrush, Floss, Teeth Whitener",
+      toothbrush & floss & mouthwash ~ "Toothbrush, Floss, Mouthwash",
+      toothbrush & water_flosser & tongue_cleaner ~ "Toothbrush, Water-based Flosser, Tongue Cleaner",
+      toothbrush & water_flosser & whitener ~ "Toothbrush, Water-based Flosser, Teeth Whitener",
+      toothbrush & water_flosser & mouthwash ~ "Toothbrush, Water-based Flosser, Mouthwash",
+      toothbrush & tongue_cleaner & whitener ~ "Toothbrush, Tongue Cleaner, Teeth Whitener",
+      toothbrush & tongue_cleaner & mouthwash ~ "Toothbrush, Tongue Cleaner, Mouthwash",
+      toothbrush & whitener & mouthwash ~ "Toothbrush, Teeth Whitener, Mouthwash",
+      
+      toothbrush & floss ~ "Toothbrush, Floss",
+      toothbrush & water_flosser ~ "Toothbrush, Water-based Flosser",
+      toothbrush & tongue_cleaner ~ "Toothbrush, Tongue Cleaner",
+      toothbrush & whitener ~ "Toothbrush, Teeth Whitener",
+      toothbrush & mouthwash ~ "Toothbrush, Mouthwash",
+      
+      toothbrush ~ "Toothbrush",
+      floss ~ "Floss",
+      water_flosser ~ "Water-based flosser or jet",
+      tongue_cleaner ~ "Tongue Cleaner",
+      whitener ~ "Teeth Whitener",
+      mouthwash ~ "Mouthwash",
+      
+      TRUE ~ "Skipped this Question"))
 
-hy_prod$products <- factor(hy_prod$products,levels=c("All Products", "All Products, Except Toothbrush","All Products, Except Floss","All Products, Except Water Based Flosser",
-                                                     "All Products, Except Tongue Cleaner", "All Products, Except Teeth Whitener", "All Products, Except Mouthwash",
-                                                     "All Products, Except Teeth Whitener and Mouthwash", "All Products, Except Tongue Cleaner and Mouthwash",
-                                                     "All Products, Except Tongue Cleaner and Teeth Whitener","All Products, Except Floss and Mouthwash",
-                                                     "All Products, Except Floss and Teeth Whitener", "All Products, Except Floss and Water-based Flosser",
-                                                     "Toothbrush, Floss, Water-based Flosser","Toothbrush, Floss, Tongue Cleaner","Toothbrush, Floss, Teeth Whitener", 
-                                                     "Toothbrush, Floss, Teeth Mouthwash", "Toothbrush, Water-based Flosser, Tongue Cleaner", 
-                                                     "Toothbrush, Water-based Flosser, Teeth Whitener", "Toothbrush, Water-based Flosser, Teeth Mouthwash",
-                                                     "Toothbrush, Tongue Cleaner, Teeth Whitener","Toothbrush, Tongue Cleaner, Mouthwash","Toothbrush, Teeth Whitener, Mouthwash",
-                                                     "Toothbrush, Floss","Toothbrush, Water-based Flosser","Toothbrush, Tongue Cleaner","Toothbrush, Teeth Whitener","Toothbrush, Mouthwash",
-                                                     "Toothbrush", "Floss", "Water-based flosser or jet", "Tongue Cleaner", "Teeth Whitener", "Mouthwash", "Skipped this Question"))
+create_kable_table(hy_prod, products, "Table 122: Oral Health Products Used in the Last Month")
 
-dt_hygeine_summary <- hy_prod  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=round(100*n/nrow(.), digits=2)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
-
-
-
-dt_hygeine_summary %>%  gt::gt() %>%
-  fmt_number(columns = "percentage", 
-             decimals = 1) %>%
-  tab_header(title = md("Table 122: Oral Health Products Used in the Last Month")) %>%
-  cols_label(products = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>%
-  grand_summary_rows(columns=c(n, percentage),
-                     fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = products))
 
 
 
@@ -748,28 +761,55 @@ one_skip_funct(D_499977481, "Table 127: Frequency Using Teeth Whitener in the La
 
 
 #MWUSE
-dt_MWUSE= BUM_tib %>%  filter(D_479143504_D_390351864==1)
+
+which_mwuse_flags <- BUM_tib %>%  filter(D_479143504_D_390351864==1) %>% 
+  mutate(
+    Alcohol_Based = as.numeric(D_406270109_D_950773275 == 1),
+    Alcohol_Free = as.numeric(D_406270109_D_762727133 == 1),
+    Chlorhexidine = as.numeric(D_406270109_D_877842367 == 1),
+    Fluoride = as.numeric(D_406270109_D_886771318 == 1),
+    Peroxide = as.numeric(D_406270109_D_404389800 == 1),
+    Cetylpyridinium = as.numeric(D_406270109_D_463302301 == 1),
+    Sensitive_Teeth = as.numeric(D_406270109_D_259744087 == 1),
+    Dry_Mouth = as.numeric(D_406270109_D_523660949 == 1),
+    Skipped = if_else(
+      rowSums(select(., starts_with("D_406270109_D_")) == 0, na.rm = FALSE) == ncol(select(., starts_with("D_406270109_D_"))), 1, 0))
 
 
-mw_prod= dt_MWUSE %>%  mutate(products= case_when(D_406270109_D_950773275==1 ~ "Alcohol Based Mouthwash",
-                                             D_406270109_D_762727133==1 ~ "Alcohol Free Mouthwash",
-                                             D_406270109_D_877842367==1 ~ "Chlorhexidine Mouthwash",
-                                             D_406270109_D_886771318==1 ~ "Flouride Mouthwash",
-                                             D_406270109_D_404389800==1 ~ "Peroxide Mouthwash",
-                                             D_406270109_D_463302301==1 ~ "Cetylpyridinium chloride Mouthwash",
-                                             D_406270109_D_259744087==1 ~ "Mouthwash for Sensitive Teeth",
-                                             D_406270109_D_523660949==1 ~ "Mouthwash for Dry Mouth",
-                                             TRUE   ~ "Skipped this Question"))
+which_mwuse_long <- which_mwuse_flags %>%
+  pivot_longer(
+    cols = c(
+      Alcohol_Based,
+      Alcohol_Free,
+      Chlorhexidine,
+      Fluoride,
+      Peroxide,
+      Cetylpyridinium,
+      Sensitive_Teeth,
+      Dry_Mouth,
+      Skipped
+    ),
+    names_to = "MW_Type",
+    values_to = "Flag"
+  ) %>%
+  filter(Flag == 1) %>%
+  mutate(
+    product_type = case_when(
+      MW_Type == "Alcohol_Based" ~ "Alcohol Based Mouthwash",
+      MW_Type == "Alcohol_Free" ~ "Alcohol Free Mouthwash",
+      MW_Type == "Chlorhexidine" ~ "Chlorhexidine Mouthwash",
+      MW_Type == "Fluoride" ~ "Fluoride Mouthwash",
+      MW_Type == "Peroxide" ~ "Peroxide Mouthwash",
+      MW_Type == "Cetylpyridinium" ~ "Cetylpyridinium Chloride Mouthwash",
+      MW_Type == "Sensitive_Teeth" ~ "Mouthwash for Sensitive Teeth",
+      MW_Type == "Dry_Mouth" ~ "Mouthwash for Dry Mouth",
+      MW_Type == "Skipped" ~ "Skipped this Question"
+    )
+  )
 
-dt_MWUSE_summary <- mw_prod  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
 
-dt_MWUSE_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 29: Mouthwash Products Used in the Last Month")) %>% 
-  cols_label(products = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = products,)) %>% opt_row_striping()
+create_kable_table_w_footnote(which_mwuse_long, MW_Type, "Table 29: Mouthwash Products Used in the Last Month")
+
 
 
 
@@ -822,50 +862,30 @@ one_skip_funct(D_800752981,  "Table 136: Frequency Using Mouthwash for Dry Mouth
 
 #PERMTTHLOST
   #Version1
-dt_PERMTTHLOST1= BUM_tib %>%   
-  filter(BUM_tib$d_822499427<as.Date("2022-11-29") & BUM_tib$d_222161762<as.Date("2022-12-1"))
 
-#lost= dt_PERMTTHLOST1 %>%  mutate(multb2 = ifelse(D_899251483_D_812107266==1, 1, 0) + ifelse(D_899251483_D_452438775==1, 1, 0) + ifelse(D_899251483_V2_D_886864375==1, 1, 0) + ifelse(D_899251483_D_104430631==1, 1, 0))
+ dt_PERMTTHLOST1= BUM_tib %>%   
+  filter(d_822499427<as.Date("2022-11-29") & d_222161762<as.Date("2022-12-1")) %>%                                                    
+   mutate(products= case_when((D_899251483_D_812107266==1 & D_899251483_D_452438775==1 & 
+                                 D_899251483_V2_D_886864375==1) ~ "From Accident, Decay, and Other Reasons",
+                              (D_899251483_D_812107266==1 & D_899251483_D_452438775==1) ~ "From Accident and Decay",
+                              (D_899251483_D_812107266==1 & D_899251483_V2_D_886864375==1) ~ "From Accident and Other Reasons",
+                              (D_899251483_D_452438775==1 & D_899251483_V2_D_886864375==1) ~ "From Decay and Other Reasons",
+                              D_899251483_D_812107266==1 ~ "Yes from accident or injury",
+                              D_899251483_D_452438775==1 ~ "Yes from tooth decay or disease",
+                              D_899251483_V2_D_886864375==1 ~ "Yes for some other reason",
+                              D_899251483_D_104430631==1 ~ "No",
+                              TRUE   ~ "Skipped this Question"),
+          products = factor(products,levels=c("From Accident, Decay, and Other Reasons", "From Accident and Decay", 
+                                              "From Accident and Other Reasons", "From Decay and Other Reasons", 
+                                              "Yes from accident or injury", "Yes from tooth decay or disease", 
+                                              "Yes for some other reason", "No", "Skipped this Question")))
 
-                                                          
-
-                                                    
-lost= dt_PERMTTHLOST1 %>%  mutate(products= case_when((D_899251483_D_812107266==1 & D_899251483_D_452438775==1 & D_899251483_V2_D_886864375==1) ~ "From Accident, Decay, and Other Reasons",
-                                           (D_899251483_D_812107266==1 & D_899251483_D_452438775==1) ~ "From Accident and Decay",
-                                           (D_899251483_D_812107266==1 & D_899251483_V2_D_886864375==1) ~ "From Accident and Other Reasons",
-                                           (D_899251483_D_452438775==1 & D_899251483_V2_D_886864375==1) ~ "From Decay and Other Reasons",
-                                           D_899251483_D_812107266==1 ~ "Yes from accident or injury",
-                                             D_899251483_D_452438775==1 ~ "Yes from tooth decay or disease",
-                                             D_899251483_V2_D_886864375==1 ~ "Yes for some other reason",
-                                             D_899251483_D_104430631==1 ~ "No",
-                                             TRUE   ~ "Skipped this Question"))
-lost$products <- factor(lost$products,levels=c("From Accident, Decay, and Other Reasons", "From Accident and Decay", "From Accident and Other Reasons", "From Decay and Other Reasons", "Yes from accident or injury", "Yes from tooth decay or disease", "Yes for some other reason", "No", "Skipped this Question"))
-
-dt_PERMTTHLOST_summary <- lost  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
-
-df_PERMTTHLOST <- as.data.frame(dt_PERMTTHLOST_summary)
-
-df_PERMTTHLOST %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 38 (V1): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")) %>% 
-  cols_label(products = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = products,)) %>% opt_row_striping()
-
+create_kable_table(dt_PERMTTHLOST1, products, "Table 38 (V1): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
 
 
   #Version2
 dt_PERMTTHLOST2= BUM_tib %>%   
-  filter(BUM_tib$d_222161762>as.Date("2022-12-01"))
-
-#lost2= dt_PERMTTHLOST2 %>%  mutate(multb2 = ifelse(D_899251483_V2_D_812107266==1, 1, 0) + ifelse(D_899251483_V2_D_452438775==1, 1, 0) + ifelse(D_899251483_V2_D_886864375==1, 1, 0) + ifelse(D_899251483_V2_D_104430631==1, 1, 0))
-
-                                                          
-
-                                                    
-                                           
-lost2= dt_PERMTTHLOST2 %>%  
+  filter(d_222161762>as.Date("2022-12-01")) %>% 
   mutate(products2= case_when((D_899251483_V2_D_812107266==1 & D_899251483_V2_D_452438775==1 & D_899251483_V2_D_886864375==1)~ "From Accident, Decay, and Other Reasons",
                                            (D_899251483_V2_D_812107266==1 & D_899251483_V2_D_452438775==1) ~ "From Accident and Decay",
                                            (D_899251483_V2_D_812107266==1 & D_899251483_V2_D_886864375==1) ~ "From Accident and Other Reasons",
@@ -874,118 +894,66 @@ lost2= dt_PERMTTHLOST2 %>%
                                              D_899251483_V2_D_452438775==1 ~ "Yes from tooth decay or disease",
                                              D_899251483_V2_D_886864375==1 ~ "Yes for some other reason",
                                              D_899251483_V2_D_104430631==1 | D_899251483_V2_D_551489317==1  ~ "No",
-                                             TRUE   ~ "Skipped this Question"))
+                                             TRUE   ~ "Skipped this Question"),
+         products2 = factor(products2,levels=c("From Accident, Decay, and Other Reasons", "From Accident and Decay", 
+                                               "From Accident and Other Reasons", "From Decay and Other Reasons", "Yes from accident or injury",
+                                               "Yes from tooth decay or disease", "Yes for some other reason", "No", "Skipped this Question")))
 
-lost2$products2 <- factor(lost2$products2,levels=c("From Accident, Decay, and Other Reasons", "From Accident and Decay", "From Accident and Other Reasons", "From Decay and Other Reasons", "Yes from accident or injury", "Yes from tooth decay or disease", "Yes for some other reason", "No", "Skipped this Question"))
-
-dt_PERMTTHLOST_summary <- lost2  %>% dplyr::group_by(products2) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products2, n, percentage)
-
-df_PERMTTHLOST <- as.data.frame(dt_PERMTTHLOST_summary)
-
-df_PERMTTHLOST %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 39 (V2): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")) %>% 
-  cols_label(products2 = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = products2,)) %>% opt_row_striping()
+create_kable_table(dt_PERMTTHLOST2, products2, "Table 38 (V2): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
+         
 
 
 #TEETHLOSTAI
-TEETHLOSTAI <- BUM_tib %>%  select(Connect_ID, D_724589244) %>%  filter((BUM_tib$D_899251483_V2_D_812107266==1 | BUM_tib$D_899251483_D_812107266==1) & (BUM_tib$d_822499427>as.Date("2022-12-1")))
-  #TEETHLOSTAI_yn <- TEETHLOSTAI  %>% group_by(D_724589244) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(D_724589244, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  TEETHLOSTAI_yn= TEETHLOSTAI %>%  mutate(answer= case_when(D_724589244==349122068 ~ "One", # | D_542661394_D_167336253==1
-                                             D_724589244==194129782~ "Two to Four",
-                                             D_724589244==922737557 ~ "Five to Nine",
-                                             D_724589244==945387130 ~ "10+",
-                                             D_724589244==383505459 ~ "More than 1 but Don't Remember",
-                                             D_724589244==832322940 ~ "Don't Know",
-                                             TRUE   ~ "Skipped this Question"))
+TEETHLOSTAI <- BUM_tib %>%  
+  filter((D_899251483_V2_D_812107266==1 | D_899251483_D_812107266==1) & (d_822499427>as.Date("2022-12-1"))) %>%  
+  mutate(answer= case_when(D_724589244==349122068 ~ "One", # | D_542661394_D_167336253==1
+                           D_724589244==194129782~ "Two to Four",
+                           D_724589244==922737557 ~ "Five to Nine",
+                           D_724589244==945387130 ~ "10+",
+                           D_724589244==383505459 ~ "More than 1 but Don't Remember",
+                           D_724589244==832322940 ~ "Don't Know",
+                           TRUE   ~ "Skipped this Question"),
+         answer = factor(answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this Question")))
 
-  TEETHLOSTAI_yn$answer <- factor(TEETHLOSTAI_yn$answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this Question"))
-  dt_TEETHLOSTAI_yn_summary <- TEETHLOSTAI_yn  %>% dplyr::group_by(answer) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(answer, n, percentage)
-  
-  dt_TEETHLOSTAI_yn_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 40: Number of Teeth Lost from Accident or Injury")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
+create_kable_table(TEETHLOSTAI, answer, "Table 40: Number of Teeth Lost from Accident or Injury")
+
+
 
 
 #TEETHLOSTD
-TEETHLOSTD <- BUM_tib %>%  select(Connect_ID, D_957305523) %>%  filter((BUM_tib$D_899251483_V2_D_452438775==1 | BUM_tib$D_899251483_D_452438775==1) & (BUM_tib$d_822499427>as.Date("2022-12-1"))) 
-  #TEETHLOSTD_yn <- TEETHLOSTD  %>% group_by(D_957305523) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(D_957305523, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-    TEETHLOSTD_yn= TEETHLOSTD %>%  mutate(answer= case_when(D_957305523==349122068 ~ "One", # | D_542661394_D_167336253==1
-                                             D_957305523==194129782~ "Two to Four",
-                                             D_957305523==922737557 ~ "Five to Nine",
-                                             D_957305523==945387130 ~ "10+",
-                                             D_957305523==383505459 ~ "More than 1 but Don't Remember",
-                                             D_957305523==832322940 ~ "Don't Know",
-                                             TRUE   ~ "Skipped this Question"))
+TEETHLOSTD <- BUM_tib %>%   
+  filter((D_899251483_V2_D_452438775==1 | D_899251483_D_452438775==1) & (d_822499427>as.Date("2022-12-1")))  %>%  
+  mutate(answer= case_when(D_957305523==349122068 ~ "One", # | D_542661394_D_167336253==1
+                           D_957305523==194129782~ "Two to Four",
+                           D_957305523==922737557 ~ "Five to Nine",
+                           D_957305523==945387130 ~ "10+",
+                           D_957305523==383505459 ~ "More than 1 but Don't Remember",
+                           D_957305523==832322940 ~ "Don't Know",
+                           TRUE   ~ "Skipped this Question"),
+         answer = factor(answer, levels= c("One", "Two to Four", "Five to Nine", "10+", 
+                                           "More than 1 but Don't Remember", "Don't Know", "Skipped this Question")))
     
-  TEETHLOSTD_yn$answer <- factor(TEETHLOSTD_yn$answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", 
-                                                                 "Don't Know", "Skipped this Question"))
-  dt_TEETHLOSTD_yn_summary <- TEETHLOSTD_yn  %>% dplyr::group_by(answer) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(answer, n, percentage)
-  
-  dt_TEETHLOSTD_yn_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 41: Number of Teeth Lost from Tooth Decay or Disease")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
+create_kable_table(TEETHLOSTD, answer, "Table 41: Number of Teeth Lost from Tooth Decay or Disease")
+    
+
 
 
 #TEETHLOSTOTH
-TEETHLOSTOTH <- BUM_tib %>%  select(Connect_ID, D_360678252) %>%  filter((BUM_tib$D_899251483_V2_D_886864375==1) & (BUM_tib$d_822499427>as.Date("2022-12-1")))
-  #TEETHLOSTOTH_yn <- TEETHLOSTOTH  %>% group_by(D_360678252) %>% summarize(n=n(), percentage=100*n/nrow(.)) %>% ungroup() %>% mutate(answer=dplyr::recode(D_360678252, !!!BUM_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-      TEETHLOSTOTH_yn= TEETHLOSTOTH %>%  mutate(answer= case_when(D_360678252==349122068 ~ "One", # | D_542661394_D_167336253==1
-                                             D_360678252==194129782~ "Two to Four",
-                                             D_360678252==922737557 ~ "Five to Nine",
-                                             D_360678252==945387130 ~ "10+",
-                                             D_360678252==383505459 ~ "More than 1 but Don't Remember",
-                                             D_360678252==832322940 ~ "Don't Know",
-                                             TRUE   ~ "Skipped this Question"))
+TEETHLOSTOTH <- BUM_tib %>%   
+  filter((D_899251483_V2_D_886864375==1) & (d_822499427>as.Date("2022-12-1"))) %>% 
+  mutate(answer= case_when(D_360678252==349122068 ~ "One", # | D_542661394_D_167336253==1
+                           D_360678252==194129782~ "Two to Four",
+                           D_360678252==922737557 ~ "Five to Nine",
+                           D_360678252==945387130 ~ "10+",
+                           D_360678252==383505459 ~ "More than 1 but Don't Remember",
+                           D_360678252==832322940 ~ "Don't Know",
+                           TRUE   ~ "Skipped this Question"),
+         answer = factor(answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this Question")))
       
-  TEETHLOSTOTH_yn$answer <- factor(TEETHLOSTOTH_yn$answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this Question"))
-  dt_TEETHLOSTOTH_yn_summary <- TEETHLOSTOTH_yn  %>% dplyr::group_by(answer) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(answer, n, percentage)
-  
-  dt_TEETHLOSTOTH_yn_summary %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 42: Number of Teeth Lost from Other Incidents")) %>% 
-  cols_label(answer = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) %>% opt_row_striping()
+create_kable_table(TEETHLOSTOTH, answer, "Table 42: Number of Teeth Lost from Other Incidents")
+      
+
+
 
 
 #DENTURES
@@ -996,39 +964,33 @@ dnt= BUM_tib %>%  mutate(products= case_when(D_542661394_D_104430631==1 ~ "No", 
                                              D_542661394_D_656498939==1 ~ "Dental Implants",
                                              D_542661394_D_181769837==1 ~ "Other",
                                              D_542661394_D_178420302==1 ~ "Uknown",
-                                             TRUE   ~ "Skipped this Question"))
+                                             TRUE   ~ "Skipped this Question"),
+                         products = factor(products, levels= c("No", "Dental Bridges", "Partial Denture", "Full Dentures", 
+                                                               "Dental Implants", "Other", "Uknown", "Skipped this Question")))
 
-dnt$products <- factor(dnt$products, levels= c("No", "Dental Bridges", "Partial Denture", "Full Dentures", "Dental Implants", "Other", "Uknown", "Skipped this Question"))
-dt_DENTURES_summary <- dnt  %>% dplyr::group_by(products) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  dplyr::select(products, n, percentage)
+create_kable_table(dnt, products, "Table 43: Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
 
-dt_DENTURES_summary %>%  gt::gt() %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md("Table 43: Lost Permanent Adult Teeth, not Including your Wisdom Teeth")) %>% 
-  cols_label(products = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),locations = cells_body(columns = products,)) %>% opt_row_striping()
 
 
 #DENTALCELAN
 BUM_tib$D_339570897 <- factor(BUM_tib$D_339570897, levels= c(317567178, 891558680, 796081734, 752219885, 314487612, 178420302, "Skipped this Question"))
-gt_functBUM(D_339570897, "Table 143: Last Professional Dental Cleaning")
+simple_funct_BUM(D_339570897, "Table 143: Last Professional Dental Cleaning")
 
 
 #CAVITY
-gt_functBUM(D_983043203, "Table 45: Had Cavities in Adult Teeth")
+simple_funct_BUM(D_983043203, "Table 45: Had Cavities in Adult Teeth")
 
 
 #GUMDISEASE
-gt_functBUM(D_736028153, "Table 46: Diagnosed with Gum Disease")
+simple_funct_BUM(D_736028153, "Table 46: Diagnosed with Gum Disease")
 
 
 #GUMTX
-gt_functBUM(D_792134396, "Table 47: Treated for Gum Disease")
+simple_funct_BUM(D_792134396, "Table 47: Treated for Gum Disease")
 
 
 #ANTIBIO
-gt_functBUM(D_736393021, "Table 48: Taken Antibiotics in the Last 2 Months")
+simple_funct_BUM(D_736393021, "Table 48: Taken Antibiotics in the Last 2 Months")
 
 
 #ANTIBIOTIME
