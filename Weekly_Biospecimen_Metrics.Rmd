@@ -2147,7 +2147,7 @@ verif_draw_order = verif_draw %>%group_by(Site) %>%
                    Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
                    Max = round(max(time,na.rm = TRUE), digits=1))
 
-# verif_draw <-verif_draw %>% #group_by(Site) %>% 
+# verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>% 
 #   mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
 #                                   as.numeric(time) <1 ~"Within 1 Day",
 #                                   as.numeric(time) < 3 ~ "1-3 Days",
