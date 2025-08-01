@@ -39,32 +39,17 @@ that are finalized. This report is limited to information from participants' fir
 
 
 library(bigrquery)
-library(data.table) ###to write or read and data management 
-library(dplyr) ###data management
 library(tidyverse) ###for data management
-library(reshape)  ###to work on transition from long to wide or wide to long data
-library(reshape2)  ### for the melt function
+library(reshape2)  # need for the melt() function
 library(listr) ###to work on a list of vector, files or..
-library(sqldf) ##sql
 library(lubridate) ###date time
 library(ggplot2) ###plots
-library(gridExtra)
-library(stringr) ###to work on patterns, charaters
 library(tinytex) #for pdf
-library(janitor) #to get the summary sum
-library(finalfit) #https://cran.r-project.org/web/packages/finalfit/vignettes/export.htmlt
-library(expss) ###to add labels
-library(epiDisplay) ##recommended applied here crosstable, tab1
-library(summarytools) ##recommended
-library(gmodels) ##recommended
-library(magrittr)
-library(arsenal)
+library(janitor) #need for adorn_totals() function
+library(gmodels) #needed for custom n_pct_table function- Crosstable() function 
 library(gtsummary)
 library(kableExtra)
 library(gt)
-library(crosstable)
-library(glue) 
-library(readr)
 library(rio)
 library(scales) #for commas in the thousands place to be applied automatically
 
@@ -127,10 +112,6 @@ for (i in 1: length(cnames)){
 
 ########### Pull in DD to be able to grab only variables with key words from the participants table #############################
 
-dictionary <- rio::import("https://episphere.github.io/conceptGithubActions/aggregate.json",format = "json")
-dd<-rbindlist(dictionary,fill=TRUE,use.names=TRUE,idcol="CID") #THIS TABLE HAS REPLICATED (CIDS+LABELS) WITH DIFFERENT VARIABLE NAMES,
-
-
 ##to select biospecimen data in recruitment 
 recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants'")
 recrvar <- bigrquery::bq_table_download(recr_var, bigint="integer64",n_max = Inf, page_size = 10000)
@@ -155,73 +136,60 @@ tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,C
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
 
-recr.bio <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
+recrver1 <- bigrquery::bq_table_download(tb_bq,bigint="integer64",n_max = Inf, page_size = 1000)
 
 #############################################################
 
-
-
-
-##to convert to numeric
-cnames <- names(recr.bio)
-recrver <- recr.bio
-for (i in 1: length(cnames)){
-  varname <- cnames[i]
-  var<-pull(recrver,varname)
-  recrver[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
-}
-##to get the labels of each variable
-recrver_CID <- as.data.frame(sapply((strsplit(colnames(recrver),"d_")),tail,1))
-colnames(recrver_CID)[1] <- "CID"
-recrver_CID$variable <- names(recr.bio)
-recrver_ver1 <- base::merge(dd,recrver_CID,by="CID")
-recrver1 <- expss::apply_labels(recrver,
-                                d_512820379 = "Recruitment type",#RcrtSI_RecruitType_v1r0
-                                d_512820379=c(	"Not active"=180583933,  
-                                               "Active"= 486306141, 
-                                               "Passive"=854703046),
-                                d_821247024 = "Verification status", #RcrtV_Verification_v1r0
-                                d_821247024 = c("Not yet verified" =875007964,
-                                                "Verified"=197316935,  
-                                                "Cannot be verified"=219863910, 
-                                                "Duplicate"=922622075 , 
-                                                "Outreach timed out"= 160161595),
-                                d_827220437 = "Site",#RcrtES_Site_v1r0
-                                d_827220437 = c("Baylor Scott and White Health"=472940358,"HealthPartners"= 531629870, 
-                                                "Henry Ford Health"=548392715,"Marshfield Clinic Health System" = 303349821,
-                                                "Sanford Health" = 657167265, "University of Chicago Medicine" = 809703864,
-                                                "Kaiser Permanente Colorado" = 125001209,"Kaiser Permanente Georgia" = 327912200,
-                                                "Kaiser Permanente Hawaii" = 300267574,"Kaiser Permanente Northwest" = 452412599),
-                                d_914594314 = "Verification status time",   #RcrtV_VerificationTm_V1R0
-                                d_878865966 = "Baseline blood sample collected", #BioFin_BaseBloodCol_v1r0
-                                d_878865966 = c("Any blood collected"=353358909, "No blood collected"=104430631),
-                                d_173836415_d_266600170_d_561681068 = "Date/time basline Research Blood Collected",#BL_BioFin_BBTime_v1r0
-                                d_684635302 = "Baseline Mouthwash Collected",    #BioFin_BaseMWCol_v1r0
-                                d_684635302 = c("Any mouthwash collected"=353358909,"No mouthwash collected"= 104430631  ),
-                                d_173836415_d_266600170_d_448660695 = "Date/time Mouthwash Collected", #
-                                d_167958071 = "Baseline Urine collected", 
-                                d_167958071 = c( "Any urine collected"=353358909, "No urine collected"=104430631),
-                                d_173836415_d_266600170_d_847159717 = "Baseline Date/time Urine collected",
-                                d_331584571_d_266600170_d_135591601 = "Baseline Check In Complete",#BL_BioChk_Complete_v1r0
-                                d_331584571_d_266600170_d_135591601 =  c( "No"=104430631, "Yes"=353358909 ),
-                                d_331584571_d_266600170_d_840048338 = "Date/Time Baseline Check In Complete",
-                                d_331584571_d_266600170_d_343048998 = "Time Baseline check out complete",#
-                                
-                                d_173836415_d_266600170_d_530173840 = "Blood Order Placed",#BioClin_BldOrderPlaced_v1r0  ## I ADDED
-                                d_173836415_d_266600170_d_530173840 =c( "No"=104430631, "Yes"=353358909 ), ## I ADDED
-                                
-                                d_173836415_d_266600170_d_592099155 = "Blood Collection Setting",#BL_BioSpm_BloodSetting_v1r0  
-                                d_173836415_d_266600170_d_592099155 =c("Research"=534621077, "Clinical"= 664882224,"Home" =103209024),
-                                d_173836415_d_266600170_d_718172863 = "Urine Collection Setting",#BL_BioSpm_UrineSetting_v1r0
-                                d_173836415_d_266600170_d_718172863 =c("Research"=534621077, "Clinical"= 664882224,"Home" =103209024),
-                                d_173836415_d_266600170_d_915179629 = "Mouthwash Collection Setting",#BL_BioSpm_MWSetting_v1r0
-                                d_173836415_d_266600170_d_915179629 =c("Research"=534621077, "Clinical"= 664882224,"Home" =103209024),
-                                
-                                d_265193023 = "Blood/urine/mouthwash combined research survey-Complete",   
-                                d_265193023 = c(	"Not Started" =	972455046, "Started"= 615768760,"Submitted"= 231311385),#SrvBLM_ResSrvCompl_v1r0
-                                d_822499427 = "Placeholder (Autogenerated) - Date/time Status of Start of blood/urine/mouthwash research survey",#SrvBLM_TmStart_v1r0
-                                d_222161762  = "Placeholder (Autogenerated)- Date/Time blood/urine/mouthwash research survey completed" #   SrvBLM_TmComplete_v1r0
-)
+recrver1 <- recrver1 %>%
+  mutate(
+    d_827220437 = dplyr::recode(d_827220437,
+                         `472940358` = "Baylor Scott and White Health",
+                         `531629870` = "HealthPartners",
+                         `548392715` = "Henry Ford Health",
+                         `303349821` = "Marshfield Clinic Health System",
+                         `657167265` = "Sanford Health",
+                         `809703864` = "University of Chicago Medicine",
+                         `125001209` = "Kaiser Permanente Colorado",
+                         `327912200` = "Kaiser Permanente Georgia",
+                         `300267574` = "Kaiser Permanente Hawaii",
+                         `452412599` = "Kaiser Permanente Northwest"),
+    
+    d_878865966 = dplyr::recode(d_878865966,
+                         `353358909` = "Any blood collected",
+                         `104430631` = "No blood collected"),
+    
+    d_684635302 = dplyr::recode(d_684635302,
+                         `353358909` = "Any mouthwash collected",
+                         `104430631` = "No mouthwash collected"),
+    
+    d_167958071 = dplyr::recode(d_167958071,
+                         `353358909` = "Any urine collected",
+                         `104430631` = "No urine collected"),
+    
+    d_173836415_d_266600170_d_530173840 = dplyr::recode(d_173836415_d_266600170_d_530173840,
+                                                 `104430631` = "No",
+                                                 `353358909` = "Yes"),
+    
+    d_173836415_d_266600170_d_592099155 = dplyr::recode(d_173836415_d_266600170_d_592099155,
+                                                 `534621077` = "Research",
+                                                 `664882224` = "Clinical",
+                                                 `103209024` = "Home"),
+    
+    d_173836415_d_266600170_d_718172863 = dplyr::recode(d_173836415_d_266600170_d_718172863,
+                                                 `534621077` = "Research",
+                                                 `664882224` = "Clinical",
+                                                 `103209024` = "Home"),
+    
+    d_173836415_d_266600170_d_915179629 = dplyr::recode(d_173836415_d_266600170_d_915179629,
+                                                 `534621077` = "Research",
+                                                 `664882224` = "Clinical",
+                                                 `103209024` = "Home"),
+    
+    d_265193023 = dplyr::recode(d_265193023,
+                         `972455046` = "Not Started",
+                         `615768760` = "Started",
+                         `231311385` = "Submitted")
+  )
 
 
 ###to convert to categorical variables
@@ -247,11 +215,8 @@ recrver1$Site <-factor(recrver1$d_827220437,levels=c("Baylor Scott and White Hea
 
 
 
-
-
-
 ### Each week must start on Monday and end with the following Sunday to be consistent with all reports
-veristart.date = as.Date(min(as.POSIXct(recr.bio$d_914594314),na.rm=TRUE))
+veristart.date = as.Date(min(as.POSIXct(recrver1$d_914594314),na.rm=TRUE))
 
 
 ```
@@ -304,6 +269,7 @@ cross_table_df <- as.data.frame(cross__table)[-1, ]
 }
 
 
+### Same function as above, but this strips the percentages out of the total column 
 create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name, margin_text) {
 cross__table <- data %>%  
   tbl_cross(
@@ -316,7 +282,6 @@ cross__table <- data %>%
     missing="ifany",
     margin_text="Total") 
 
-#Ops doesn't want the total column to have percentages in these tables
 cross__table[["table_body"]]$stat_0 <- sapply(strsplit(cross__table[["table_body"]]$stat_0, " "), "[", 1)
 
 #Ops doesn't like the grouped by variables on a different line the column labels
@@ -386,7 +351,7 @@ gt::gt_latex_dependencies()
 ```{r Removing_Duplicates, include=FALSE}
 
 # Ops no longer wants duplicate collections in this report
-## REMOVING DUPLICATES: Method- take the first collection and drop the second collection
+## REMOVING DUPLICATES: Method- take the first collection only for blood and urine
 ##### NOTE: Home MW collections are separate collections BUT they are not finalized, so they will not be removed from the dataframe 
   ## confirmed that duplicate HMW collections don't mess up these counts and are handled in the kit section 
 
@@ -416,15 +381,22 @@ no_dups <- bind_rows(rows_to_keep, non_duplicate_rows)
 
 ```{r Labeling2, include=FALSE}
 
-no_dups <- expss::apply_labels(no_dups,d_827220437 = "Site",#RcrtES_Site_v1r0
-                             d_827220437 = c("Baylor Scott and White Health"=472940358, "HealthPartners"= 531629870, "Henry Ford Health"=548392715,
-                                             "Marshfield Clinic Health System" = 303349821,"Sanford Health" = 657167265, 
-                                             "University of Chicago Medicine" = 809703864, "Kaiser Permanente Colorado" = 125001209,
-                                             "Kaiser Permanente Georgia" = 327912200,"Kaiser Permanente Hawaii" = 300267574,"Kaiser Permanente Northwest" = 452412599))
 
-no_dups$Site <- factor(no_dups$d_827220437, levels= c("Baylor Scott and White Health", "HealthPartners", "Henry Ford Health","Marshfield Clinic Health System",
-                                                      "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado","Kaiser Permanente Georgia",
-                                                      "Kaiser Permanente Hawaii","Kaiser Permanente Northwest")) 
+no_dups <- no_dups %>%
+  mutate(Site = case_when(d_827220437 == 472940358 ~ "Baylor Scott and White Health",
+                          d_827220437 == 531629870 ~ "HealthPartners",
+                          d_827220437 == 548392715 ~ "Henry Ford Health",
+                          d_827220437 == 303349821 ~ "Marshfield Clinic Health System",
+                          d_827220437 == 657167265 ~ "Sanford Health",
+                          d_827220437 == 809703864 ~ "University of Chicago Medicine",
+                          d_827220437 == 125001209 ~ "Kaiser Permanente Colorado",
+                          d_827220437 == 327912200 ~ "Kaiser Permanente Georgia",
+                          d_827220437 == 300267574 ~ "Kaiser Permanente Hawaii",
+                          d_827220437 == 452412599 ~ "Kaiser Permanente Northwest"),
+         Site = factor(Site,levels = c("Baylor Scott and White Health",  "HealthPartners",  "Henry Ford Health",
+                                       "Marshfield Clinic Health System", "Sanford Health",  "University of Chicago Medicine",
+                                       "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest")))
+
 
 
 
@@ -582,8 +554,8 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                   Site=='Henry Ford Health' ~ "Missing HFH location",
                                   Site=='University of Chicago Medicine' ~ "Missing UC location",
                                   TRUE ~ "Unidentified location"),
-                                 BiospeCollection = ifelse((recrver1$d_878865966 == 353358909 | recrver1$d_167958071 == 353358909 | 
-                                                              recrver1$d_684635302 == 353358909 ), "Any biospecimen Collections","No biospecimen collections"),
+                                 BiospeCollection = ifelse((d_878865966 == "Any blood collected" | d_167958071 == "Any urine collected" | 
+                                                              d_684635302 == "Any mouthwash collected" ), "Any biospecimen Collections","No biospecimen collections"),
                                  age = case_when(state_d_934298480 == "713781738"~ "30-34",
                                                  state_d_934298480 == '631272782' ~ "35-39",
                                                  state_d_934298480 == '124276120' ~ "40-45",
@@ -604,8 +576,10 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
 
 
 
-recrver1$Connect_ID < as.numeric(recrver1$Connect_ID)
-no_dups$Connect_ID < as.numeric(no_dups$Connect_ID)
+recrver1$Connect_ID <- as.numeric(recrver1$Connect_ID)
+no_dups$Connect_ID <- as.numeric(no_dups$Connect_ID)
+recrver1$Site <- as.character(recrver1$Site)
+no_dups$Site <- as.character(no_dups$Site)
 biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
 
 ```
@@ -616,6 +590,12 @@ biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
 
 
 ```{r Tables1.1_1.5, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
+##Site is coming out of order somehow
+ biocol.tb <- biocol.tb %>% 
+  mutate(Site = factor(Site,levels = c("Baylor Scott and White Health",  "HealthPartners",  "Henry Ford Health",
+                                       "Marshfield Clinic Health System", "Sanford Health",  "University of Chicago Medicine",
+                                       "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest")))
 
 ## Tables 1-4
 
@@ -1185,9 +1165,9 @@ setting_ctabs <- coll_sett_all %>%
          BL_BioSpm_MWSetting_v1r0 = coalesce(BL_BioSpm_MWSetting_v1r0, settings))
 
 
-all_blood_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_BloodSetting_v1r0[setting_ctabs$d_878865966 == 353358909], exclude = NULL))
-allurine_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_UrineSetting_v1r0[setting_ctabs$d_167958071 == 353358909], exclude = NULL))
-all_mw_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_MWSetting_v1r0[setting_ctabs$d_684635302 == 353358909], exclude = NULL))
+all_blood_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_BloodSetting_v1r0[setting_ctabs$d_878865966 == "Any blood collected"], exclude = NULL))
+allurine_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_UrineSetting_v1r0[setting_ctabs$d_167958071 == "Any urine collected"], exclude = NULL))
+all_mw_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_MWSetting_v1r0[setting_ctabs$d_684635302 == "Any mouthwash collected"], exclude = NULL))
 
 distrb_allsetts <- cbind(all_blood_settings, allurine_settings, all_mw_settings)
 
@@ -1224,9 +1204,9 @@ setting_ctabs_Site <- site_data %>%
          BL_BioSpm_MWSetting_v1r0 = coalesce(BL_BioSpm_MWSetting_v1r0, settings))
 
 
-all_blood_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_BloodSetting_v1r0[setting_ctabs_Site$d_878865966 == 353358909], exclude = NULL))
-allurine_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_UrineSetting_v1r0[setting_ctabs_Site$d_167958071 == 353358909], exclude = NULL))
-all_mw_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_MWSetting_v1r0[setting_ctabs_Site$d_684635302 == 353358909], exclude = NULL))
+all_blood_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_BloodSetting_v1r0[setting_ctabs_Site$d_878865966 == "Any blood collected"], exclude = NULL))
+allurine_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_UrineSetting_v1r0[setting_ctabs_Site$d_167958071 == "Any urine collected"], exclude = NULL))
+all_mw_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_MWSetting_v1r0[setting_ctabs_Site$d_684635302 == "Any mouthwash collected"], exclude = NULL))
 
 distrb_allsetts_Site <- cbind(all_blood_settings_Site, allurine_settings_Site, all_mw_settings_Site)
 
@@ -1269,8 +1249,8 @@ table4_redone__R <- coll_sett_all %>%
                                                                                         'Blood & Mouthwash Only','Urine & Mouthwash Only','Blood Only',
                                                                                         'Urine Only','Mouthwash Only','No Specimens Collected')))
 
-table4_redone__R$Site <- droplevels(table4_redone__R$Site)
-table4_redone__R$`Specimens Collected` <- droplevels(table4_redone__R$`Specimens Collected`)
+table4_redone__R$Site <- droplevels(as.factor(table4_redone__R$Site))
+table4_redone__R$`Specimens Collected` <- droplevels(as.factor(table4_redone__R$`Specimens Collected`))
 
 
 spec_by_site_R <- create_tbl_cross(table4_redone__R, 'Specimens Collected', "Site", "column", " ", " ")
@@ -1295,8 +1275,8 @@ table4_redone__C <- coll_sett_all %>%
   dplyr::select(-blood, -urine, -mouthwash) %>%  # Remove helper columns
   mutate(`Specimens Collected` = factor(`Specimens Collected`,levels=c('Blood & Urine (All)', 'Blood Only', 'Urine Only', 'No Specimens Collected')))
 
-table4_redone__C$Site <- droplevels(table4_redone__C$Site)
-table4_redone__C$`Specimens Collected` <- droplevels(table4_redone__C$`Specimens Collected`)
+table4_redone__C$Site <- droplevels(as.factor(table4_redone__C$Site))
+table4_redone__C$`Specimens Collected` <- droplevels(as.factor(table4_redone__C$`Specimens Collected`))
 
 
 spec_by_site_C <- create_tbl_cross(table4_redone__C, 'Specimens Collected', "Site", "column", " ", " ")
@@ -1417,11 +1397,8 @@ system_coll
 ```{r Table11, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 #Participants who checked in for a baseline biospecimen visit but did not give any samples
-dd[grepl("BioChk",dd$`Variable Name`),]
 names(tube_col)[names(tube_col) == "as.character(Connect_ID)"] <- "Connect_ID"
-recr_bio <- base::merge(recrver1,tube_col,by="Connect_ID")
-bio_checkin_resh <- recr_bio  %>% filter(!is.na(d_331584571_d_266600170_d_840048338) & all_settings=="Research") %>% select(BiospeCollection ) %>% tbl_summary()
-table(bio_checkin_resh$BiospeCollection)
+
 
 tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
 tube.ls <- paste0("d_", trimws(paste(tubes$conceptId.1,collapes="")))
@@ -1458,15 +1435,30 @@ tube_nodev <- as.data.frame(aggregate( coll_sett_all$tube_nodev,
 
 Deviation_Freq <- base::merge(tube_dev,tube_nodev,by="row.names")
 
-Deviation_Freq <- Deviation_Freq[,c(2,3,5)]
-Deviation_Freq$Total <- Deviation_Freq[,2]+Deviation_Freq[,3]
-Deviation_Freq$dev_n_pct <- ifelse(Deviation_Freq[,2] >0, paste0(format(Deviation_Freq[,2],big.mark=",")," (", round(100*Deviation_Freq[,2]/Deviation_Freq$Total, 1)," %)"), "0 (0 %)")
-Deviation_Freq$nodev_n_pct <- ifelse(Deviation_Freq[,3] >0, paste0(format(Deviation_Freq[,3],big.mark=",")," (",  round(100*Deviation_Freq[,3]/Deviation_Freq$Total,1), " %)"), "0 (0 %)")
+Deviation_Freq <- Deviation_Freq %>% select("Group.1.x", "d_299553921_d_678857215", "d_958646668_d_593843561") %>% 
+  mutate(Total = d_299553921_d_678857215 + d_958646668_d_593843561,
+         'Any Devaitaions' = paste(d_299553921_d_678857215, " (", round(d_299553921_d_678857215/Total*100, digits=1),"%)"),
+         'No Devaitaions' = paste(d_958646668_d_593843561, " (", round(d_958646668_d_593843561/Total*100, digits=1),"%)"),
+         Site = factor(Group.1.x,levels = c("Baylor Scott and White Health",  "HealthPartners",  "Henry Ford Health",
+                                       "Marshfield Clinic Health System", "Sanford Health",  "University of Chicago Medicine",
+                                       "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest"))) %>% 
+  select("Site", "Any Devaitaions", "No Devaitaions", "Total") %>% 
+   arrange(Site)
 
-Deviation_Freq[10,c(1:6)] <- c("Total",total1, total2,format(sum(coll_sett_all$tubecol),big.mark=","),
-                               paste0(format(total1,big.mark=",")," (", round(100*sum(as.numeric(Deviation_Freq[1:9,2]))/sum(as.numeric(Deviation_Freq$Total), na.rm=T), 1)," %)"),  
-                               paste0(format(total2,big.mark=",")," (", round(100*sum(as.numeric(Deviation_Freq[1:9,3]))/sum(as.numeric(Deviation_Freq$Total), na.rm=T),1)," %)"))     
-Deviation_Freq <- Deviation_Freq %>% mutate(Site = ifelse(is.na(Group.1.x), "Total",  as.character(Group.1.x))) ###to replace NA in the factor variable
+# Add Total row
+total_row <- Deviation_Freq %>%
+  summarise(Site = "Total",
+            Total = sum(Total, na.rm = TRUE),
+            Any_num = sum(as.numeric(gsub(" .*", "", `Any Devaitaions`)), na.rm = TRUE),
+            No_num = sum(as.numeric(gsub(" .*", "", `No Devaitaions`)), na.rm = TRUE)) %>%
+  mutate(`Any Devaitaions` = paste0(Any_num, " (", round(Any_num / Total * 100, 1), "%)"),
+         `No Devaitaions` = paste0(No_num, " (", round(No_num / Total * 100, 1), "%)")) %>%
+  select(Site, `Any Devaitaions`, `No Devaitaions`, Total)
+
+
+Deviation_Freq <- Deviation_Freq %>% bind_rows(total_row)
+
+
 
 ```
 
@@ -1539,12 +1531,13 @@ dev_tube1   <- dev_tube %>% filter(d_678857215 ==353358909 & deviation == 353358
                                    sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="937362785" ~"Centrifuge Too Short",
                                    sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="956345366" ~"Insufficient Volume",
                                    sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="982885431" ~ "Not Found"))
+
 notcol_tubes <- colnames(coll_sett_all)[grepl("883732523",colnames(coll_sett_all))] #7
-col_tubes <- colnames(coll_sett_all)[grepl("d_593843561",colnames(coll_sett_all))] #13
-dev_tubes <- colnames(coll_sett_all)[grepl("d_678857215",colnames(coll_sett_all))] #13
+#col_tubes <- colnames(coll_sett_all)[grepl("d_593843561",colnames(coll_sett_all))] #13
+#dev_tubes <- colnames(coll_sett_all)[grepl("d_678857215",colnames(coll_sett_all))] #13
 notcol.ls <- sapply(strsplit(notcol_tubes, "_d"),"[[",1)
 notcol_tube <- NULL
-tubenotcol.ls <-list()
+#tubenotcol.ls <-list()
 
 
 for (i in 1:length(notcol.ls)){
@@ -1613,10 +1606,10 @@ collection_long <- collection_long  %>%
                                        tubeID == "d_232343615"  ~ "SS Tube4",
                                        tubeID == "d_589588440"  ~ "SS Tube5",
                                        tubeID == "d_505347689"  ~ "STRECK Tube1", 
-                                       tubeID == "d_958646668"  ~ "Heparin Tube2"))
-collection_long$tube_type <- factor(collection_long$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5",
+                                       tubeID == "d_958646668"  ~ "Heparin Tube2"),
+                 tube_type = factor(tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5",
                                                                         "Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2",
-                                                                        "EDTA Tube3","ACD Tube1", "STRECK Tube1", "Urine Tube1","MW Tube1" ) )   
+                                                                        "EDTA Tube3","ACD Tube1", "STRECK Tube1", "Urine Tube1","MW Tube1" )))   
 
 
 
@@ -1634,7 +1627,7 @@ dev_tube2 <- base::merge(dev,dev_tube1[,c("dev_type","TubeID","tubeID","deviatio
 ```{r Table2.7_2.8, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 research__blood <- collection_long %>% filter(biocol_Setting == "Research" & tubecol == 353358909) %>% 
-  mutate(Site=droplevels(Site),
+  mutate(Site=droplevels(as.factor(Site)),
          tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1", "STRECK Tube1")))  
 
 research__blood <- research__blood %>% filter(!is.na(tube_type))
@@ -1668,7 +1661,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
                                                                     tube_type=="MW Tube1" ~ "Mouthwash"))
 
 clinic.coltube<- clinic.coltube %>% filter(biocol_Setting == "Clinical" & tubecol == 353358909 & tube_types!="Urine 1") %>% # & tube_type!="MW Tube1") %>% 
-  mutate(Site=droplevels(Site),
+  mutate(Site=droplevels(as.factor(Site)),
          tube_type = factor(tube_types,levels=c("SS T1", "SS T2","SS T3", "SS T4", "SS T5", "Heparin 1","Heparin 2","EDTA 1","EDTA 2","EDTA 3","ACD 1","STRECK 1")))
 
 
@@ -1693,6 +1686,7 @@ bloodtubetype_C <- bloodtubetype_C[, c("Site","SS T1", "SS T2","SS T3", "SS T4",
 a<- collection_long[which(collection_long$tubecol==104430631),]
 b <- notcol_tube[which(notcol_tube$tubecol == 104430631),]
 notcol_notes <- base::merge(a, b[,c("tubeID","d_820476880","tube_notcol")], by=c("tubeID","d_820476880"),all.x=TRUE)
+
 notcol_notes <- notcol_notes %>% 
   mutate(notcol.notes = case_when(tubecol == 104430631 & tube_notcol==181769837 ~ "Other",
                                   tubecol == 104430631 & tube_notcol==234139565 ~ "Short Draw",
@@ -1717,18 +1711,18 @@ notcol_notes <- notcol_notes %>%
                                tubeID == "d_232343615"  ~ "SS Tube4",
                                tubeID == "d_589588440"  ~ "SS Tube5",
                                tubeID == "d_505347689"  ~ "STRECK Tube1",
-                               tubeID == "d_958646668"  ~ "Heparin Tube2"))
-notcol_notes$tube_type <- factor(notcol_notes$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5",
+                               tubeID == "d_958646668"  ~ "Heparin Tube2"),
+         tube_type = factor(tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5",
                                                                   "Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2",
-                                                                  "EDTA Tube3","ACD Tube1","Urine Tube1","STRECK Tube1","MW Tube1" ) ) 
-notcol_notes$notcol.notes <- factor(notcol_notes$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
+                                                                  "EDTA Tube3","ACD Tube1","Urine Tube1","STRECK Tube1","MW Tube1" )),
+         notcol.notes = factor(notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons")))
 
 
 
 
 
 research.notcol <- notcol_notes %>% filter(biocol_Setting=="Research" & tubecol==104430631) %>%
-  mutate(Site=droplevels(Site),
+  mutate(Site=droplevels(as.factor(Site)),
          tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","STRECK Tube1","Urine Tube1","MW Tube1" )))
 research.notcol$notcol.notes <- factor(research.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
 
@@ -1755,41 +1749,10 @@ colnames(tube_type_notcolreasons)[1] <- "Tube Type"
 
 ```{r Table13, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
-research.notcolnotes <- research.notcol %>% select(notcol.notes,Site, tube_type) %>% 
-  crosstable(c(Site, tube_type),by=notcol.notes,showNA="ifany", total="row",margin=c("row", "col"),
-             percent_digits=1, percent_pattern="{n} ({p_col})") %>% as_flextable()
-
-clinicnotes.notcol <- notcol_notes %>% filter(biocol_Setting=="Clinical" & tubecol==104430631 & notcol_notes$biospecimen!="Mouthwash"  )%>%    
-  mutate(Site=droplevels(Site),
-         tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5","Heparin Tube1","Heparin Tube2",
-                                               "EDTA Tube1", "EDTA Tube2","EDTA Tube3","ACD Tube1","STRECK Tube1","Urine Tube1" )))
-          
-clinicnotes.notcol$notcol.notes <- factor(clinicnotes.notcol$notcol.notes, levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
-clinicnotes.notcol$notcol.notes <- droplevels(clinicnotes.notcol$notcol.notes)
-clinicnotes.notcol$tube_type = droplevels(clinicnotes.notcol$tube_type)
-clinic.notcolsite <- n_pct_table(clinicnotes.notcol$Site,clinicnotes.notcol$notcol.notes)
-clinicnotes.coltype <- n_pct_table(clinicnotes.notcol$tube_type,clinicnotes.notcol$notcol.notes)
-notcol.reasons.clinic <- rbind(clinicnotes.coltype,clinic.notcolsite)
-reasons <- c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons")
-missing <- reasons[which(c(reasons,"Site","Total") %nin% colnames(notcol.reasons.clinic))]
-n.col <- as.numeric(ncol(notcol.reasons.clinic))
-for (i in 1:length(missing)){
-  notcol.reasons.clinic[,(n.col+i)] <- "0 (0 %)"
-  colnames(notcol.reasons.clinic)[n.col+i] <- missing[i]
-}
-
-notcol.reasons.clinic[c(14,21),c((n.col+1):8)] <- "0"
-
-
-
-
-
-
-
 #Number of tube tubes Discarded by tube type and site
 discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>% 
-  mutate(Site=droplevels(Site),
-         tube_type = droplevels(tube_type))
+  mutate(Site=droplevels(as.factor(Site)),
+         tube_type = droplevels(as.factor(tube_type)))
 discard.site <- n_pct_table(discard.tb$Site,discard.tb$tube_type)
 discard.site <- (discard.site[, c((ncol(discard.site)), 1:(ncol(discard.site)-1))])
 
@@ -1801,36 +1764,28 @@ discard.site[nrow(discard.site),c(2:ncol(discard.site))] <- paste(discard.site[n
 ```{r Rsch_Srvy_Status, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 research.survey <- coll_sett_all %>% filter(all_settings == "Research") %>%
-  mutate(research.sv = case_when(d_265193023 == 231311385 ~ "Submitted",
-                                 d_265193023 == 615768760 ~ "Started",
-                                 d_265193023 == 972455046 ~ "Not Started"),
-         Site=droplevels(Site),
-         research.svtime =  difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_822499427)),units="hours"), ##survey time from start to complete
+  mutate(Site=droplevels(as.factor(Site)),
          ctime = round(as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_822499427)),units="mins")), digits=1),
-         tm_biocolsuv = difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),units="hours"), #time between survey completion to biospecimen collection visit check in
+         tm_biocolsuv = difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),units="hours"), #time b/w survey completion to bio collection visit check in
          checktmvisit = case_when( as.numeric(tm_biocolsuv) >72 ~"> 72hrs",
                                    72 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 48 ~ "> 48 hrs to 72 hrs",
                                    48 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 24 ~ "> 24 hrs to 48 hrs",   
                                    24 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 12 ~ "> 12 hrs to 24 hrs",
                                    12 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 3 ~ "> 3 hrs to 12 hrs",  
                                    3 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) >= 0 ~ "0 hrs to 3 hrs",
-                                   d_265193023 != 231311385 ~ "Not Submitted", 
+                                   d_265193023 != "Submitted" ~ "Not Submitted", 
                                    TRUE ~ "Missing Time"),
          #Waiting on Erin's approval for this change
                                    #tm_biocolsuv < 0 ~ "QC error,
                                    #is.na(tm_biocolsuv) ~ "Missing Time"),
          time_biochk = difftime(as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998)),as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),units="mins"),
-         biochk_outlier = ifelse(is.na(time_biochk), "Missing (not checked out)", 
-                                 ifelse( 0<= as.numeric(time_biochk)/60 & as.numeric(time_biochk)/60 <= 24, "No Outlier", 
-                                         ifelse(as.numeric(time_biochk)/60 > 24, "Outlier",  "Undefined"))),
-         biochk_outlier = factor(biochk_outlier,levels=c("No Outlier","Outlier","Missing (not checked out)")),
          checktmvisit = factor(checktmvisit, levels=c( "Not Submitted", "Missing Time", "0 hrs to 3 hrs","> 3 hrs to 12 hrs",
                                                        "> 12 hrs to 24 hrs","> 24 hrs to 48 hrs","> 48 hrs to 72 hrs","> 72hrs"))) 
 
 
 
 
-BUM_status <- create_tbl_cross(research.survey, "research.sv", "Site", "column", " ", " ")
+BUM_status <- create_tbl_cross(research.survey, "d_265193023", "Site", "column", " ", " ")
 colnames(BUM_status)[ncol(BUM_status)] = "Total Research Surveys"
 
 
@@ -1839,9 +1794,9 @@ colnames(BUM_status)[ncol(BUM_status)] = "Total Research Surveys"
 research.survey_sec3 <- research.survey %>% filter(checktmvisit!="Not Submitted")
 research.survey_sec3$checktmvisit <- droplevels(research.survey_sec3$checktmvisit)
   
-precovR <- research.survey_sec3 %>%  filter(research.sv == "Submitted" & d_222161762<as.Date("2023-07-05"))
+precovR <- research.survey_sec3 %>%  filter(d_265193023 == "Submitted" & d_222161762<as.Date("2023-07-05"))
 
-postcovR <- research.survey_sec3 %>%  filter(research.sv == "Submitted" & d_222161762>=as.Date("2023-07-05"))
+postcovR <- research.survey_sec3 %>%  filter(d_265193023 == "Submitted" & d_222161762>=as.Date("2023-07-05"))
 
 precovid_BUMtime <- create_tbl_cross(precovR, "checktmvisit", "Site", "column", " ", " ")
 colnames(precovid_BUMtime)[ncol(precovid_BUMtime)] = "Total Research Surveys"
@@ -1854,8 +1809,8 @@ colnames(postcovid_BUMtime)[ncol(postcovid_BUMtime)] = "Total Research Surveys"
 
 
 ##Start to submission 
-precovR_comp <- research.survey %>%  filter(d_222161762<as.Date("2023-07-05") & research.sv == "Submitted" & ctime>0) 
-postcovR_comp <- research.survey %>%  filter(d_222161762>=as.Date("2023-07-05") & research.sv == "Submitted" & ctime>0)
+precovR_comp <- research.survey %>%  filter(d_222161762<as.Date("2023-07-05") & d_265193023 == "Submitted" & ctime>0) 
+postcovR_comp <- research.survey %>%  filter(d_222161762>=as.Date("2023-07-05") & d_265193023 == "Submitted" & ctime>0)
 
 
 Table21R_Before = precovR_comp %>% group_by(Site) %>% 
@@ -1893,18 +1848,17 @@ clinical.survey <- coll_sett_all %>% filter(all_settings == "Clinical") %>%
   mutate(clin.sv = case_when(d_253883960 == 231311385 ~ "Submitted",
                              d_253883960 == 615768760 ~ "Started",
                              d_253883960 == 972455046 ~ "Not Started"),
-         Site=droplevels(Site),
+         Site=droplevels(as.factor(Site)),
          d_173836415_d_266600170_d_139245758_clc = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_139245758)), ##urine
          d_173836415_d_266600170_d_982213346_clc = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)), ##blood collected
          d_173836415_d_266600170_d_740582332_clc = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_740582332)), ##Autogenerated date/time stamp for Any specimen collected at RRL
          clinic.svtime =  difftime(as.POSIXct(ymd_hms(d_764863765)),as.POSIXct(ymd_hms(d_534669573)),units="hours"),
          ctime = round(as.numeric(difftime(as.POSIXct(ymd_hms(d_764863765)),as.POSIXct(ymd_hms(d_534669573)),units="mins")), digits=1)) ##survey time from start to complete
 
-clinical.survey <- clinical.survey %>% mutate(clc.coltm  = do.call(pmin, c(select(.,ends_with('clc')),na.rm=TRUE))) ###any biospecimen collected time
-clinical.survey$tm_biocolsuv <-  difftime(as.POSIXct(ymd_hms(clinical.survey$d_764863765)),clinical.survey$clc.coltm,units="hours") #time between survey completion to biospecimen collection visit check in
-clinicsv.complete <- as.data.frame(tab1(clinical.survey$clin.sv))
-clinicsv.complete <- clinicsv.complete %>% 
-  mutate(cumulative.Freq = ifelse(output.table.Percent<100.0, cumsum(output.table.Frequency),output.table.Frequency))
+clinical.survey <- clinical.survey %>% 
+  mutate(clc.coltm  = do.call(pmin, c(select(.,ends_with('clc')),na.rm=TRUE)),
+         tm_biocolsuv =  difftime(as.POSIXct(ymd_hms(d_764863765)),clc.coltm,units="hours")) #time between survey completion to biospecimen collection visit check in
+
 
 
 clinical.survey <-clinical.survey %>%
@@ -2013,12 +1967,10 @@ BU_trig_comp = clinical.survey %>% group_by(Site) %>%
 
 ### Section 4
 
-statics_biock <- tapply(as.numeric(research.survey$time_biochk),research.survey$biochk_outlier,summary)
-tab32a <- bind_rows(statics_biock)
 
 research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk)) 
 
-research.vt.length.table = research.vt.length %>%group_by(Site) %>% #biochk_outlier,
+research.vt.length.table = research.vt.length %>%group_by(Site) %>% 
   dplyr::summarize('Number of Research Collection Visits'=n(),
                    Min = min(time,na.rm = TRUE),
                    Q1 = quantile(time, 0.25,na.rm = TRUE),
@@ -2167,7 +2119,11 @@ verif_draw_order = verif_draw %>%group_by(Site) %>%
 verif_baseline_Af <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2022-06-01")) %>%  
   mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
          campaign = case_when((state_d_667474224==348281054 | state_d_667474224==324692899) ~ "Upcoming Appointment",
-                               TRUE ~ "All Other Campaigns")) %>%
+                               TRUE ~ "All Other Campaigns"),
+         Site = factor(Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
+                                                     "Marshfield Clinic Health System",
+                                                     "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado",
+                                                     "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest"))) %>%
   group_by(Site) %>% 
   dplyr::summarize(#'Number of Baseline Collections1'=n()[campaign=="Upcoming Appointment"],
     'Number of Baseline Collections1' = sum(campaign == "Upcoming Appointment"),
@@ -2196,7 +2152,7 @@ verif_baseline_Af <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(
 
 
 avg_draw_order <- clinical.survey %>%  filter(d_173836415_d_266600170_d_982213346>=as.Date("2023-02-01") & 
-                                        Site!='HealthPartners' & Site!="Sanford Health" & Site!='University of Chicago Medicine') %>%  ##won't receive a draw order from HP--Github issue 72
+                                        Site!='HealthPartners' & Site!="Sanford Health" & Site!='University of Chicago Medicine') %>% 
   mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)),
                                     as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days"))) %>%
   group_by(Site) %>% 
@@ -2219,7 +2175,7 @@ avg_draw_order <- clinical.survey %>%  filter(d_173836415_d_266600170_d_98221334
 
 present.day <- Sys.time()
 
-avg_bldorder_present <- recrver1 %>%  filter(d_878865966==104430631 & !is.na(d_173836415_d_266600170_d_769615780) & 
+avg_bldorder_present <- recrver1 %>%  filter(d_878865966=="No blood collected" & !is.na(d_173836415_d_266600170_d_769615780) & 
                                            Site!='HealthPartners' & Site!='Henry Ford Health'  & Site!='Sanford Health') %>%  
   mutate(time = as.numeric(difftime(present.day,as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days"))) %>% 
   group_by(Site) %>% 
@@ -2242,14 +2198,9 @@ avg_bldorder_present <- recrver1 %>%  filter(d_878865966==104430631 & !is.na(d_1
 ```{r Table27, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 
-###won't receive a draw order from HP--Github issue 72
-Table_bld_draw= recrver1 %>%  filter(d_827220437==125001209 | d_827220437==327912200 | d_827220437==300267574 | d_827220437==452412599) %>% ## excluding hybrid sites
-  mutate(bld_placed= case_when(d_173836415_d_266600170_d_530173840==353358909 ~ "Blood Draw Order Placed",
-                               (d_173836415_d_266600170_d_530173840==104430631 | is.na(d_173836415_d_266600170_d_530173840))~ "No Blood Draw Order Placed"),
-         Site= case_when(d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                         d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                         d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                         d_827220437==452412599 ~ "Kaiser Permanente Northwest"),
+Table_bld_draw= recrver1 %>%  filter(grepl("^Kaiser", Site)) %>% ## excluding hybrid sites
+  mutate(bld_placed= case_when(BioClin_BldOrderPlaced_v1r0=="Yes" ~ "Blood Draw Order Placed",
+                               (BioClin_BldOrderPlaced_v1r0=="No" | is.na(BioClin_BldOrderPlaced_v1r0))~ "No Blood Draw Order Placed"),
          verif_bld= case_when(d_821247024==197316935 ~ 1,
                               TRUE ~ 0))  %>% 
   dplyr::select(Site, bld_placed)  %>% 
@@ -2264,7 +2215,8 @@ Table_bld_draw= recrver1 %>%  filter(d_827220437==125001209 | d_827220437==32791
   bold_labels() %>%
   modify_header() %>%
   modify_caption("Table 4.9: Baseline Blood Draw Order Status Among Verified Participants") %>%
-  as_kable_extra(escape = FALSE, addtl_fmt = TRUE)
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
+  kable_styling(latex_options = "scale_down")
 
 
 
@@ -2274,33 +2226,19 @@ Table_bld_draw= recrver1 %>%  filter(d_827220437==125001209 | d_827220437==32791
 ```{r Table26, warning=FALSE, eval=TRUE,echo=FALSE}
 
 ver_date_diff <-table1  %>% filter(biocol.appoint=="No Baseline Collection")  %>% 
-  group_by(Site) %>% 
   mutate(day_past = difftime(as.Date(currentDate), as.Date(d_914594314), units="days"),
-         coll_days_diff = ifelse(as.numeric(day_past)<30,"< 30 Days",
-                                 ifelse(as.numeric(day_past)<60,"30 to <60 Days",
-                                        ifelse(as.numeric(day_past)<90,"60 to <90 Days",
-                                               ifelse(as.numeric(day_past)<180,"90 to 180 Days",
-                                                      ifelse(as.numeric(day_past)<270,"180 to <270 Days",
-                                                             "270 Days or More"))))))
+         coll_days_diff = case_when(as.numeric(day_past)<30 ~ "< 30 Days",
+                                    as.numeric(day_past)<60 ~ "30 to <60 Days",
+                                    as.numeric(day_past)<90 ~ "60 to <90 Days",
+                                    as.numeric(day_past)<180 ~ "90 to 180 Days",
+                                    as.numeric(day_past)<270 ~ "180 to <270 Days",
+                                    as.numeric(day_past)>=270 ~ "270 Days or More"),
+         coll_days_diff = factor(coll_days_diff, levels=c("< 30 Days", "30 to <60 Days", "60 to <90 Days",
+                                                          "90 to 180 Days", "180 to <270 Days", "270 Days or More")))
 
 
-ver_date_diff$Connect_ID <- as.numeric(ver_date_diff$Connect_ID)
+crosstable.coll_bptl1 <- create_tbl_cross(ver_date_diff, "Site", "coll_days_diff", "row", "Site", " ")
 
-table.coll_bptl <- ctable(ver_date_diff$Site,ver_date_diff$coll_days_diff)
-crosstable.coll_bptl <- as.data.frame(cbind(table.coll_bptl$cross_table,table.coll_bptl$proportions))
-crosstable.coll_bptl$Sites <-trimws(rownames(crosstable.coll_bptl))
-
-
-crosstable.coll_bptl$n_pct_30_Day <-  paste(format(crosstable.coll_bptl[,1],big.mark=","),"(", round(100*crosstable.coll_bptl[,8],1),"%)",sep=" ")
-crosstable.coll_bptl$n_pct_60_Day <-  paste(format(crosstable.coll_bptl[,4],big.mark=","),"(", round(100*crosstable.coll_bptl[,11],1),"%)",sep=" ")
-crosstable.coll_bptl$n_pct_90_Day <-  paste(format(crosstable.coll_bptl[,5],big.mark=","),"(", round(100*crosstable.coll_bptl[,12],1),"%)",sep=" ")
-crosstable.coll_bptl$n_pct_180_Day <-  paste(format(crosstable.coll_bptl[,6],big.mark=","),"(", round(100*crosstable.coll_bptl[,13],1),"%)",sep=" ")
-crosstable.coll_bptl$n_pct_270_Day <-  paste(format(crosstable.coll_bptl[,2],big.mark=","),"(", round(100*crosstable.coll_bptl[,9],1),"%)",sep=" ")
-crosstable.coll_bptl$n_pct_270_plus_days =  paste(format(crosstable.coll_bptl[,3],big.mark=","),"(", round(100*crosstable.coll_bptl[,10],1),"%)",sep=" ")
-crosstable.coll_bptl$Total <- paste(crosstable.coll_bptl$Total, " (100%)")
-
-
-crosstable.coll_bptl1 <- crosstable.coll_bptl[, c(15:21, 7)]
 
 
 ```
@@ -2370,85 +2308,64 @@ coll_bptl_diff <- biospe_adhoc_all %>%
                                  ifelse(as.numeric(day_past)<3,"2 Days",
                                         ifelse(as.numeric(day_past)<4,"3 Days", 
                                                ifelse(as.numeric(day_past)<5,"4 Days",
-                                                      ifelse(as.numeric(day_past)>=5,">4 Days", "Missing time stamp(s)"))))))
-                                  #"Missing time stamp(s)"))))))
+                                                      ifelse(as.numeric(day_past)>=5,">4 Days", "Missing time stamp(s)"))))),
+         coll_days_diff=factor(coll_days_diff, levels=c("1 Day","2 Days","3 Days","4 Days",">4 Days","Missing time stamp(s)")))
+                                 
+```
 
 
-coll_bptl_diff$Connect_ID <- as.numeric(coll_bptl_diff$`as.character(Connect_ID)`)
 
 
-table.coll_bptl_28a <- ctable(coll_bptl_diff$Site,coll_bptl_diff$coll_days_diff)
-crosstable.coll_bptl28a <- as.data.frame(cbind(table.coll_bptl_28a$cross_table,table.coll_bptl_28a$proportions))
-crosstable.coll_bptl28a$Site <- list("Baylor Scott and White Health","HealthPartners","Henry Ford Health",
-                                     "Marshfield Clinic Health System","Sanford Health","University of Chicago Medicine", "Total")
+```{r Table5.1, message=FALSE, echo=FALSE, warning=FALSE}
 
-crosstable.coll_bptl28a$n_pct_1_Day <-  paste(format(crosstable.coll_bptl28a[,2],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,8],1),"%)",sep=" ")
-crosstable.coll_bptl28a$n_pct_2_Day <-  paste(format(crosstable.coll_bptl28a[,3],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,9],1),"%)",sep=" ")
-crosstable.coll_bptl28a$n_pct_3_Day <-  paste(format(crosstable.coll_bptl28a[,4],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,10],1),"%)",sep=" ")
-crosstable.coll_bptl28a$n_pct_4_Day <-  paste(format(crosstable.coll_bptl28a[,5],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,11],1),"%)",sep=" ")
-crosstable.coll_bptl28a$n_pct_4_plus_days =  paste(format(crosstable.coll_bptl28a[,1],big.mark=","),"(", round(100*crosstable.coll_bptl28a[,7],1),"%)",sep=" ")
-crosstable.coll_bptl28a$Total_Pct <- paste(crosstable.coll_bptl28a$Total, " (100%)")
+coll_bptl_diff5.1 <- coll_bptl_diff %>% ungroup() %>% 
+  mutate(coll_days_diff= droplevels(coll_days_diff))
 
-crosstable.coll_bptl28a <- crosstable.coll_bptl28a[,c(13:19)]
+crosstable.coll_bptl28a <- create_tbl_cross(coll_bptl_diff5.1, "Site", "coll_days_diff", "row", "Site", " ")
 
 
 ```
 
 ```{r Table28b,include=FALSE, echo=FALSE, warning=FALSE}
 
-
-table.coll_bptl <- ctable(coll_bptl_diff$Site_location,coll_bptl_diff$coll_days_diff)
-ctable.coll_bptl28 <- as.data.frame(cbind(table.coll_bptl$cross_table,table.coll_bptl$proportions))
-ctable.coll_bptl28$UC_Sites <-trimws(rownames(ctable.coll_bptl28))
-
-ctable.coll_bptl28$n_pct_1_Day <-  paste(format(ctable.coll_bptl28[,2],big.mark=","),"(", round(100*ctable.coll_bptl28[,8],1),"%)",sep=" ")
-ctable.coll_bptl28$n_pct_2_Day <-  paste(format(ctable.coll_bptl28[,3],big.mark=","),"(", round(100*ctable.coll_bptl28[,9],1),"%)",sep=" ")
-ctable.coll_bptl28$n_pct_3_Day <-  paste(format(ctable.coll_bptl28[,4],big.mark=","),"(", round(100*ctable.coll_bptl28[,10],1),"%)",sep=" ")
-ctable.coll_bptl28$n_pct_4_Day <-  paste(format(ctable.coll_bptl28[,5],big.mark=","),"(", round(100*ctable.coll_bptl28[,11],1),"%)",sep=" ")
-ctable.coll_bptl28$n_pct_4_plus_days =  paste(format(ctable.coll_bptl28[,1],big.mark=","),"(", round(100*ctable.coll_bptl28[,7],1),"%)",sep=" ")
-ctable.coll_bptl28$Total <- paste(ctable.coll_bptl28$Total, " (100%)")
+crosstable.coll_bptl28 <- create_tbl_cross(coll_bptl_diff5.1, "Site_location", "coll_days_diff", "row", "Site", " ")
+crosstable.coll_bptl28 <- as.data.frame(crosstable.coll_bptl28)
+colnames(crosstable.coll_bptl28)[1] <- "Collection_Location"
 
 
-ctable.coll_bptl28 <- ctable.coll_bptl28[,c(13:18,6)]
 
-colnames(ctable.coll_bptl28) <- c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Day", ">4 Days", "Total Received Research Collections")
-
-#to help shirnk this very long table
-ctable.coll_bptl28 <- ctable.coll_bptl28 %>%  filter(!is.na("Collection Location"))
-
-
-ctable.coll_bptl28 <- ctable.coll_bptl28 %>%
+ctable.coll_bptl28 <- crosstable.coll_bptl28 %>%
   mutate(Site_Group = case_when(
-    `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", 
+    Collection_Location %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", 
                                  "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
-    `Collection Location` %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
-    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", 
+    Collection_Location %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
+    Collection_Location %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", 
                                  "Colby Abbotsford", "Merrill", "Stevens Point",
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
-    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)", 
+    Collection_Location %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
+    Collection_Location %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
                                  "HFH Detroit Northwest", "In-home Collection","HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
-    `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", 
+    Collection_Location %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", 
                                  "North Garland", "Temple CDM","Temple Roney", "Waco - MacArthur", "Missing BSWH location") ~ "Baylor Scott and White Health",
-    `Collection Location` %in% c("Unidentified location") ~ "Other",
+    Collection_Location %in% c("Unidentified location") ~ "Other",
     TRUE ~ " "
   )) 
 
 
 
 
-#to help shirnk this very long table
-ctable.coll_bptl28 <- ctable.coll_bptl28 %>%  filter(str_sub(.data$`Total Received Research Collections`, 1, 1) != "0")
+# Removing rows with all 0's
+ctable.coll_bptl28 <- ctable.coll_bptl28 %>%  filter(str_sub(Total, 1, 1) != "0")
 
 
 # Separate the Total row
-total_row <- ctable.coll_bptl28 %>% filter(`Collection Location` == "Total")
+total_row <- ctable.coll_bptl28 %>% filter(Collection_Location == "Total")
 
 # Remove the Total row from the main table
 rsch_coll_times <- ctable.coll_bptl28 %>%
-  filter(`Collection Location` != "Total") %>%
-  arrange(Site_Group, `Collection Location`)
+  filter(Collection_Location != "Total") %>%
+  arrange(Site_Group, Collection_Location)
 
 # Append the Total row at the bottom with Site_Group = "Total"
 rsch_coll_times <- bind_rows(rsch_coll_times, total_row %>% mutate(Site_Group = "Total"))
@@ -2460,13 +2377,13 @@ rsch_coll_times$Site_Group <- factor(rsch_coll_times$Site_Group, levels = unique
 site_group_counts <- table(rsch_coll_times$Site_Group)
 
 
-rsch_coll_times52 <- knitr::kable(rsch_coll_times[, c(2:7)], 
+rsch_coll_times52 <- knitr::kable(rsch_coll_times[, c(1:7)], 
              caption="Table 5.2: Baseline Collection-To-Receipt Time (in Days) Among Research Collections by Collection Location",
              col.names=c("Collection Location","1 Day","2 Days","3 Days","4 Day",">4 Days","Total Received Research Collections"),
              align=c("l",rep("c", 6)), 
              booktabs = TRUE, longtable = TRUE) %>%  
   pack_rows(index = site_group_counts) %>%  # Ensure "Total" is last
-  row_spec(which(rsch_coll_times$`Collection Location` %in% names(site_group_counts)), hline_after = TRUE) %>%
+  row_spec(which(rsch_coll_times$Collection_Location %in% names(site_group_counts)), hline_after = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
   landscape()
 
@@ -2498,7 +2415,7 @@ biospe_adhoc2= biospe_adhoc_2 %>%  filter((!is.na(d_232343615_d_926457119) | !is
                                          !is.na(d_703954371_d_926457119) |!is.na(d_838567176_d_926457119) | !is.na(d_958646668_d_926457119) |
                                          !is.na(d_973670172_d_926457119)) &
                                       !is.na(Clin_Site_location) & !is.na(Site)) %>% 
-  mutate(Site=droplevels(Site))
+  mutate(Site=droplevels(as.factor(Site)))
 
 coll_bptl_diff2 <- biospe_adhoc2  %>% group_by(as.character(Connect_ID),Site, Clin_Site_location) %>% 
   mutate(any_collection = min(d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119,
@@ -2510,21 +2427,19 @@ coll_bptl_diff2 <- biospe_adhoc2  %>% group_by(as.character(Connect_ID),Site, Cl
                                  ifelse(as.numeric(day_past)<3,"2 Days",
                                         ifelse(as.numeric(day_past)<4,"3 Days", 
                                                ifelse(as.numeric(day_past)<5,"4 Days", 
-                                                      ifelse(as.numeric(day_past)>=5,">4 Days", "Missing Time Stamp(s)"))))))
+                                                      ifelse(as.numeric(day_past)>=5,">4 Days", "Missing Time Stamp(s)"))))),
+         coll_days_diff=factor(coll_days_diff, levels=c("1 Day","2 Days","3 Days","4 Days",">4 Days","Missing time stamp(s)")))
 
 coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
 
+```
 
+```{r Table5.3, message=FALSE, echo=FALSE, warning=FALSE}
 
-coll_bptl_diff2$Connect_ID <- as.numeric(coll_bptl_diff2$`as.character(Connect_ID)`)
-coll_bptl_diff2$coll_days_diff <- factor(coll_bptl_diff2$coll_days_diff,levels=c("1 Day","2 Days","3 Days","4 Days", ">4 Days"))
+coll_bptl_diff5.2 <- coll_bptl_diff2 %>% ungroup() %>% 
+  mutate(coll_days_diff= droplevels(coll_days_diff))
 
-
-ctabs_rsch_coll_days <- coll_bptl_diff2 %>%  tabyl(Site, coll_days_diff) %>%  add_totals_and_percentages(total_position = c("both"), percentage_type = "row")
-
-
-
-
+crosstable.clin_coll_days <- create_tbl_cross(coll_bptl_diff5.2, "Site", "coll_days_diff", "row", "Site", " ")
 
 
 
@@ -2532,15 +2447,17 @@ ctabs_rsch_coll_days <- coll_bptl_diff2 %>%  tabyl(Site, coll_days_diff) %>%  ad
 
 
 #### By Site location
-rsch_coll_days <- coll_bptl_diff2 %>%  tabyl(Clin_Site_location, coll_days_diff) %>%  add_totals_and_percentages(total_position = c("both"), percentage_type = "row")
-colnames(rsch_coll_days) <- c("Collection Location", "1 Day", "2 Days", "3 Days", "4 Day", ">4 Days", "Total Received Clinical Collections")
+coll_bptl_diff5.2$Clin_Site_location[coll_bptl_diff5.2$Site=="Kaiser Permanente Colorado"]="KPCO"
+coll_bptl_diff5.2$Clin_Site_location[coll_bptl_diff5.2$Site=="Kaiser Permanente Georgia"]="KPGA"
+coll_bptl_diff5.2$Clin_Site_location[coll_bptl_diff5.2$Site=="Kaiser Permanente Northwest"]="KPNW"
+coll_bptl_diff5.2$Clin_Site_location[coll_bptl_diff5.2$Site=="Sanford Health"]="KPNW"
 
-rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Colorado"]="KPCO"
-rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Georgia"]="KPGA"
-rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Hawaii"]="KPHI"
-rsch_coll_days$`Collection Location`[rsch_coll_days$`Collection Location`=="Kaiser Permanente Northwest"]="KPNW"
+clin_coll_days <- create_tbl_cross(coll_bptl_diff5.2, "Clin_Site_location", "coll_days_diff", "row", "Collection Location", " ")
+clin_coll_days <- as.data.frame(clin_coll_days)
+colnames(clin_coll_days)[1] <- "Collection Location"
 
-rsch_coll_days <- rsch_coll_days %>%
+
+clin_coll_days <- clin_coll_days %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
                                  "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", "Missing HFH location") ~ "Henry Ford Health", 
@@ -2553,27 +2470,46 @@ rsch_coll_days <- rsch_coll_days %>%
     `Collection Location`== "Sanford Health" ~ "Sanford Health",
     `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", 
                                  "DCAM (Hyde Park)","Crown Point", "Missing UC location") ~ "University of Chicago Medicine",
-    TRUE ~ " "
-  )) 
+    TRUE ~ " "),
+    Site_Group = factor(Site_Group, levels=c("HealthPartners", "Henry Ford Health", "University of Chicago Medicine", 
+                                             "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Northwest", "Kaiser Permanente Hawaii",
+                                             "Sanford Health"))) 
 
-crosstable.coll_bptl_2 <- rsch_coll_days  %>%
-  gt::gt(groupname_col = "Site_Group") %>% 
-  tab_header(title='Table 5.4: Baseline Collection-To-Receipt Time (in Days) \n Among Clinical Collections by Clinic Location') %>% 
-  tab_footnote(footnote= paste0("At the time of reporting, ", dim(biospe_adhoc2_missings)[[1]], " of the Clinical Collections did not have collection and/or receipt date/time information available."),
-               locations = gt::cells_column_labels(columns = "Total Received Clinical Collections")) %>% 
-  gt::tab_style(style = list(gt::cell_text(weight = "bold")),
-                locations = gt::cells_row_groups()) %>% 
-  gt::tab_style(style = list(gt::cell_text(align = "center")), 
-                locations = gt::cells_title(groups = "title")) %>%
-gt::cols_width(
-  `Collection Location` ~ gt::px(175), #Location Titles are by far the longest
-  `Total Received Clinical Collections` ~ gt::px(80), # Totals are rather long as well
-  everything() ~ gt::px(70)) %>%  
-gt::tab_options(table.width = "95%", # Adjust the width as needed
-  table.border.right.width = px(0),
-  #container.width = "80%",  # Ensure table container doesn't full page width
-  table.align = "left", # Ensure the table aligns to the left
-  table.font.size = "6pt")
+
+
+# Removing rows with all 0's
+clin_coll_days <- clin_coll_days %>%  filter(str_sub(Total, 1, 1) != "0")
+
+
+# Separate the Total row
+total_row <- clin_coll_days %>% filter(`Collection Location` == "Total")
+
+# Remove the Total row from the main table
+clin_coll_times <- clin_coll_days %>%
+  filter(`Collection Location` != "Total") %>%
+  arrange(Site_Group, `Collection Location`)
+
+# Append the Total row at the bottom with Site_Group = "Total"
+clin_coll_times <- bind_rows(clin_coll_times, total_row %>% mutate(Site_Group = "Total"))
+
+#Make sure the Sites are in the right order
+clin_coll_times$Site_Group <- factor(clin_coll_times$Site_Group, levels = unique(clin_coll_times$Site_Group))
+
+# Count occurrences of each Site_Group to ensure proper grouping
+site_group_counts <- table(clin_coll_times$Site_Group)
+
+
+crosstable.coll_bptl_2 <- knitr::kable(clin_coll_times[, c(1:7)], 
+             caption="Table 5.4: Baseline Collection-To-Receipt Time (in Days) \n Among Clinical Collections by Clinic Location",
+             col.names=c("Collection Location","1 Day","2 Days","3 Days","4 Day",">4 Days","Total Received Clinical Collections"),
+             align=c("l",rep("c", 6)), 
+             booktabs = TRUE, longtable = TRUE) %>%  
+  pack_rows(index = site_group_counts) %>%  # Ensure "Total" is last
+  row_spec(which(clin_coll_times$Collection_Location %in% names(site_group_counts)), hline_after = TRUE) %>%
+  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
+  footnote(general= paste0("At the time of reporting, ", dim(biospe_adhoc2_missings)[[1]], " of the Clinical Collections did not have collection and/or receipt date/time information available."), general_title = " ") %>% 
+  landscape()
+
 
 
 ```
@@ -2588,7 +2524,7 @@ clinical.survey_specs <- clinical.survey %>%   group_by(Connect_ID, Site) %>%
 
 clc.bothtm <- c("d_173836415_d_266600170_d_139245758","d_173836415_d_266600170_d_224596428","d_173836415_d_266600170_d_541311218","d_173836415_d_266600170_d_939818935","d_173836415_d_266600170_d_769615780",
                 "d_173836415_d_266600170_d_822274939","d_173836415_d_266600170_d_398645039","d_173836415_d_266600170_d_982213346")
-dd[grepl("139245758|224596428|541311218|939818935|769615780|822274939|398645039|982213346",dd$CID),]
+
 
 clc.both.vt <- clinical.survey_specs[,c("Connect_ID","Site","bldcol_max","Urine_col_max","collection.tm",clc.bothtm)]
 
@@ -2661,7 +2597,7 @@ research.survey<- research.survey %>% mutate(schedulecol.tm =min(as.POSIXct(ymd_
 
 ##HF
 fig4_sub_all <- research.survey %>%  filter(Site=="Henry Ford Health") 
-fig4_sub_all <- fig4_sub_all %>%  filter((d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909) & !is.na(checktmvisit)) 
+fig4_sub_all <- fig4_sub_all %>%  filter((d_684635302 == "Any mouthwash collected" | d_878865966 == "Any blood collected"| d_167958071 == "Any urine collected") & !is.na(checktmvisit)) 
 
 fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
 
@@ -2698,7 +2634,7 @@ research.4_1 <- ggplot(visit_wk_site4, aes(x=as.Date(col.Monday.date), y=pct3)) 
 
 ##Sanford
 fig4_sub_all <- research.survey %>%  filter(Site=="Sanford Health") 
-fig4_sub_all <- fig4_sub_all %>%  filter((d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909) & !is.na(checktmvisit)) 
+fig4_sub_all <- fig4_sub_all %>%  filter((d_684635302 == "Any mouthwash collected" | d_878865966 == "Any blood collected"| d_167958071 == "Any urine collected") & !is.na(checktmvisit)) 
 
 fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
 
@@ -2734,7 +2670,7 @@ research.4_2 <- ggplot(visit_wk_site4__2, aes(x=as.Date(col.Monday.date), y=pct3
 
 ##UC
 fig4_sub_all <- research.survey %>%  filter(Site=="University of Chicago Medicine") 
-fig4_sub_all <- fig4_sub_all %>%  filter((d_684635302 == 353358909 | d_878865966 == 353358909| d_167958071 == 353358909) & !is.na(checktmvisit)) 
+fig4_sub_all <- fig4_sub_all %>%  filter((d_684635302 == "Any mouthwash collected" | d_878865966 == "Any blood collected"| d_167958071 == "Any urine collected") & !is.na(checktmvisit)) 
 
 fig4_sub_all$Site<- droplevels(fig4_sub_all$Site)
 
@@ -2958,7 +2894,7 @@ add_footnote(tab8, "Tube configuration/quantity varies by site based on clinical
 
 
 
-devns <- knitr::kable(Deviation_Freq[,c(7,5,6,4)],
+devns <- knitr::kable(Deviation_Freq,
              col.names=c("Site","Any Deviations","No Deviations", "Total Tubes Collected"), 
              caption='Table 2.5: Baseline- Deviation Status Among Biospecimen Tubes Collected',
              row.names=FALSE, align=c("l",rep("c", 3)), booktabs = TRUE )
@@ -3275,7 +3211,7 @@ add_footnote(rsch_coll_times52, paste0("At the time of reporting, ", dim(biospe_
 
 \FloatBarrier
 ```{r clin_clt_days,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
-clin_bptl <- knitr::kable(ctabs_rsch_coll_days, 
+clin_bptl <- knitr::kable(crosstable.clin_coll_days, 
              col.names=c("Site", "1 Day", "2 Days", "3 Days", "4 Days", ">4 Days", "Total Received Clinical Collections"), 
              caption='Table 5.3: Baseline Collection-To-Receipt Time (in Days) Among Clinical Collections', 
              row.names=FALSE, align=c("l", rep("c", 6)), booktabs = TRUE) %>% 
@@ -3285,6 +3221,7 @@ add_footnote(clin_bptl, paste0("At the time of reporting, ", dim(biospe_adhoc2_m
 
 \FloatBarrier
 ```{r clin_loc_clt_days,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
+
 crosstable.coll_bptl_2
 
 ```
@@ -3299,23 +3236,23 @@ crosstable.coll_bptl_2
 ```{r Figs6_14_Plots, warning=FALSE, eval=TRUE,echo=FALSE, message=FALSE}
 
 
-coll_bptl_diff <- coll_bptl_diff %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_678166505)), units="hours"))
-coll_bptl_diff$hrs_past <- as.numeric(coll_bptl_diff$hrs_past)
-coll_bptl_diff<- coll_bptl_diff %>%  filter(hrs_past>0)
+coll_bptl_diff <- coll_bptl_diff %>% 
+  mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_678166505)), units="hours"),
+         hrs_past = as.numeric(hrs_past),
+         Weekdays = factor(weekdays(as.Date(d_678166505))),
+         Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%  
+  filter(hrs_past>0)
 
 
 
-coll_bptl_diff2 <- coll_bptl_diff2 %>% mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(clin_coll_bu)), units="hours"))
-coll_bptl_diff2$hrs_past <- as.numeric(coll_bptl_diff2$hrs_past)
+coll_bptl_diff2 <- coll_bptl_diff2 %>% 
+  mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(clin_coll_bu)), units="hours"),
+         hrs_past = as.numeric(hrs_past),
+         Weekdays = factor(weekdays(as.Date(clin_coll_bu))),
+         Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")))
 
 
 
-
-coll_bptl_diff$Weekdays <- factor(weekdays(as.Date(coll_bptl_diff$d_678166505)))
-coll_bptl_diff$Weekdays<- factor(coll_bptl_diff$Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
-
-coll_bptl_diff2$Weekdays <- factor(weekdays(as.Date(coll_bptl_diff2$clin_coll_bu)))
-coll_bptl_diff2$Weekdays<- factor(coll_bptl_diff2$Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
 
 scatMF <- coll_bptl_diff %>%  filter(Site=="Marshfield Clinic Health System")
 scatSF <- coll_bptl_diff %>%  filter(Site=="Sanford Health")
@@ -3929,7 +3866,7 @@ kitstatus <- "SELECT Connect_ID,
   END AS Kit_Status_r2,
 
 d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_319972665_d_826941471,
-d_173836415_d_266600170_d_319972665_d_379252329, --d_173836415_d_266600170_d_319972665_d_759651991
+d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_759651991,
 
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_541483796_d_826941471, d_173836415_d_266600170_d_541483796_d_379252329,
 
@@ -4001,7 +3938,8 @@ kit_assembly <- bq_table_download(kit_assmb_table, bigint="integer64",n_max = In
 
 ### Initial Kit
 status_elgA <- kit_table %>%
-  filter(Kit_Status_int!="No Status") %>% 
+  #Not everyone will have a requested initial kit
+  filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) | Kit_Status_int!="No Status") %>% 
   mutate(Kit_Status_int = factor(Kit_Status_int,
                                  levels=c("Undeliverable","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))) 
  
@@ -4046,7 +3984,7 @@ status_elg7.1C <- create_tbl_cross(status_elgC, "Site", "Kit_Status_r2", "row", 
 colnames(status_elg7.1C)[ncol(status_elg7.1C)] <- "Total Eligible"
 
 status_elg_knC <- knitr::kable(status_elg7.1C,
-             caption="Table 7.1c:  Baseline- Home Mouthwash Replacement Kit 1 Status \n Among All R2 Kits Requested",
+             caption="Table 7.1c:  Baseline- Home Mouthwash Replacement Kit 2 Status \n Among All R2 Kits Requested",
              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>% 
   add_indent(seq(1, nrow(status_elg7.1C) - 1)) %>% 
   kable_styling(latex_options = "scale_down")

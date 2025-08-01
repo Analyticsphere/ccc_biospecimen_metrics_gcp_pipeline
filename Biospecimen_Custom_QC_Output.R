@@ -593,7 +593,7 @@ bioqc_csv <- bioqc %>%
                                                     (d_173836415_d_266600170_d_210921343!="Yes" | is.na(d_173836415_d_266600170_d_541311218)) &
                                                     d_650516960=="Clinical", "Rule 72-URINE", " "),
         ###	73. If an Inital Kit is requested, then the Initial Kit Status must be populated. 
-        #Rule73 = ifelse(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) & is.na(d_173836415_d_266600170_d_319972665_d_221592017), "Rule 73", " "),
+        Rule73 = ifelse(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) & is.na(d_173836415_d_266600170_d_319972665_d_221592017), "Rule 73", " "),
         ###	74. If an Replacement 1 Kit is requested, then the Replacement1 Kit Status must be populated. 
         Rule74 = ifelse(!is.na(d_173836415_d_266600170_d_541483796_d_759651991) & is.na(d_173836415_d_266600170_d_541483796_d_221592017), "Rule 74", " "),
         ###	75. If an Replacement 2 is requested, then the Replacement2 Kit Status must be populated. 
@@ -834,26 +834,26 @@ hmw2 <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_379252329==976461
 # 37. If kit status is Assigned, then supply kit tracking number should populate
 asgn <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==241974920 | d_173836415_d_266600170_d_541483796_d_221592017==241974920 | 
                            d_173836415_d_266600170_d_641006239_d_221592017==241974920) & 
-                          (is.na(d_531858099) | is.na(d_426588510))) 
+                          is.na(d_531858099)) 
 
 
 
 
 # 38. If kit status is Shipped, then supply kit tracking number, date/time kit shipped, and kit level should populate
 # BioKit_SupplyKitTrack_v1r0  is all null here, but 39 rows in prod
-shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160)  | is.na(d_426588510))) |
-                           (d_173836415_d_266600170_d_541483796_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160)  | is.na(d_426588510))) |
-                           (d_173836415_d_266600170_d_641006239_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160)  | is.na(d_426588510)))) 
+shipt <- HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160) )) |
+                           (d_173836415_d_266600170_d_541483796_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160) )) |
+                           (d_173836415_d_266600170_d_641006239_d_221592017==277438316 & (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160)))) 
 
 
 
 # 39. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received, and and kit level should populate
 recvd <-Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017==375535639 & kit_level=="Initial Kit" & 
-                               (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) |
+                               (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160) | is.na(d_173836415_d_266600170_d_319972665_d_826941471) |  is.na(d_137401245))) |
                               (d_173836415_d_266600170_d_541483796_d_221592017==375535639 & kit_level=="Replacement Kit 1" & 
-                                 (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) | 
+                                 (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160) | is.na(d_173836415_d_266600170_d_541483796_d_826941471) |  is.na(d_137401245))) | 
                               (d_173836415_d_266600170_d_641006239_d_221592017==375535639 & kit_level=="Replacement Kit 2" & 
-                                 (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))))
+                                 (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160) | is.na(d_173836415_d_266600170_d_641006239_d_826941471) |  is.na(d_137401245))))
 
 
 
@@ -926,7 +926,7 @@ invalid_rows <- HMW %>% filter(!is.na(d_173836415_d_266600170_d_448660695) & !gr
 
 
 #66. If home mouthwash kit is Replacement 1 or Replacement 2, BioKit_KitStatus should not be Undeliverable Address.
-undeliverables <- HMW %>%  filter(d_173836415_d_266600170_d_641006239_d_221592017=="332067457" & (d_426588510=="389478821" | d_426588510=="772116457"))
+undeliverables <- HMW %>%  filter(d_173836415_d_266600170_d_641006239_d_221592017=="332067457" | d_173836415_d_266600170_d_541483796_d_221592017=="332067457")
 
 ###	69. BioFin_BMTimeBL_v1r0 must occur after BioKit_KitShipTm_v1r0 or before BioKit_KitRecdTm_v1r0.
   ### Excludes those where BioFin_BMTimeBL_v1r0 is in the same month OR the month on either side of BioKit_KitShipTm_v1r0 or BioKit_KitRecdTm_v1r0
@@ -1207,46 +1207,6 @@ split_setting <- split_setting %>%  select(Connect_ID, Collection_ID)
 
 
 
-
-
-
-###	67. If kit is an Initial kit, BioKit_DtKitReq_v1r0 should be null.
-project_id <- "nih-nci-dceg-connect-prod-6d04"
-dataset <- "FlatConnect"
-table <- "participants"
-column_to_check <- "d_173836415_d_266600170_d_319972665_d_759651991"
-
-# Step 1: Check if the column exists
-check_query <- glue::glue("
-  SELECT column_name
-  FROM `{project_id}.{dataset}.INFORMATION_SCHEMA.COLUMNS`
-  WHERE table_name = '{table}'
-    AND column_name = '{column_to_check}'
-")
-
-check_result <- bq_project_query(project_id, check_query)
-column_check <- bq_table_download(check_result)
-
-# Step 2: If it exists, run the query
-if (nrow(column_check) > 0) {
-  warning(glue::glue("Column {column_to_check} EXISTS in {table}! Pulling data..."))
-  
-  # Safe query to pull Connect_ID and the column
-  data_query <- glue::glue("
-    SELECT Connect_ID, `{column_to_check}`
-    FROM `{project_id}.{dataset}.{table}`
-    WHERE Connect_ID IS NOT NULL
-  ")
-  
-  data_result <- bq_project_query(project_id, data_query)
-  output_data <- bq_table_download(data_result)
-  
-} else {
-  cat("No errors.")
-  output_data <- tibble()
-}
-
-bioqc_csv$Rule67 = ifelse(bioqc_csv$Connect_ID %in% output_data$Connect_ID, "Rule 67", " ")
 
 
 
