@@ -56,7 +56,7 @@ D_371067537, D_430551721, D_821247024, D_914594314,  state_d_725929722,
 D_949302066 , D_517311251, D_205553981, D_117249500, d_265193023, d_331584571_d_266600170_d_343048998, d_173836415_d_266600170_d_448660695,
 d_331584571_d_266600170_d_840048338,  d_534669573, d_764863765, d_827220437, d_253883960 
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
-where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and d_821247024='197316935' and d_253883960='231311385'"
+where Connect_ID IS NOT NULL and (d_512820379='486306141' OR d_512820379='854703046') and d_831041022='104430631' and d_821247024='197316935' and d_253883960='231311385'"
 specimenBU <- "SELECT Connect_ID, d_556788178 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` where Connect_ID is not null"
 
 
@@ -102,7 +102,7 @@ cat("Particiapnts with Blood, Urine Survey Completed: ", dim(BU)[[1]])
 ```{r functions, include=FALSE}
 ##FUNCTIONS
 
-BU_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Unknown", "654207589"="Male",
+dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Unknown", "654207589"="Male",
                  "110092955"="The same day", "952212668"="The day before", "330461666"="More than a day before", "974230748"="Yes, in the past day",
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
                  "548628123"="A little bit", "567908725"="Somewhat", "760969884"="Quite a bit", "464631026"="Very Much", "707601969"="Yes, another",
@@ -118,170 +118,212 @@ BU_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", 
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
-gt_functBU <- function(CID, Title){  
+simple_funct_BU <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
-  dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM)
-  gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),  percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>% 
-  tab_options(
-      stub.font.weight = "bold"
+
+       gt_yn <- BU_tib %>%
+        filter(as.numeric(D_860011428)>=3) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  ) 
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
 }
 
 menstrual_funct <- function(CID, Title){  
   CID_SYM <- rlang::ensym(CID)
-  dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BU_tib$D_522008539==536341288)
-  gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
   
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),  percentage = md("**%**")) %>% 
-grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
+         gt_yn <- BU_tib %>%
+        filter(D_522008539==536341288) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  )
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
 }
 
 
-covid_once_funct <- function(CID, Title){  
-  CID_SYM <- rlang::ensym(CID)
-  dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05") & (as.numeric(BU_tib$D_860011428)>=1 | BU_tib$D_494226443=="353358909"))
-  gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),  percentage = md("**%**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) 
-}
 
-covid_twice_funct <- function(CID, Title){  
-  CID_SYM <- rlang::ensym(CID)
-  dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05") & (as.numeric(BU_tib$D_860011428)>=2))
-  gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup()  %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),   percentage = md("**%**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) 
-}
-
-covid_thrice_funct <- function(CID, Title){  
-  CID_SYM <- rlang::ensym(CID)
-  dt_select <- BU_tib %>%  select(Connect_ID, !!CID_SYM) %>%  filter(BU_tib$d_764863765<as.Date("2023-07-05") & (as.numeric(BU_tib$D_860011428)>=3))
-  gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>%  mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  select(answer, n, percentage)
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),   percentage = md("**%**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
-    ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
-    )
-  ) 
-}
-
-
-#One skip logic (previous response)
+#One skip logic (previous response was one particular response)
 one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){  
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
-  dt_select <- BU_tib %>%  filter(!!CID_SYM_P==Previous_Answer) %>%  select(Connect_ID, !!CID_SYM) 
-  gt_yn <- dt_select  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=dplyr::recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-  gt_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),  percentage = md("**%**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
+  
+     gt_yn <- BU_tib %>%
+        filter(!!CID_SYM_P==Previous_Answer) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  ) 
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
 }
 
 
-#Two skip logic (previous response)
-#did have covid questions 
+#Two skip logic (previous response has one of two responses)
 two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_CID2, Previous_Answer2){  
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
   CID_SYM_P2 <- rlang::ensym(Previous_CID2)
-  dt_select2 <- BU_tib %>%  filter( !!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>% 
-    select(Connect_ID, !!CID_SYM) 
-  gt2_yn <- dt_select2  %>% dplyr::group_by(!!CID_SYM) %>% dplyr::summarize(n=n(), percentage=100*n/nrow(.)) %>% dplyr::ungroup() %>% dplyr::mutate(answer=recode(!!CID_SYM, !!!BU_dict)) %>% replace_na(list(answer="Skipped this Question")) %>%  dplyr::select(answer, n, percentage)
-  gt2_yn %>%  gt::gt()  %>%  
-  fmt_number(columns = "percentage", decimals = 1) %>% 
-  tab_header(title = md(Title)) %>% 
-  cols_label(answer = md("**Answer**"),  n = md("**N**"),  percentage = md("**%**")) %>% 
-  grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T)) %>%
-  tab_options(
-      stub.font.weight = "bold"
+    
+      gt_yn <- BU_tib %>%
+        filter(!!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>% 
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+      
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
     ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_body(
-      columns = answer,
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
     )
-  ) 
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down"))
+
+      
 }
+
+
+
+
+
+
+
+create_kable_table_w_footnote <- function(df, group_by_vriable, Title){  
+  CID_SYM <- rlang::ensym(group_by_vriable)
+  
+  gt_yn <- df %>%
+    group_by(!!CID_SYM) %>%
+    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
+    ungroup() %>%
+    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
+    replace_na(list(answer = "Skipped this Question")) %>%
+    select(answer, n, percentage)
+  
+  gt_yn_kable <- gt_yn %>%
+    mutate(
+      percentage = round(percentage, 1),
+      N = comma(n)
+    ) %>%
+    select(answer, N, percentage) %>%
+    dplyr::rename(
+      "Answer" = answer,
+      "Pct" = percentage
+    ) %>%
+    bind_rows(
+      tibble(
+        Answer = "Total",
+        N = comma(sum(gt_yn$n, na.rm = TRUE)),
+        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
+      )
+    )
+
+  
+  kable(gt_yn_kable, 
+        caption = Title, align = "lrr",
+        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    kable_styling(latex_options = c("scale_down")) %>% 
+    footnote(general="Participants may select multiple responses or skip the question.", general_title = "")
+}
+
 
 
 
@@ -310,47 +352,56 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
 
 
 #SEX
-gt_functBU(D_522008539, "SEX: Biological Sex at Birth")
+simple_funct_BU(D_522008539, "SEX: Biological Sex at Birth")
 
 
 
 #SYMPTDAY
+dt_SYMPTDAY_flags <- BU_tib %>%
+  mutate(
+    Cough = as.numeric(D_470484596_D_756774083 == 1),
+    Diarrhea = as.numeric(D_470484596_D_235386560 == 1),
+    Nasal_Congestion = as.numeric(D_470484596_D_955154600 == 1),
+    Sick_to_Your_Stomach_or_Vomitting = as.numeric(D_470484596_D_811126581 == 1),
+    Fever = as.numeric(D_470484596_D_406943303 == 1),
+    None_of_these = as.numeric(D_470484596_D_535003378 == 1),
+    Skipped = if_else(
+      rowSums(select(., starts_with("D_470484596_D_")) == 0, na.rm = FALSE) == ncol(select(., starts_with("D_470484596_D_"))), 1, 0))
 
-dt_SYMPTDAY= BU_tib %>%  mutate(multb2 = ifelse(D_470484596_D_756774083==1, 1, 0) + ifelse(D_470484596_D_235386560==1, 1, 0) + ifelse(D_470484596_D_955154600==1, 1, 0) + 
-                                             ifelse(D_470484596_D_811126581==1, 1, 0) + ifelse(D_470484596_D_406943303==1, 1, 0)) 
+dt_SYMPTDAY_long <- dt_SYMPTDAY_flags %>%
+  pivot_longer(
+    cols = c(
+      Cough,
+      Diarrhea,
+      Nasal_Congestion,
+      Sick_to_Your_Stomach_or_Vomitting,
+      Fever,
+      None_of_these,
+      Skipped
+    ),
+    names_to = "symptom_flag",
+    values_to = "Flag"
+  ) %>%
+  filter(Flag == 1) %>%
+  mutate(
+    symptom = case_when(
+      symptom_flag == "Cough" ~ "Cough",
+      symptom_flag == "Diarrhea" ~ "Diarrhea",
+      symptom_flag == "Nasal_Congestion" ~ "Nasal Congestion",
+      symptom_flag == "Sick_to_Your_Stomach_or_Vomitting" ~ "Sick to Your Stomach or Vomitting",
+      symptom_flag == "Fever" ~ "Fever",
+      symptom_flag == "None_of_these" ~ "None of these",
+      symptom_flag == "Skipped" ~ "Skipped this Question"
+    )
+  )
 
 
-
-which_sympt= dt_SYMPTDAY %>%  mutate(symptom= case_when(as.numeric(multb2)>1 ~ "Multiple Symptoms",
-                                                        D_470484596_D_756774083==1 ~ "Cough",
-                                                        D_470484596_D_235386560==1 ~ "Diarrhea",
-                                                        D_470484596_D_955154600==1 ~ "Nasal Congestion",
-                                                        D_470484596_D_811126581==1 ~ "Sick to Your Stomach or Vomitting",
-                                                        D_470484596_D_406943303==1 ~ "Fever",
-                                                        D_470484596_D_535003378==1 ~ "None of these",
-                                                        TRUE   ~ "Skipped this Question"))
-
-which_sympt$symptom <- factor(which_sympt$symptom,levels=c("Multiple Symptoms",  "Cough", "Diarrhea", "Nasal Congestion", "Sick to Your Stomach or Vomitting", "Fever", "None of these", "Skipped this Question"))
-
-
-dt_SYMPTDAY_summary <- which_sympt %>% dplyr::group_by(symptom) %>%  dplyr::summarize(n=n(), percentage=round(100*n/nrow(.), digits=2)) %>%  dplyr::select(symptom, n, percentage)
-
-
-
-dt_SYMPTDAY_summary  %>%  gt::gt() %>%
-  fmt_number(columns = "percentage", decimals = 1) %>%
-  tab_header(title = md("Table 2: Symptoms in the 24 hours Prior to Sample Donation")) %>%
-  cols_label(symptom = md("**Answer**"), n = md("**N**"), percentage = md("**%**")) %>%
-  grand_summary_rows(columns=c(n, percentage),
-                     fns = ~sum(.,na.rm = T)) %>%
-  tab_options(stub.font.weight = "bold") %>%
-  tab_style(style = list(cell_text(weight = "bold")),
-            locations = cells_body(columns = symptom)) 
+create_kable_table_w_footnote(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation")
 
 
 #EATDRINKBEFORE
 BU_tib$D_867307558 <- factor(BU_tib$D_867307558,levels=c(110092955, 952212668, 330461666, "Skipped this Question"))
-gt_functBU(D_867307558, "Table 3: When Last Food or Beverage Consumed")
+simple_funct_BU(D_867307558, "Table 3: When Last Food or Beverage Consumed")
 
 
 
@@ -361,42 +412,40 @@ gt_functBU(D_867307558, "Table 3: When Last Food or Beverage Consumed")
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-avg_coll2 <- BU_tib %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | d_827220437==657167265 | d_827220437==809703864) & 
-                              !is.na(D_867307558)) %>% 
-  mutate(MW_date = as.Date(d_173836415_d_266600170_d_448660695))
-
-avg_coll2$MW_dayb4 <- avg_coll2$MW_date - 1
-
-avg_coll <- avg_coll2 %>%  mutate(eat= case_when(D_867307558==110092955 ~ paste0(str_sub(d_173836415_d_266600170_d_448660695,1,11), D_191057574_V2, ":00.000Z"),
+avg_coll <- BU_tib %>%  filter((d_827220437==531629870 |  d_827220437==548392715 | d_827220437==303349821 | 
+                                d_827220437==657167265 | d_827220437==809703864) & 
+                               !is.na(D_867307558)) %>%  
+  mutate(MW_date = as.Date(d_173836415_d_266600170_d_448660695),
+         MW_dayb4 = MW_date - days(1),
+         eat= case_when(D_867307558==110092955 ~ paste0(str_sub(d_173836415_d_266600170_d_448660695,1,11), D_191057574_V2, ":00.000Z"),
                                                   D_867307558==952212668 ~ paste0(MW_dayb4, D_191057574_V2, ":00.000Z" )),
-                                   time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),as.POSIXct(ymd_hms(eat)),units="hours")),
-                                  MW = case_when( as.numeric(abs(abs(time))) >72 ~">72hrs",
-                                            72 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 48 ~ "> 48 hrs to 72 hrs",
-                                            48 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 24 ~ "> 24 hrs to 48 hrs",   
-                                            24 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 12 ~ "> 12 hrs to 24 hrs",
-                                            12 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 3 ~ "> 3 hrs to 12 hrs",  
-                                            3 >= as.numeric(abs(time)) & as.numeric(abs(time)) >= 0 ~ "0 hrs to 3 hrs",
-                                            is.na(time) ~ "Missing Time"),
-                                 Site=case_when(d_827220437==531629870 ~ "HealthPartners",
-                                                 d_827220437==548392715 ~ "Henry Ford Health System",
-                                                 d_827220437==303349821 ~ "Marshfield Clinical Health System",
-                                                 d_827220437==657167265 ~ "Sanford Health",
-                                                 d_827220437==809703864 ~ "University of Chicago Medicine",
-                                                d_827220437==125001209 ~ "Kaiser Permanente Colorado",
-                                                 d_827220437==327912200 ~ "Kaiser Permanente Georgia",
-                                                 d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
-                                                 d_827220437==452412599 ~ "Kaiser Permanente Northwest"),
-                                 MW = factor(MW, levels= c( "Missing Time", "0 hrs to 3 hrs", "> 3 hrs to 12 hrs", "> 12 hrs to 24 hrs",
-                                                         "> 24 hrs to 48 hrs", "> 48 hrs to 72 hrs", ">72hrs")))
+         time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),as.POSIXct(ymd_hms(eat)),units="hours")),
+         MW = case_when( as.numeric(abs(abs(time))) >72 ~">72hrs",
+                         72 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 48 ~ "> 48 hrs to 72 hrs",
+                         48 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 24 ~ "> 24 hrs to 48 hrs",   
+                         24 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 12 ~ "> 12 hrs to 24 hrs",
+                         12 >= as.numeric(abs(time)) & as.numeric(abs(time)) > 3 ~ "> 3 hrs to 12 hrs",  
+                         3 >= as.numeric(abs(time)) & as.numeric(abs(time)) >= 0 ~ "0 hrs to 3 hrs",
+                         TRUE ~ "Missing Time"),
+         MW = factor(MW, levels= c(  "Missing Time", "0 hrs to 3 hrs", "> 3 hrs to 12 hrs", "> 12 hrs to 24 hrs", 
+                                     "> 24 hrs to 48 hrs", "> 48 hrs to 72 hrs", ">72hrs")),
+         Site=case_when(d_827220437==531629870 ~ "HealthPartners",
+                        d_827220437==548392715 ~ "Henry Ford Health System",
+                        d_827220437==303349821 ~ "Marshfield Clinical Health System",
+                        d_827220437==657167265 ~ "Sanford Health",
+                        d_827220437==809703864 ~ "University of Chicago Medicine",
+                        d_827220437==125001209 ~ "Kaiser Permanente Colorado",
+                        d_827220437==327912200 ~ "Kaiser Permanente Georgia",
+                        d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
+                        d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
 
-MW_time1 <- avg_coll %>% dplyr::group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) # %>% dplyr::ungroup() #------ why is it saying MW is not a column????
-#MW_time <- MW_time1 %>%  sort_by(Site) 
+MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) 
   
 MW_time1 %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
   tab_header(title = md("Table 4. Time from Last Meal to Time of Mouthwash Collection")) %>% 
-  cols_label(n= md("**Number**"), MW = md(" "), percentage = md("**Percent**")) %>%  
+  cols_label(n= md("**N**"), MW = md("**Answer**"), percentage = md("**Pct**")) %>%  
   grand_summary_rows(columns=c(n, percentage),fns = ~sum(.,na.rm = T))
 
 
@@ -479,11 +528,11 @@ BU_tib$D_487532606_D_619765650 <- factor(BU_tib$D_487532606_D_619765650,levels=c
 BU_tib$D_487532606_D_520755310 <- factor(BU_tib$D_487532606_D_520755310,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
 BU_tib$D_487532606_D_839329467 <- factor(BU_tib$D_487532606_D_839329467,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
 
-gt_functBU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
+simple_funct_BU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
 
-gt_functBU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
+simple_funct_BU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
 
-gt_functBU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken")
+simple_funct_BU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken")
 
 
 ```
