@@ -458,13 +458,6 @@ for (i in 1: length(cnames)){
   biospe[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
 }
 
-
-log_info("Pulling DD for column naming")
-
-dictionary <- rio::import("https://episphere.github.io/conceptGithubActions/aggregate.json",format = "json")
-dd<-rbindlist(dictionary,fill=TRUE,use.names=TRUE,idcol="CID") #THIS TABLE HAS REPLICATED (CIDS+LABELS) WITH DIFFERENT VARIABLE NAMES,
-
-
 log_info("Pulling participant table schema")
 ##Select biospecimen data in recruitment 
 recr_var <- bq_project_query(project, query="SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect`.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS WHERE table_name='participants'")
