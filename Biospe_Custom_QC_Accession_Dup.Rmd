@@ -1108,7 +1108,6 @@ kit <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` w
 kit_table <- bq_project_query(project, kit)
 kit_data <- bq_table_download(kit_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
-
 kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
 
