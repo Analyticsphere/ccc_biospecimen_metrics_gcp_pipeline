@@ -1102,31 +1102,11 @@ MW_data <- bq_table_download(MW_table, bigint = "integer64", n_max = Inf, page_s
 
 
 
-## Need to remove blood/urine duplicates with the same logic as in the beginning of the code
-## Keep the HMW collections and only the first blood/urine collection to properly remove duplicates
-# 1. Keep all CHA rows (HMW)
-cha_rows <- MW_data %>%
-  filter(grepl("^CHA", d_820476880))
-
-# 2. Among CXA rows, keep earliest finalized collection timestamp per Connect_ID-- this is what we did with the original biospecimen table duplicates
-cxa_rows <- MW_data %>%
-  filter(grepl("^CXA", d_820476880)) %>%
-  group_by(Connect_ID) %>%
-  slice_min(order_by = d_556788178, with_ties = FALSE) %>%
-  ungroup()
- 
-# 3. Combine the two sets
-MW_data_clean <- bind_rows(cha_rows, cxa_rows)
-
-
-
-
-
 kit <- "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` where Connect_ID is not null"
 kit_table <- bq_project_query(project, kit)
 kit_data <- bq_table_download(kit_table, bigint = "integer64", n_max = Inf, page_size = 1000)
 
-MW_data$Connect_ID <- as.numeric(MW_data$Connect_ID)
+MW_data_clean$Connect_ID <- as.numeric(MW_data_clean$Connect_ID)
 kit_data$Connect_ID <- as.numeric(kit_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
 
@@ -1149,6 +1129,7 @@ HMW <- HMW %>%
     . == 772116457 ~ "Replacement Kit 2",
     . == 389478821 ~ "Replacement Kit 1",
     . == 663273321 ~ "Initil Kit",
+    . == 728267588 ~"Initialized",
     . == 849527480 ~"Address Printed",
     . == 241974920 ~ "Assigned",
     . == 277438316 ~ "Shipped",
@@ -1294,16 +1275,19 @@ knitr::kable(shipt, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ### 39. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received, and and kit level should populate
 ```{r recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
-
+## needs to be fixed regardless- wrong count of columns and column names; should be using parts vars for the second two is.na vars
 recvd <- Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017=="Received" & kit_level=="Initial Kit" & 
-                                 (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) |
+                                 (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160) | 
+                                    is.na(d_173836415_d_266600170_d_319972665_d_826941471) |  is.na(d_137401245))) |
                                (d_173836415_d_266600170_d_541483796_d_221592017=="Received" & kit_level=="Replacement Kit 1" & 
-                                  (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510))) | 
+                                  (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160) | 
+                                     is.na(d_173836415_d_266600170_d_541483796_d_826941471) |  is.na(d_137401245))) | 
                                (d_173836415_d_266600170_d_641006239_d_221592017=="Received" & kit_level=="Replacement Kit 2" & 
-                                  (is.na(d_531858099) | is.na(d_661940160) | is.na(d_826941471) |  is.na(d_137401245) | is.na(d_426588510)))) %>%  
-  select(Site, Connect_ID, kit_level, d_531858099, d_661940160, d_826941471, d_137401245) %>%  safe_arrange(Site)
+                                  (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160) | 
+                                     is.na(d_173836415_d_266600170_d_641006239_d_826941471) |  is.na(d_137401245)))) %>%  
+  select(Site, Connect_ID, kit_level, d_531858099, d_137401245) %>%  safe_arrange(Site)
 
-colnames(recvd) <- c("Site", "Connect ID", "SupplyKitTrack", "KitShipTm", "KitRecdTm", "CollCardRet")
+colnames(recvd) <- c("Site", "Connect ID", "Kit Level", "SupplyKitTrack",  "CollCardRet")
 knitr::kable(recvd, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_position")
 
 ```
@@ -1328,7 +1312,6 @@ knitr::kable(collctd, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_
 ### 41. If kit status is Received, then the mouthwash sample tube ID should populate.
 
 ```{r mwtubeid, echo=FALSE, warning=FALSE, message=FALSE}
-
 
 mwtubeid <- Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & (d_173836415_d_266600170_d_319972665_d_221592017=="Received" | 
                                                                     d_173836415_d_266600170_d_541483796_d_221592017=="Received" |
@@ -1407,6 +1390,7 @@ knitr::kable(mw_dt, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 
 ### 46. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 10 days ago, BioKit_KitStatusBL_v1r0 should be Received
 ```{r kit_recvd, echo=FALSE, warning=FALSE, message=FALSE}
+
 
 ### Need them on a kit level to review
 kits_recvd <- Bio_HMW %>%
@@ -1877,54 +1861,54 @@ knitr::kable(kit_rule4_r2, longtable = TRUE)
 ```{r r1_r2_undeliverable, echo=FALSE, warning=FALSE, message=FALSE}
 
 
-r1_r2_undeliverable <- HMW %>%  filter(d_173836415_d_266600170_d_641006239_d_221592017=="332067457" & (d_426588510=="Replacement Kit 1" | d_426588510=="Replacement Kit 2")) %>% 
-  select(Site, Connect_ID, d_173836415_d_266600170_d_641006239_d_221592017, d_426588510) %>%  safe_arrange(Site)
+r1_r2_undeliverable <- HMW %>%  filter(d_173836415_d_266600170_d_541483796_d_221592017=="332067457" | d_173836415_d_266600170_d_641006239_d_221592017=="332067457") %>% 
+  select(Site, Connect_ID, d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_641006239_d_221592017) %>%  safe_arrange(Site)
 
 
-colnames(r1_r2_undeliverable) <- c("Site", "Connect ID", "R2_BioKit_KitStatus_v1r0", "BioKit_KitLevel_v1r0")
+colnames(r1_r2_undeliverable) <- c("Site", "Connect ID", "R1_BioKit_KitStatus_v1r0", "R2_BioKit_KitStatus_v1r0")
 knitr::kable(r1_r2_undeliverable, longtable = TRUE)
 
 ```
 
-###	67. If kit is an Initial kit, BioKit_DtKitReq_v1r0 should be null.
+
 ```{r kit_rule5, echo=FALSE, warning=FALSE, message=FALSE}
 
-
-project_id <- "nih-nci-dceg-connect-prod-6d04"
-dataset <- "FlatConnect"
-table <- "participants"
-column_to_check <- "d_173836415_d_266600170_d_319972665_d_759651991"
-
-# Step 1: Check if the column exists
-check_query <- glue::glue("
-  SELECT column_name
-  FROM `{project_id}.{dataset}.INFORMATION_SCHEMA.COLUMNS`
-  WHERE table_name = '{table}'
-    AND column_name = '{column_to_check}'
-")
-
-check_result <- bq_project_query(project_id, check_query)
-column_check <- bq_table_download(check_result)
-
-# Step 2: If it exists, run the query
-if (nrow(column_check) > 0) {
-  warning(glue::glue("Column {column_to_check} EXISTS in {table}! Pulling data..."))
-  
-  # Safe query to pull Connect_ID and the column
-  data_query <- glue::glue("
-    SELECT Connect_ID, `{column_to_check}`
-    FROM `{project_id}.{dataset}.{table}`
-    WHERE Connect_ID IS NOT NULL
-  ")
-  
-  data_result <- bq_project_query(project_id, data_query)
-  output_data <- bq_table_download(data_result)
-  
-} else {
-  cat("No errors.")
-  output_data <- tibble()
-}
-
+###	67. If kit is an Initial kit, BioKit_DtKitReq_v1r0 should be null.
+# project_id <- "nih-nci-dceg-connect-prod-6d04"
+# dataset <- "FlatConnect"
+# table <- "participants"
+# column_to_check <- "d_173836415_d_266600170_d_319972665_d_759651991"
+# 
+# # Step 1: Check if the column exists
+# check_query <- glue::glue("
+#   SELECT column_name
+#   FROM `{project_id}.{dataset}.INFORMATION_SCHEMA.COLUMNS`
+#   WHERE table_name = '{table}'
+#     AND column_name = '{column_to_check}'
+# ")
+# 
+# check_result <- bq_project_query(project_id, check_query)
+# column_check <- bq_table_download(check_result)
+# 
+# # Step 2: If it exists, run the query
+# if (nrow(column_check) > 0) {
+#   warning(glue::glue("Column {column_to_check} EXISTS in {table}! Pulling data..."))
+#   
+#   # Safe query to pull Connect_ID and the column
+#   data_query <- glue::glue("
+#     SELECT Connect_ID, `{column_to_check}`
+#     FROM `{project_id}.{dataset}.{table}`
+#     WHERE Connect_ID IS NOT NULL
+#   ")
+#   
+#   data_result <- bq_project_query(project_id, data_query)
+#   output_data <- bq_table_download(data_result)
+#   
+# } else {
+#   cat("No errors.")
+#   output_data <- tibble()
+# }
+# 
 
 ```
 
@@ -2244,17 +2228,16 @@ knitr::kable(Github262_spec_tubeU, longtable = TRUE) %>% kable_styling(latex_opt
 
 
 
-
-```{r KitReq_KitStatus_Int, echo=FALSE, warning=FALSE, message=FALSE}
 ####	73. If an Inital Kit is requested, then the Initial Kit Status must be populated. 
+```{r KitReq_KitStatus_Int, echo=FALSE, warning=FALSE, message=FALSE}
 
-# KitReq_KitStatus_Int <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) &
-#                                    is.na(d_173836415_d_266600170_d_319972665_d_221592017)) %>% 
-#   select(Site, Connect_ID, d_173836415_d_266600170_d_319972665_d_759651991, d_173836415_d_266600170_d_319972665_d_221592017) %>%  safe_arrange(Site)
-# 
-# 
-# colnames(KitReq_KitStatus_Int) <- c("Site", "Connect ID", "BioKit_MW_Int_BioKit_DtKitReq", "BioKit_Maw_Int_BioKit_KitStatusBL")
-# knitr::kable(KitReq_KitStatus_Int, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
+KitReq_KitStatus_Int <- bioqc %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) &
+                                   is.na(d_173836415_d_266600170_d_319972665_d_221592017)) %>%
+  select(Site, Connect_ID, d_173836415_d_266600170_d_319972665_d_759651991, d_173836415_d_266600170_d_319972665_d_221592017) %>%  safe_arrange(Site)
+
+
+colnames(KitReq_KitStatus_Int) <- c("Site", "Connect ID", "BioKit_MW_Int_BioKit_DtKitReq", "BioKit_Maw_Int_BioKit_KitStatusBL")
+knitr::kable(KitReq_KitStatus_Int, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7)
 
 ```
 
@@ -2411,7 +2394,6 @@ knitr::kable(BioChk_TimeBL_v1r0_RschTmBL, longtable = TRUE)  %>% kable_styling(l
 
 
 ```
-
 
 
 
