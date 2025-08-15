@@ -35,13 +35,19 @@ boxfolder <- 221297686961
 
 
 
+######## Note: Participants with errors whose data we will not correct will be excluded from the rule. Github contains records of these exclusions as well.
+
+
+
 
 
 
 project <- "nih-nci-dceg-connect-prod-6d04"
 
 
-
+## Clinical blood/urine and Research blood/urine/mouthwash samples have a collection ID starting with CXA. These samples must be finalized. 
+## Home MW collections are separate, their collection IDs start with CHA and willnever be finalized.
+## Need to remove duplicate samples. Only the first blood/urine or blood/urine/mouthwash sample will be kept.
 bio <- "WITH T AS (
   SELECT Connect_ID
   FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
@@ -173,7 +179,7 @@ bioqc_csv <- bioqc %>%
                                                "6862754687", "9143436002", "3319331872", "7276829171", "9262617255",
                                                2431356225, 1703960468, '6437389686', '7338222763', "5213644501", "3137297902",
                                                "8370075725", 7536254831, 8685711133, 1573897668, 4332317182, '2643537513', "2145164291",
-                                               "4246383289")), "Rule 2b", " "),
+                                               "4246383289", 9772303289)), "Rule 2b", " "),
          
          # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
          Rule3 = ifelse(d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & 
@@ -607,6 +613,9 @@ bioqc_csv <- bioqc %>%
 
 ## 31. BioClin_DBBloodID_v1r0 must be in BioClin_PolyBloodID_v1r0 if and BioClin_DBBloodRRLDt_v1r0 occured more than 7 days ago
 
+##Poly Accession IDs constantly have issues, either the _integer variable is missing or the regular variable isn't in the right format
+if("d_646899796_integer" %in% names(bioqc)){
+  bioqc$d_646899796 <- bioqc$d_646899796_integer}
 
 qc_7 <- bioqc %>%  filter(d_167958071==353358909 & d_650516960==664882224 & as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7  & 
                             is.na(d_173836415_d_266600170_d_786930107))
@@ -617,7 +626,7 @@ qc_8 <- bioqc %>%  filter(d_878865966==353358909 & d_650516960==664882224 & as.n
          
 bioqc1 <- bioqc %>%  
   filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0)) > 7 &
-                           !is.na(d_646899796_integer) & 
+                           !is.na(d_646899796) & 
                            (Site=="Henry Ford Health System" | Site=="University of Chicago Medicine") & #only HP and UC sends this
                            !(Connect_ID %in% c( 
                              # HFH exclusions
@@ -626,6 +635,7 @@ bioqc1 <- bioqc %>%
                            1629086681,9768745029,3770024701,8836251245, 3312148528 ,
                            # UC exclusions
                            4782195164,6229346420,8336144924,7515171846 ,9963945282,9554775290,8570090186,4727512872, 5506703775,8123989364 ,1271036774,6288600449,
+                           9692694571, 4327492344, 8372596629, 9399609746,
                            #SF exclusions ##this last one is somehow being shown as an error when it is not. Cannot find a workaround
                            9843228847, 7152112646)) &  
                            # Don't count the empty bracket people if they're in rule #8, because those would be expected
@@ -635,10 +645,10 @@ bioqc1 <- bioqc %>%
 str1 <- bioqc1$d_173836415_d_266600170_d_543608829
 str1 <- str_trim(str1)
 PolyBloodID <- unlist(strsplit(gsub("\\[|\\]", "", str1), ",")) 
-bioqc1$d_646899796_integer <- str_trim(bioqc1$d_646899796_integer)
+bioqc1$d_646899796 <- str_trim(bioqc1$d_646899796)
 
 #Sometimes this poly accession comes in as an array, sometimes it doesn't, so just selecting the integer version of the variable
-bioqc1 <- bioqc1 %>% mutate(BioClin_DBBloodID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_646899796_integer), d_646899796_integer))
+bioqc1 <- bioqc1 %>% mutate(BioClin_DBBloodID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_646899796), d_646899796))
 
 polyblood <- bioqc1 %>%  filter(!(bioqc1$BioClin_DBBloodID_v1r0 %in% PolyBloodID)) %>%  select(Site, Connect_ID, BioClin_DBBloodID_v1r0, d_173836415_d_266600170_d_543608829) %>% safe_arrange(Site)
 
@@ -648,11 +658,13 @@ polyblood <- bioqc1 %>%  filter(!(bioqc1$BioClin_DBBloodID_v1r0 %in% PolyBloodID
 
 ## 32. BioClin_DBUrineID_v1r0 must be in BioClin_PolyUrineID_v1r0 if BioClin_DBUrineRRLDt_v1r0 occurred more than seven days ago.
 
-
+##Poly Accession IDs constantly have issues, either the _integer variable is missing or the regular variable isn't in the right format
+if("d_928693120_integer" %in% names(bioqc)){
+  bioqc$d_928693120 <- bioqc$d_928693120_integer}
 
 bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0)) > 7 &
                                (Site=="Henry Ford Health System" | Site=="University of Chicago Medicine") & #only HP and UC sends this
-                               !is.na(d_928693120_integer) & #d_173836415_d_266600170_d_110349197!="[]" & 
+                               !is.na(d_928693120) & #d_173836415_d_266600170_d_110349197!="[]" & 
                                !(Connect_ID %in% c(1629086681, 3165368475, 3293040395, 3544623873, 6361337944, 6954174713, 7571439842,
                                                    3770024701, 8836251245, 9768745029, 5461650381, 4900116130, 4435276749, 6288600449,
                                                    6473532641, 6336258662, 8589481620, 4688823720, 3759939890, 2824989966)) &  #HFH exclusions
@@ -662,11 +674,11 @@ bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_
 str2 <- bioqc2$d_173836415_d_266600170_d_110349197
 str2 <- str_trim(str2)
 PolyUrineID <- unlist(strsplit(gsub("\\[|\\]", "", str2), ",")) 
-bioqc2$d_928693120_integer <- str_trim(bioqc2$d_928693120_integer) 
+bioqc2$d_928693120 <- str_trim(bioqc2$d_928693120) 
 
 
 #Sometimes this poly accession comes in as an array, sometimes it doesn't, so just selecting the integer version of the variable
-bioqc2 <- bioqc2 %>%   mutate(BioClin_DBUrineID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_928693120_integer),d_928693120_integer))
+bioqc2 <- bioqc2 %>%   mutate(BioClin_DBUrineID_v1r0=ifelse(Site=="Henry Ford Health System", paste0("L", d_928693120),d_928693120))
 
 polyurine <- bioqc2 %>%  filter(!(bioqc2$BioClin_DBUrineID_v1r0 %in% PolyUrineID)) %>%  select(Site, Connect_ID, BioClin_DBUrineID_v1r0, d_173836415_d_266600170_d_110349197) %>% safe_arrange(Site)
 
@@ -1003,8 +1015,8 @@ bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==531629870 ~ "HealthPartne
 ## Mismatched Blood CSV
 
 qc1_blood <- bioqc %>%  
-  filter(str_sub(d_173836415_d_266600170_d_341570479, 1, 11) != str_sub(d_646899796_integer, 1, 11)) %>%
-  select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796_integer, d_556788178) %>%
+  filter(str_sub(d_173836415_d_266600170_d_341570479, 1, 11) != str_sub(d_646899796, 1, 11)) %>%
+  select(Site, Connect_ID, d_173836415_d_266600170_d_341570479, d_646899796, d_556788178) %>%
   arrange(Site)
 
 qc1_blood$d_556788178 <- as.POSIXct(ymd_hms(qc1_blood$d_556788178))
@@ -1020,8 +1032,8 @@ openxlsx::write.xlsx(qc1_blood,glue("{local_drive}Mismatched_Blood_Accession_IDs
 
 ## Mismatches Urine CSV
 qc1_urine <- bioqc %>%  
-  filter(str_sub(d_173836415_d_266600170_d_198261154, 1, 11) != str_sub(d_928693120_integer, 1, 11)) %>%
-  select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120_integer, d_556788178) %>%
+  filter(str_sub(d_173836415_d_266600170_d_198261154, 1, 11) != str_sub(d_928693120, 1, 11)) %>%
+  select(Site, Connect_ID, d_173836415_d_266600170_d_198261154, d_928693120, d_556788178) %>%
   arrange(Site)
 
 qc1_urine$d_556788178 <- as.POSIXct(ymd_hms(qc1_urine$d_556788178))
@@ -1227,7 +1239,7 @@ parts_data <- parts_data %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Ba
                                                     d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
 ### 29.b. If BioClin_ClinBloodTmBL_v1r0 is populated, then BioSpm_BloodSettingBL_v1r0 must be Clinical and BioFin_BaseBloodCol_v1r0 must be yes.
-c_blood3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_982213346) & 
+c_blood3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_982213346, units="days"), digits=0)) > 7 & 
                                        ((d_173836415_d_266600170_d_592099155=="Research" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="No") &
                                        !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", 
                                                             "3467573584", "1274744512", '3362078899',  '7789082855', '8148304740')))
@@ -1245,7 +1257,7 @@ c_urine3.4 <- parts_data %>%  filter(!is.na(d_173836415_d_266600170_d_139245758)
                                                            '6437389686', '5972658064', '8553891957', '9575612025', '2769291903', '1731138933', '3589595480','1349953410', 
                                                            '3722445358', '9694753790', '1703960468', '2512896461', '8924667241','2431356225', '4057490101', '5213644501',
                                                            '3137297902', '8370075725', '7789082855', '8148304740', "7536254831", "8685711133", "1573897668", "4332317182",
-                                                           '2643537513', "2145164291", "4246383289")))
+                                                           '2643537513', "2145164291", "4246383289", "6568449334")))
 
 
 ########## These rules need to allow for duplicates
@@ -1257,8 +1269,10 @@ Rsett_BioChk_TimeBL_v1r0 <- parts_data %>%  filter((d_173836415_d_266600170_d_59
                                                      is.na(d_331584571_d_266600170_d_840048338))
 
 ###	77. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
-BioChk_TimeBL_v1r0_RschTmBL <- parts_data %>%  filter(as.POSIXct(d_331584571_d_266600170_d_840048338) > pmin(as.POSIXct(d_173836415_d_266600170_d_561681068), 
-                                                                                                             as.POSIXct(d_173836415_d_266600170_d_847159717), na.rm=T))
+BioChk_TimeBL_v1r0_RschTmBL <- parts_data %>% 
+  filter((as.POSIXct(d_331584571_d_266600170_d_840048338) > 
+            pmin(as.POSIXct(d_173836415_d_266600170_d_561681068), as.POSIXct(d_173836415_d_266600170_d_847159717), na.rm=T)) & 
+           !(Connect_ID %in% c('3972348378','7772455634','7400318404','3111954555','1106079872')))
 
 
 ########## These rules need to allow for duplicates
