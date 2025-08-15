@@ -3441,7 +3441,6 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
     labs(color = "Collection Location") 
   }
   
-
   plot6 <- plt +
     geom_line() +
     geom_point(width = 0.2) +
