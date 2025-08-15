@@ -29,6 +29,7 @@ This Weekly Metrics report contains tables and plots for the Connect Biospecimen
 by health provider site. This information pertains to verified participants as of the date above and collections
 that are finalized. This report is limited to information from participants' first finalized specimen collection. In the event that a participant donated specimen(s) in a repeat collection, that information is not reflected in this report.
 
+\textbf{\textcolor{blue}{Do not share any data from this report that indicate the number of individuals at any of the Connect recruitment sites with individuals outside of the Connect Study.  This includes in manuscripts, abstracts, presentations, etc. You may present data aggregated across all of the Connect sites.}}.
   
 ```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
 
@@ -446,7 +447,7 @@ no_dups <- no_dups %>%
       d_951355211 == 117840593 ~ "Temple CDM",
       d_951355211 == 574104518 ~ "Temple Roney",
       d_951355211 == 962830330 ~ "Waco - MacArthur",
-      #d_951355211 ==  ~ "Temple Westfield"
+      #d_951355211 ==  749199085 ~ "Temple Westfield"
       #SF
       d_951355211 == 769594361 ~ "Fargo Amber Valley",
       d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
@@ -514,6 +515,8 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                     d_173836415_d_266600170_d_452847912 == 1050020026 ~ "Brownstown",
                                   d_173836415_d_266600170_d_185243482 == 1010170010 | 
                                     d_173836415_d_266600170_d_452847912 == 1010170010 ~ "E Jefferson Pathology",
+                                  d_173836415_d_266600170_d_185243482 == 1010380008 | 
+                                    d_173836415_d_266600170_d_452847912 == 1010380008 ~ "Woodhaven Pathology",
                                   Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1) ~ "South Loop",
                                   Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==2 | d_173836415_d_266600170_d_452847912==2) ~ "Orland Park",
                                   Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==3 | d_173836415_d_266600170_d_452847912==3) ~ "Kenwood",
@@ -772,8 +775,9 @@ rownames(col_num_1.2) <- col_num_1.2$`Collection Location`
 
 col_num_1.2 <- col_num_1.2 %>%
   mutate(Site_Group = case_when(
-    `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology","Missing HFH location") ~ "Henry Ford Health", 
+    `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main",
+                                 "Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", 
+                                 "Woodhaven Pathology", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic",
                                  "NSC", "Missing HP location") ~ "HealthPartners",   
     `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", "DCAM (Hyde Park)", 
@@ -2459,8 +2463,9 @@ colnames(clin_coll_days)[1] <- "Collection Location"
 
 clin_coll_days <- clin_coll_days %>%
   mutate(Site_Group = case_when(
-    `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main","Sterling Heights","Columbus", 
-                                 "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", "Missing HFH location") ~ "Henry Ford Health", 
+    `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", 
+                                 "K1 HFH Main","Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO","Brownstown", 
+                                 "E Jefferson Pathology", "Woodhaven Pathology", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic", 
     "NSC", "Missing HP location") ~ "HealthPartners", 
     `Collection Location`== "KPCO" ~ "Kaiser Permanente Colorado",
@@ -3464,7 +3469,7 @@ research.vt_plotH_Clin <- ggplot(edited_fig3_1_Clin_tally, aes(x=as.Date(col.Mon
   scale_color_manual(values=c("Wyandotte"="#B1C7D9", "Macomb"="#164C71", "West Bloomfield"="#FDBE19", "Royal Oak"="#F8D991", 
                               "Fairlane (Dearborn)"="#565C65", "Columbus"= "#3C989E", "Plymouth"="#CC7D15", "Troy"="#DAB384", "Taylor"="#7C94A8","Brownstown"="#2973A5",
                               "Livonia"="#BBBEC1", "Ford Road"="#99C0C4", "NCO"="#B9D7E3", "Sterling Heights"="#309EBD", "K1 HFH Main"="#97C4D5", 
-                              "E Jefferson Pathology"="#74B0C7")) + 
+                              "E Jefferson Pathology"="#74B0C7", "Woodhaven Pathology" = "#FBE5B5")) + 
   ggtitle(label="Figure 6.4: Baseline- Weekly Clinical Biospecimen Collections \n by Clinic Location, Henry Ford Health") +
   labs(color = "Clinic Location") +
   theme(panel.background = element_blank(),
