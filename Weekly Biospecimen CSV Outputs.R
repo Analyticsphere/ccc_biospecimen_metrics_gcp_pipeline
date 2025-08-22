@@ -535,12 +535,17 @@ factor_cid <-function(var,data){
 
 ## Need to update some of the variables based on the flattening
 
+## These Poly IDs constantly have issues as they are arrays. Sometimes the variable has an _interger version as well that needs to be renamed 
+
 ###BioClin_DBBloodID_v1r0
+if("d_646899796_integer" %in% names(biospe)){
 biospe$d_646899796 <- biospe$d_646899796_integer
-biospe <- biospe %>%  select(-d_646899796_integer, -d_646899796_string)
+biospe <- biospe %>%  select(-d_646899796_integer, -d_646899796_string)}
+
 ###BioClin_DBUrineID_v1r0
+if("d_928693120_integer" %in% names(biospe)){
 biospe$d_928693120 <- biospe$d_928693120_integer
-biospe <- biospe %>%  select(-d_928693120_integer, -d_928693120_string)
+biospe <- biospe %>%  select(-d_928693120_integer, -d_928693120_string)}
 
 ## Need to include some variables now in the participants table instead of the biospecimen table
 moved <- recr.bio %>%  select(Connect_ID, d_173836415_d_266600170_d_534041351, d_173836415_d_266600170_d_398645039, 
