@@ -1383,7 +1383,6 @@ tube_nodev <- as.data.frame(aggregate(coll_sett_all$tube_nodev,
 tube_nodev <- tube_nodev %>% 
   rename(Site = Group.1, No_Deviation = colnames(tube_nodev)[2]) #sometimes this switches from d_299553921_d_593843561 to d_958646668_d_593843561
 
-
 ## Combine them into one dataframe
 Deviation_Freq <- base::merge(tube_dev,tube_nodev,by="Site")
 
@@ -1417,7 +1416,6 @@ Deviation_Freq <- Deviation_Freq %>% bind_rows(total_row)
 ```{r Deviations, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 #Number of tubes collected, not collected, reason not collected, deviations, and discards -- collection_long used throughout the code elsewhere 
-
 
 notcol_tubes <- colnames(coll_sett_all)[grepl("883732523",colnames(coll_sett_all))] 
 notcol.ls <- sapply(strsplit(notcol_tubes, "_d"),"[[",1)
@@ -1646,6 +1644,7 @@ discard.site[nrow(discard.site),c(2:ncol(discard.site))] <- paste(discard.site[n
 
 # Setting up variables for all research specific Tables and Figures
 
+
 research.survey <- coll_sett_all %>% filter(all_settings == "Research") %>%
   mutate(Site=droplevels(as.factor(Site)),
          ctime = round(as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_822499427)),units="mins")), digits=1),
@@ -1728,7 +1727,6 @@ Table21R_After = postcovR_comp %>% group_by(Site) %>%
 
 
 ```{r Research_Srvy_Status, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
-
 ## Collection Visit Length 
 
 research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk)) 
@@ -1830,7 +1828,6 @@ research.4_2 <- Section3_Figures("Sanford Health", "Figure 3.2: Baseline- Weekly
 research.4_3 <- Section3_Figures("University of Chicago Medicine", "Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, University of Chicago Medicine")
 
 ```
-
 
 
 ```{r Table28a,include=FALSE, echo=FALSE, warning=FALSE}
@@ -2454,7 +2451,6 @@ avg_bldorder_present <- table1 %>%  filter(d_878865966=="No blood collected" & !
 
 
 ```
-
 
 
 ```{r Table27, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
