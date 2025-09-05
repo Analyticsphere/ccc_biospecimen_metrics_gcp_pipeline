@@ -98,7 +98,6 @@ for (i in 1: length(cnames)){
   biospe[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
 }
 
-
 ########### Pull in DD to be able to grab only variables with key words from the participants table #############################
 
 ##to select biospecimen data in recruitment 
@@ -617,7 +616,7 @@ biospe.t1 <- knitr::kable(table1_totals, col.names=c("Site", "Baseline Collectio
 
 coll_sett_all <- table1 %>%  filter(BiospeCollection == "Any biospecimen Collections" & (d_410912345== 353358909 | BL_BioSpm_MWSetting_v1r0=="Home")) %>% 
   mutate(all_settings = case_when((d_650516960=="664882224" | BL_BioSpm_BloodSetting_v1r0=="Clinical" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Clinical" | BL_BioSpm_MWSetting_v1r0=="Clinical") ~ "Clinical",
+                                    BL_BioSpm_UrineSetting_v1r0=="Clinical") ~ "Clinical",
                                   (d_650516960=="534621077" | BL_BioSpm_BloodSetting_v1r0=="Research" | 
                                     BL_BioSpm_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
                                   (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
@@ -854,7 +853,7 @@ m_pct <- round((sum(table1$sex=="Male")/sum(!is.na(table1$sex)))*100, digits=2)
 uk_pct <- round((sum(table1$sex=="Unknown")/sum(!is.na(table1$sex)))*100, digits=2)
 
 BLCol_by_Sex <- knitr::kable(BLCol_by_Sex_df, 
-             caption='Table 1.14 Baseline Biospecimen Collection Status by Sex \n Among Verified Participants',
+             caption='Table 1.13 Baseline Biospecimen Collection Status by Sex \n Among Verified Participants',
              row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
     add_indent(seq(1, nrow(BLCol_by_Sex_df) - 1)) %>% 
@@ -880,7 +879,7 @@ BLCol_by_Age_df <- create_tbl_cross2(table1, "age", "biocol.appoint", "row", "Ag
 colnames(BLCol_by_Age_df)[ncol(BLCol_by_Age_df)] <- "Total Verified \n Participants"
 
 BLCol_by_Age <- knitr::kable(BLCol_by_Age_df, 
-             caption="Table 1.15. Baseline Biospecimen Collection Status by Age \n Among Verified Participants",
+             caption="Table 1.14. Baseline Biospecimen Collection Status by Age \n Among Verified Participants",
              row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
     add_indent(seq(1, nrow(BLCol_by_Age_df) - 1)) %>% 
@@ -913,7 +912,7 @@ BLCol_by_Race_df <- create_tbl_cross2(table1, "race", "biocol.appoint", "row", "
 colnames(BLCol_by_Race_df)[ncol(BLCol_by_Race_df)] <- "Total Verified \n Participants"
 
 BLCol_by_Race <- knitr::kable(BLCol_by_Race_df, 
-             caption="Table 1.16. Baseline Biospecimen Collection Status by Race \n Among Verified Participants",
+             caption="Table 1.15. Baseline Biospecimen Collection Status by Race \n Among Verified Participants",
              row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
     add_indent(seq(1, nrow(BLCol_by_Race_df) - 1)) %>% 
@@ -1280,9 +1279,9 @@ table4_redone__C <- coll_sett_all %>%
          `Specimens Collected` = case_when(blood & urine ~ "Blood & Urine (All)",
                                            blood & !urine ~ "Blood Only",
                                            !blood & urine ~ "Urine Only",
-                                           !blood & !urine ~ "No Specimens Collected")) %>%
+                                           !blood & !urine ~ "Attempted but \n No Specimens Collected")) %>%
   dplyr::select(-blood, -urine, -mouthwash) %>%  # Remove helper columns
-  mutate(`Specimens Collected` = factor(`Specimens Collected`,levels=c('Blood & Urine (All)', 'Blood Only', 'Urine Only', 'No Specimens Collected')))
+  mutate(`Specimens Collected` = factor(`Specimens Collected`,levels=c('Blood & Urine (All)', 'Blood Only', 'Urine Only', 'Attempted but \n No Specimens Collected')))
 
 table4_redone__C$Site <- droplevels(as.factor(table4_redone__C$Site))
 table4_redone__C$`Specimens Collected` <- droplevels(as.factor(table4_redone__C$`Specimens Collected`))
@@ -1290,48 +1289,6 @@ table4_redone__C$`Specimens Collected` <- droplevels(as.factor(table4_redone__C$
 
 spec_by_site_C <- create_tbl_cross(table4_redone__C, 'Specimens Collected', "Site", "column", " ", " ")
 colnames(spec_by_site_C)[ncol(spec_by_site_C)] <- "Total Clinical Collections"
-
-```
-
-
-
-
-```{r Data System, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
-
-# Data System Type for Clinical Data 
-
-
-
-
-bldurcl <- coll_sett_all  %>%  filter(all_settings=="Clinical" & (BioFin_BaseBloodCol_v1r0 == "Any blood collected" | BioFin_BaseUrineCol_v1r0 == "Any urine collected")) %>% 
-  mutate(Data_System = case_when((d_173836415_d_266600170_d_534041351==353358909 & is.na(d_173836415_d_266600170_d_693370086)) |
-                                   (d_173836415_d_266600170_d_210921343==353358909 & is.na(d_173836415_d_266600170_d_786930107))~ "Biospecimen Dashboard Only",
-                                 (is.na(d_173836415_d_266600170_d_534041351) & d_173836415_d_266600170_d_693370086==353358909) |
-                                   (is.na(d_173836415_d_266600170_d_210921343) & d_173836415_d_266600170_d_786930107==353358909)~ "Site Data Only",
-                                 (d_173836415_d_266600170_d_534041351==353358909 & d_173836415_d_266600170_d_693370086==353358909) |
-                                   (d_173836415_d_266600170_d_210921343==353358909 & d_173836415_d_266600170_d_786930107==353358909) ~ "Site Data & Biospecimen Dashboard"))
-
-all_data_system_levels <- c("Biospecimen Dashboard Only", "Site Data & Biospecimen Dashboard", "Site Data Only")
-
-
-blood_system <- bldurcl %>%
-  filter(as.character(d_878865966) == "Any blood collected") %>%
-  tabyl(Data_System, d_878865966) %>%
-  add_totals_and_percentages(total_position = "row", percentage_type = "col")
-
-urine_system <- bldurcl %>%
-  filter(as.character(d_167958071) == "Any urine collected") %>%
-  mutate(Data_System = factor(Data_System, levels = all_data_system_levels)) %>%
-  tabyl(Data_System, d_167958071) %>%
-  add_totals_and_percentages(total_position = "both", percentage_type = "row")
-
-
-system_coll <- cbind(blood_system, urine_system)
-system_coll <- system_coll[, c(1, 2, 4)]  # Keep only relevant columns
-colnames(system_coll) <- c("Data System", "Blood Collected", "Urine Collected")
-
-system_coll
-
 
 ```
 
@@ -2124,8 +2081,7 @@ BU_trig_comp = clinical.survey %>% group_by(Site) %>%
 
 ## Draw Order Placement to Clinical Collection
 
-avg_draw_order <- clinical.survey %>%  filter(d_173836415_d_266600170_d_982213346>=as.Date("2023-02-01") & 
-                                        Site!='HealthPartners' & Site!="Sanford Health" & Site!='University of Chicago Medicine') %>% 
+avg_draw_order <- clinical.survey %>%  filter(Site!='HealthPartners' & Site!="Sanford Health" & Site!='University of Chicago Medicine') %>% 
   mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)),
                                     as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days"))) %>%
   group_by(Site) %>% 
@@ -2363,46 +2319,49 @@ verif_BSL_colctB = BSL_colctB %>% group_by(Site) %>%
 
 ## Verification to Draw Order
 
-ver_draw <- coll_sett_all %>%  filter(all_settings=="Clinical" & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2023-02-01")  & 
-                                    Site!='HealthPartners' & Site!='Sanford Health' & Site!='University of Chicago Medicine')  
-                                      #& Site!='Henry Ford Health') %>% mutate(Site = droplevels(Site))
+ver_draw <- biocol.tb %>%  filter(!is.na(d_173836415_d_266600170_d_769615780) & d_914594314>=as.Date("2023-02-01")  & 
+                                    Site!='HealthPartners' & Site!='Sanford Health' & Site!='University of Chicago Medicine' &  
+                                       Site!='Henry Ford Health') %>% mutate(Site = droplevels(Site))
 
 verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
 
-verif_draw_order = verif_draw %>%group_by(Site) %>%
-  dplyr::summarize('Number of Draw Orders Placed'=n(),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
+# verif_draw_order = verif_draw %>%group_by(Site) %>%
+#   dplyr::summarize('Number of Draw Orders Placed'=n(),
+#                    Min = round(min(time,na.rm = TRUE), digits=1),
+#                    Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
+#                    Median = round(median(time,na.rm = TRUE), digits=1),
+#                    Mean = round(mean(time,na.rm = TRUE), digits=1),
+#                    Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
+#                    Max = round(max(time,na.rm = TRUE), digits=1))
+
 #### Change pending approval
-# verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>% 
-#   mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
-#                                   as.numeric(time) <1 ~"Within 1 Day",
-#                                   as.numeric(time) < 3 ~ "1-3 Days",
-#                                   as.numeric(time) <30 ~ "4-30 Days",
-#                                   as.numeric(time) >= 30 ~ "More than 30 Days",
-#                                   TRUE ~ "Missing Time Stamp(s)"),
-#          checktmvisit = factor(checktmvisit, levels=c("Negative Time", "Within 1 Day", "1-3 Days", 
-#                                                       "4-30 Days", "More than 30 Days", "Missing Time Stamp(s)")))
-# 
-# verif_draw_order <- create_tbl_cross(verif_draw, "checktmvisit", "Site", "column", " ", " ")
-# colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placements"
+verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>%
+  mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
+                                  as.numeric(time) <1 ~"Within 1 Day",
+                                  as.numeric(time) < 3 ~ "1-3 Days",
+                                  as.numeric(time) <30 ~ "4-30 Days",
+                                  as.numeric(time) >= 30 ~ "More than 30 Days",
+                                  TRUE ~ "Missing Time Stamp(s)"),
+         checktmvisit = factor(checktmvisit, levels=c("Negative Time", "Within 1 Day", "1-3 Days",
+                                                      "4-30 Days", "More than 30 Days", "Missing Time Stamp(s)")))
+
+verif_draw_order <- create_tbl_cross(verif_draw, "checktmvisit", "Site", "column", " ", " ")
+colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placements"
 
 
 
 ## Verification to Collection  by Campaign Type
 
-verif_baseline_Af <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2022-06-01")) %>%  
+verif_BL_Af <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2022-06-01")) %>%  
   mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_556788178)),as.POSIXct(ymd_hms(d_914594314)),units="days")),
          campaign = case_when((state_d_667474224==348281054 | state_d_667474224==324692899) ~ "Upcoming Appointment",
                                TRUE ~ "All Other Campaigns"),
          Site = factor(Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
                                                      "Marshfield Clinic Health System",
                                                      "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado",
-                                                     "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest"))) %>%
+                                                     "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest"))) 
+
+verif_baseline_Af <- verif_BL_Af %>% 
   group_by(Site) %>% 
   dplyr::summarize(#'Number of Baseline Collections1'=n()[campaign=="Upcoming Appointment"],
     'Number of Baseline Collections1' = sum(campaign == "Upcoming Appointment"),
@@ -2417,13 +2376,33 @@ verif_baseline_Af <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(
     Mean2 = round(mean(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
     SD2= round(sd(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
     Max2 = round(max(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
-    'Total Number of Baseline Collections'=n())%>%
+    'Total Number of Baseline Collections'=n()) %>%
   ungroup() %>%  
   select(Site,  'Number of Baseline Collections1', Min1, Median1, Mean1, SD1, Max1, 
          'Number of Baseline Collections2', Min2, Median2, Mean2, SD2, Max2, 'Total Number of Baseline Collections')
 
 
+## Total Row
+total_summary <- verif_BL_Af %>% 
+  summarise(
+    Site = "Total",
+    'Number of Baseline Collections1' = sum(campaign == "Upcoming Appointment"),
+    Min1    = round(min(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
+    Median1 = round(median(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
+    Mean1   = round(mean(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
+    SD1     = round(sd(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
+    Max1    = round(max(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
+    'Number of Baseline Collections2' = sum(campaign == "All Other Campaigns"),
+    Min2    = round(min(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
+    Median2 = round(median(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
+    Mean2   = round(mean(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
+    SD2     = round(sd(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
+    Max2    = round(max(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
+    'Total Number of Baseline Collections' = n()
+  )
 
+## Bind site + total
+verif_baseline_Af_final <- bind_rows(verif_baseline_Af, total_summary)
 
 ```
 
@@ -2438,7 +2417,7 @@ avg_bldorder_present <- table1 %>%  filter(d_878865966=="No blood collected" & !
                                            Site!='HealthPartners' & Site!='Henry Ford Health'  & Site!='Sanford Health') %>%  
   mutate(time = as.numeric(difftime(currentDate,as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),units="days"))) %>% 
   group_by(Site) %>% 
-  dplyr::summarize('Number of Open Draw Orders'=n(),
+  dplyr::summarize('Number of Unfilled \n Blood Draw Orders'=n(),
                    Min = round(min(time,na.rm = TRUE), digits=1),
                    Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
                    Median = round(median(time,na.rm = TRUE), digits=1),
@@ -2619,16 +2598,6 @@ add_footnote(tab5_4, "Note: Blood and urine specimens are not collected in the H
              notation = "none")
 ```
 
-\FloatBarrier
-```{r KnitrTables1.13, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
-
-Bld_urn_cli = knitr::kable(system_coll, 
-                           caption='Table 1.13: Baseline- Data System Status Among Clinical Biospecimen Collections by Specimen Type', 
-                           row.names=FALSE,align=c("l",rep("c", 2)), booktabs = TRUE) %>%  
-  kable_styling(latex_options = "scale_down") #"HOLD_position"
-add_footnote(Bld_urn_cli, "Note: Site data may be available up to 48 hours later than Biospecimen Dashboard data. 'Site Data Only' is assumed to be '0 (0%)' when not listed.", 
-             notation = "none")
-```
 
 
 
@@ -2670,6 +2639,7 @@ knitr::kable(spec_by_site_R ,
 knitr::kable(spec_by_site_C, 
              caption='Table 2.2: Baseline Clinical Biospecimens Collected by Specimen Type', 
              row.names=FALSE,align=c("l",rep("c", 9)), booktabs = TRUE)  %>% 
+  column_spec(1, width = "4cm") %>% #make longer row name wrap into 2 lines
   kable_styling(latex_options = "scale_down") 
 
 
@@ -2698,8 +2668,8 @@ tab8=knitr::kable(bloodtubetype_C,
   add_indent(seq(1, nrow(bloodtubetype_C) - 1))  %>% 
   kable_styling(latex_options = "scale_down", full_width = FALSE)   %>% 
   landscape()
-add_footnote(tab8, "Tube configuration/quantity varies by site based on clinical lab supply to achieve collection closest to the desired volume of 20mL SST, 10mL EDTA, 10mL Heparin, 6mL ACD and 10mL Streck. Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 06/01/2025; Streck tube collection was introduced at different time points and is only collected at certain sites", notation = "none") %>% 
-  add_footnote(" This table only takes into account tubes obtained during the first finalized Clinical collection, which may or may not have included blood and does not include tubes collected during re-draw collections. For actual tube counts, reference the BSI.", notation="none")
+add_footnote(tab8, "Note: Tube configuration/quantity varies by site based on clinical lab supply to achieve collection closest to the desired volume of 20mL SST, 10mL EDTA, 10mL Heparin, 6mL ACD and 10mL Streck. Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 06/01/2025; Streck tube collection was introduced at different time points and is only collected at certain sites", notation = "none") %>% 
+  add_footnote(" Note: This table only takes into account tubes obtained during the first finalized Clinical collection, which may or may not have included blood and does not include tubes collected during re-draw collections. For actual tube counts, reference the BSI.", notation="none")
 
 
 
@@ -2787,7 +2757,6 @@ add_footnote(tbl19b,"Note: The COVID-19 survey questions were separated from the
 
 
 
-\newpage
 \FloatBarrier
 
 ```{r Figures1_3, echo=FALSE, message=FALSE,warning=FALSE, eval=TRUE}
@@ -2898,8 +2867,10 @@ knitr::kable(verif_BSL_colctD,
 BSL_A <- knitr::kable(verif_BSL_colctA,
                       caption='Table 4.3: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified Before 2/01/2023',
                       row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE)  %>% 
-  kable_styling(latex_options = "scale_down")
-add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago.", notation = "none")
+  kable_styling(latex_options = "scale_down") 
+
+add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago.", notation = "none") %>% 
+  add_footnote(" Note: Data reflected in this table are an estimate, based on when samples were finalized in the Biospecimen Dashboard, actual collections would have occurred prior to the Connect team receiving the samples.", notation="none")
 
 
 
@@ -2911,14 +2882,14 @@ add_footnote(BSL_B,"Note: Baseline Clinical Collections were launched in Februar
 
 
 
-AF26 <- knitr::kable(verif_baseline_Af,
+AF26 <- knitr::kable(verif_baseline_Af_final,
                      caption = 'Table 4.5: Baseline- Time (in Days) from Verification to Collection Among Participants Verified on or After 6/01/2022 by Campaign Type',
                      row.names=FALSE, booktabs = T, linesep = "", format.args = list(big.mark = ","), 
                      align = c("l",  rep("c", 13)), 
                      col.names=c("Site",  'Number of Collections',"Min", "Median", "Mean", "SD", "Max", 'Number of Collections', 
                                  "Min", "Median", "Mean", "SD", "Max","Total Baseline Collections") ) %>% 
   kable_styling(latex_options = "scale_down") %>% 
-  add_indent(seq(1, nrow(verif_baseline_Af))) %>% 
+  add_indent(seq(1, nrow(verif_baseline_Af_final)-1)) %>% 
   add_header_above(c(" " = 1, "Upcoming Appointment" = 6, "All Other Campaigns" = 6,  " "=1)) %>% landscape() 
 add_footnote(AF26, "Note: Upcoming Appointment includes “Screening appointment” and “Non-screening appointment” campaign types. All Other Campaigns include “Random”, “Demographic Group”, “Aging out of study”, “Geographic group”, “Post-Screening Selection”, “Technology adapters”, “Low-income/health professional shortage areas”, and “Other” campaign types.", notation = "none")
 
@@ -2929,10 +2900,7 @@ tabl27 <- knitr::kable(verif_draw_order,
                        caption='Table 4.6: Baseline- Time (in Days) from Verification to Draw Order Placement',
                        row.names=FALSE, align=c("l", rep("c", 3)),digits=1, booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down")
-
-add_footnote(tabl27, "Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data", notation="none")
-
-#add_footnote(tabl27, "Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data. Henry Ford is excluded because clinical collection was not an option in 2/2023 and participants have collection type options, therefore, it may take longer for draw orders to be requested and placed.", notation="none")
+add_footnote(tabl27, "Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data. Henry Ford is excluded because participants have collection type options, therefore, the placement of draw orders post-verification may be delayed.", notation="none")
 
 
 tab4_9 <- knitr::kable(avg_draw_order, 
@@ -2944,8 +2912,9 @@ add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and S
 
 
 tab4_10 <- knitr::kable(avg_bldorder_present, 
-                        caption='Table 4.8: Baseline- Time (in Days) from Draw Order Placement to Present Date by Site', 
+                        caption='Table 4.8: Baseline- Time (in Days) from Blood  Draw Order Placement to Present Date by Site \n for Participants with No Baseline Clincial Blood Collection', 
                         row.names=FALSE, align=c("l", rep("c", 11)),digits=1, booktabs = TRUE) %>% 
+  column_spec(2, width = "4cm") %>% #make longer column name wrap into 2 lines
   kable_styling(latex_options = "scale_down") 
 add_footnote(tab4_10, "Note: Table includes information for Kaiser sites only, other clinical collection sites are excluded.", notation="none")
 
