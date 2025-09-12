@@ -2332,7 +2332,6 @@ ver_draw <- biocol.tb %>%  filter(!is.na(d_173836415_d_266600170_d_769615780) & 
 
 verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
 
-
 verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>%
   mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
                                   as.numeric(time) <1 ~"Within 1 Day",
