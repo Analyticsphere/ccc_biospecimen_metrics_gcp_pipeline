@@ -1163,10 +1163,13 @@ dup_list <- bio_dup_with_status %>%
          Urine_Tube_Collected, MW_Tube_Collected) %>%
   arrange(Connect_ID)
 
+
 dup_list_by_tube <- dup_list %>%  
   group_by(Connect_ID) %>%
-  filter(any(across(ends_with("_Tube_Collected"), ~ all(. == "Yes", na.rm = TRUE)))) %>%
+  filter(any(across(ends_with("_Tube_Collected"), 
+                    ~ sum(. == "Yes", na.rm = TRUE) > 1))) %>%
   ungroup()
+
 
 colnames(dup_list_by_tube) <- c("Connect ID", "Site", "Collection Setting", "Collection ID", "Collection Date/Time", "Collection Finalized", "True Duplicate",
                         "SST1_Tube_Collected", "SST2_Tube_Collected", "SST3_Tube_Collected", "SST4_Tube_Collected",
