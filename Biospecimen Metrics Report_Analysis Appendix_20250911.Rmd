@@ -1,31 +1,29 @@
-
 ---
 title: "Biospecimen Weekly Metrics RMD"
 author: "Kelsey Sanchez"
 date: "Data Extracted and Report Ran: `r Sys.Date()`"
-header-includes:  
-    \usepackage[labelformat=empty]{caption}
-    \usepackage{placeins}
-    \usepackage{booktabs}
-    \usepackage{pdflscape}
-    \usepackage{longtable}
-
+header-includes: 
+  - \usepackage[labelformat=empty]{caption}
+  - \usepackage{placeins}
+  - \usepackage{booktabs}
+  - \usepackage{pdflscape}
+  - \usepackage{longtable}
 
 output:
   pdf_document:
-      latex_engine: xelatex
-      extra_dependencies: ["float", "longtable", "booktabs"]
-      toc: true
-      keep_tex: yes
-      fig_width: 7
-      fig_height: 5
-      fig_caption: true
-      df_print: paged 
+    latex_engine: xelatex
+    extra_dependencies: ["float", "longtable", "booktabs"]
+toc: true
+keep_tex: yes
+fig_width: 7
+fig_height: 5
+fig_caption: true
+df_print: paged
 ---
-
-
-
-This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified
+  
+  
+  
+  This Weekly Metrics report contains tables and plots for the Connect Biospecimen samples, many stratified
 by health provider site. This information pertains to verified participants as of the date above and collections
 that are finalized. This report does not include information from participants whose data have been destroyed. This report is limited to information from participants' first finalized specimen collection. In the event that a participant donated specimen(s) in a repeat collection, that information is not reflected in this report.
 
@@ -40,6 +38,7 @@ that are finalized. This report does not include information from participants w
 #old.packages()
 #update.packages()  
 
+# NOTE: (Autumn Hullings 8/26/2025) - I separated the library chunk from the billing to be able to run libraries separately when code failed below due to package overwrite issues:
 library(bigrquery)
 library(tidyverse) ###for data management
 library(reshape2)  # need for the melt() function
@@ -58,25 +57,8 @@ library(scales) #for commas in the thousands place to be applied automatically
 currentDate <- Sys.Date()
 currentDate <- as.Date(currentDate)
 
-bq_auth()
-
-### Set Box folders for output CSV files #######################################
-use_test_box_folder <- TRUE # Local user sets this (Jake or Kelsey)
-
-# Over-ride if using plumber api on GCP (USER DOESN'T TOUCH THIS!)
-# Check if the environment variable exists and is not empty
-if (!is.null(Sys.getenv("USE_TEST_BOX_FOLDER")) &&
-    Sys.getenv("USE_TEST_BOX_FOLDER") != "") {
-  use_test_box_folder <- as.logical(Sys.getenv("USE_TEST_BOX_FOLDER"))
-}
-
-if (use_test_box_folder) {
-  boxfolder <- 222593912729 # test box folder
-} else {
-  boxfolder <- 221280601453 # destination of CSV files (not pdf)
-}
-
 ```
+
 
 ```{r BQPull, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
@@ -588,8 +570,6 @@ biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
                                        "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest")))
 
 ```
-
-
 
 
 
@@ -1300,6 +1280,7 @@ colnames(spec_by_site_C)[ncol(spec_by_site_C)] <- "Total Clinical Collections"
 
 
 
+
 ```{r Table11, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 # Count of Deviation Existence by Site
@@ -1336,7 +1317,7 @@ tube_dev <- as.data.frame(aggregate(coll_sett_all$tubedev,
                                     FUN = sum)) 
 # I get an error messga eunless this line is separated
 tube_dev <- tube_dev %>% 
-  rename(Site = Group.1, Any_Deviation = colnames(tube_dev)[2])
+  dplyr::rename(Site = Group.1, Any_Deviation = colnames(tube_dev)[2])
 
 
 tube_nodev <- as.data.frame(aggregate(coll_sett_all$tube_nodev,
@@ -1344,7 +1325,7 @@ tube_nodev <- as.data.frame(aggregate(coll_sett_all$tube_nodev,
                                       FUN = sum)) 
 # I get an error messga eunless this line is separated
 tube_nodev <- tube_nodev %>% 
-  rename(Site = Group.1, No_Deviation = colnames(tube_nodev)[2]) #sometimes this switches from d_299553921_d_593843561 to d_958646668_d_593843561
+  dplyr::rename(Site = Group.1, No_Deviation = colnames(tube_nodev)[2]) #sometimes this switches from d_299553921_d_593843561 to d_958646668_d_593843561
 
 ## Combine them into one dataframe
 Deviation_Freq <- base::merge(tube_dev,tube_nodev,by="Site")
@@ -1356,7 +1337,7 @@ Deviation_Freq <- Deviation_Freq %>%
          Site = factor(Site,levels = c("Baylor Scott and White Health",  "HealthPartners",  "Henry Ford Health",
                                        "Marshfield Clinic Health System", "Sanford Health",  "University of Chicago Medicine",
                                        "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest"))) %>% 
-  select("Site", "Any Deviations", "No Deviations", "Total") %>% 
+  dplyr::select("Site", "Any Deviations", "No Deviations", "Total") %>% 
    arrange(Site)
 
 ## Add Total row
@@ -1367,10 +1348,11 @@ total_row <- Deviation_Freq %>%
             No_num = sum(as.numeric(gsub(" .*", "", `No Deviations`)), na.rm = TRUE)) %>%
   mutate(`Any Deviations` = paste0(Any_num, " (", round(Any_num / Total * 100, 1), "%)"),
          `No Deviations` = paste0(No_num, " (", round(No_num / Total * 100, 1), "%)")) %>%
-  select(Site, `Any Deviations`, `No Deviations`, Total)
+  dplyr::select(Site, `Any Deviations`, `No Deviations`, Total)
 
 
 Deviation_Freq <- Deviation_Freq %>% bind_rows(total_row)
+
 
 
 
@@ -1607,7 +1589,6 @@ discard.site[nrow(discard.site),c(2:ncol(discard.site))] <- paste(discard.site[n
 
 # Setting up variables for all research specific Tables and Figures
 
-
 research.survey <- coll_sett_all %>% filter(all_settings == "Research") %>%
   mutate(Site=droplevels(as.factor(Site)),
          ctime = round(as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_822499427)),units="mins")), digits=1),
@@ -1682,7 +1663,6 @@ Table21R_After = postcovR_comp %>% group_by(Site) %>%
                    Q3 = quantile(ctime, 0.75),
                    Perc.95= quantile(ctime, 0.95),
                    Max = max(ctime))
-
 
 
 
@@ -1909,8 +1889,6 @@ ctable_rsch_loc_bptl <- rsch_loc_coll_bptl %>%
   )) 
 
 
-
-
 # Removing rows with all 0's
 ctable_rsch_loc_bptl <- ctable_rsch_loc_bptl %>%  filter(str_sub(Total, 1, 1) != "0")
 
@@ -1923,6 +1901,48 @@ rsch_coll_times <- ctable_rsch_loc_bptl %>%
   filter(Collection_Location != "Total") %>%
   arrange(Site_Group, Collection_Location)
 
+
+
+
+# --- NEW: Adding Site Group Total Row ---
+
+value_cols <- names(rsch_coll_times)[2:7]  # "1 Day","2 Days","3 Days","4 Day",">4 Days","Total"
+
+# 1) Extract N from "N (%)" in each cell
+counts_for_sum <- rsch_coll_times %>%
+    dplyr::mutate(dplyr::across(
+        dplyr::all_of(value_cols),
+        ~ suppressWarnings(as.numeric(gsub(",", "", stringr::str_extract(.x, "^[0-9,]+"))))
+    ))
+
+# 2) Subtotal the N’s within each Site_Group
+subtotals_count <- counts_for_sum %>%
+    dplyr::group_by(Site_Group) %>%
+    dplyr::summarise(dplyr::across(dplyr::all_of(value_cols), ~ sum(.x, na.rm = TRUE)), .groups = "drop")
+
+# 3) Rebuild "N (%)" strings for the subtotal rows
+subtotals_fmt <- subtotals_count %>%
+    dplyr::mutate(row_total = .data$Total) %>%
+    dplyr::mutate(dplyr::across(
+        dplyr::all_of(setdiff(value_cols, "Total")),
+        ~ paste0(formatC(.x, format = "d", big.mark = ","),
+                 " (", sprintf("%.1f", ifelse(row_total > 0, 100 * .x / row_total, 0)), "%)")
+    )) %>%
+    dplyr::mutate(
+        Total = formatC(Total, format = "d", big.mark = ","),
+        Collection_Location = "Total"              # label for the within-site total row
+    ) %>%
+    dplyr::select(Collection_Location, dplyr::all_of(value_cols), Site_Group)
+
+# 4) Insert the subtotal rows so they appear at the bottom of each Site_Group block
+rsch_coll_times <- dplyr::bind_rows(rsch_coll_times, subtotals_fmt) %>%
+    dplyr::arrange(Site_Group, (Collection_Location == "Total"), Collection_Location)
+
+
+
+
+
+
 # Append the Total row at the bottom with Site_Group = "Total"
 rsch_coll_times <- bind_rows(rsch_coll_times, total_row %>% mutate(Site_Group = "Total"))
 
@@ -1931,6 +1951,7 @@ rsch_coll_times$Site_Group <- factor(rsch_coll_times$Site_Group, levels = unique
 
 # Count occurrences of each Site_Group 
 site_group_counts <- table(rsch_coll_times$Site_Group)
+
 
 
 rsch_coll_times52 <- knitr::kable(rsch_coll_times[, c(1:7)], 
@@ -2182,7 +2203,7 @@ clin_coll_days <- clin_coll_days %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", 
                                  "K1 HFH Main","Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO","Brownstown", 
-                                 "E Jefferson Pathology", "Woodhaven Pathology", "CANPAV Pathology OP Lab", 
+                                 "E Jefferson Pathology", "Woodhaven Pathology", "CANPAV Pathology OP Lab",
                                  "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic", 
     "NSC", "Missing HP location") ~ "HealthPartners", 
@@ -2211,6 +2232,52 @@ total_row <- clin_coll_days %>% filter(`Collection Location` == "Total")
 clin_coll_times <- clin_coll_days %>%
   filter(`Collection Location` != "Total") %>%
   arrange(Site_Group, `Collection Location`)
+
+
+
+
+
+
+# --- NEW: Adding Site Group Total Row ---
+
+value_cols <- names(clin_coll_times)[2:7]  # "1 Day","2 Days","3 Days","4 Day",">4 Days","Total"
+
+# 1) Extract N from "N (%)" in each cell
+counts_for_sum <- clin_coll_times %>%
+  dplyr::mutate(dplyr::across(
+    dplyr::all_of(value_cols),
+    ~ suppressWarnings(as.numeric(gsub(",", "", stringr::str_extract(.x, "^[0-9,]+"))))
+  ))
+
+# 2) Subtotal the N’s within each Site_Group
+subtotals_count <- counts_for_sum %>%
+  dplyr::group_by(Site_Group) %>%
+  dplyr::summarise(dplyr::across(dplyr::all_of(value_cols), ~ sum(.x, na.rm = TRUE)), .groups = "drop")
+
+# 3) Rebuild "N (%)" strings for the subtotal rows
+subtotals_fmt <- subtotals_count %>%
+  dplyr::mutate(row_total = .data$Total) %>%
+  dplyr::mutate(dplyr::across(
+    dplyr::all_of(setdiff(value_cols, "Total")),
+    ~ paste0(formatC(.x, format = "d", big.mark = ","),
+             " (", sprintf("%.1f", ifelse(row_total > 0, 100 * .x / row_total, 0)), "%)")
+  )) %>%
+  dplyr::mutate(
+    Total = formatC(Total, format = "d", big.mark = ","),
+    `Collection Location` = "Total"              # label for the within-site total row
+  ) %>%
+  dplyr::select(`Collection Location`, dplyr::all_of(value_cols), Site_Group)
+
+# 4) Insert the subtotal rows so they appear at the bottom of each Site_Group block
+clin_coll_times <- dplyr::bind_rows(clin_coll_times, subtotals_fmt) %>%
+  dplyr::arrange(Site_Group, (`Collection Location` == "Total"), `Collection Location`)
+
+
+
+
+
+
+
 
 # Append the Total row at the bottom with Site_Group = "Total"
 clin_coll_times <- bind_rows(clin_coll_times, total_row %>% mutate(Site_Group = "Total"))
@@ -2440,9 +2507,11 @@ total_df <- data.frame(t(total_row), stringsAsFactors = FALSE) #set to df to bin
 colnames(total_df) <- colnames(all_coll_to_sub_with_pct[, c(1,3)])
 
 all_coll_to_sub_with_pct <- rbind(all_coll_to_sub_with_pct[, c(1,3)], total_df)
+  
 
 
 ```
+
 
 
 
@@ -2526,18 +2595,6 @@ crosstable.coll_bptl1 <- create_tbl_cross(ver_date_diff, "Site", "coll_days_diff
 
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 
 \newpage
 
@@ -2780,6 +2837,7 @@ knitr::kable(BU_status,
   kable_styling(latex_options = "scale_down")
 
 
+
 CTS <-knitr::kable(all_coll_to_sub_with_pct,
                    caption='Table 3.3: Time (in Days) From Specimen Collection to Biospecimen Survey Completion',
                    col.names = c("Time", "N(%)"),
@@ -2788,7 +2846,6 @@ CTS <-knitr::kable(all_coll_to_sub_with_pct,
   add_indent(seq(1, nrow(all_coll_to_sub_with_pct) - 1))  %>%
   kable_styling(latex_options = "scale_down")
 add_footnote(CTS,"Note: Collection times reflected in this table for collections that occurred in the clinical collection setting are an estimate, based on when samples were finalized in the Biospecimen Dashboard, actual collections would have occurred on average 1 day prior to the Connect team receiving the samples.", notation = "none")
-
 
 tbl19a <-knitr::kable(precovid_BUMtime, 
                       caption='Table 3.4: Baseline Biospecimen Survey Completion Time from Research Collection Visit Check In \n (Pre-COVID- 19 Questions Removal)',
@@ -2989,7 +3046,6 @@ knitr::kable(crosstable.coll_bptl1,
              row.names=FALSE, align=c("l", rep("c", 7)), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 ```
-
 
 \newpage
 \newpage
@@ -4233,5 +4289,1722 @@ Table7_10a <- knitr::kable(Table7.10a,
   kable_styling(latex_options = "HOLD_position")
 add_footnote(Table7_10a, "Note: Only includes data from mouthwash kits returned with completed Collection Card.", notation = "none")
          
+
+```
+
+
+
+
+
+
+\newpage
+# Appendix: Biospecimen Analysis Request
+
+**Exclusion Criteria:** 
+
+The Biospecimen Analysis Request followed the same exclusion criteria as used in the Biospecimen Weekly Metrics Report where:  
+
+1) Connect_ID is not null
+2) Collection Entry Final is not null
+3) Verification Status (CID: 821247024) = Verified (CID: 197316935) and Data Destruction (CID: 831041022) = No (CID: 104430631) 
+4) Used only finalized collections for clinical and research specimens
+5) Removed duplicate collections from all clinical & research collections
+6) Among those with sequential collections, used only the first collection based on the Date/Time Collection Entry Final (CID: 556788178)   
+
+**Data "freeze" date for this report:** XX/XX/XXXX 
+ 
+\newpage
+
+##  Request 1: Density plot/histogram of recruitment and biospecimens collected by age
+
+```{r Request1,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE, results='hold'}
+#===========================================================================
+# REQUEST 1: Histogram of recruitment and biospeciemen collections by age
+#===========================================================================
+
+# Figure 1a: Histogram of all verified participants ages 30-70 years
+age_bin_counts <- biocol.tb %>%
+  filter(!is.na(age)) %>%
+  group_by(age) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  # Optional: reorder the factor levels so the plot goes left to right
+  mutate(age = factor(age, levels = sort(unique(age))))
+
+age_bin_counts_plot <- ggplot(age_bin_counts, aes(x = age, y = n)) +
+  geom_col(fill = "#5B9BD5") +
+  labs(title = "Figure 1a. All verified participants by 5-year age group from 30-70 years",
+       x = "Age Group",
+       y = "Count of Verified Participants") +
+  scale_y_continuous(breaks = seq(0, 20000, by = 1000)) + 
+  theme_classic(base_size = 12) +
+  theme(
+    plot.title = element_text(size = 11, face = "bold", hjust = 0.5),  # center & enlarge title
+    axis.title.x = element_text(size = 10),  # x-axis title size
+    axis.title.y = element_text(size = 10)   # y-axis title size
+  )
+
+print(age_bin_counts_plot)
+
+
+# Table 1b: Histogram of biospecimen collections for participants 30-70 years
+age_bin_biocol <- table1 %>%
+  filter(biocol.appoint == "Baseline Collection", !is.na(age)) %>%
+  group_by(age) %>%
+  summarise(n = n()) %>%
+  ungroup() %>%
+  mutate(age = factor(age, levels = sort(unique(age))))  # keep age bin order consistent
+
+age_bin_biocol_plot <- ggplot(age_bin_biocol, aes(x = age, y = n)) +
+  geom_col(fill = "#5B9BD5") +
+  labs(title = "Figure 1b. All biospecimen collections by 5-year age group from 30-70 years",
+       x = "Age Group",
+       y = "Count of Baseline Collections") +
+  scale_y_continuous(breaks = seq(0, 10000, by = 1000)) + 
+    theme_classic(base_size = 14) +
+  theme(
+    plot.title = element_text(size = 11, face = "bold", hjust = 0.5),  # center & enlarge title
+    axis.title.x = element_text(size = 10),  # x-axis title size
+    axis.title.y = element_text(size = 10)   # y-axis title size
+  )
+
+print(age_bin_biocol_plot)
+
+```
+
+\newpage
+
+##  Request 2: Total number of collection sites
+
+a. Clinical collection IHC sites (N = 8): KPCO, KPHI, KPGA, KPNW, HFH, HP, Sanford, UChicago
+
+b. Research collection IHC sites (N = 6): BSWH, Sanford, HFH, HP, UChicago, Marshfield
+
+c. Number of unique collection sites per IHC: 
+   - Kaiser Permanente (KP): Dynamic (for Clinical only)
+   - HealthPartners (HP): N = 8 (6 Clinical, 2 Research)
+   - Henry Ford Health System (HFH): N = 25 (18 Clinical, 7 Research: 5 main, 1 pop-up, 1 in-home)
+   - Sanford Health (Sanford): N = Dynamic (for Clinical only), N = 5 (Research)
+   - University of Chicago Medicine (UChicago): N = 14 (8 Clinical, 6 Research: 5 main, 1 pop-up)
+   - Baylor Scott & White Health (BSWH): N = 10 (Research)
+   - Marshfield Clinic Health System (Marshfield): N = 10 (Research: 9 main, 1 pop-up)
+  
+d. Number of unique shipping sites per IHC: 
+   - Overall: N = 23
+     - Kaiser Permanente (KP): 
+        - KP-Colorado (KPCO): N = 1
+        - KP-Georgia (KPGA): N = 1
+        - KP-Northwest (KPNW): N = 1
+        - KP-Hawaii (KPHI): N = 1
+     - HealthPartners (HP): N = 2
+     - Henry Ford Health System (HFH): N = 1
+     - Sanford Health (Sanford): N = 3
+     - University of Chicago Medicine (UChicago): N = 2
+     - Baylor Scott & White Health (BSWH): N = 4
+     - Marshfield Clinic Health System (Marshfield): N = 7 (5 main, 2 pop-up)
+  
+**NOTE:** Clinical and research biospecimen collections are broken down by sub-site below in Table 2a and Table 2b, respectively. 
+  
+```{r Request2,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE, results='asis'}
+#===========================================================
+# REQUEST 2: Total number of Collection Sites
+#===========================================================
+
+
+
+# Table 2:
+knitr::kable(table1_allsett,
+                                   caption='Table 2. Number of baseline biospecimen collections by setting for first specimen collected', 
+                                   row.names=FALSE,align=c("l", rep("c", 3)), booktabs = TRUE) %>%  
+  add_indent(seq(1, nrow(table1_allsett) - 1)) %>% 
+  kable_styling(latex_options = c("scale_down", "hold_position")) %>% 
+  kableExtra::footnote(general = "Note: This table was taken directly from Biospecimen Weekly Metrics Report: Table 1.2.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+#print(settings_breakdown)
+
+
+#Table 2a: Clinical Collections
+Table2a <- col_num_1.2_gt %>%  summary_rows(
+  groups = TRUE,
+  columns = vars("Total Clinical Collections"),
+  fns = (Sum = ~sum(.)),
+) %>% tab_header("Table 2a: Baseline Clinical Biospecimen Collections by Collection Location") %>% 
+ tab_footnote(
+    footnote = "This table was taken directly from Biospecimen Weekly Metrics Report: Table 1.4. KP and Sanford sites are not included due to the high number of individual collection sites.",
+    locations = cells_title(groups = "title")
+  ) %>% 
+tab_source_note(source_note = "")
+
+
+#Table 2b: Research Collections
+Table2b <-col_num_1.1_gt %>%  
+  summary_rows(
+    groups = TRUE,
+    columns = vars("Total Research Collections"),
+    fns = (Sum = ~sum(.))
+  ) %>% 
+  tab_header("Table 2b: Baseline Research Biospecimen Collections by Collection Location") %>% 
+  tab_options(table.font.size = px(8))  %>% 
+ tab_footnote(
+    footnote = "This table was taken directly from Biospecimen Weekly Metrics Report: Table 1.3.",
+    locations = cells_title(groups = "title")
+  ) %>% 
+tab_source_note(source_note = "")
+
+
+#Print Tables:
+Table2a
+Table2b
+
+```
+
+
+\FloatBarrier
+\newpage
+\FloatBarrier
+
+## Request 3: Time from recruitment to blood collection (restricted to 2024 onwards)
+
+\FloatBarrier
+```{r Request3, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+#========================================================================
+# REQUEST 3: Time from Recruitment to Blood Collection (2024 onwards)
+#========================================================================
+
+# SITE VARIABLE CHECKS
+invisible(
+  grep("site", names(coll_sett_all), value = TRUE, ignore.case = TRUE)
+)
+
+invisible(
+  coll_sett_all %>%
+     dplyr::select(Site, Clin_Site_location, siteAcronym, Site_location) %>%
+    summarise(across(everything(), ~ list(unique(.)))) %>%
+    pivot_longer(cols = everything(), names_to = "Variable", values_to = "Unique_Values")
+)
+
+invisible(unique(coll_sett_all$Site))
+invisible(unique(coll_sett_all$Clin_Site_location))
+invisible(unique(coll_sett_all$siteAcronym))
+invisible(unique(coll_sett_all$Site_location))
+invisible(unique(coll_sett_all$all_settings))
+
+
+# BASE DATASETS
+baseline_col_research <- coll_sett_all %>%
+  filter(
+    d_331584571 == 266600170,
+    !is.na(d_914594314),
+    !is.na(d_556788178),
+    all_settings == "Research"
+  )
+
+baseline_col_clinical <- coll_sett_all %>%
+  filter(
+    d_331584571 == 266600170,
+    !is.na(d_914594314),
+    !is.na(d_556788178),
+    all_settings == "Clinical"
+  )
+
+
+# FILTERED ON OR AFTER 1/1/2024
+baseline_colct_clinical <- baseline_col_clinical %>%
+  filter(d_914594314 >= as.Date("2024-01-01"))
+
+BSL_colctD_clinical <- baseline_colct_clinical %>%
+  mutate(time = as.numeric(difftime(
+    as.POSIXct(ymd_hms(d_556788178)),
+    as.POSIXct(ymd_hms(d_914594314)),
+    units = "days"
+  )))
+
+baseline_colct_research <- baseline_col_research %>%
+  filter(d_914594314 >= as.Date("2024-01-01"))
+
+BSL_colctD_research <- baseline_colct_research %>%
+  mutate(time = as.numeric(difftime(
+    as.POSIXct(ymd_hms(d_556788178)),
+    as.POSIXct(ymd_hms(d_914594314)),
+    units = "days"
+  )))
+
+
+
+# SUMMARY + TOTAL ROWS
+add_total_rows <- function(site_summary, datasets, labels, site_var = "siteAcronym") {
+  totals <- purrr::map2(datasets, labels, function(data, label) {
+    # format bold only when knitting
+    label_fmt <- if (knitr::is_html_output()) {
+      cell_spec(label, bold = TRUE)
+    } else if (knitr::is_latex_output()) {
+      cell_spec(label, bold = TRUE, format = "latex")
+    } else {
+      label  # plain text in console
+    }
+
+    data %>%
+      dplyr::summarize(
+        Site = label_fmt,
+        'Number of Collection Visits' = n(),
+        Min     = round(min(time, na.rm = TRUE), 1),
+        Q1      = round(quantile(time, 0.25, na.rm = TRUE), 1),
+        Median  = round(median(time, na.rm = TRUE), 1),
+        Mean    = round(mean(time, na.rm = TRUE), 1),
+        SD      = round(sd(time, na.rm = TRUE), 1),
+        Q3      = round(quantile(time, 0.75, na.rm = TRUE), 1),
+        'Perc.95' = round(quantile(time, 0.95, na.rm = TRUE), 1),
+        Max     = round(max(time, na.rm = TRUE), 1)
+      )
+  }) %>%
+    dplyr::bind_rows()
+
+  site_summary %>%
+    dplyr::rename(Site = {{ site_var }}) %>%
+    bind_rows(totals)
+}
+
+
+
+# CLINICAL TABLE (with Clinical + Research Totals)
+verif_BSL_colct_clinical <- BSL_colctD_clinical %>%
+  group_by(siteAcronym) %>%
+  dplyr::summarize(
+    'Number of Collection Visits' = n(),
+    Min     = round(min(time, na.rm = TRUE), 1),
+    Q1      = round(quantile(time, 0.25, na.rm = TRUE), 1),
+    Median  = round(median(time, na.rm = TRUE), 1),
+    Mean    = round(mean(time, na.rm = TRUE), 1),
+    SD      = round(sd(time, na.rm = TRUE), 1),
+    Q3      = round(quantile(time, 0.75, na.rm = TRUE), 1),
+    'Perc.95' = round(quantile(time, 0.95, na.rm = TRUE), 1),
+    Max     = round(max(time, na.rm = TRUE), 1),
+    .groups = "drop"
+  )
+
+verif_BSL_colct_clinical <- add_total_rows(
+  verif_BSL_colct_clinical,
+  datasets = list(
+    BSL_colctD_clinical,
+    dplyr::bind_rows(BSL_colctD_clinical, BSL_colctD_research)
+  ),
+  labels = c("Clinical Total", "Overall Total (Research + Clinical)"),
+)
+
+# Table 3a: Clinical collection
+knitr::kable(
+  verif_BSL_colct_clinical,
+  caption = 'Table 3a: Time (in Days) from Recruitment to Clinical Collection Among Participants Verified on or After 1/01/2024',
+  row.names = FALSE,
+  align = c("l", rep("c", 8)),
+  booktabs = TRUE,
+  escape = FALSE
+) %>%
+  row_spec(0, bold = TRUE) %>%
+  row_spec(nrow(verif_BSL_colct_clinical) - 1, bold = TRUE) %>%
+  row_spec(nrow(verif_BSL_colct_clinical), bold = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  footnote(general = "Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+#invisible(Table3_clinical_withresearch)
+
+
+
+# RESEARCH TABLE (with Research + Clinical Totals)
+verif_BSL_colct_research <- BSL_colctD_research %>%
+  group_by(siteAcronym) %>%
+  dplyr::summarize(
+    'Number of Collection Visits' = n(),
+    Min     = round(min(time, na.rm = TRUE), 1),
+    Q1      = round(quantile(time, 0.25, na.rm = TRUE), 1),
+    Median  = round(median(time, na.rm = TRUE), 1),
+    Mean    = round(mean(time, na.rm = TRUE), 1),
+    SD      = round(sd(time, na.rm = TRUE), 1),
+    Q3      = round(quantile(time, 0.75, na.rm = TRUE), 1),
+    'Perc.95' = round(quantile(time, 0.95, na.rm = TRUE), 1),
+    Max     = round(max(time, na.rm = TRUE), 1),
+    .groups = "drop"
+  )
+
+verif_BSL_colct_research <- add_total_rows(
+  verif_BSL_colct_research,
+  datasets = list(
+    BSL_colctD_research,
+    dplyr::bind_rows(BSL_colctD_research, BSL_colctD_clinical)
+  ),
+  labels = c("Research Total", "Overall Total (Research + Clinical)")
+)
+
+# Table 3b: Research collection
+knitr::kable(
+  verif_BSL_colct_research,
+  caption = 'Table 3b: Time (in Days) from Recruitment to Research Collection Among Participants Verified on or After 1/01/2024',
+  row.names = FALSE,
+  align = c("l", rep("c", 8)),
+  booktabs = TRUE,
+  escape = FALSE
+) %>%
+  row_spec(0, bold = TRUE) %>%
+  row_spec(nrow(verif_BSL_colct_research) - 1, bold = TRUE) %>%
+  row_spec(nrow(verif_BSL_colct_research), bold = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%
+    footnote(general = "Note: August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near the time of collection.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+#invisible(Table3_research_withclinical)
+
+
+# # PRINT TABLES
+# print(Table3_clinical_withresearch)
+# print(Table3_research_withclinical)
+
+```
+\FloatBarrier
+\newpage
+\FloatBarrier
+```{r Request4_setup, eval=TRUE,echo=FALSE,include=FALSE} 
+
+# ======================================================================================
+# REQUEST 4: PULL IN MODULE 1 DATA TO MERGE WITH BIOSPECIMENS
+# ======================================================================================
+
+# Pulling in Module 1 completion to get participant defined race for the next few tables:
+
+recr_M1 <- bq_project_query(project, query="SELECT Connect_ID, d_821247024, d_914594314,  d_512820379, d_255077064,
+                            d_949302066 , d_517311251  FROM  `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` WHERE  d_821247024='197316935' and (d_512820379='486306141' OR d_512820379='854703046')")
+recr_m1 <- bq_table_download(recr_M1,bigint = "integer64",n_max = Inf, page_size = 10000)
+cnames <- names(recr_m1)
+# Check that it doesn't match any non-number
+numbers_only <- function(x) !grepl("\\D", x)
+# to check variables in recr_noinact_wl1
+for (i in 1: length(cnames)){
+  varname <- cnames[i]
+  var<-pull(recr_m1,varname)
+  recr_m1[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
+}
+
+
+# Handling participants that somehow completed both Mod1 version 1 and Mod1 version 2:
+
+sql_M1_1 <- bq_project_query(project, query="SELECT Connect_ID, D_384191091_D_384191091_D_583826374, D_384191091_D_384191091_D_636411467, 
+                             D_384191091_D_384191091_D_458435048, D_384191091_D_384191091_D_706998638, D_384191091_D_384191091_D_973565052, 
+                             D_384191091_D_384191091_D_586825330, D_384191091_D_384191091_D_412790539, D_384191091_D_384191091_D_807835037,
+                             D_384191091_D_747350323,D_384191091_D_384191091_D_746038746, d_784119588
+                             FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.module1_v1` where Connect_ID is not null")
+sql_M1_2 <- bq_project_query(project, query="SELECT Connect_ID, D_384191091_D_384191091_D_583826374 ,D_384191091_D_384191091_D_636411467, 
+                             D_384191091_D_384191091_D_458435048, D_384191091_D_384191091_D_706998638, D_384191091_D_384191091_D_973565052,
+                             D_384191091_D_384191091_D_586825330,D_384191091_D_384191091_D_412790539,D_384191091_D_384191091_D_807835037,
+                             D_384191091_D_747350323,D_384191091_D_384191091_D_746038746, d_784119588
+                             FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.module1_v2` where Connect_ID is not null")
+
+
+M1_V1 <- bq_table_download(sql_M1_1, bigint = "integer64")
+M1_V2 <- bq_table_download(sql_M1_2, bigint = "integer64")
+
+# Select matching column names
+M1_V1_vars <- colnames(M1_V1)
+M1_V2_vars <- colnames(M1_V2)
+common_vars <- intersect(M1_V1_vars, M1_V2_vars)
+
+# Subset to common columns
+M1_V1_common <- M1_V1[, common_vars]
+M1_V2_common <- M1_V2[, common_vars]
+
+# Add version indicator
+M1_V1_common$version <- 1
+M1_V2_common$version <- 2
+
+# Identify columns with mismatched types
+mismatched_cols <- names(M1_V1_common)[sapply(names(M1_V1_common), function(col) {
+  class(M1_V1_common[[col]]) != class(M1_V2_common[[col]])
+})]
+
+# Convert mismatched columns to character for consistency
+M1_V1_common <- M1_V1_common %>%
+  mutate(across(all_of(mismatched_cols), as.character))
+M1_V2_common <- M1_V2_common %>%
+  mutate(across(all_of(mismatched_cols), as.character))
+
+# Combine both versions for participants who completed both
+M1_common <- bind_rows(M1_V1_common, M1_V2_common) %>%
+  arrange(Connect_ID, desc(version))
+
+# For columns unique to each version
+V1_only_vars <- setdiff(M1_V1_vars, common_vars)
+V2_only_vars <- setdiff(M1_V2_vars, common_vars)
+
+# Subset each version for unique columns and add version indicator
+m1_v1_only <- M1_V1[, c("Connect_ID", V1_only_vars)] %>%
+  mutate(version = 1)
+m1_v2_only <- M1_V2[, c("Connect_ID", V2_only_vars)] %>%
+  mutate(version = 2)
+
+# Combine the unique and common data
+m1_common_v1 <- left_join(M1_common, m1_v1_only, by = c("Connect_ID", "version"))
+m1_combined_v1v2 <- left_join(m1_common_v1, m1_v2_only, by = c("Connect_ID", "version"))
+
+# Filter for complete cases where specific completion criteria are met
+m1_complete <- m1_combined_v1v2 %>%
+  filter(Connect_ID %in% recr_m1$Connect_ID[recr_m1$d_949302066 == 231311385]) %>%
+  arrange(desc(version))
+
+# Remove duplicates, keeping only the most recent version for each Connect_ID
+m1_complete_nodup <- m1_complete[!duplicated(m1_complete$Connect_ID),]
+
+m1_complete_nodup$Connect_ID <- as.numeric(m1_complete_nodup$Connect_ID)
+
+
+
+
+
+
+
+############ Added:/Updated 
+
+#Need to include recr_M1 because it has the survey flag variable d_949302066 and participant requirements (verified, no data deletion)
+m1_race <- left_join(recr_m1, m1_complete_nodup, by="Connect_ID")
+
+# Merge M1 dataset with biospecimens dataset: - you need to merge this with Table 1.1 (dataframe table1) in order to include those with or without collections
+coll_sett_all_m1 <- left_join(table1, m1_race, by="Connect_ID")
+
+# Then add the settings variable derivation. All those with a populated setting have a collection, so research.survey.m1 and clinical.survey.m1 aren't affected
+# Remove filter so the No Collection counts show up, and then apply the filter so only true finalized collections are counted and given settings
+coll_sett_all_m1 <- coll_sett_all_m1 %>%  
+  #filter(BiospeCollection == "Any biospecimen Collections" & (d_410912345== 353358909 | BL_BioSpm_MWSetting_v1r0=="Home")) %>% 
+    mutate(all_settings = case_when(BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 & 
+                                      (d_650516960=="664882224" | BL_BioSpm_BloodSetting_v1r0=="Clinical" | 
+                                         BL_BioSpm_UrineSetting_v1r0=="Clinical") ~ "Clinical",
+                                    
+                                    BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 & 
+                                    (d_650516960=="534621077" | BL_BioSpm_BloodSetting_v1r0=="Research" | 
+                                         BL_BioSpm_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
+                                    
+                                    BiospeCollection == "Any biospecimen Collections" &
+                                    (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
+                                         BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Home"))
+
+#############
+
+
+
+race_columns <- c("D_384191091_D_384191091_D_583826374", 
+                  "D_384191091_D_384191091_D_636411467",
+                  "D_384191091_D_384191091_D_458435048",
+                  "D_384191091_D_384191091_D_706998638",
+                  "D_384191091_D_384191091_D_973565052",
+                  "D_384191091_D_384191091_D_586825330",
+                  "D_384191091_D_384191091_D_412790539",
+                  "D_384191091_D_384191091_D_807835037")
+
+
+# All data is currently string values, need to convert "1" and "0" to 1 and 0 to be summarized
+coll_sett_all_m1[race_columns] <- lapply(coll_sett_all_m1[race_columns], as.numeric)
+
+coll_sett_all_m1$multi_racial <- ifelse(rowSums(coll_sett_all_m1[race_columns], na.rm = TRUE) > 1, 1, 0)
+
+coll_sett_all_m1 <- coll_sett_all_m1 %>%  
+  mutate(m1_race = case_when( ### Updte: naming 'race' to 'm1_race' to be able to differenciate in all the tables WHICH race is being referenced.
+    d_949302066!="231311385" ~ "Module1 Not Completed", 
+    multi_racial == 1 ~ "Multi-Racial",
+    D_384191091_D_384191091_D_583826374 == 1 ~ "American Indian or Native American",
+    D_384191091_D_384191091_D_636411467 == 1 ~ "Asian/Asian American",
+    D_384191091_D_384191091_D_458435048 == 1 ~ "Black, African American, or African",
+    D_384191091_D_384191091_D_706998638 == 1 ~ "Hispanic, Latino, or Spanish",
+    D_384191091_D_384191091_D_973565052 == 1 ~ "Middle Eastern or North African",
+    D_384191091_D_384191091_D_586825330 == 1 ~ "Hawaiian or Pacific Islander",
+    D_384191091_D_384191091_D_412790539 == 1 ~ "White",
+    (D_384191091_D_384191091_D_807835037 == 1 | !is.na(D_384191091_D_747350323)) ~ "Other",
+    D_384191091_D_384191091_D_746038746==1 ~ "Prefer Not to Answer",
+    TRUE ~ "Skipped this question"
+  )) %>%
+  mutate(m1_race = factor(m1_race, levels = c(
+    "Multi-Racial",
+    "American Indian or Native American",
+    "Asian/Asian American",
+    "Black, African American, or African",
+    "Hispanic, Latino, or Spanish",
+    "Middle Eastern or North African",
+    "Hawaiian or Pacific Islander",
+    "White",
+    "Other",
+    "Prefer Not to Answer",
+    "Skipped this question",
+    "Unknown",
+    "Module1 Not Completed"   #forcing this row last in tables
+  )))
+
+
+
+# Re-define data sets using coll_sett_all_m1 for all Module1-derived variables: 
+
+## Research Survey (& module 1): research.survey.m1 
+research.survey.m1 <- coll_sett_all_m1 %>% filter(all_settings == "Research") %>%
+  mutate(Site=droplevels(as.factor(siteAcronym)),
+         ctime = round(as.numeric(difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_822499427)),units="mins")), digits=1),
+         tm_biocolsuv = difftime(as.POSIXct(ymd_hms(d_222161762)),as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),units="hours"), #time b/w survey completion to bio collection visit check in
+         checktmvisit = case_when( as.numeric(tm_biocolsuv) >72 ~"> 72hrs",
+                                   72 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 48 ~ "> 48 hrs to 72 hrs",
+                                   48 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 24 ~ "> 24 hrs to 48 hrs",   
+                                   24 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 12 ~ "> 12 hrs to 24 hrs",
+                                   12 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 3 ~ "> 3 hrs to 12 hrs",  
+                                   3 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) >= 0 ~ "0 hrs to 3 hrs",
+                                   d_265193023 != "Submitted" ~ "Not Submitted", 
+                                   TRUE ~ "Missing Time"),
+         #Waiting on Erin's approval for this change
+         #tm_biocolsuv < 0 ~ "QC error,
+         #is.na(tm_biocolsuv) ~ "Missing Time"),
+         time_biochk = difftime(as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998)),as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),units="mins"),
+         checktmvisit = factor(checktmvisit, levels=c( "Not Submitted", "Missing Time", "0 hrs to 3 hrs","> 3 hrs to 12 hrs",
+                                                       "> 12 hrs to 24 hrs","> 24 hrs to 48 hrs","> 48 hrs to 72 hrs","> 72hrs"))) 
+
+
+
+## Clincial Survey (& module 1): clinical.survey.m1
+
+clinical_cols <- c("d_173836415_d_266600170_d_139245758",
+                   "d_173836415_d_266600170_d_982213346",
+                   "d_173836415_d_266600170_d_740582332")
+
+coll_sett_all_m1 <- coll_sett_all_m1 %>%
+  mutate(across(all_of(clinical_cols), ~ as.POSIXct(ymd_hms(.)), .names = "{.col}_clc"))
+
+clinical.survey.m1 <- coll_sett_all_m1 %>%
+  filter(all_settings == "Clinical") %>%
+  mutate(
+    clin.sv = case_when(
+      d_253883960 == 231311385 ~ "Submitted",
+      d_253883960 == 615768760 ~ "Started",
+      d_253883960 == 972455046 ~ "Not Started"
+    ),
+    Site = droplevels(factor(Site)),
+    d_173836415_d_266600170_d_139245758_clc = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_139245758)),
+    d_173836415_d_266600170_d_982213346_clc = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)),
+    d_173836415_d_266600170_d_740582332_clc = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_740582332)),
+    clinic.svtime = difftime(as.POSIXct(ymd_hms(d_764863765)), as.POSIXct(ymd_hms(d_534669573)), units = "hours"),
+    ctime = round(as.numeric(clinic.svtime, units = "mins"), 1),
+    clc.coltm = do.call(pmin, c(as.list(dplyr::select(., ends_with("clc"))), na.rm = TRUE)),
+    tm_biocolsuv = difftime(as.POSIXct(ymd_hms(d_764863765)), clc.coltm, units = "hours"),
+    checktmvisit = case_when(
+      as.numeric(tm_biocolsuv) > 72 ~ "> 72hrs",
+      between(as.numeric(tm_biocolsuv), 48, 72) ~ "> 48 hrs to 72 hrs",
+      between(as.numeric(tm_biocolsuv), 24, 48) ~ "> 24 hrs to 48 hrs",
+      between(as.numeric(tm_biocolsuv), 12, 24) ~ "> 12 hrs to 24 hrs",
+      between(as.numeric(tm_biocolsuv), 3, 12)  ~ "> 3 hrs to 12 hrs",
+      between(as.numeric(tm_biocolsuv), 0, 3)   ~ "0 hrs to 3 hrs",
+      d_265193023 != 231311385                  ~ "Not Submitted",
+      TRUE                                      ~ "Missing Time"
+    )
+  ) %>%
+  mutate(
+    checktmvisit = factor(checktmvisit, levels = c(
+      "Not Submitted", "Missing Time", "0 hrs to 3 hrs",
+      "> 3 hrs to 12 hrs", "> 12 hrs to 24 hrs",
+      "> 24 hrs to 48 hrs", "> 48 hrs to 72 hrs", "> 72hrs"
+    ))
+  ) %>%
+  droplevels()
+
+
+```
+
+\newpage
+\newpage
+\FloatBarrier
+
+## Request 4: Biospecimen collection visits and biospecimen survey completion 
+
+a. Overall and by site, age group, sex, race/ethnicity, collection type (clinical vs. research) 
+b. Separately for home mouthwash collections
+
+**NOTE:** Since the research and clinical collection surveys are two different processes, they are represented separately in the metrics report.
+
+\FloatBarrier
+
+### Biospecimen Collection Status (Table 4a: Parts 1-6)
+```{r Request4a_parts1_6, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+#=======================================================================================
+# REQUEST 4 - PART A: Biospecimen Collection Status 
+#=======================================================================================
+
+# COLLECTION STATUS by Groups:
+
+## Collections - By Site:
+collection_bysite <- knitr::kable(table1_totals, col.names=c("Site", "Baseline Collection","No Baseline Collection", "Total Verified Participants"), 
+                          caption='Table 4a.Part 1: Baseline Biospecimen Collection Status Among Verified Participants by Site', 
+                          row.names=FALSE,align=c("l", rep("c", 3)), booktabs = TRUE) %>%  
+  add_indent(seq(1, nrow(table1_totals) - 1)) %>% 
+  kable_styling(latex_options = "scale_down") %>% 
+    footnote(general = "Note: This table was taken directly from the Biospecimen Weekly Metrics Report: Table 1.1.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+## Collections - By Age Group:
+collection_byage <- knitr::kable(BLCol_by_Age_df, 
+             caption="Table 4a.Part 2: Biospecimen Collection Status Among Verified Participants by Age",
+             row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
+    kable_styling(latex_options = "scale_down") %>%  
+    add_indent(seq(1, nrow(BLCol_by_Age_df) - 1)) %>% 
+  kableExtra::footnote(general="Note: This table was taken directly from the Biospecimen Weekly Metrics Report: Table 1.14. Age defined as the de-identified age data reported by sites at time of invitation, not current age at the time of specimen collection. Any missing or unknown age has been reported to the sites as a quality control issue to be resolved.",
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+### check for any Connect_IDs with unknown age:
+ # unknown_age_table <- table1 %>%
+ #   filter(is.na(age)) %>%
+ #  select(Connect_ID, age, Site)
+
+## Collections - By Race/Ethnicity - Site Reported:
+collection_byrace_site <- knitr::kable(BLCol_by_Race_df, 
+                              caption="Table 4a.Part 3: Baseline Biospecimen Collection Status Among Verified Participants by Site-Reported Race",
+                              row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%  
+  add_indent(seq(1, nrow(BLCol_by_Race_df) - 1)) %>% 
+  kableExtra::footnote(general = "Note: Race defined as the de-identified race data reported by sites at time of invitation.",
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+
+
+## Collections - By Race/Ethnicity - Module 1 Reported:
+BLCol_by_Race_m1 <- create_tbl_cross2(coll_sett_all_m1, "m1_race", "biocol.appoint", "row", "race", "Baseline Biospecimen Collection Status", "Total Verified Participants")
+
+collection_byrace_m1 <- knitr::kable(
+  BLCol_by_Race_m1,  
+  caption = 'Table 4a.Part 4: Baseline Biospecimen Collection Status Among Verified Participants by Module 1-Reported Race', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") 
+
+
+## Collections - By Sex:
+collection_bysex <- knitr::kable(BLCol_by_Sex_df, 
+                             caption='Table 4a.Part 5: Baseline Biospecimen Collection Status Among Verified Participants by Sex',
+                             row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%  
+  add_indent(seq(1, nrow(BLCol_by_Sex_df) - 1)) %>% 
+  kableExtra::footnote(general="Note: This table was taken directly from the Biospecimen Weekly Metrics Report: Table 1.13. Sex defined as the de-identified sex data reported by sites at time of invitation.",
+           general_title = "",
+           footnote_as_chunk = TRUE,
+           escape = FALSE,
+           threeparttable = TRUE)
+
+
+
+## Collections - By Collection Type (redefine dataframe from Table 1.2):  
+coll_sett_all_NR <- table1 %>%  
+  filter(BiospeCollection == "Any biospecimen Collections" & (d_410912345== 353358909 | BL_BioSpm_MWSetting_v1r0=="Home")) %>% 
+  mutate(all_settings = case_when((d_650516960=="534621077" | BL_BioSpm_BloodSetting_v1r0=="Research Only" | 
+                                    BL_BioSpm_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
+                                  
+                                  (d_650516960=="664882224" | BL_BioSpm_BloodSetting_v1r0=="Clinical" | 
+                                    BL_BioSpm_UrineSetting_v1r0=="Clinical") & d_684635302=="No mouthwash collected" ~ "Clinical Only", #exclude HMW
+                                  
+                                  (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
+                                    BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") &
+                                    d_878865966=="No blood collected" & d_167958071=="No urine collected" ~ "Home MW Only", #exclude blood or urine
+                                  
+                                  (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
+                                    BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Clinical + Home")) #else clinical & home
+
+table1_allsett_NR <- create_tbl_cross(coll_sett_all_NR, "Site", "all_settings", "row", "Site", "Collection Setting")  
+
+# Collections - By Collection Type:
+collection_bytype <- knitr::kable(table1_allsett_NR, 
+                                   caption='Table 4a.Part 6: Baseline Biospecimen Collection Status Among Verified Participants by Collection Type', 
+                                   row.names=FALSE,align=c("l", rep("c", 3)), booktabs = TRUE) %>%  
+  add_indent(seq(1, nrow(table1_allsett_NR) - 1)) %>% 
+  kable_styling(latex_options = c("scale_down", "hold_position")) %>% 
+  footnote(general = "Note: Any collections indicated under 'Clinical' setting reflect collections in which blood and or urine were the only sample(s) collected; those with any home mouthwash collections are excluded. Any collections indicated under 'Home' setting reflect collections in which home mouthwash was collected, regardless of whether blood or urine was collected.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+
+#Print tables - Collection visits by groups (Parts 1 - 6):
+collection_bysite
+collection_byage
+collection_byrace_site
+collection_byrace_m1
+collection_bysex
+collection_bytype
+```
+
+\FloatBarrier
+
+### Biospecimen Survey Status (Research and Clinical separately) (Table 4a: Parts 7-16)
+
+```{r Request4a_parts7_16, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+#=======================================================================================
+# REQUEST 4 - PART A: Survey Status (Research [BUM] & Clinical [BU])
+#=======================================================================================
+
+
+## By Site - dataframes:
+BUM_status_site <- create_tbl_cross(research.survey, "Site", "d_265193023", "row", " ", " ")
+colnames(BUM_status_site)[ncol(BUM_status_site)] = "Total Research Surveys"
+
+BU_status_site <- create_tbl_cross(clinical.survey, "Site", "clin.sv","row", " ", " ")
+colnames(BU_status_site)[ncol(BU_status_site)] = "Total Clinical Surveys"
+
+### By Site - Research Collections:
+bysite_research <- knitr::kable(
+  BUM_status_site,  
+  caption = 'Table 4a.Part 7: Baseline Biospecimen Survey Status Among Research Collections by Site', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") %>% 
+  footnote(general = "Note: This table was taken directly from the Biospecimen Weekly Metrics Report: Table 3.1.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+### By Site - Clinical Collections:
+bysite_clinical <- knitr::kable(
+  BU_status_site, 
+  caption = 'Table 4a.Part 8: Baseline Biospecimen Survey Status Among Clinical Collections by Site', 
+  row.names = FALSE,
+  align = c("l", rep("c", 8)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") %>% 
+  footnote(general = "Note: This table was taken directly from the Biospecimen Weekly Metrics Report: Table 3.2.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+
+
+
+## By Age Group - dataframes:
+BUM_status_age <- create_tbl_cross(research.survey, "age", "d_265193023", "row", " ", " ")
+colnames(BUM_status_age)[ncol(BUM_status_age)] = "Total Research Surveys"
+
+BU_status_age <- create_tbl_cross(clinical.survey, "age", "clin.sv","row", " ", " ")
+colnames(BU_status_age)[ncol(BU_status_age)] = "Total Clinical Surveys"
+
+### By Age - Research Collections:
+byage_research <- knitr::kable(
+  BUM_status_age,  
+  caption = 'Table 4a.Part 9: Baseline Biospecimen Survey Status Among Research Collections by Age Group', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") %>% 
+  footnote(general = "Note: Age defined as the de-identified age data reported by sites at time of invitation. Any missing or unknown age has been report to the sites as a quality control issue to be resolved.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+### By Age - Clinical Collections:
+byage_clinical <- knitr::kable(
+  BU_status_age, 
+  caption = 'Table 4a.Part 10: Baseline Biospecimen Survey Status Among Clinical Collections by Age Group ', 
+  row.names = FALSE,
+  align = c("l", rep("c", 8)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") %>% 
+  footnote(general = "Note: Age defined as the de-identified age data reported by sites at time of invitation. Any missing or unknown age has been report to the sites as a quality control issue to be resolved.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+
+
+### By Race/Ethnicity - dataframes:
+BUM_status_race <- create_tbl_cross(research.survey, "race", "d_265193023", "row", " ", " ")
+colnames(BUM_status_race)[ncol(BUM_status_race)] = "Total Research Surveys"
+
+BUM_status_race_m1 <- create_tbl_cross(research.survey.m1, "m1_race", "d_265193023", "row", " ", " ")
+colnames(BUM_status_race_m1)[ncol(BUM_status_race_m1)] = "Total Research Surveys" 
+
+BU_status_race <- create_tbl_cross(clinical.survey, "race", "clin.sv","row", " ", " ")
+colnames(BU_status_race)[ncol(BU_status_race)] = "Total Clinical Surveys" 
+
+BU_status_race_m1 <- create_tbl_cross(clinical.survey.m1, "m1_race", "clin.sv","row", " ", " ")
+colnames(BU_status_race_m1)[ncol(BU_status_race_m1)] = "Total Clinical Surveys" 
+
+### By Site-Reported Race/Ethnicity - Research Collections:
+byrace_site_research <- knitr::kable(
+  BUM_status_race,  
+  caption = 'Table 4a.Part 11: Baseline Biospecimen Survey Status Among Research Collections by Site-Reported Race/Ethnicity', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") %>% 
+  kableExtra::footnote(general = "Note: Race defined as the de-identified race data reported by sites at time of invitation.",
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+### By Module1-Reported Race/Ethnicity - Research Collections:
+byrace_m1_research <- knitr::kable(
+  BUM_status_race_m1,  
+  caption = 'Table 4a.Part 12: Baseline Biospecimen Survey Status Among Research Collections by Module1-Reported Race/Ethnicity', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") 
+ 
+### By Site-Reported Race/Ethnicity - Clinical Collections:
+byrace_site_clinical <- knitr::kable(
+  BU_status_race,  
+  caption = 'Table 4a.Part 13: Baseline Biospecimen Survey Status Among Clinical Collections by Site-Reported Race/Ethnicity', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") %>% 
+  kableExtra::footnote(general = "Note: Race defined as the de-identified race data reported by sites at time of invitation.",
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+### By Module1-Reported Race/Ethnicity - Clinical Collections:
+byrace_m1_clinical <- knitr::kable(
+  BU_status_race_m1,  
+  caption = 'Table 4a.Part 14: Baseline Biospecimen Survey Status Among Clinical Collections by Module1-Reported Race/Ethnicity', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") 
+ 
+
+
+
+## By Sex - dataframes:
+BUM_status_sex <- create_tbl_cross(research.survey, "sex", "d_265193023", "row", " ", " ")
+colnames(BUM_status_sex)[ncol(BUM_status_sex)] = "Total Research Surveys"
+
+BU_status_sex <- create_tbl_cross(clinical.survey, "sex", "clin.sv", "row", " ", " ")
+colnames(BU_status_sex)[ncol(BU_status_sex)] = "Total Clinical Surveys"
+
+
+
+### By Sex - Research Collections:
+bysex_research <- knitr::kable(
+  BUM_status_sex,  
+  caption = 'Table 4a.Part 15: Baseline Biospecimen Survey Status Among Research Collections by Sex', 
+  row.names = FALSE,
+  align = c("l", rep("c", 6)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") 
+
+### By Sex - Clinical Collections:
+bysex_clinical <- knitr::kable(
+  BU_status_sex, 
+  caption = 'Table 4a.Part 16: Baseline Biospecimen Survey Status Among Clinical Collections by Sex', 
+  row.names = FALSE,
+  align = c("l", rep("c", 8)),
+  booktabs = TRUE
+) %>% 
+  kable_styling(latex_options = "scale_down", "HOLD_position") 
+
+###
+
+# Print tables: 
+print(bysite_research)
+print(bysite_clinical)
+print(byage_research)
+print(byage_clinical)
+print(byrace_site_research)
+print(byrace_m1_research)
+print(byrace_site_clinical)
+print(byrace_m1_clinical)
+print(bysex_research)
+print(bysex_clinical)
+```
+
+\FloatBarrier
+\newpage
+\FloatBarrier
+
+### Home Mouthwash Collections (Table 4b: Parts 1-5)
+
+```{r Request4b, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+#================================================
+# REQUEST 4 - PART B: Mouthwash
+#================================================
+
+# Add in MW variables from coll_sett_all_m1
+kit_table_merged <- kit_table %>%
+  mutate(Connect_ID = as.character(Connect_ID)) %>%
+  left_join(
+    coll_sett_all_m1 %>%
+      mutate(Connect_ID = as.character(Connect_ID)) %>%
+      dplyr::select(Connect_ID, siteAcronym, age, sex, race, m1_race, all_settings),
+    by = "Connect_ID"
+  ) %>%
+  left_join(
+    clinical.survey.m1 %>%
+      mutate(Connect_ID = as.character(Connect_ID)) %>%
+      dplyr::select(Connect_ID, m1_race) %>%
+      dplyr::rename(multi_race = m1_race),
+    by = "Connect_ID"
+  )
+
+# grep("race", names(kit_table_merged), value = TRUE)
+# unique(kit_table_merged$race) 
+# unique(kit_table_merged$multi_race)   
+
+
+MW_status <- kit_table_merged %>%  filter(Kit_Status_r2=="Received" | Kit_Status_r1=="Received" | Kit_Status_int=="Received") %>%
+  mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
+                                   d_547363263==615768760 ~ "Started",
+                                   d_547363263==231311385 ~ "Submitted"),
+         MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted")))  
+
+
+
+#MW_bysite
+MW_status_bysite <- create_tbl_cross(MW_status, "Site", "MWSrvy_status", "row", "Site", " ")
+colnames(MW_status_bysite)[ncol(MW_status_bysite)] <- "Total Participants with Received Kits"
+
+
+knitr::kable(MW_status_bysite,
+             caption="Table 4b. Part 1: Baseline - Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits by Site",
+             row.names=FALSE, align=c("l", rep("c", 4)),booktabs = TRUE) %>% 
+  add_indent(seq(1, nrow(MW_status_bysite) - 1)) %>% 
+  kable_styling(latex_options = "scale_down") %>% 
+  kableExtra::footnote(
+    general = "Note: This table was taken directly from Biospecimen Weekly Metrics Report: Table 7.7.",
+    general_title = " "
+  )
+ 
+
+#MW_byage
+MW_status_byage <- create_tbl_cross2(
+  MW_status,
+  "age",
+  "MWSrvy_status",
+  "row",
+  "Age",
+  " ",
+  margin_text = "Total Participants with Received Kits"
+)
+colnames(MW_status_byage)[ncol(MW_status_byage)] <- "Total Verified Participants"
+
+
+knitr::kable(MW_status_byage, 
+  caption="Table 4b. Part 2: Baseline - Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits by Age Group",
+  row.names=FALSE, align=c("l", rep("c", 5)), booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  add_indent(seq(1, nrow(MW_status_bysite) - 1)) %>%
+  footnote(general = "Note: Age defined as the de-identified age data reported by sites at time of invitation. Any missing or unknown age has been report to the sites as a quality control issue to be resolved.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) 
+
+### check for any Connect_IDs with unknown age:
+# unknown_age_table_MW <- MW_status %>%
+#   filter(is.na(age)) %>%
+#   select(Connect_ID, age, Site)
+
+#MW_byrace_site
+MW_status_byrace_site <- create_tbl_cross2(
+  MW_status,
+  "race",
+  "MWSrvy_status",
+  "row",
+  "race",
+  " ",
+  margin_text = "Total Participants with Received Kits"
+)
+colnames(MW_status_byrace_site)[ncol(MW_status_byrace_site)] <- "Total Verified Participants"
+
+
+knitr::kable(MW_status_byrace_site, 
+  caption="Table 4b. Part 3: Baseline - Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits by Site-Reported Race/Ethnicity",
+  row.names=FALSE, align=c("l", rep("c", 5)), booktabs = TRUE) %>%
+    footnote(general = "Note: Race defined as the de-identified race data reported by sites at time of invitation.", 
+           general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  add_indent(seq(1, nrow(MW_status_byrace_site) - 1)) 
+
+
+#MW_byrace_m1
+MW_status_byrace_m1 <- create_tbl_cross2(
+  MW_status,
+  "multi_race",
+  "MWSrvy_status",
+  "row",
+  "multi_race",
+  " ",
+  margin_text = "Total Participants with Received Kits"
+)
+colnames(MW_status_byrace_m1)[ncol(MW_status_byrace_m1)] <- "Total Verified Participants"
+
+
+knitr::kable(MW_status_byrace_m1, 
+  caption="Table 4b. Part 4: Baseline - Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits by Module1-Reported Race/Ethnicity",
+  row.names=FALSE, align=c("l", rep("c", 5)), booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  add_indent(seq(1, nrow(MW_status_byrace_m1) - 1))
+  
+
+
+#MW_bysex
+MW_status_bysex <- create_tbl_cross2(
+  MW_status,
+  "sex",
+  "MWSrvy_status",
+  "row",
+  "sex",
+  " ",
+  margin_text = "Total Participants with Received Kits"
+)
+colnames(MW_status_bysex)[ncol(MW_status_bysex)] <- "Total Verified Participants"
+
+
+knitr::kable(MW_status_bysex, 
+  caption="Table 4b. Part 5: Baseline - Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits by Sex",
+  row.names=FALSE, align=c("l", rep("c", 5)), booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  add_indent(seq(1, nrow(MW_status_bysex) - 1)) 
+
+
+
+###
+
+# Print tables - Request 4b: Parts 1-5: 
+# print(MW_bysite)
+# print(MW_byage)
+# print(MW_byrace_site)
+# print(MW_byrace_m1)
+# print(MW_bysex)
+
+```
+
+\FloatBarrier
+\newpage
+
+## Request 5: Number of specimens collected
+
+a. Overall
+b. By specimen type
+
+\FloatBarrier
+```{r Request5, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+#================================================
+# REQUEST 5: Number of Specimens Collected
+#================================================
+
+# spec_by_site_R2 <- create_tbl_cross(table4_redone__R, 'Specimens Collected', "Site", "row", " ", " ")
+# colnames(spec_by_site_R2)[ncol(spec_by_site_R2)] <- "Total Research Collections"
+
+knitr::kable(spec_by_site_R , 
+             caption='Table 5a: Baseline Research Biospecimens Collected by Specimen Type', 
+             row.names=FALSE,align=c("l",rep("c", 6)), booktabs = TRUE)  %>% 
+  kable_styling(latex_options = "scale_down") %>% 
+  landscape() %>% 
+  kableExtra::footnote(
+    general = "Note: This table was taken directly from Biospecimen Weekly Metrics Report: Table 2.1",
+    general_title = " "
+  )
+
+# spec_by_site_C2 <- create_tbl_cross(table4_redone__C, 'Specimens Collected', "Site", "row", " ", " ")
+# colnames(spec_by_site_C2)[ncol(spec_by_site_C2)] <- "Total Clinical Collections"
+
+knitr::kable(spec_by_site_C, 
+             caption='Table 5b: Baseline Clinical Biospecimens Collected by Specimen Type', 
+             row.names=FALSE,align=c("l",rep("c", 9)), booktabs = TRUE)  %>% 
+  kable_styling(latex_options = "scale_down")  %>% 
+  landscape() %>% 
+  kableExtra::footnote(
+    general = "Note: This table was taken directly from Biospecimen Metrics Weekly Report: Table 2.2",
+    general_title = " "
+  )
+```
+
+\FloatBarrier
+\newpage
+
+## Request 6: Needle to processing time
+
+**NOTE:** Table 6a (Clinical) and Table 6b (Research) were taken directly from the Biospecimen Weekly Metrics Report: Table 5.4 and Table 5.2, respectively. Totals per IHC and overall were generated for each collection approach separately.
+
+
+```{r Request6, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+## Note: In previous metrics reports, there were no totals per IHC. Kelsey added / modified code for in Section Table28b to generate these totals
+
+#================================================
+# REQUEST 6: Needle to Processing Time
+#================================================
+
+# BY CLINICAL COLLECTIONS
+# Table 6a: Baseline Collection-To-Receipt Time (in Days) Among Clinical Collections by Site
+
+ctable_clin_loc_bptl <- knitr::kable(clin_coll_times[, c(1:7)], 
+caption="Table 6a: Baseline Collection-To-Receipt Time (in Days) \n Among Clinical Collections by Clinic Location",
+col.names=c("Collection Location","1 Day","2 Days","3 Days","4 Day",">4 Days","Total Received Clinical Collections"),
+                                     align=c("l",rep("c", 6)), 
+                                     booktabs = TRUE, longtable = TRUE) %>%  
+  pack_rows(index = site_group_counts) %>%  # Ensure "Total" is last
+  row_spec(which(clin_coll_times$Collection_Location %in% names(site_group_counts)), hline_after = TRUE) %>%
+  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
+  landscape() %>% 
+  kableExtra::footnote(general = paste0("Note: At the time of reporting, ", dim(biospe_adhoc2_missings)[[1]], 
+                              " of the Clinical Collections did not have collection and/or receipt date/time information available."), 
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+ctable_clin_loc_bptl
+
+# BY RESEARCH COLLECTIONS
+# Table 6b: Baseline Collection-To-Receipt Time (in Days) Among Research Collections by Site
+
+rsch_coll_times52_6b <- knitr::kable(rsch_coll_times[, c(1:7)], 
+             caption="Table 6b: Baseline Collection-To-Receipt Time (in Days) Among Research Collections by Collection Location",
+             col.names=c("Collection Location","1 Day","2 Days","3 Days","4 Day",">4 Days","Total Received Research Collections"),
+             align=c("l",rep("c", 6)), 
+             booktabs = TRUE, longtable = TRUE) %>%  
+  pack_rows(index = site_group_counts) %>%  # Ensure "Total" is last
+    row_spec(which(rsch_coll_times$Collection_Location %in% names(site_group_counts)), hline_after = TRUE) %>%
+    kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=7) %>% 
+  landscape() %>% 
+  kableExtra::footnote(general = paste0("Note: At the time of reporting, ", dim(biospe_adhoc_missings)[[1]], 
+                            " of the Research Collections do not have receipt date/time information available."), 
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+rsch_coll_times52_6b
+
+# print(clin_coll_times[, 1:7])
+# rsch_coll_times[, 1:7] 
+
+```
+
+\FloatBarrier
+\newpage
+
+## Request 7: Biospecimen collection incidents and deviations
+
+  - Incidents at biospecimen collection: Non-complete draws, fainting, other incidents
+  - Incidents after collection, before arrival at NCI lab
+  - Processing incidents and deviations
+
+**NOTE:** Many of the requested tables can be found in Baseline Collection Completeness section of the Biospecimen Metrics 
+
+```{r Request7, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+#============================================================
+# REQUEST 7: Biospecimen Collection Incidents and Deviations
+#============================================================
+
+# TABLES DIRECTLY FROM BIOSPECIMEN REPORT:
+
+# Table7a: Total Number of Deviations from Baseline Specimens by Site
+Table7a <- knitr::kable(Deviation_Freq,
+                      col.names=c("Site","Any Deviations","No Deviations", "Total Tubes Collected"), 
+                      caption='Table 7a: Total Number of Deviations from Baseline Specimens by Site',
+                      row.names=FALSE, align=c("l",rep("c", 3)), booktabs = TRUE ) 
+add_footnote(Table7a, "Note: This table was taken directly from Biospecimen Weekly Metrics Report: Table 2.5. This table includes deviations on all baseline specimens except home mouthwash.", notation = "none") 
+
+
+# Table7b: 
+Table7b <- knitr::kable(discard.site, 
+             caption='Table 7b: Number of Discarded Tubes Among Biospecimen Collections by Tube Type and Site', 
+             row.names=FALSE,  
+             align=c("l",rep("c", 10)), booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down")
+add_footnote(Table7b, "Note: This table was taken directly from Biospecimen Weekly Metrics Report: Table 2.8. 'Short Draw' reason applicable to blood collection tubes only.", notation="none")
+
+
+# Table7c: Reason Not Collected Among Baseline Research Collection Tubes by Site
+Table7c <- knitr::kable(reason_notcol,  
+                         caption='Table 7c: Reason Not Collected Among Baseline Research Collection Tubes by Site', 
+                         row.names=FALSE,align=c("l",rep("c", 7)), booktabs = TRUE) %>%  
+  add_indent(seq(1, nrow(reason_notcol) - 1)) %>% 
+  kable_styling(latex_options = "scale_down")
+add_footnote(Table7c,"Note: This table was taken directly from Biospecimen Weekly Metrics Report: Table 2.6. The 'Short Draw' is applicable to blood collection tubes only.", notation="none")
+
+
+# Table7d: Reason Not Collected Among Baseline Research Collection Tubes by Site
+Table7d <- knitr::kable(tube_type_notcolreasons,  
+                          caption='Table 7d: Reason Not Collected Among Baseline Research Collection Tubes by Tube Type',
+                          row.names=FALSE,align=c("l",rep("c", 7)), booktabs = TRUE)  %>%  
+  add_indent(seq(1, nrow(tube_type_notcolreasons) - 1))  %>% 
+  kable_styling(latex_options = "scale_down")
+add_footnote(Table7d, "Note: This table was taken directly from Biospecimen Weekly Metrics Report: Table 2.7. 'Short Draw' reason applicable to blood collection tubes only.", notation="none")
+```
+\FloatBarrier
+\newpage
+
+```{r Request7_dataset, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+coll_sett_all<- coll_sett_all%>% arrange(Site)
+
+tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
+#tubes[grepl("00", tubes$`Variable Name`),]
+
+
+bld.ls <- c("d_299553921","d_703954371","d_454453939","d_838567176","d_652357376","d_376960806","d_232343615","d_589588440","d_677469051", "d_683613884","d_958646668", "d_505347689") #STRECK added 
+
+tubeid <- grep("d_825582494", names(coll_sett_all), value=TRUE) #tube ID
+deviation <- grep("d_678857215",names(coll_sett_all),value=TRUE) 
+colid <- grep("d_593843561", names(coll_sett_all), value=TRUE) #collected yes/no
+discard <- grep("d_762124027",names(coll_sett_all),value=TRUE) #discard yes/no
+biodiscard <- coll_sett_all[,(which(names(coll_sett_all) %in% discard))]
+
+coll_sett_all$blddev <- 0 #blood deviations
+coll_sett_all$bldcol <- 0 #blood collections
+coll_sett_all$blddid <- 0 #discarded
+for(i in 1:length(bld.ls)){
+  
+  bldcol <- ifelse(coll_sett_all[,paste(bld.ls[i],"d_593843561",sep="_")] == 104430631 | is.na(coll_sett_all[,paste(bld.ls[i],"d_593843561",sep="_")]),0,1)  ##for tube collected
+  
+  blddev <- ifelse(coll_sett_all[,paste(bld.ls[i],"d_678857215",sep="_")]==104430631 | is.na(coll_sett_all[,paste(bld.ls[i],"d_678857215",sep="_")]),0,1) #for tube deviations yes/no
+  
+  blddid <- ifelse(coll_sett_all[,paste(bld.ls[i],"d_762124027",sep="_")]==104430631 | is.na(coll_sett_all[,paste(bld.ls[i],"d_762124027",sep="_")]),0,1)
+  
+  coll_sett_all$blddev <- coll_sett_all$blddev+blddev
+  coll_sett_all$bldcol <- bldcol + coll_sett_all$bldcol ###to check collection
+  coll_sett_all$blddid <- coll_sett_all$blddid+blddid  
+  
+}
+
+#table(coll_sett_all$d_650516960,coll_sett_all$bldcol)
+coll_sett_all<- coll_sett_all%>% mutate(bloodcomplete = ifelse((d_650516960==534621077 & bldcol == 5) | (d_650516960==664882224 & bldcol == 11), "Blood.Completion" ,#blood collection completion
+                                                   ifelse( (d_650516960==534621077 & (bldcol<5 & bldcol>0)) | (d_650516960==664882224 & (bldcol <  11 & bldcol > 0)),"Blood.Incompleted","NoBlood")),
+                            Urine_col = ifelse(d_973670172_d_593843561==353358909, 1, ifelse(d_973670172_d_593843561==104430631,0,0)),
+                            MW_col = ifelse(d_143615646_d_593843561==353358909,1,ifelse(d_143615646_d_593843561==104430631,0,0)),
+                            biocol_Setting = case_when(d_650516960==534621077  ~"Research",
+                                                       d_650516960==664882224 ~ "Clinical",
+                                                       d_650516960 ==103209024 ~ "Home")) 
+coll_sett_all$Biospe_col <- coll_sett_all$bldcol + coll_sett_all$Urine_col + coll_sett_all$MW_col    
+coll_sett_all$BaseBLDCol <-ifelse(coll_sett_all$bldcol>0,1,ifelse(is.na(coll_sett_all$bldcol),NA,0)) #blood collection Yes/No
+#coll_sett_all[duplicated(coll_sett_all$Connect_ID),]$Connect_ID
+
+
+
+#Participants who checked in for a baseline biospecimen visit but did not give any samples
+
+tube_col <- coll_sett_all %>% group_by(as.character(Connect_ID),Site,all_settings) %>% 
+  filter(d_410912345== 353358909) %>% 
+  dplyr::summarise(bldcol_max = max(bldcol),
+                   Urine_col_max= max(Urine_col),
+                   MW_col_max=max(MW_col),
+                   d_973670172_d_593843561_max=max(d_973670172_d_593843561),
+                   d_143615646_d_593843561_max = max(d_143615646_d_593843561),
+                   d_410912345_max=max(d_410912345),
+                   collection.tm =max(as.POSIXct(ymd_hms(d_556788178))),
+                   schedulecol.tm =min(as.POSIXct(ymd_hms(d_678166505))))
+
+#dd[grepl("BioChk",dd$`Variable Name`),]
+names(tube_col)[names(tube_col) == "as.character(Connect_ID)"] <- "Connect_ID"
+recr_bio <- base::merge(recrver1,tube_col,by="Connect_ID")
+bio_checkin_resh <- recr_bio  %>% filter(!is.na(d_331584571_d_266600170_d_840048338) & all_settings=="Research") %>% select(BiospeCollection ) %>% tbl_summary()
+#table(bio_checkin_resh$BiospeCollection)
+
+tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
+tube.ls <- paste0("d_", trimws(paste(tubes$conceptId.1,collapes="")))
+
+coll_sett_all$tubedev <- 0 #biospecimen deviations
+coll_sett_all$tubecol <- 0 #tube collections
+coll_sett_all$tubedid <- 0 #tube discarded
+
+for(i in 1:length(tube.ls)){
+  
+  tubecol <- ifelse(coll_sett_all[,paste(tube.ls[i],"d_593843561",sep="_")] == 104430631 | is.na(coll_sett_all[,paste(tube.ls[i],"d_593843561",sep="_")]),0,1)  ##for tube collected
+  
+  tubedev <- ifelse(coll_sett_all[,paste(tube.ls[i],"d_678857215",sep="_")]==104430631 | is.na(coll_sett_all[,paste(tube.ls[i],"d_678857215",sep="_")]),0,1) #for tube deviations yes/no
+  
+  tubedid <- ifelse(coll_sett_all[,paste(tube.ls[i],"d_762124027",sep="_")]==104430631 | is.na(coll_sett_all[,paste(tube.ls[i],"d_762124027",sep="_")]),0,1)
+  
+  coll_sett_all$tubedev <- coll_sett_all$tubedev+tubedev
+  coll_sett_all$tubecol <- tubecol + coll_sett_all$tubecol ###to check collection
+  coll_sett_all$tubedid <- coll_sett_all$tubedid+tubedid  
+}
+#table(coll_sett_all$tubecol)
+#table(coll_sett_all$tubedev)
+
+
+
+
+coll_sett_all$tube_nodev <- coll_sett_all$tubecol-coll_sett_all$tubedev
+total1 <- sum(coll_sett_all$tubedev) 
+total2 <- sum(coll_sett_all$tube_nodev) 
+tube_dev <- as.data.frame(aggregate( coll_sett_all$tubedev,                
+                                     by = list(coll_sett_all$Site),              
+                                     FUN = sum))
+tube_nodev <- as.data.frame(aggregate( coll_sett_all$tube_nodev,               
+                                       by = list(coll_sett_all$Site),              
+                                       FUN = sum))
+
+
+
+Deviation_Freq <- base::merge(tube_dev,tube_nodev,by="row.names")
+
+Deviation_Freq <- Deviation_Freq[,c(2,3,5)]
+Deviation_Freq$Total <- Deviation_Freq[,2]+Deviation_Freq[,3]
+Deviation_Freq$dev_n_pct <- ifelse(Deviation_Freq[,2] >0, paste0(format(Deviation_Freq[,2],big.mark=",")," (", round(100*Deviation_Freq[,2]/Deviation_Freq$Total, 1)," %)"), "0 (0 %)")
+Deviation_Freq$nodev_n_pct <- ifelse(Deviation_Freq[,3] >0, paste0(format(Deviation_Freq[,3],big.mark=",")," (",  round(100*Deviation_Freq[,3]/Deviation_Freq$Total,1), " %)"), "0 (0 %)")
+
+Deviation_Freq[10,c(1:6)] <- c("Total",total1, total2,format(sum(coll_sett_all$tubecol),big.mark=","),
+                               paste0(format(total1,big.mark=",")," (", round(100*sum(as.numeric(Deviation_Freq[1:9,2]))/sum(as.numeric(Deviation_Freq$Total), na.rm=T), 1)," %)"),  
+                               paste0(format(total2,big.mark=",")," (", round(100*sum(as.numeric(Deviation_Freq[1:9,3]))/sum(as.numeric(Deviation_Freq$Total), na.rm=T),1)," %)"))     
+Deviation_Freq <- Deviation_Freq %>% mutate(Site = ifelse(is.na(Group.1.x), "Total",  as.character(Group.1.x))) ###to replace NA in the factor variable
+
+
+
+#Number of deviations by biospecimen type and by tube type 
+tubes <- unique(y[grepl(" Tube ",y$`Secondary.Source`),c("conceptId.1","Secondary.Source")])
+tube.ls <- paste0("d_", trimws(paste(tubes$conceptId.1,collapes="")))
+
+dev_tube <- NULL
+for (i in 1:length(tube.ls)){
+  
+  id <- paste(tube.ls[i],"d_825582494",sep="_")
+  tube <- paste(tube.ls[i],"d_678857215",sep="_")
+  tube_dev <- paste(tube.ls[i],"d_248868659", sep="_")
+  deviation <- grep(tube_dev,colnames(coll_sett_all),value=TRUE)
+  tmp <- as.data.frame(coll_sett_all[,which(colnames(coll_sett_all) %in% c(id,tube,deviation))] )
+  tmp <- tmp[which(!is.na(tmp[,(colnames(tmp) == id)])),]
+  
+  dev_long <- reshape2::melt(tmp, 
+                               id.vars=c(id,tube), 
+                               measure.vars=deviation,
+                               variable.name="dev_type",
+                               value.name="deviation")
+  
+  
+  colnames(dev_long)[grep("d_678857215",names(dev_long))] <- "d_678857215"
+  colnames(dev_long)[grep("d_825582494",names(dev_long))] <- "TubeID"
+  
+  dev_long <- dev_long[complete.cases(dev_long[,c("TubeID","d_678857215","dev_type","deviation")]),]
+  
+  dev_tube <- dplyr::bind_rows(dev_tube,dev_long)
+  
+}  
+
+dev_tube1   <- dev_tube %>% filter(d_678857215 ==353358909 & deviation == 353358909)  %>%  
+  mutate(biospecimen=ifelse(grepl("d_973670172",dev_type), "urine",
+                            ifelse(grepl("d_143615646",dev_type),"Mouthwash","blood")),
+         tube_type = case_when(grepl("d_973670172",dev_type) ~ "Urine Tube1",
+                               grepl("d_143615646",dev_type) ~ "MW Tube1",
+                               grepl("d_299553921",dev_type) ~ "SS Tube1",
+                               grepl("d_703954371",dev_type) ~ "SS Tube2",
+                               grepl("d_454453939",dev_type) ~ "EDTA Tube1",
+                               grepl("d_838567176",dev_type) ~ "Heparin Tube1",
+                               grepl("d_652357376",dev_type) ~ "ACD Tube1",
+                               grepl("d_677469051",dev_type) ~ "EDTA Tube2",
+                               grepl("d_683613884",dev_type) ~ "EDTA Tube3",
+                               grepl("d_376960806",dev_type) ~ "SS Tube3",
+                               grepl("d_232343615",dev_type) ~ "SS Tube4",
+                               grepl("d_589588440",dev_type) ~ "SS Tube5",
+                               grepl("d_958646668",dev_type) ~ "Heparin Tube2",
+                               grepl("d_505347689",dev_type) ~ "STRECK Tube1"), 
+         
+         deviationnotes =case_when(sapply(strsplit(as.character(dev_type),"d_"),tail,1) =="102695484" ~ "Deviation Clot < 30min",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="242307474" ~ "Hemolyzed", 
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="283900611" ~ "Mislabel Resolved",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="313097539" ~ "Outside Contamated",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="453343022" ~ "Other",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="472864016" ~ "Broken", 
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="550088682" ~ "Temparture Too Low",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="561005927" ~ "Cent Low",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="635875253" ~ "Broken Gel",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="654002184" ~ "Centrifuge Too Long",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="684617815" ~ "MisLabled Discard",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="690540566" ~"Tempature Too High",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="728366619" ~"Low Volume-(tube/container partially filled but still usable)",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="742806035" ~"MW < 30s",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="757246707" ~"Leak/Spilled",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="777486216" ~"Tube Size",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="810960823" ~"Discard",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="861162895" ~"Cent High",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="912088602" ~"Clot > 2h",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="937362785" ~"Centrifuge Too Short",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="956345366" ~"Insufficient Volume",
+                                   sapply(strsplit(as.character(dev_type),"d_"),"[[",4) =="982885431" ~ "Not Found"))
+notcol_tubes <- colnames(coll_sett_all)[grepl("883732523",colnames(coll_sett_all))] 
+col_tubes <- colnames(coll_sett_all)[grepl("d_593843561",colnames(coll_sett_all))] 
+dev_tubes <- colnames(coll_sett_all)[grepl("d_678857215",colnames(coll_sett_all))] 
+notcol.ls <- sapply(strsplit(notcol_tubes, "_d"),"[[",1)
+notcol_tube <- NULL
+tubenotcol.ls <-list()
+
+
+for (i in 1:length(notcol.ls)){
+  
+  tubecol <- paste(notcol.ls[i],"d_593843561",sep="_")
+  tube_notcol <- paste(notcol.ls[i],"d_883732523", sep="_") #notcolnotes
+  TubeID <- paste(tube.ls[i],"d_825582494",sep="_")
+  
+  tube_deviation <- paste(notcol.ls[i], "d_678857215",sep="_")
+  
+  select <- c(TubeID,tubecol,tube_notcol,tube_deviation)
+  tmp <- coll_sett_all[,(colnames(coll_sett_all)%in% c(select,"d_820476880","Site","biocol_Setting"))] 
+  notcol <- tmp 
+  colnames(notcol)[colnames(notcol)==TubeID] <- "TubeID"
+  colnames(notcol)[colnames(notcol)==tubecol] <- "tubecol"
+  colnames(notcol)[colnames(notcol)==tube_notcol] <- "tube_notcol"
+  
+  colnames(notcol)[colnames(notcol)==tube_deviation] <- "tube_deviation"
+  
+  
+  notcol$tubeID <- notcol.ls[i]
+  
+  notcol_tube <- dplyr::bind_rows(notcol_tube,notcol)
+  
+} 
+
+
+collection_long <- NULL
+for (i in 1:length(tube.ls)){
+  
+  tubeid <- paste(tube.ls[i],"d_825582494",sep="_")
+  tubecol <- paste(tube.ls[i],"d_593843561",sep="_")
+  tube_deviation <- paste(tube.ls[i], "d_678857215",sep="_")
+  tube_discard <- paste(tube.ls[i], "d_762124027",sep="_")
+  select <- c(tubeid,tubecol,tube_deviation,tube_discard)
+  tmp <- coll_sett_all[,(colnames(coll_sett_all)%in% c(select,"d_820476880","Site","biocol_Setting"))] 
+  col <- tmp 
+  colnames(col)[colnames(col)==tubeid] <- "TubeID"
+  colnames(col)[colnames(col)==tubecol] <- "tubecol"
+  colnames(col)[colnames(col)==tube_deviation] <- "tube_deviation"
+  colnames(col)[colnames(col)==tube_discard] <- "tube_discard"
+  
+  col$tubeID <- tube.ls[i]
+  collection_long <- dplyr::bind_rows(collection_long,col)
+} 
+
+collection_long <- collection_long  %>% 
+  dplyr:: mutate(deviation = case_when(tube_deviation == 353358909 ~ "Any Deviation",
+                                       tube_deviation == 104430631 ~ "No Deviation"),
+                 Collected = case_when(tubecol ==353358909 ~ "Collected",
+                                       tubecol == 104430631 ~ "Not  Collected"),
+                 Discarded = case_when(tube_discard == 353358909 ~ "Any Discard",
+                                       tube_discard == 104430631 ~ "No Discard"),
+                 biospecimen=ifelse(tubeID=="d_973670172", "urine",
+                                    ifelse(tubeID=="d_143615646","Mouthwash","blood")),
+                 tube_type = case_when(tubeID == "d_973670172"  ~ "Urine Tube1",
+                                       tubeID == "d_143615646"  ~ "MW Tube1",
+                                       tubeID == "d_299553921"  ~ "SS Tube1",
+                                       tubeID == "d_703954371"  ~ "SS Tube2",
+                                       tubeID == "d_454453939"  ~ "EDTA Tube1",
+                                       tubeID == "d_838567176"  ~ "Heparin Tube1",
+                                       tubeID == "d_652357376"  ~ "ACD Tube1",
+                                       tubeID == "d_677469051"  ~ "EDTA Tube2",
+                                       tubeID == "d_683613884"  ~ "EDTA Tube3",
+                                       tubeID == "d_376960806"  ~ "SS Tube3",
+                                       tubeID == "d_232343615"  ~ "SS Tube4",
+                                       tubeID == "d_589588440"  ~ "SS Tube5",
+                                       tubeID == "d_505347689"  ~ "STRECK Tube1", 
+                                       tubeID == "d_958646668"  ~ "Heparin Tube2"))
+collection_long$tube_type <- factor(collection_long$tube_type, levels=c("SS Tube1", "SS Tube2","SS Tube3", "SS Tube4", "SS Tube5",
+                                                                        "Heparin Tube1","Heparin Tube2","EDTA Tube1", "EDTA Tube2",
+                                                                        "EDTA Tube3","ACD Tube1", "STRECK Tube1", "Urine Tube1","MW Tube1" ) )   
+
+
+
+dev_tube1$tube_dev <- paste(dev_tube1$tube_type,"Deviation", dev_tube1$deviationnotes,sep=" ")
+dev_tube1$tubeID <- substr(dev_tube1$dev_type,1,11)
+dev <- collection_long %>% filter(tube_deviation==353358909) 
+dev_tube2 <- base::merge(dev,dev_tube1[,c("dev_type","TubeID","tubeID","deviationnotes","tube_dev")],by.x=c("TubeID","tubeID"), by.y=c("TubeID","tubeID")) ##to get the deviation notes
+```
+
+```{r Request7_incidenttypes, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+# BY SITE
+# Summarize deviations by Site and Tube Type
+devns_by_type_df <- dev_tube2 %>%
+  filter(biospecimen != "Mouthwash") %>%
+  group_by(Site,
+           Tube_Type = tube_type,
+           Deviation = deviationnotes) %>%
+  summarise(`Number of Deviations` = n(), .groups = "drop")
+
+# Sort rows for display
+devns_by_type_df <- devns_by_type_df %>%
+  arrange(Site, Tube_Type)
+
+#  Mark indented tube type rows
+devns_by_type_df <- devns_by_type_df %>%
+  group_by(Site) %>%
+  mutate(Row_Label = paste0("  ", Tube_Type),
+         is_header = FALSE) %>%
+  ungroup()
+
+# Create site header rows (not indented)
+headers <- devns_by_type_df %>%
+  distinct(Site) %>%
+  mutate(Row_Label = Site,
+         is_header = TRUE,
+         Tube_Type = NA,
+         Deviation = NA,
+         `Number of Deviations` = NA)
+
+# Add site total rows
+site_totals <- devns_by_type_df %>%
+  group_by(Site) %>%
+  summarise(`Number of Deviations` = sum(`Number of Deviations`, na.rm = TRUE)) %>%
+  mutate(Row_Label = "Total",
+         is_header = FALSE,
+         Tube_Type = NA,
+         Deviation = NA)
+
+# Combine all rows
+devns_by_type_display_site <- bind_rows(headers, devns_by_type_df, site_totals) %>%
+  arrange(Site, desc(is_header), Row_Label)
+
+# Save indent rows (exclude headers and total rows)
+indent_rows_site <- which(!(devns_by_type_display_site$is_header | devns_by_type_display_site$Row_Label == "Total"))
+
+# Summarize and pivot to wide format
+devns_by_site_wide <- devns_by_type_display_site %>%
+  filter(!is.na(Deviation)) %>%
+  group_by(Site, Deviation) %>%
+  summarise(`Number of Deviations` = sum(`Number of Deviations`, na.rm = TRUE), .groups = "drop") %>%
+  bind_rows(
+    devns_by_type_display_site %>%
+      filter(!is.na(Deviation)) %>%
+      group_by(Deviation) %>%
+      summarise(`Number of Deviations` = sum(`Number of Deviations`), .groups = "drop") %>%
+      mutate(Site = "Total")
+  ) %>%
+  pivot_wider(names_from = Deviation, values_from = `Number of Deviations`, values_fill = 0)
+
+
+# Table 7e
+knitr::kable(
+  devns_by_site_wide,
+  caption = "Table 7e. Incident Type by Site",
+  align = c("l", rep("c", ncol(devns_by_site_wide) - 1)),
+  booktabs = TRUE,
+  row.names = FALSE,
+  format = "latex"  
+) %>%
+  kable_styling(latex_options = "scale_down") %>%
+   kableExtra::footnote(
+    general = "Note: Table summarizes incident reasons by site, excluding home mouthwash collections.",
+    general_title = "",
+    footnote_as_chunk = TRUE,
+    escape = FALSE,
+    threeparttable = TRUE
+  )
+
+
+# BY COLLECTION SETTING
+# Summarize deviations
+devns_by_type_df <- dev_tube2 %>%
+  filter(biospecimen != "Mouthwash") %>%
+  group_by(`Collection Setting` = biocol_Setting,
+           Tube_Type = tube_type,
+           Deviation = deviationnotes) %>%
+  summarise(`Number of Deviations` = n(), .groups = "drop")
+
+# Add indenting
+devns_by_type_df <- devns_by_type_df %>%
+  arrange(`Collection Setting`, Tube_Type) %>%
+  group_by(`Collection Setting`) %>%
+  mutate(Row_Label = paste0("  ", Tube_Type),
+         is_header = FALSE) %>%
+  ungroup()
+
+# Add collection setting headers
+headers <- devns_by_type_df %>%
+  distinct(`Collection Setting`) %>%
+  mutate(Row_Label = `Collection Setting`,
+         is_header = TRUE,
+         Tube_Type = NA,
+         Deviation = NA,
+         `Number of Deviations` = NA)
+
+# Add collection setting totals
+setting_totals <- devns_by_type_df %>%
+  group_by(`Collection Setting`) %>%
+  summarise(`Number of Deviations` = sum(`Number of Deviations`, na.rm = TRUE)) %>%
+  mutate(Row_Label = "Total",
+         is_header = FALSE,
+         Tube_Type = NA,
+         Deviation = NA)
+
+# Combine all rows
+devns_by_type_display_sett <- bind_rows(headers, devns_by_type_df, setting_totals) %>%
+  arrange(`Collection Setting`, desc(is_header), Row_Label)
+
+# Save indent rows
+indent_rows_sett <- which(!(devns_by_type_display_sett$is_header | devns_by_type_display_sett$Row_Label == "Total"))
+
+#  Summarize and pivot to wide format
+devns_by_setting_wide <- devns_by_type_display_sett %>%
+  filter(!is.na(Deviation)) %>%
+  group_by(`Collection Setting`, Deviation) %>%
+  summarise(`Number of Deviations` = sum(`Number of Deviations`, na.rm = TRUE), .groups = "drop") %>%
+  bind_rows(
+    devns_by_type_display_sett %>%
+      filter(!is.na(Deviation)) %>%
+      group_by(Deviation) %>%
+      summarise(`Number of Deviations` = sum(`Number of Deviations`), .groups = "drop") %>%
+      mutate(`Collection Setting` = "Total")
+  ) %>%
+  pivot_wider(names_from = Deviation, values_from = `Number of Deviations`, values_fill = 0)
+
+
+
+# Table 7f:
+knitr::kable(
+  devns_by_setting_wide,
+  caption = "Table 7f. Incident Type by Collection Setting",
+  align = c("l", rep("c", ncol(devns_by_setting_wide) - 1)),
+  booktabs = TRUE,
+  row.names = FALSE
+) %>%
+  kable_styling(latex_options = "scale_down") %>%
+    landscape() %>% 
+  kableExtra::footnote(
+    general = "Note: Table summarizes incident reasons by collection setting, excluding home mouthwash collections.",
+    general_title = "",
+    footnote_as_chunk = TRUE,
+    escape = FALSE,
+    threeparttable = TRUE
+  )
+
+
 
 ```

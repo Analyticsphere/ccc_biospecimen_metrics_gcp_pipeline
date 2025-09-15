@@ -525,7 +525,13 @@ simple_funct_CVD(D_494226443, "Ever Have COVID-19")
 
 
 #COV2
-hist_funct(D_860011428, "Times Having COVID-19", "Times", "Frequency")
+#qc issue of participants putting in year of diagnosis instead of times having covid
+CVD_tib <- CVD_tib %>% mutate(D_860011428_num = case_when(as.numeric(D_860011428)<100 ~ D_860011428,
+                                                          TRUE ~ NA))
+cov2 <- hist_funct(D_860011428_num, "Times Having COVID-19", "Times", "Frequency")
+cov2 + scale_x_continuous(breaks = breaks_width(1)) +
+  labs(caption="Participants that put values over 99 are a quality control issue and have been exlcuded from this plot.")
+
 ```
 
 
