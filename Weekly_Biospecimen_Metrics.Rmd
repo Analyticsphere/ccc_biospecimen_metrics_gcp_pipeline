@@ -430,7 +430,7 @@ no_dups <- no_dups %>%
       d_951355211 == 117840593 ~ "Temple CDM",
       d_951355211 == 574104518 ~ "Temple Roney",
       d_951355211 == 962830330 ~ "Waco - MacArthur",
-      #d_951355211 ==  749199085 ~ "Temple Westfield"
+      d_951355211 ==  749199085 ~ "Temple Westfield",
       #SF
       d_951355211 == 769594361 ~ "Fargo Amber Valley",
       d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
@@ -679,7 +679,8 @@ col_num_1.1 <- col_num_1.1 %>%
     `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
                                  "HFH Detroit Northwest","In-home Collection", "HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
     `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth",
-                                 "North Garland", "Temple CDM", "Temple Roney", "Waco - MacArthur","Missing BSWH location") ~ "Baylor Scott and White Health",
+                                 "North Garland", "Temple CDM", "Temple Roney", "Waco - MacArthur","Temple Westfield",
+                                 "Missing BSWH location") ~ "Baylor Scott and White Health",
     TRUE ~ "Other"
   ))
 
@@ -1838,7 +1839,7 @@ coll_bptl_diff <- biospe_adhoc_all %>%
   mutate(Site_location = factor(Site_location,
                                 levels=c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving",
                                          "Irving", "NTX Biorepository","BCC- Fort Worth","North Garland", "Temple CDM",
-                                         "Temple Roney", "Waco - MacArthur","Missing BSWH location",
+                                         "Temple Roney", "Waco - MacArthur","Temple Westfield","Missing BSWH location",
                                          "HP Research Clinic", "HP Park Nicollet", "Missing HP location",
                                          "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
                                          "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "HFH Jackson","Missing HFH location",
@@ -1903,7 +1904,8 @@ ctable_rsch_loc_bptl <- rsch_loc_coll_bptl %>%
     Collection_Location %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
                                  "HFH Detroit Northwest", "In-home Collection","HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
     Collection_Location %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", 
-                                 "North Garland", "Temple CDM","Temple Roney", "Waco - MacArthur", "Missing BSWH location") ~ "Baylor Scott and White Health",
+                                 "North Garland", "Temple CDM","Temple Roney", "Waco - MacArthur", "Temple Westfield",
+                               "Missing BSWH location") ~ "Baylor Scott and White Health",
     Collection_Location %in% c("Unidentified location") ~ "Other",
     TRUE ~ " "
   )) 
@@ -2331,6 +2333,7 @@ ver_draw <- biocol.tb %>%  filter(!is.na(d_173836415_d_266600170_d_769615780) & 
                                        Site!='Henry Ford Health') %>% mutate(Site = droplevels(Site))
 
 verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_769615780)),as.POSIXct(ymd_hms(d_914594314)),units="days")))
+
 
 verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>%
   mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
@@ -3308,7 +3311,7 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
                                 "FW All Saints"="#565C65", "NTX Biorepository"="#3C989E",
                                 "BCC- Plano"="#FBE5B5","BCC- Irving"="#E7CCAD","Irving"="#309EBD",
                                 "North Garland"="#CC7D15", "Temple CDM"="#BBBEC1", "Temple Roney"="#2973A5",
-                                "Waco - MacArthur"="#99C0C4"),
+                                "Waco - MacArthur"="#99C0C4", "Temple Westfield"="#B9D7E3"),
                          guide = guide_legend(nrow = 3, byrow = TRUE)) +
     labs(color = "Collection Location") 
   }
@@ -4132,7 +4135,7 @@ table7_8 <- kit_table %>%  filter(Kit_Status_r2=="Received" | Kit_Status_r1=="Re
   mutate(MWSrvy_status = case_when(d_547363263==972455046 ~ "Not Started",
                                    d_547363263==615768760 ~ "Started",
                                    d_547363263==231311385 ~ "Submitted"),
-         MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted")))  
+         MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) 
 
 
 table7_8_totals <- create_tbl_cross(table7_8, "Site", "MWSrvy_status", "row", "Site", " ")
@@ -4151,14 +4154,10 @@ knitr::kable(table7_8_totals,
  # Define shared function
 generate_mw_table <- function(comparison) {
   kit_table %>% 
-    filter((Kit_Status_r2 == "Received" | Kit_Status_r1 == "Received" | Kit_Status_int == "Received") &
+    filter(d_547363263 == '231311385' & (Kit_Status_r2 == "Received" | Kit_Status_r1 == "Received" | Kit_Status_int == "Received") &
              eval(parse(text = paste0("as.Date(d_173836415_d_266600170_d_319972665_d_661940160) ", comparison, " as.Date('2024-05-22')")))) %>%
-    mutate(MWSrvy_status = case_when(d_547363263 == 972455046 ~ "Not Started",
-                                     d_547363263 == 615768760 ~ "Started",
-                                     d_547363263 == 231311385 ~ "Submitted"),
-           MW_completion = difftime(as.Date(d_173836415_d_266600170_d_448660695), as.Date(d_195145666), units = "days"),
-           MW_comp_diff = case_when(MWSrvy_status != "Submitted" ~ "Not Submitted",
-                                    as.numeric(MW_completion) <= -4 ~ "4+ Days before Collection",
+    mutate(MW_completion = difftime(as.Date(d_173836415_d_266600170_d_448660695), as.Date(d_195145666), units = "days"),
+           MW_comp_diff = case_when(as.numeric(MW_completion) <= -4 ~ "4+ Days before Collection",
                                     as.numeric(MW_completion) == -3 ~ "3 Days before Collection",
                                     as.numeric(MW_completion) == -2 ~ "2 Days before Collection",
                                     as.numeric(MW_completion) == -1 ~ "1 Day before Collection",
@@ -4167,7 +4166,7 @@ generate_mw_table <- function(comparison) {
                                     as.numeric(MW_completion) == 2 ~ "2 Days after Collection",
                                     as.numeric(MW_completion) == 3 ~ "3 Days after Collection",
                                     as.numeric(MW_completion) >= 4 ~ "4+ Days after Collection"),
-           MW_comp_diff = factor(MW_comp_diff,levels = c("Not Submitted", "4+ Days before Collection", "3 Days before Collection",
+           MW_comp_diff = factor(MW_comp_diff,levels = c("4+ Days before Collection", "3 Days before Collection",
                                                          "2 Days before Collection", "1 Day before Collection", "Same Day as Collection",
                                                          "1 Day after Collection", "2 Days after Collection", "3 Days after Collection",
                                                          "4+ Days after Collection")))
@@ -4191,6 +4190,10 @@ add_footnote(tbl_7_9, "Only includes data from mouthwash kits returned with comp
 
 ######### Table 7.9 (After PWA update)
 table7_10 <- generate_mw_table(comparison = ">=")
+
+## Cut off at 5/1/2025
+table7_10 <- table7_10 %>%  filter(as.Date(d_173836415_d_266600170_d_319972665_d_661940160) <= as.Date('2025-05-01'))
+
 table7_10_totals <- create_tbl_cross(table7_10, "Site", "MW_comp_diff", "row", "Site", " ")
 
 tbl_7_10 <- knitr::kable(table7_10_totals,
@@ -4212,25 +4215,34 @@ add_footnote(tbl_7_10, "Only includes data from mouthwash kits returned with com
 ```{r Tables10s, eval=TRUE,echo=FALSE, message=FALSE,warning=FALSE, results='asis'}
 
 
-survey_cc_int <- kit_table %>%  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & as.Date(d_195145666) > "2025-05-01") 
+survey_cc_int <- kit_table %>%  
+  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & as.Date(d_195145666) > "2025-05-01" & d_547363263 == '231311385') %>% 
+  mutate(ctime = round(as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),
+                                           as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="days")), 
+                       digits=0),
+         MW_comp_card = case_when(as.numeric(ctime) <= -4 ~ "4+ Days before Collection",
+                                  as.numeric(ctime) == -3 ~ "3 Days before Collection",
+                                  as.numeric(ctime) == -2 ~ "2 Days before Collection",
+                                  as.numeric(ctime) == -1 ~ "1 Day before Collection",
+                                  as.numeric(ctime) == 0 ~ "Same Day as Collection",
+                                  as.numeric(ctime) == 1 ~ "1 Day after Collection",
+                                  as.numeric(ctime) == 2 ~ "2 Days after Collection",
+                                  as.numeric(ctime) == 3 ~ "3 Days after Collection",
+                                  as.numeric(ctime) >= 4 ~ "4+ Days after Collection"),
+           MW_comp_card = factor(MW_comp_card,levels = c("4+ Days before Collection", "3 Days before Collection",
+                                                         "2 Days before Collection", "1 Day before Collection", "Same Day as Collection",
+                                                         "1 Day after Collection", "2 Days after Collection", "3 Days after Collection",
+                                                         "4+ Days after Collection")))   
 
-survey_cc_int <-  survey_cc_int %>% 
-  mutate(ctime = as.numeric(difftime(as.POSIXct(ymd_hms(d_195145666)),as.POSIXct(ymd_hms(d_173836415_d_266600170_d_448660695)),units="hours"))) %>%  
-  filter(ctime>0)
+Table7.10a <- create_tbl_cross(survey_cc_int, "Site", "MW_comp_card", "row", "Site", " ")  
 
-Table7.10a = survey_cc_int %>% group_by(Site) %>% 
-  dplyr::summarize(N=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Max = max(ctime))
  
 Table7_10a <- knitr::kable(Table7.10a,
                            caption='Table 7.10 Baseline- Mouthwash Biospecimen Survey Completion Time (in Days) Relative to Collection Time \n Reported on Collection Card for Initial Kit (Post update to  survey introduction)',
                            row.names=FALSE, align=c("l",rep("c", 7)),digits=1, booktabs = TRUE) %>%
-  kable_styling(latex_options = "HOLD_position")
+  add_indent(seq(1, nrow(Table7.10a) - 1)) %>%
+  kable_styling(latex_options = "scale_down") %>%
+  landscape()
 add_footnote(Table7_10a, "Note: Only includes data from mouthwash kits returned with completed Collection Card.", notation = "none")
          
 
