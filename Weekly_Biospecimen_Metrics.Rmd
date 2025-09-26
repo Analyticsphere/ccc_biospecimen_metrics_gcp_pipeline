@@ -2720,7 +2720,7 @@ add_footnote(tab8, "Note: Tube configuration/quantity varies by site based on cl
 
 devns <- knitr::kable(Deviation_Freq,
              col.names=c("Site","Any Deviations","No Deviations", "Total Tubes Collected"), 
-             caption='Table 2.5: Baseline- Deviation Status Among Biospecimen Tubes Collected',
+             caption='Table 2.5: Baseline- Deviation Status Among Biospecimen Tubes Collected Reported by the Site',
              row.names=FALSE, align=c("l",rep("c", 3)), booktabs = TRUE )
 add_footnote(devns, "Note: This table includes deviations on all baseline specimens except home mouthwash.", notation = "none") 
 
@@ -4154,7 +4154,8 @@ knitr::kable(table7_8_totals,
  # Define shared function
 generate_mw_table <- function(comparison) {
   kit_table %>% 
-    filter(d_547363263 == '231311385' & (Kit_Status_r2 == "Received" | Kit_Status_r1 == "Received" | Kit_Status_int == "Received") &
+    filter(d_547363263 == '231311385' & !is.na(d_195145666) & 
+             (Kit_Status_r2 == "Received" | Kit_Status_r1 == "Received" | Kit_Status_int == "Received") &
              eval(parse(text = paste0("as.Date(d_173836415_d_266600170_d_319972665_d_661940160) ", comparison, " as.Date('2024-05-22')")))) %>%
     mutate(MW_completion = difftime(as.Date(d_173836415_d_266600170_d_448660695), as.Date(d_195145666), units = "days"),
            MW_comp_diff = case_when(as.numeric(MW_completion) <= -4 ~ "4+ Days before Collection",
