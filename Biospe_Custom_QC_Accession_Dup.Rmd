@@ -1005,7 +1005,7 @@ c_blood3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_17
                                   ((d_173836415_d_266600170_d_592099155=="Research" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="No") &
                                   !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", 
                                                        "3467573584", "1274744512", '3362078899',  '7789082855', '8148304740', '3882691411',
-                                                       '6248007969'))) %>% 
+                                                       '6248007969', '5367655537'))) %>% 
     select(Site, Connect_ID, d_878865966, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_982213346) %>%  safe_arrange(Site, Connect_ID)
 
 
@@ -1049,7 +1049,7 @@ c_urine3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_17
                                                '3137297902', '8370075725', '7789082855', '8148304740', "7536254831", "8685711133", "1573897668", 
                                                "4332317182", '2643537513', "2145164291", "4246383289", "6568449334", '3882691411', '6248007969',
                                                '9772303289', '6422794867','7338222763', '9973370517', '6351945356', '5919403814', '7143228040',
-                                               '6144633182', '4958431450', '9358513094', '7414720886')))   %>%  
+                                               '6144633182', '4958431450', '9358513094', '7414720886', '5367655537')))   %>%  
     select(Site, Connect_ID, d_167958071, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
 
 
@@ -1411,7 +1411,7 @@ homsetting <- HMW %>%
                                '6852468591','6905078269','7114006740','7139348190','7604078161','7920818931','8069999333','8070453964','8079970701',
                                '8188956474','8227438016','8482215929','8507644460','8607112027','8607385492','8811471144','8943073495','8992675461',
                                '8997367478','9091358231','9181813667','9234234591','9273458271','9411992203','9499085205','9792382050','9813020733',
-                               '9839544037','9920404904','9977516520'))) %>% 
+                               '9839544037','9920404904','9977516520', '3805509458', '4692007528'))) %>% 
   mutate(BioSpm_MWSettingBL = case_when(d_173836415_d_266600170_d_915179629=="103209024" ~ "Home",
                                         d_173836415_d_266600170_d_915179629=="534621077" ~ "Research",
                                         d_173836415_d_266600170_d_915179629=="664882224" ~ "Clinical",
@@ -2009,29 +2009,29 @@ knitr::kable(Dup_kits_rule, longtable = TRUE)
 ```
 
 
-###	69. BioFin_BMTimeBL_v1r0 must occur after BioKit_KitShipTm_v1r0 or before BioKit_KitRecdTm_v1r0.
+###	69. BioFin_BMTimeBL_v1r0 must occur after BioKit_KitShipTm_v1r0 or before BioKit_KitRecdTm_v1r0. (If BioFin_BMTimeBL_v1r0 is in the same month OR the month on either side of BioKit_KitShipTm_v1r0 or BioKit_KitRecdTm_v1r0, then they are excluded.)
 ```{r Github212, echo=FALSE, warning=FALSE, message=FALSE}
 
-issue212 <- HMW %>%  filter( ((as.Date(d_173836415_d_266600170_d_448660695) <  d_173836415_d_266600170_d_319972665_d_661940160) |
-                               (as.Date(d_173836415_d_266600170_d_448660695) > d_826941471))  & 
-                               #If BioFin_BMTimeBL_v1r0 is in the same month OR the month on either side of BioKit_KitShipTm_v1r0 or BioKit_KitRecdTm_v1r0 then ignore the error.
-                                (abs(as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7)) - as.numeric(str_sub(d_173836415_d_266600170_d_319972665_d_661940160, 6, 7)))>1 |
-                                    abs(as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7)) - as.numeric(str_sub(d_826941471, 6, 7)))>1 ) &
-                               #Exclude those with December(12)/January(01) dates, won't be caught 
-                               !( (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==12 & as.numeric(str_sub(d_173836415_d_266600170_d_319972665_d_661940160, 6, 7))==1) | 
-                                    (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==1 & as.numeric(str_sub(d_173836415_d_266600170_d_319972665_d_661940160, 6, 7))==12) | 
-                                    (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==12 & as.numeric(str_sub(d_826941471, 6, 7))==1) | 
-                                    (as.numeric(str_sub(d_173836415_d_266600170_d_448660695, 6, 7))==1 & as.numeric(str_sub(d_826941471, 6, 7))==12)) & 
-                               !(Connect_ID %in% c("2356168653", '1129239381', '1235516301', '1315346907', '1417042322', '1490795015', '1554435136', 
-                                                   '1660752574', '1851172817' , '1900351532',
-                               '1945066463','2102413296','2234414606','2266872636','2347707069','2438867357','2588345831','2692093429','2868546464',
-                               '3408508449','3467113341','3514778574','3741171072','4012589086','4096312966','4129752591','4250626397','4289721302',
-                               '4409399902','4607023051','4643888450','4692120743','4783962641','4789211013','4848590353','4877288759','5471085995',
-                               '5481976839','5855894125','5900119620','5906537633','6189755928','6426055006','6473068968','6604641516','6662499874',
-                               '6852468591','6905078269','7114006740','7139348190','7604078161','7920818931','8069999333','8070453964','8079970701',
-                               '8188956474','8227438016','8482215929','8507644460','8607112027','8607385492','8811471144','8943073495','8992675461',
-                               '8997367478','9091358231','9181813667','9234234591','9273458271','9411992203','9499085205','9792382050','9813020733',
-                               '9839544037','9920404904','9977516520'))) %>%
+issue212 <- HMW %>%  
+  mutate(BMTimeBL = as.Date(d_173836415_d_266600170_d_448660695),
+         KitShipTm = as.Date(d_173836415_d_266600170_d_319972665_d_661940160),
+         KitRecdTm = as.Date(d_826941471)) %>% 
+  filter( ( BMTimeBL <  KitShipTm |
+              BMTimeBL > KitRecdTm)  & 
+            #If the difference between BioFin_BMTimeBL_v1r0 and BioKit_KitShipTm_v1r0, or BioFin_BMTimeBL_v1r0 and BioKit_KitRecdTm_v1r0 is less than a month, ignore 
+        !(abs(interval(floor_date(BMTimeBL, "month"), floor_date(KitShipTm, "month")) %/% months(1)) <= 1 |
+          abs(interval(floor_date(BMTimeBL, "month"), floor_date(KitRecdTm, "month")) %/% months(1)) <= 1) & 
+            !(Connect_ID %in% c("2356168653", '1129239381', '1235516301', '1315346907', '1417042322', '1490795015', '1554435136', 
+                                '1660752574', '1851172817' , '1900351532',
+                                '1945066463','2102413296','2234414606','2266872636','2347707069','2438867357','2588345831','2692093429','2868546464',
+                                '3408508449','3467113341','3514778574','3741171072','4012589086','4096312966','4129752591','4250626397','4289721302',
+                                '4409399902','4607023051','4643888450','4692120743','4783962641','4789211013','4848590353','4877288759','5471085995',
+                                '5481976839','5855894125','5900119620','5906537633','6189755928','6426055006','6473068968','6604641516','6662499874',
+                                '6852468591','6905078269','7114006740','7139348190','7604078161','7920818931','8069999333','8070453964','8079970701',
+                                '8188956474','8227438016','8482215929','8507644460','8607112027','8607385492','8811471144','8943073495','8992675461',
+                                '8997367478','9091358231','9181813667','9234234591','9273458271','9411992203','9499085205','9792382050','9813020733',
+                                '9839544037','9920404904','9977516520', '3797437285', '8811209117',  '5019127359', '3797437285',
+                                '8811209117', '5019127359','3486230846', '8954870489', '2254978243', '1050654902', '9863548767', '6288600449'))) %>%
   select(Site, Connect_ID, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_319972665_d_661940160, d_826941471) %>% safe_arrange(Site)
 
 
@@ -2434,49 +2434,6 @@ knitr::kable(BioChk_TimeBL_v1r0_RschTmBL, longtable = TRUE)  %>% kable_styling(l
 
 ```
 
-
-```{r AddRules, include=FALSE}
-
-#Add to Jake's rule list
-
-#STRECK Tube 1_ID  // d_505347689_d_825582494 // crossValid1 equal to or less than char() // 14 // d_505347689_d_593843561 //	353358909
-
-# STRECK Tube 1- Tube Collected	    d_505347689_d_593843561	valid	353358909, 104430631		
-# STRECK Tube 1- Deviation	          d_505347689_d_678857215	NA or crossValid1	353358909, 104430631		
-# STRECK Tube 1- Discard Flag	      d_505347689_d_762124027	NA or crossValid1	353358909, 104430631	d_505347689_d_248868659_d_472864016	353358909
-# STRECK Tube 1- Deviation Hemolyzed	d_505347689_d_248868659_d_242307474	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Mislabeled Resolved	d_505347689_d_248868659_d_283900611	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Outside Contaminated	d_505347689_d_248868659_d_313097539	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Other	d_505347689_d_248868659_d_453343022	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Broken	d_505347689_d_248868659_d_472864016	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Temperature Too Low	d_505347689_d_248868659_d_550088682	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Mislabeled Discard	d_505347689_d_248868659_d_684617815	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Temperature Too High	d_505347689_d_248868659_d_690540566	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Low Volume-(tube/container partially filled but still usable)	d_505347689_d_248868659_d_728366619	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Leaked/Spilled	d_505347689_d_248868659_d_757246707	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Tube Size	d_505347689_d_248868659_d_777486216	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Discard	d_505347689_d_248868659_d_810960823	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-# STRECK Tube 1- Deviation Not Found	d_505347689_d_248868659_d_982885431	NA or crossValid1	353358909, 104430631	d_505347689_d_678857215	353358909
-
-
-#STRECK Tube 1 Collected BS	d_878865966	crossValid2	353358909	d_505347689_d_593843561	353358909	d_331584571	266600170							If the visit type is Baseline and any blood tube is collected, then the baseline blood is maked as collected																																																			
-
-#STEK Tube HF Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 548392715					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
-
-
-
-#EVENTUALLY: STEK Tube Sanford Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 657167265					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
-
-#EVENTUALLY: STEK Tube HP Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_505347689_d_593843561	353358909	d_650516960	664882224	d_505347689_d_762124027	104430631	 d_827220437 531629870					If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
-
-
-#EVENTUALLY: ACD Tube Sanford Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_652357376_d_593843561	353358909	d_650516960	664882224	d_652357376_d_762124027	104430631		 d_827220437 657167265				If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
-#EVENTUALLY: ACD Tube HP Collected DB	d_173836415_d_266600170_d_534041351	crossValid3	353358909	d_652357376_d_593843561	353358909	d_650516960	664882224	d_652357376_d_762124027	104430631		 d_827220437 531629870				If any indiviudal blood tubes collected=yes than BioClin_DBBloodRRL_v1r0 needs to be yes
-
-
-
-
-```
 
 
 
