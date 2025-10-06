@@ -9,4 +9,8 @@
 *.tex
 *.xlsx
 .secrets
+<<<<<<< HEAD
 .DS_Store
+=======
+.DS_Store
+>>>>>>> main
