@@ -1466,9 +1466,28 @@ knitr::kable(mw_dt, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ### Need them on a kit level to review
 kits_recvd <- Bio_HMW %>%
   filter(as.numeric(round(difftime(currentDate, d_195145666, units = "days"), digits = 0)) > 10 & 
-           ((kit_level == "Replacement Kit 2" & d_173836415_d_266600170_d_641006239_d_221592017 != "Received") |
-              (kit_level == "Replacement Kit 1" & d_173836415_d_266600170_d_541483796_d_221592017 != "Received") |
-              (kit_level == "Initial Kit" & d_173836415_d_266600170_d_319972665_d_221592017 != "Received"))) %>% 
+      (# Replacement Kit 2 not received (NA safe)
+      (kit_level == "Replacement Kit 2" &
+        (is.na(d_173836415_d_266600170_d_641006239_d_221592017) |
+         d_173836415_d_266600170_d_641006239_d_221592017 != "Received")) |
+      
+      # Replacement Kit 1 not received AND Replacement Kit 2 not received (NA safe)
+      (kit_level == "Replacement Kit 1" &
+        (is.na(d_173836415_d_266600170_d_541483796_d_221592017) |
+         d_173836415_d_266600170_d_541483796_d_221592017 != "Received") &
+        (is.na(d_173836415_d_266600170_d_641006239_d_221592017) |
+         d_173836415_d_266600170_d_641006239_d_221592017 != "Received")) |
+      
+      # Initial Kit not received AND neither replacement kit received (NA safe)
+      (kit_level == "Initial Kit" &
+        (is.na(d_173836415_d_266600170_d_319972665_d_221592017) |
+         d_173836415_d_266600170_d_319972665_d_221592017 != "Received") &
+        (is.na(d_173836415_d_266600170_d_541483796_d_221592017) |
+         d_173836415_d_266600170_d_541483796_d_221592017 != "Received") &
+        (is.na(d_173836415_d_266600170_d_641006239_d_221592017) |
+         d_173836415_d_266600170_d_641006239_d_221592017 != "Received"))
+    )
+  ) %>%
   select(Site, Connect_ID, kit_level, d_195145666, d_972453354,
          d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_641006239_d_221592017) %>%  safe_arrange(Site)
 
