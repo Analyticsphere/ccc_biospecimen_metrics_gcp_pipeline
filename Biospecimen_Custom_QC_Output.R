@@ -919,9 +919,28 @@ mw_dt <-  Bio_HMW %>%  filter(str_sub(d_820476880,1,3)=="CHA" & d_173836415_d_26
 # 46. If BioSpm_MWSettingBL_v1r0 is Home and SrvMtW_TmComplete_v1r0 is more than 10 days ago, BioKit_KitStatusBL_v1r0 should be Received
 kits_recvd <- Bio_HMW %>%
   filter(as.numeric(round(difftime(currentDate, d_195145666, units = "days"), digits = 0)) > 10 & 
-         ((kit_level == "Replacement Kit 2" & d_173836415_d_266600170_d_641006239_d_221592017 != "375535639") |
-            (kit_level == "Replacement Kit 1" & d_173836415_d_266600170_d_541483796_d_221592017 != "375535639") |
-            (kit_level == "Initial Kit" & d_173836415_d_266600170_d_319972665_d_221592017 != "375535639")))
+         (# Replacement Kit 2 not received (NA safe)
+           (kit_level == "Replacement Kit 2" &
+              (is.na(d_173836415_d_266600170_d_641006239_d_221592017) |
+                 d_173836415_d_266600170_d_641006239_d_221592017 != "375535639")) |
+             
+             # Replacement Kit 1 not received AND Replacement Kit 2 not received (NA safe)
+             (kit_level == "Replacement Kit 1" &
+                (is.na(d_173836415_d_266600170_d_541483796_d_221592017) |
+                   d_173836415_d_266600170_d_541483796_d_221592017 != "375535639") &
+                (is.na(d_173836415_d_266600170_d_641006239_d_221592017) |
+                   d_173836415_d_266600170_d_641006239_d_221592017 != "375535639")) |
+             
+             # Initial Kit not received AND neither replacement kit received (NA safe)
+             (kit_level == "Initial Kit" &
+                (is.na(d_173836415_d_266600170_d_319972665_d_221592017) |
+                   d_173836415_d_266600170_d_319972665_d_221592017 != "375535639") &
+                (is.na(d_173836415_d_266600170_d_541483796_d_221592017) |
+                   d_173836415_d_266600170_d_541483796_d_221592017 != "375535639") &
+                (is.na(d_173836415_d_266600170_d_641006239_d_221592017) |
+                   d_173836415_d_266600170_d_641006239_d_221592017 != "375535639"))
+         )
+) 
 
 
 #47.BioFin_BMTimeBL_v1r0 must be in the structure of YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM:SS.SSSZ
