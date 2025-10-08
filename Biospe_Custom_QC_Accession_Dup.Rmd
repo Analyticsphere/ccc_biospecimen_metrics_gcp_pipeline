@@ -1492,6 +1492,7 @@ kits_recvd <- Bio_HMW %>%
          d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_641006239_d_221592017) %>%  safe_arrange(Site)
 
 
+
 colnames(kits_recvd) <- c("Site", "Connect ID", "Kit_Level", "SrvMtW_TmComplete_v1r0", "BioKit_ReturnKitTrack", 
                           "Initial_BioKit_KitStatusBL_v1r0", "R1_BioKit_KitStatusBL_v1r0", "R2_BioKit_KitStatusBL_v1r0")
 
