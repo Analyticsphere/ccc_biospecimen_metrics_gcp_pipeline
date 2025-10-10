@@ -2053,7 +2053,7 @@ clinical.survey <- clinical.survey %>%
 
 
 BU_coll_DB_comp = clinical.survey %>% group_by(Site) %>% 
-  filter(!is.na(coll_to_DB_BU)) %>% 
+  filter(coll_to_DB_BU >= 0) %>% #request to exclude negative values
   dplyr::summarize('Number of Clinical Collection Visits'=n(),
                    Min = round(min(coll_to_DB_BU,na.rm = TRUE), digits=1),
                    Q1 = round(quantile(coll_to_DB_BU, 0.25,na.rm = TRUE), digits=1),
@@ -2829,16 +2829,16 @@ knitr::kable(coll_comp_BU,
              caption='Table 3.6: Baseline Clinical Biospecimen Survey Complete Time from Collection Time', 
              row.names=FALSE,align=c("l", rep("c", 8)), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
-# knitr::kable(BU_coll_DB_comp,
-#              caption='Table 3.6.a Time (in Hours) From Clinical Biospecimen Collection to Biospecimen Dashboard Entry',
-#              row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
-#   kable_styling(latex_options = "scale_down")
-# 
-# 
-# knitr::kable(BU_trig_comp,
-#              caption='Table 3.6.b Baseline Clinical Biospecimen Survey Complete Time (in Hours) From Survey Becoming Available',
-#              row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
-#   kable_styling(latex_options = "scale_down")
+knitr::kable(BU_coll_DB_comp,
+             caption='Table 3.6.a Time (in Hours) From Clinical Biospecimen Collection to Biospecimen Dashboard Entry',
+             row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down")
+
+
+knitr::kable(BU_trig_comp,
+             caption='Table 3.6.b Baseline Clinical Biospecimen Survey Complete Time (in Hours) From Survey Becoming Available',
+             row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down")
 
 
 
