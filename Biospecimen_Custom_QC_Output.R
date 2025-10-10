@@ -71,7 +71,7 @@ d_173836415_d_266600170_d_319972665_d_759651991, d_173836415_d_266600170_d_31997
 d_173836415_d_266600170_d_541483796_d_379252329, d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_541483796_d_826941471,
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
 d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, 
-d_173836415_d_266600170_d_641006239_d_826941471, d_331584571_d_266600170_d_840048338
+d_173836415_d_266600170_d_641006239_d_826941471, d_331584571_d_266600170_d_840048338, d_914594314
 
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
@@ -604,7 +604,17 @@ bioqc_csv <- bioqc %>%
         ###	74. If an Replacement 1 Kit is requested, then the Replacement1 Kit Status must be populated. 
         Rule74 = ifelse(!is.na(d_173836415_d_266600170_d_541483796_d_759651991) & is.na(d_173836415_d_266600170_d_541483796_d_221592017), "Rule 74", " "),
         ###	75. If an Replacement 2 is requested, then the Replacement2 Kit Status must be populated. 
-        Rule75 = ifelse(!is.na(d_173836415_d_266600170_d_641006239_d_759651991) & is.na(d_173836415_d_266600170_d_641006239_d_221592017), "Rule 75", " "))  
+        Rule75 = ifelse(!is.na(d_173836415_d_266600170_d_641006239_d_759651991) & is.na(d_173836415_d_266600170_d_641006239_d_221592017), "Rule 75", " "),
+        #	78. Draw order placement (BioClin_BldUrnPlcdTmBL_v1r0) should not occur more than 4 days prior to verification (RcrtV_VerificationTm_v1r0).
+        Rule78 = ifelse(str_sub(d_820476880, start=1, end=3)=="CXA" & #blood/urine only
+                          (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4), "Rule 78", " "),
+        #	79. Draw orders (BioClin_BldUrnPlcdTmBL_v1r0)should be placed within 30 days of verification (RcrtV_VerificationTm_v1r0). This excludes those from Henry Ford and those verified before 2/1/2023.
+        Rule79 = ifelse(d_914594314>=as.Date("2023-02-01") & Site!='Henry Ford Health System' &
+                          (as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_914594314, units="days")) > 30), "Rule 79", " "),
+        #	80. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
+        Rule80 = ifelse(as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, units="days")) > 2  & 
+                          Connect_ID!='1094193968', "Rule 80", " ")
+        )  
 
  
 
