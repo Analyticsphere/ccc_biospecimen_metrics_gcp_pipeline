@@ -2411,31 +2411,29 @@ knitr::kable(BioChk_TimeBL_v1r0_RschTmBL, longtable = TRUE)  %>% kable_styling(l
 ###	78. Draw order placement (BioClin_BldUrnPlcdTmBL_v1r0) should not occur more than 4 days prior to verification (RcrtV_VerificationTm_v1r0).
 ```{r DrawOrder_Verif4, echo=FALSE, warning=FALSE, message=FALSE}
 
-# DrawOrder_Verif4 <- bioqc %>%  filter(str_sub(d_820476880, start=1, end=3)=="CXA" & #blood/urine only
-#                                         (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4) %>%
-#   select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682) %>%  safe_arrange(Site)
-# 
-# 
-# colnames(DrawOrder_Verif4) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL")
-# knitr::kable(DrawOrder_Verif4, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE)#, font_size=8)
+DrawOrder_Verif4 <- bioqc %>%  filter(str_sub(d_820476880, start=1, end=3)=="CXA" & #blood/urine only
+                                        (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4)) %>%
+  select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682) %>%  safe_arrange(Site)
+
+
+colnames(DrawOrder_Verif4) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL")
+knitr::kable(DrawOrder_Verif4, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE)#, font_size=8)
 
 
 ```
 
-###	79. Draw orders (<184451682>BioClin_BldUrnPlcdTmBL_v1r0 or <939818935>BioClin_UrnOrdPlcdDtBL_v1r0)should be placed within 30 days of verification (<914594314>RcrtV_VerificationTm_v1r0).
+###	79. Draw orders (BioClin_BldUrnPlcdTmBL_v1r0)should be placed within 30 days of verification (RcrtV_VerificationTm_v1r0). This excludes those from Henry Ford and those verified before 2/1/2023.
 
 ```{r DrawOrder_Verif30, echo=FALSE, warning=FALSE, message=FALSE}
 
-#Please be sure this rule excludes participants who refuse baseline samples, blood or urine
 
- # DrawOrder_Verif30 <- bioqc %>%  filter(d_685002411_d_194410742=="104430631" & d_685002411_d_949501163=="104430631" & 
- #                                                         (as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_914594314, units="days")) > 30 |
- #                                                            as.numeric(difftime(d_173836415_d_266600170_d_939818935, d_914594314, units="days")) > 30)) %>% 
- #   select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_939818935) %>%  safe_arrange(Site)
- # 
- # 
- # colnames(DrawOrder_Verif30) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL", "BioClin_UrnOrdPlcdDtBL")
- # knitr::kable(DrawOrder_Verif30, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
+ DrawOrder_Verif30 <- bioqc %>%  filter(d_914594314>=as.Date("2023-02-01") & Site!='Henry Ford Health System' &
+                                                         (as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_914594314, units="days")) > 30)) %>% 
+   select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682) %>%  safe_arrange(Site)
+
+
+ colnames(DrawOrder_Verif30) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL")
+ knitr::kable(DrawOrder_Verif30, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
 
 
 ```
@@ -2443,15 +2441,14 @@ knitr::kable(BioChk_TimeBL_v1r0_RschTmBL, longtable = TRUE)  %>% kable_styling(l
 ###	80. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
 ```{r DrawOrder_Colct2, echo=FALSE, warning=FALSE, message=FALSE}
 
-# DrawOrder_Colct2 <- bioqc %>%  filter(as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, units="days")) > 2 |
-#                                         as.numeric(difftime(d_173836415_d_266600170_d_939818935, d_173836415_d_266600170_d_139245758, units="days")) > 2) %>%
-#   select(Site, Connect_ID, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, d_173836415_d_266600170_d_939818935,
-#          d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
-# 
-# 
-# colnames(DrawOrder_Colct2) <- c("Site", "Connect ID", "BioClin_BldUrnPlcdTmBL", "BioClin_ClinBloodTmBL",
-#                                 "BioClin_UrnOrdPlcdDtBL", "BioClin_ClinicalUrnTmBL")
-# knitr::kable(DrawOrder_Colct2, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
+DrawOrder_Colct2 <- bioqc %>%  filter(as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, units="days")) > 2  & 
+                                        Connect_ID!='1094193968') %>%
+  select(Site, Connect_ID, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346,
+         d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
+
+
+colnames(DrawOrder_Colct2) <- c("Site", "Connect ID", "BioClin_BldUrnPlcdTmBL", "BioClin_ClinBloodTmBL", "BioClin_ClinicalUrnTmBL")
+knitr::kable(DrawOrder_Colct2, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
 
 
 ```
