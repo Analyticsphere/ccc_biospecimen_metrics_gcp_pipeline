@@ -836,7 +836,7 @@ table1.5 <- create_tbl_cross(coll_sett_all, 'Site', "BioFin_BaseBloodCol_v1r0", 
 
 biospe.bld <- knitr::kable(table1.5, 
                            col.names=c("Site", "Any Blood Collected","No Blood Collected", "Total Collections"),
-                           caption='Table 1.7: Baseline Blood Collection Status Among Biospecimen Collections',
+                           caption='Table 1.6: Baseline Blood Collection Status Among Biospecimen Collections',
                            row.names=FALSE,align=c("l", rep("c", 3)), 
                            booktabs = TRUE)  %>% 
   add_indent(seq(1,  10)) %>%  
@@ -860,7 +860,7 @@ m_pct <- round((sum(table1$sex=="Male")/sum(!is.na(table1$sex)))*100, digits=2)
 uk_pct <- round((sum(table1$sex=="Unknown")/sum(!is.na(table1$sex)))*100, digits=2)
 
 BLCol_by_Sex <- knitr::kable(BLCol_by_Sex_df, 
-             caption='Table 1.13 Baseline Biospecimen Collection Status by Sex \n Among Verified Participants',
+             caption='Table 1.12 Baseline Biospecimen Collection Status by Sex \n Among Verified Participants',
              row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
     add_indent(seq(1, nrow(BLCol_by_Sex_df) - 1)) %>% 
@@ -886,7 +886,7 @@ BLCol_by_Age_df <- create_tbl_cross2(table1, "age", "biocol.appoint", "row", "Ag
 colnames(BLCol_by_Age_df)[ncol(BLCol_by_Age_df)] <- "Total Verified \n Participants"
 
 BLCol_by_Age <- knitr::kable(BLCol_by_Age_df, 
-             caption="Table 1.14. Baseline Biospecimen Collection Status by Age \n Among Verified Participants",
+             caption="Table 1.13. Baseline Biospecimen Collection Status by Age \n Among Verified Participants",
              row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
     add_indent(seq(1, nrow(BLCol_by_Age_df) - 1)) %>% 
@@ -919,7 +919,7 @@ BLCol_by_Race_df <- create_tbl_cross2(table1, "race", "biocol.appoint", "row", "
 colnames(BLCol_by_Race_df)[ncol(BLCol_by_Race_df)] <- "Total Verified \n Participants"
 
 BLCol_by_Race <- knitr::kable(BLCol_by_Race_df, 
-             caption="Table 1.15. Baseline Biospecimen Collection Status by Race \n Among Verified Participants",
+             caption="Table 1.14. Baseline Biospecimen Collection Status by Race \n Among Verified Participants",
              row.names=FALSE, align=c("l",rep("c", 5)), booktabs = TRUE) %>%
     kable_styling(latex_options = "scale_down") %>%  
     add_indent(seq(1, nrow(BLCol_by_Race_df) - 1)) %>% 
@@ -946,7 +946,7 @@ BLCol_by_Race <- knitr::kable(BLCol_by_Race_df,
 
 
 
-```{r Sanford_Table_1.4, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Sanford_Table_1.5, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 ### Separate code for Sanford clinical locations counts 
 
@@ -1021,7 +1021,7 @@ table1_4_locations$Region[table1_4_locations$Site_location=="Missing Both Locati
 
 
 
-# Aggregate counts by Site_location and Region
+## Aggregate counts by Site_location and Region
 count_all <- table1_4_locations %>%
   count(Region, Site_location) %>%
   dplyr::rename(Count_Total = n)
@@ -1030,95 +1030,10 @@ total_all <- sum(count_all$Count_Total)
 count_all <- count_all %>%
   mutate(Percent_Total = paste0(round((Count_Total / total_all) * 100, 1), "%"))
 
-# Define the filtered data frames for 7-day and 30-day counts
-table1_4_locations_7days <- table1_4_locations %>% filter(d_556788178 >= currentDate - 7)
-table1_4_locations_30days <- table1_4_locations %>% filter(d_556788178 >= currentDate - 30)
-
-## All Counts
-count_all <- table1_4_locations %>%
-  count(Region, Site_location) %>%
-   dplyr::rename(Count_Total = n)
-
-total_all <- sum(count_all$Count_Total)
-count_all <- count_all %>%
-  mutate(Percent_Total = paste0(round((Count_Total / total_all) * 100, 1), "%"))
 
 
 
-## 7-day Counts
-count_7days <- table1_4_locations_7days %>%
-  count(Region, Site_location) %>%
-  dplyr::rename(Count_7days = n)
-
-total_7days <- sum(count_7days$Count_7days)
-count_7days <- count_7days %>%
-  mutate(Percent_7days = paste0(round((Count_7days / total_7days) * 100, 1), "%"))
-
-
-## 30-day Counts
-count_30days <- table1_4_locations_30days %>%
-  count(Region, Site_location) %>%
-  dplyr::rename(Count_30days = n)
-
-total_30days <- sum(count_30days$Count_30days)
-count_30days <- count_30days %>%
-  mutate(Percent_30days = paste0(round((Count_30days / total_30days) * 100, 1), "%"))
-
-
-# Combine counts into the final table
-final_col_num_1.5 <- full_join(count_all, count_7days, by = c("Region", "Site_location")) %>%
-  full_join(count_30days, by = c("Region", "Site_location")) %>%
-  replace_na(list(Count_Total = 0, Percent_Total = "0%", Count_7days = 0, Percent_7days = "0%", Count_30days = 0, Percent_30days = "0%"))
-
-# Add total row
-total_row <- data.frame(
-  Region = "Total",
-  Site_location = "Total",
-  Count_Total = total_all,
-  Percent_Total = "100%",
-  Count_7days = total_7days,
-  Percent_7days = "100%",
-  Count_30days = total_30days,
-  Percent_30days = "100%"
-)
-
-final_col_num_1.5 <- bind_rows(final_col_num_1.5, total_row)
-
-# Add a helper column for sorting counts by region descending
-final_col_num_1.5 <- final_col_num_1.5 %>%
-  mutate(is_total = if_else(Region == "Total" & Site_location == "Total", 1, 0)) %>%
-  arrange(is_total, Region, desc(Count_30days)) %>%
-  dplyr::select(-is_total)  # Remove the helper column
-
-final_col_num_1.5$'In the Past 7 Days' <- paste0(final_col_num_1.5$Count_7days, " (", final_col_num_1.5$Percent_7days, ")")
-final_col_num_1.5$'In the Past 30 Days' <- paste0(final_col_num_1.5$Count_30days, " (", final_col_num_1.5$Percent_30days, ")")
-final_col_num_1.5$'Collection Location' <- final_col_num_1.5$Site_location
-
-
-SF_collections <- final_col_num_1.5 %>% filter(Count_7days>0 | Count_30days>0)
-
-
-# Keep the Region column initially for arranging and grouping
-SF_collections <- SF_collections[, c("Region", "Collection Location", "In the Past 7 Days", "In the Past 30 Days")]
-SF_collections$Region <- factor(SF_collections$Region, levels=c("Bemidji","Bismarck","Fargo","Sioux Falls", "Unknown", "Total"))
-
-
-SF_collections_tbl <- SF_collections %>%
-  dplyr::select(-Region) %>%  # Remove Region just before rendering
-  kbl(caption = "Table 1.5: Baseline Clinical Biospecimen Collections in the Past 30 Days at Sanford Health by Clinic Location",
-      booktabs = TRUE, longtable = TRUE) %>%
-  kable_styling(latex_options = "scale_down", full_width = FALSE, font_size = 6) %>%
-  row_spec(0, bold = TRUE) %>%
-  pack_rows(index = table(SF_collections$Region))  # Group by Region
-
-
-
-```
-
-
-```{r SF1.5, echo=FALSE, eval=TRUE,echo=FALSE,warning=FALSE,include=FALSE,results='hold'}
-
-## Same table as above but only want top 10 collection locations listed per Region. 
+## Only want top 10 collection locations listed per Region. 
 ### Note: If any are tied, we'll have more than 10
 
 top10 <- count_all %>%
@@ -1132,7 +1047,7 @@ colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "
 
 SF_top10_collections <- top10 %>%
   dplyr::select(-Region) %>%  
-   kbl(caption = "Table 1.6 Top Baseline Clinical Collection Locations at Sanford Health by Region",
+   kbl(caption = "Table 1.5 Top Baseline Clinical Collection Locations at Sanford Health by Region",
        booktabs = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE) %>%
   row_spec(0, bold = TRUE) %>%
@@ -2053,7 +1968,7 @@ clinical.survey <- clinical.survey %>%
 
 
 BU_coll_DB_comp = clinical.survey %>% group_by(Site) %>% 
-  filter(!is.na(coll_to_DB_BU)) %>% 
+  filter(coll_to_DB_BU >= 0) %>% #request to exclude negative values
   dplyr::summarize('Number of Clinical Collection Visits'=n(),
                    Min = round(min(coll_to_DB_BU,na.rm = TRUE), digits=1),
                    Q1 = round(quantile(coll_to_DB_BU, 0.25,na.rm = TRUE), digits=1),
@@ -2575,14 +2490,7 @@ col_num_1.2_gt
 \FloatBarrier
 ```{r KnitrTables1.5, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
-add_footnote(SF_collections_tbl, 
-
-             paste0("This table reflects Clincal Collections in the past 30 days; the total number of Clinical Collections at Sanford Health is ",
-                    dim(table1_4_locations)[[1]]),
-             notation = "none")
-
 add_footnote(SF_top10_collections,footnote_text, notation= "none") 
-
 
 ```
 \FloatBarrier
@@ -2594,7 +2502,7 @@ biospe.bld
 ```{r KnitrTables1.8, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 
 tab5=knitr::kable(distrb_allsetts_with_totals, 
-                  caption='Table 1.8: Baseline Collection Setting Among Biospecimen Collections by Specimen Type', 
+                  caption='Table 1.7: Baseline Collection Setting Among Biospecimen Collections by Specimen Type', 
                   row.names=FALSE, align=c("l", rep("c", 3)), format.args = list(big.mark = ","), booktabs = TRUE)   
 add_footnote(tab5, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", 
              notation = "none")
@@ -2605,7 +2513,7 @@ add_footnote(tab5, "Note: Blood and urine specimens are not collected in the Hom
 ```{r KnitrTables1.9, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 tab5_1=knitr::kable(site_results["Henry Ford Health"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
-                    caption='Table 1.9: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Henry Ford Health', 
+                    caption='Table 1.8: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Henry Ford Health', 
                     row.names=FALSE, align=c("l", rep("c", 3)), format.args = list(big.mark = ","), booktabs = TRUE)   
 add_footnote(tab5_1, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", 
              notation = "none")
@@ -2615,7 +2523,7 @@ add_footnote(tab5_1, "Note: Blood and urine specimens are not collected in the H
 ```{r KnitrTables1.10, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 tab5_2=knitr::kable(site_results["HealthPartners"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
-                    caption='Table 1.10: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, HealthPartners', 
+                    caption='Table 1.9: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, HealthPartners', 
                     row.names=FALSE, align=c("l",rep("c", 3)), format.args = list(big.mark = ","), booktabs = TRUE)   
 add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", 
              notation = "none")
@@ -2626,7 +2534,7 @@ add_footnote(tab5_2, "Note: Blood and urine specimens are not collected in the H
 
 tab5_3=knitr::kable(site_results["Sanford Health"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
-                    caption='Table 1.11: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Sanford Health', 
+                    caption='Table 1.10: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, Sanford Health', 
                     row.names=FALSE, align=c("l",rep("c", 3)), format.args = list(big.mark = ","), booktabs = TRUE)
 add_footnote(tab5_3, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", 
              notation = "none")
@@ -2637,7 +2545,7 @@ add_footnote(tab5_3, "Note: Blood and urine specimens are not collected in the H
 
 tab5_4=knitr::kable(site_results["University of Chicago Medicine"], 
                     col.names=c("Collection Setting","Any Blood Collected", "Urine Collected", "Mouthwash Collected"), 
-                    caption='Table 1.12: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, University of Chicago Medicine', 
+                    caption='Table 1.11: Baseline Collection Setting Among Biospecimen Collections by Specimen Type, University of Chicago Medicine', 
                     row.names=FALSE, align=c("l",rep("c", 3)), format.args = list(big.mark = ","), booktabs = TRUE)
 add_footnote(tab5_4, "Note: Blood and urine specimens are not collected in the Home setting, and mouthwash specimens are not collected in the Clinical setting.", 
              notation = "none")
@@ -2829,16 +2737,16 @@ knitr::kable(coll_comp_BU,
              caption='Table 3.6: Baseline Clinical Biospecimen Survey Complete Time from Collection Time', 
              row.names=FALSE,align=c("l", rep("c", 8)), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
-# knitr::kable(BU_coll_DB_comp,
-#              caption='Table 3.6.a Time (in Hours) From Clinical Biospecimen Collection to Biospecimen Dashboard Entry',
-#              row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
-#   kable_styling(latex_options = "scale_down")
-# 
-# 
-# knitr::kable(BU_trig_comp,
-#              caption='Table 3.6.b Baseline Clinical Biospecimen Survey Complete Time (in Hours) From Survey Becoming Available',
-#              row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
-#   kable_styling(latex_options = "scale_down")
+knitr::kable(BU_coll_DB_comp,
+             caption='Table 3.6.a Time (in Hours) From Clinical Biospecimen Collection to Biospecimen Dashboard Entry',
+             row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down")
+
+
+knitr::kable(BU_trig_comp,
+             caption='Table 3.6.b Baseline Clinical Biospecimen Survey Complete Time (in Hours) From Survey Becoming Available',
+             row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
+  kable_styling(latex_options = "scale_down")
 
 
 
