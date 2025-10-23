@@ -506,6 +506,8 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                     d_173836415_d_266600170_d_452847912 == 1010380008 ~ "Woodhaven Pathology",
                                   d_173836415_d_266600170_d_185243482 == 1011290016 | 
                                     d_173836415_d_266600170_d_452847912 == 1011290016 ~ "CANPAV Pathology OP Lab",
+                                  d_173836415_d_266600170_d_185243482 == 1120190010 | 
+                                    d_173836415_d_266600170_d_452847912 == 1120190010 ~ "Jackson Professional Building",
                                   Site=="Henry Ford Health" & is.na(d_173836415_d_266600170_d_185243482) &
                                     is.na(d_173836415_d_266600170_d_452847912) ~ "Missing Both Location IDs",
                                   Site=="University of Chicago Medicine" & (d_173836415_d_266600170_d_185243482==1 | d_173836415_d_266600170_d_452847912==1) ~ "South Loop",
@@ -767,7 +769,7 @@ col_num_1.2 <- col_num_1.2 %>%
   mutate(Site_Group = case_when(
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", "K1 HFH Main",
                                  "Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", 
-                                 "Woodhaven Pathology", "CANPAV Pathology OP Lab", 
+                                 "Woodhaven Pathology", "CANPAV Pathology OP Lab", "Jackson Professional Building",
                                  "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic",
                                  "NSC", "Missing HP location") ~ "HealthPartners",   
@@ -2100,7 +2102,7 @@ clin_coll_days <- clin_coll_days %>%
     `Collection Location` %in% c("Macomb", "West Bloomfield", "Wyandotte","Fairlane (Dearborn)", "Plymouth", "Royal Oak", "Troy", 
                                  "K1 HFH Main","Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO","Brownstown", 
                                  "E Jefferson Pathology", "Woodhaven Pathology", "CANPAV Pathology OP Lab", 
-                                 "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
+                                 "Jackson Professional Building", "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic", 
     "NSC", "Missing HP location") ~ "HealthPartners", 
     `Collection Location`== "KPCO" ~ "Kaiser Permanente Colorado",
@@ -3165,7 +3167,7 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
                               "Taylor"="#7C94A8","Brownstown"="#2973A5",
                               "Livonia"="#BBBEC1", "Ford Road"="#99C0C4", "NCO"="#B9D7E3", "Sterling Heights"="#309EBD", "K1 HFH Main"="#97C4D5", 
                               "E Jefferson Pathology"="#74B0C7", "Woodhaven Pathology" = "#FBE5B5", "CANPAV Pathology OP Lab" = "#A8B7C5",
-                              "Missing Both Location IDs" = "black")) + 
+                              "Jackson Professional Building"="#9A9DA3", "Missing Both Location IDs" = "black")) + 
   labs(color = "Clinic Location")
   } else if(site == "University of Chicago Medicine" && settings=="Research"){
     
