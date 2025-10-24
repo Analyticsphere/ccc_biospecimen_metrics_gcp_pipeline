@@ -21,12 +21,21 @@ currentDate <- Sys.Date()
 
 project <- "nih-nci-dceg-connect-prod-6d04"
 
-################################################################################################################
 
 
 
 
-###########################################     CSV1:    Boxes     #############################################
+
+
+
+
+
+################################.     THESE FIRST TWO FILES CAN BE CREATED DIRECTLY IN BQ. NANCI IS WORKING ON THIS AND ONCE COMPLETED THIS CAN BE REMOVED FROM THE CODE ##############
+
+
+
+
+#############  CSV1:    Boxes    ##############
 
 log_info("Starting Box table SQL query")
 
@@ -145,7 +154,7 @@ gc()
 
 
 
-############################    CSV2:  KitAssembly_Table    ####################################################
+############   CSV2:  KitAssembly_Table    ##############
 
 log_info("Kit Assembly SQL query")
 
@@ -270,7 +279,7 @@ gc()
 
 
 
-################################################################################################################
+#####################################################################################################################################################################
 
 
 
@@ -279,9 +288,9 @@ gc()
 
 
 
+###############################.  THIS IS 2 BQ QUERIES THAT WOULD HAVE TO BE JOINED TOGETHER BUT THE FUNCTION NANCI IS WORKING ON SHOULD ALSO BE ABLE TO REMOVE THIS FROM THE CODE AND PUT IN BQ
 
-
-#########################################           CSV4:  prod_recr_veriBiospe_Formats            ##########################################################
+###########      CSV4:  prod_recr_veriBiospe_Formats            ############################
 
 log_info("Pulling participants table variables for recr_veri_prod file")
 
@@ -439,6 +448,23 @@ gc()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+########################.   THIS HAS TO REMAIN IN R EVEN AFTER NANCI'S FUNCTIONS       ################################################
+
+
 #############. Prepping data for the Biospecimen and Participant table merged outputs #################################
 
 
@@ -504,15 +530,6 @@ gc()
 
 
 #################################################################################################################
-
-
-
-
-
-
-
-
-
 
 
 
