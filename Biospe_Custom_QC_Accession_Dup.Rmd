@@ -726,7 +726,7 @@ knitr::kable(qc13_urn, longtable = TRUE)
 
 
 
-qc13_streck <- rule18 %>%  filter(d_505347689_d_593843561=="Yes" & d_505347689_d_762124027=="No" & is.na(d_505347689_d_926457119)) & !(Connect_ID %in% c("3978016781")) %>% 
+qc13_streck <- rule18 %>%  filter(d_505347689_d_593843561=="Yes" & d_505347689_d_762124027=="No" & is.na(d_505347689_d_926457119) & !(Connect_ID %in% c("3978016781"))) %>% 
   select(Site, Connect_ID, d_505347689_d_926457119)  %>%  safe_arrange(Site)
 
 
