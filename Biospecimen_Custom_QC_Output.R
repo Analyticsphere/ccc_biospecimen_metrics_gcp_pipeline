@@ -608,13 +608,22 @@ bioqc_csv <- bioqc %>%
         Rule75 = ifelse(!is.na(d_173836415_d_266600170_d_641006239_d_759651991) & is.na(d_173836415_d_266600170_d_641006239_d_221592017), "Rule 75", " "),
         #	78. Draw order placement (BioClin_BldUrnPlcdTmBL_v1r0) should not occur more than 4 days prior to verification (RcrtV_VerificationTm_v1r0).
         Rule78 = ifelse(str_sub(d_820476880, start=1, end=3)=="CXA" & #blood/urine only
-                          (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4), "Rule 78", " "),
-        #	79. Draw orders (BioClin_BldUrnPlcdTmBL_v1r0)should be placed within 30 days of verification (RcrtV_VerificationTm_v1r0). This excludes those from Henry Ford and those verified before 2/1/2023.
-        Rule79 = ifelse(d_914594314>=as.Date("2023-02-01") & Site!='Henry Ford Health System' &
-                          (as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_914594314, units="days")) > 30), "Rule 79", " "),
-        #	80. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
-        Rule80 = ifelse(as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, units="days")) > 2  & 
-                          Connect_ID!='1094193968', "Rule 80", " ")
+                          (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4) & 
+                          !(Connect_ID %in% c('3259382811', '9402029018')), "Rule 78", " "),
+        #	79. If verification (RcrtV_VerificationTm_v1r0) occurred more than 14 days ago and Site is Henry Ford or Kaiser, and Draw orders (BioClin_BldOrUrnPlcdBL_v1r0) must be placed. This  excludes those from Henry Ford with Research Collections.
+        Rule79 = ifelse(d_914594314<as.Date(currentDate -14) & 
+                          (Site %in% c("Kaiser Permanente Colorado","Kaiser Permanente Georgia",
+                                         "Kaiser Permanente Hawaii","Kaiser Permanente Northwest",
+                                         "Henry Ford Health System")) &
+                          is.na(d_173836415_d_266600170_d_184451682) & 
+                          #Exclude HF Research collections
+                          d_878865966=="No" & d_167958071=="No" & d_684635302 == "No", "Rule 79", " "),
+        #	80. Clinical collection date (<173836415.266600170.982213346>BioClin_ClinBloodTmBL_v1r0 or 173836415.266600170.139245758>BioClin_ClinicalUrnTmBL_v1r0) should not precede draw order date (<184451682>BioClin_BldUrnPlcdTmBL_v1r0 ) by more than 2 days.
+        Rule80 = ifelse(as.numeric(difftime(d_173836415_d_266600170_d_184451682,
+                                            d_173836415_d_266600170_d_982213346, units="days") > 2 |
+                                     difftime(d_173836415_d_266600170_d_184451682,
+                                              d_173836415_d_266600170_d_139245758, units="days") > 2)  & 
+                          !(Connect_ID %in% c('1094193968', '8393015300')), "Rule 80", " ")
         )  
 
  
