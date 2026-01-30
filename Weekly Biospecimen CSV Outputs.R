@@ -398,6 +398,7 @@ recr_mw <- left_join(bio_pts_data, mw_addons, by="Connect_ID")
 
 log_info("Mapping variables responses to English answer for recr_veri_prod file")
 
+## There is not a straight forward way to do this in BQ, so leaving it as R code
 recr_mw <- recr_mw %>%
   mutate(across(everything(), ~ case_when(
     . == 353358909 ~ "Yes",

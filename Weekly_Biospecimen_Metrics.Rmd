@@ -383,7 +383,6 @@ no_dups <- no_dups %>%
 
 
 ## Research locations use d_951355211 (BioSpm_Location_v1r0) for Site location. These locations should all be in the DD as well
-
 no_dups <- no_dups %>% 
   mutate(
     Site_location = case_when(
@@ -430,14 +429,17 @@ no_dups <- no_dups %>%
       d_951355211 == 117840593 ~ "Temple CDM",
       d_951355211 == 574104518 ~ "Temple Roney",
       d_951355211 == 962830330 ~ "Waco - MacArthur",
-      d_951355211 ==  749199085 ~ "Temple Westfield",
+      d_951355211 == 749199085 ~ "Temple Westfield",
+      d_951355211 == 471260082 ~ "Waco Fishpond",
+      #d_951355211 == 603989030	~ "Killeen Main"
       #SF
       d_951355211 == 769594361 ~ "Fargo Amber Valley",
       d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
       d_951355211 == 467088902 ~ "Fargo South University",
       d_951355211 == 246137578 ~ "Edith Sanford Breast Center (coded as Sanford Center)",
       d_951355211 == 433070901 ~ "Edith Sanford Breast Center",
-      #Missing
+      d_951355211 == 246153539 ~ "Bemidji Clinic",
+      #Missing (Not listed above)
       Site=='University of Chicago Medicine' ~ "Missing UC location",
       Site=='HealthPartners' ~ "Missing HP location",
       Site=='Marshfield Clinic Health System' ~ "Missing MF location",
