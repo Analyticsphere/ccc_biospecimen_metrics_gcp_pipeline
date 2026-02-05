@@ -3531,7 +3531,47 @@ status_elg_knC <- knitr::kable(status_elg7.1C,
  
 
 ```
- 
+
+```{r RequestKits, include=FALSE, echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
+
+
+#d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991
+# ### Request a kit table 1
+#  req_kit <- kit_table %>% filter(d_173836415_d_266600170_d_319972665_d_638781731=="353358909") %>% 
+#   mutate(Kit_Status_int = factor(Kit_Status_int,
+#                                  levels=c("Undeliverable","Initialized", 
+#                                           "Address Printed", "Assigned", "Shipped", "Received")),
+#          elg = case_when(is.na(d_173836415_d_266600170_d_319972665_d_759651991) ~ "Ineligible",
+#                          TRUE~ "Eligible"),
+#          elg = factor(elg,levels=c("Eligible","Ineligible"))) 
+# 
+# 
+# req_kit_table1 <- create_tbl_cross(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
+# colnames(req_kit_table1)[ncol(req_kit_table1)] <- "Total Kits Requested"
+# 
+# knitr::kable(req_kit_table1,
+#              caption="Table tbd: Request a Kit",
+#              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>% 
+#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>% 
+#   kable_styling(latex_options = "scale_down")
+# 
+# 
+# 
+# 
+# ### Request a kit table 2
+# req_kit2 <- req_kit %>% filter(elg=="Eligible")
+# 
+# req_kit_table2 <- create_tbl_cross(req_kit2, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
+# colnames(req_kit_table2)[ncol(req_kit_table2)] <- "Total Kits Requested"
+# 
+# knitr::kable(req_kit_table2,
+#              caption="Table tbd2: Request a Kit",
+#              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>% 
+#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>% 
+#   kable_styling(latex_options = "scale_down")
+
+
+```
  
  
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
