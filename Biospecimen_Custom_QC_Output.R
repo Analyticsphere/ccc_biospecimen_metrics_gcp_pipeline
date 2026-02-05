@@ -176,12 +176,13 @@ bioqc_csv <- bioqc %>%
                                                6422794867, 1349953410, 1731138933, 2769291903, 3589595480, 3722445358, 
                                                5972658064, 8553891957, 9121406600, 9575612025, 4057490101, 9167792140,
                                                8924667241, 9694753790, 5899565591, 6568449334, 1371560328, 8625295305,
-                                               "6862754687", "9143436002", "3319331872", "7276829171", "9262617255",
-                                               2431356225, 1703960468, '6437389686', '7338222763', "5213644501", "3137297902",
-                                               "8370075725", 7536254831, 8685711133, 1573897668, 4332317182, '2643537513', "2145164291",
-                                               "4246383289", 9772303289, '6351945356', '5919403814', '7143228040', '6144633182', '4958431450', 
-                                               '9973370517', "9358513094", "7414720886", "4054300519", "9906761921", "7945071279", "8783197795", "1289559030", 
-                                               "6250053683", "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444")), "Rule 2b", " "),
+                                               6862754687, 9143436002, 3319331872, 7276829171, 9262617255,
+                                               2431356225, 1703960468, 6437389686, 7338222763, 5213644501, 3137297902,
+                                               8370075725, 7536254831, 8685711133, 1573897668, 4332317182, 2643537513, 2145164291,
+                                               4246383289, 9772303289, 6351945356, 5919403814, 7143228040, 6144633182, 4958431450, 
+                                               9973370517, 9358513094, 7414720886, 4054300519, 9906761921, 7945071279, 8783197795, 1289559030, 
+                                               6250053683, 3720410076, 8288718444, 5967357815, 3968179760, 2452097537, 8926083140, 1376492836, 8288718444,
+                                               6554752349)), "Rule 2b", " "),
          # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
          Rule3 = ifelse(d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & 
                           d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & 
@@ -607,13 +608,22 @@ bioqc_csv <- bioqc %>%
         Rule75 = ifelse(!is.na(d_173836415_d_266600170_d_641006239_d_759651991) & is.na(d_173836415_d_266600170_d_641006239_d_221592017), "Rule 75", " "),
         #	78. Draw order placement (BioClin_BldUrnPlcdTmBL_v1r0) should not occur more than 4 days prior to verification (RcrtV_VerificationTm_v1r0).
         Rule78 = ifelse(str_sub(d_820476880, start=1, end=3)=="CXA" & #blood/urine only
-                          (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4), "Rule 78", " "),
-        #	79. Draw orders (BioClin_BldUrnPlcdTmBL_v1r0)should be placed within 30 days of verification (RcrtV_VerificationTm_v1r0). This excludes those from Henry Ford and those verified before 2/1/2023.
-        Rule79 = ifelse(d_914594314>=as.Date("2023-02-01") & Site!='Henry Ford Health System' &
-                          (as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_914594314, units="days")) > 30), "Rule 79", " "),
-        #	80. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
-        Rule80 = ifelse(as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, units="days")) > 2  & 
-                          Connect_ID!='1094193968', "Rule 80", " ")
+                          (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4) & 
+                          !(Connect_ID %in% c('3259382811', '9402029018')), "Rule 78", " "),
+        #	79. If verification (RcrtV_VerificationTm_v1r0) occurred more than 14 days ago and Site is Henry Ford or Kaiser, and Draw orders (BioClin_BldOrUrnPlcdBL_v1r0) must be placed. This  excludes those from Henry Ford with Research Collections.
+        Rule79 = ifelse(d_914594314<as.Date(currentDate -14) & 
+                          (Site %in% c("Kaiser Permanente Colorado","Kaiser Permanente Georgia",
+                                         "Kaiser Permanente Hawaii","Kaiser Permanente Northwest",
+                                         "Henry Ford Health System")) &
+                          is.na(d_173836415_d_266600170_d_184451682) & 
+                          #Exclude HF Research collections
+                          d_878865966=="No" & d_167958071=="No" & d_684635302 == "No", "Rule 79", " "),
+        #	80. Clinical collection date (<173836415.266600170.982213346>BioClin_ClinBloodTmBL_v1r0 or 173836415.266600170.139245758>BioClin_ClinicalUrnTmBL_v1r0) should not precede draw order date (<184451682>BioClin_BldUrnPlcdTmBL_v1r0 ) by more than 2 days.
+        Rule80 = ifelse(as.numeric(difftime(d_173836415_d_266600170_d_184451682,
+                                            d_173836415_d_266600170_d_982213346, units="days") > 2 |
+                                     difftime(d_173836415_d_266600170_d_184451682,
+                                              d_173836415_d_266600170_d_139245758, units="days") > 2)  & 
+                          !(Connect_ID %in% c('1094193968', '8393015300')), "Rule 80", " ")
         )  
 
  
@@ -984,7 +994,7 @@ issue212 <- HMW %>%
                                 '8997367478','9091358231','9181813667','9234234591','9273458271','9411992203','9499085205','9792382050','9813020733',
                                 '9839544037','9920404904','9977516520', '3797437285', '8811209117',  '5019127359', '3797437285',
                                 '8811209117', '5019127359', '3486230846', '8954870489', '2254978243', '1050654902', '9863548767', '6288600449', '3805509458', 
-                                "2401165994", "4967873956", "7192141098", "1242942518", '4545815202'))) 
+                                "2401165994", "4967873956", "7192141098", "1242942518", '4545815202', "6244974048"))) 
 
 #53. Connect ID and token in Participants Table must match Connect ID and token in Biospecimens table
 tokens <- "SELECT 
@@ -1313,7 +1323,8 @@ c_urine3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_17
                                                            '2643537513', "2145164291", "4246383289", "6568449334", '3882691411', '6248007969', '9772303289', '6422794867',
                                                            '7338222763', '9973370517', '6351945356', '5919403814', '7143228040', '6144633182', '4958431450', '7414720886',
                                                            '5367655537', "4054300519", "9906761921", "9358513094", "7945071279", "8783197795", "1289559030", "6250053683", 
-                                                           "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444")))
+                                                           "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444",
+                                                           "6554752349")))
 
 
 ########## These rules need to allow for duplicates
