@@ -327,7 +327,7 @@ knitr::kable(qc_8, longtable = TRUE)
 
 
 
-### 9. All baseline samples (BioFin_BaseBloodCol_v1r0,BioFin_BaseUrineCol_v1r0,BioFin_BaseMWCol_v1r0 for Research collections; BioFin_BaseBloodCol_v1r0,BioFin_BaseUrineCol_v1r0 for Clinical collections) are collected, and BioCol_ColTime_v1r0 occurred on or after 11/21/2022 then SMMet_BLSamplesColl_v1r0 must be YES
+### 9. All baseline samples (BioFin_BaseBloodCol_v1r0, BioFin_BaseUrineCol_v1r0, BioFin_BaseMWCol_v1r0 for Research collections; BioFin_BaseBloodCol_v1r0, BioFin_BaseUrineCol_v1r0 for Clinical collections) are collected, and BioCol_ColTime_v1r0 occurred on or after 11/21/2022 then SMMet_BLSamplesColl_v1r0 must be YES
 ```{r SMMET, echo=FALSE, warning=FALSE, message=FALSE}
 
 ## This rule needs to allow for participants with duplicate collections, so this will be a separate BQ pull
@@ -650,7 +650,7 @@ knitr::kable(qc_streck, longtable = TRUE)
 ```{r BioBPTL_DateRecResearch, echo=FALSE, warning=FALSE, message=FALSE}
 
 
- ###########chnage to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
+ ###########change to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
 
 bioqcR <- bioqc %>%  filter(d_650516960=="Research")
 
