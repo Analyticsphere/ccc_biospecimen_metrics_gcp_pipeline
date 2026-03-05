@@ -4,6 +4,7 @@ author: "Kelsey Dowling"
 date: "`r Sys.Date()`"
 header-includes:  
     \usepackage{placeins}
+    \usepackage{threeparttable}
 
 
 output:
