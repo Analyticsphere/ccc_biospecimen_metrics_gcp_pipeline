@@ -3550,7 +3550,8 @@ kt.Connect_ID as ktCID ,
 case when d_137401245='353358909'  then 'Collection Card Not Included'
 ELSE 'Collection Card Included'
 END AS Card_Status,
-d_633640710_d_950521660, d_633640710_d_545319575, d_633640710_d_938338155, d_633640710_d_205954477, d_633640710_d_289239334,d_633640710_d_992420392, d_633640710_d_541085383,d_633640710_d_427719697, d_633640710_d_100618603, d_426588510, d_221592017
+d_633640710_d_950521660, d_633640710_d_545319575, d_633640710_d_938338155, d_633640710_d_205954477, d_633640710_d_289239334,d_633640710_d_992420392, d_633640710_d_541085383,d_633640710_d_427719697, 
+d_633640710_d_100618603, d_633640710_d_309189173, d_426588510, d_221592017
  FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` pts
  left join `nih-nci-dceg-connect-prod-6d04.FlatConnect.kitAssembly` kt
  on pts.d_173836415_d_266600170_d_319972665_d_687158491=kt.d_687158491
@@ -3842,8 +3843,9 @@ Table7.5 <- bind_rows(Table7.5, total_row)
  
 ## Kit Conditions
 
-condition_cols <- c("d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", "d_633640710_d_205954477", "d_633640710_d_289239334","d_633640710_d_992420392",
-           "d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603")
+condition_cols <- c("d_633640710_d_950521660", "d_633640710_d_545319575", "d_633640710_d_938338155", 
+                    "d_633640710_d_205954477", "d_633640710_d_289239334","d_633640710_d_992420392",
+           "d_633640710_d_541085383","d_633640710_d_427719697", "d_633640710_d_100618603", "d_633640710_d_309189173")
 kit_assembly <- kit_assembly %>%
   mutate(
     multi_cond = rowSums(across(all_of(condition_cols), ~ .x == 353358909, .names = NULL), na.rm = TRUE)
@@ -3854,7 +3856,8 @@ table_32 <- kit_assembly %>%
                                    d_633640710_d_545319575==353358909 ~ "Package Crushed",
                                    d_633640710_d_938338155==353358909 ~ "Improper Packaging",
                                    d_633640710_d_205954477==353358909 ~ "Collection Cup Damaged",
-                                   d_633640710_d_289239334==353358909 ~ "Collection Cup Leaked",
+                                   d_633640710_d_289239334==353358909 ~ "Collection Cup Leaked Partially",
+                                   d_633640710_d_309189173==353358909 ~ "Collection Cup Leaked - Total Loss",
                                    d_633640710_d_992420392==353358909 ~ "Empty Cup Returned",
                                    d_633640710_d_541085383==353358909 ~ "Incorrect Collection Type Returned",
                                    d_633640710_d_427719697==353358909 ~ "Collection Cup Not Returned",
