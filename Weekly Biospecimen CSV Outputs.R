@@ -498,7 +498,7 @@ names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setti
                "BioBPTL_DateRec_v1r0_EDTAT2",
                "BioBPTL_DateRec_v1r0_EDTAT3",
                "BioRec_NoteOpt_v1r0",
-               ##"BioCol_StrayTubesList_v1r0",
+               ##"BioCol_StrayTubesList_v1r0", #not yet a populated variable
                "siteAcronym",
                "BioCol_Deviation_v1r0_SST1",
                "BioCol_DevNotes_v1r0_SST1",

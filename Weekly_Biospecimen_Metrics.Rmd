@@ -9,6 +9,7 @@ header-includes:
     \usepackage{booktabs}
     \usepackage{pdflscape}
     \usepackage{longtable}
+    \usepackage{threeparttable}
 
 
 output:
@@ -464,6 +465,9 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                   Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 6 | d_173836415_d_266600170_d_452847912 == 6) ~ "Brooklyn Center",
                                   Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 7 | d_173836415_d_266600170_d_452847912 == 7) ~ "Clinic Stillwater",
                                   Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 8 | d_173836415_d_266600170_d_452847912 == 8) ~ "New Richmond Clinic",
+                                  Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 9 | d_173836415_d_266600170_d_452847912 == 9) ~ "Burnsville Clinic and Specialty Center",
+                                  Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 10 | d_173836415_d_266600170_d_452847912 == 10) ~ "Andover Clinic",
+                                  Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 11 | d_173836415_d_266600170_d_452847912 == 11) ~ "St. Paul Clinic- Wabasha",
                                   d_173836415_d_266600170_d_185243482 == 1050010095 | d_173836415_d_266600170_d_452847912 == 1050010095 |
                                     d_173836415_d_266600170_d_185243482 == 1050010034 | d_173836415_d_266600170_d_452847912 == 1050010034 ~ "Wyandotte",
                                   d_173836415_d_266600170_d_185243482 == 1060010063 |
@@ -775,6 +779,7 @@ col_num_1.2 <- col_num_1.2 %>%
                                  "Woodhaven Pathology", "CANPAV Pathology OP Lab", "Jackson Professional Building",
                                  "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic",
+                                 "Burnsville Clinic and Specialty Center", "St. Paul Clinic- Wabasha", "Andover Clinic",
                                  "NSC", "Missing HP location") ~ "HealthPartners",   
     `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", "DCAM (Hyde Park)", 
                                  "Crown Point", "Missing UC location") ~ "University of Chicago Medicine",
@@ -2109,7 +2114,7 @@ clin_coll_days <- clin_coll_days %>%
                                  "E Jefferson Pathology", "Woodhaven Pathology", "CANPAV Pathology OP Lab", 
                                  "Jackson Professional Building", "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
     `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic", 
-    "NSC", "Missing HP location") ~ "HealthPartners", 
+                                 "Burnsville Clinic and Specialty Center", "St. Paul Clinic- Wabasha", "Andover Clinic", "NSC", "Missing HP location") ~ "HealthPartners", 
     `Collection Location`== "KPCO" ~ "Kaiser Permanente Colorado",
     `Collection Location`== "KPGA" ~ "Kaiser Permanente Georgia",
     `Collection Location` %in% c("Oahu Clinics", "Non-Oahu Clinics", "Missing Both Location IDs","Missing KPHI location") ~ "Kaiser Permanente Hawaii",
@@ -3172,7 +3177,8 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
                               "Taylor"="#7C94A8","Brownstown"="#2973A5",
                               "Livonia"="#BBBEC1", "Ford Road"="#99C0C4", "NCO"="#B9D7E3", "Sterling Heights"="#309EBD", "K1 HFH Main"="#97C4D5", 
                               "E Jefferson Pathology"="#74B0C7", "Woodhaven Pathology" = "#FBE5B5", "CANPAV Pathology OP Lab" = "#A8B7C5",
-                              "Jackson Professional Building"="#9A9DA3", "Missing Both Location IDs" = "black")) + 
+                              "Jackson Professional Building"="#9A9DA3", "Missing Both Location IDs" = "black"),
+                       guide = guide_legend(nrow = 8, byrow = TRUE)) +
   labs(color = "Clinic Location")
   } else if(site == "University of Chicago Medicine" && settings=="Research"){
     
@@ -3212,13 +3218,16 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
                                 "Edith Sanford Breast Center (coded as Sanford Center)"="#FDBE19", 
                                 "Edith Sanford Breast Center"="#2973A5","Fargo Amber Valley"="#309EBD",
                                 "Bemidji Clinic"="#164C71")) +
-    guides(color = guide_legend(nrow = 3, byrow = TRUE, title = "Collection Location")) +
+    guides(color = guide_legend(nrow = 4, byrow = TRUE, title = "Collection Location")) +
     labs(color = "Collection Location") 
   } else if(site == "HealthPartners" && settings=="Clinical"){
       
     plt <- ggplot(weekly_counts, aes(x = as.Date(col.Monday.date), y = n, color = .data[[color_var]])) +
       scale_color_manual(values=c("NSC"="#99C0C4", "Elk River"="#565C65", "Chanhassen"="#CC7D15", "Park Nicollet Minneapolis Clinic"="#FDBE19",
-                                "Brooklyn Center"="#3C989E", "Clinic Stillwater"="#2973A5", "New Richmond Clinic"="#E7CCAD" )) +
+                                "Brooklyn Center"="#3C989E", "Clinic Stillwater"="#2973A5", "New Richmond Clinic"="#E7CCAD",
+                                "Burnsville Clinic and Specialty Center"= "#797D83", "St. Paul Clinic- Wabasha"="#164C71", 
+                                "NSC"="#309EBD", "Andover Clinic"="#B1C7D9"),
+                         guide = guide_legend(nrow = 5, byrow = TRUE)) +
     labs(color = "Clinic Location") 
   } else if(site == "Baylor Scott and White Health" && settings=="Research"){
     
@@ -3229,7 +3238,7 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
                                 "North Garland"="#CC7D15", "Temple CDM"="#BBBEC1", "Temple Roney"="#2973A5",
                                 "Waco - MacArthur"="#99C0C4", "Temple Westfield"="#B9D7E3",
                                 "Waco Fishpond"="#A8B7C5","Killeen Main"= "#797D83"),
-                         guide = guide_legend(nrow = 3, byrow = TRUE)) +
+                         guide = guide_legend(nrow = 4, byrow = TRUE)) +
     labs(color = "Collection Location") 
   }
   
@@ -3256,12 +3265,17 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
 ```
 
 
-```{r Section6_Figures, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
+```{r Section6_Figures1, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
 
   
 #Figure 6.1
 Section6_plot_function(coll_sett_all,start_date = "2022-06-20", title = "Figure 6.1: Baseline - Weekly Total Biospecimen Collections")
 
+```
+
+\newpage
+
+```{r Section6_Figures2, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
 #Figure 6.2
 Section6_plot_function(coll_sett_all,start_date = "2022-06-20", site = "Henry Ford Health", 
                        color_by_setting = TRUE, color_var="all_settings",
@@ -3539,40 +3553,49 @@ status_elg_knC <- knitr::kable(status_elg7.1C,
 
 ```{r RequestKits, include=FALSE, echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
+# ----- Not yet in prod -------------------------
 
-#d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991
-# ### Request a kit table 1
-#  req_kit <- kit_table %>% filter(d_173836415_d_266600170_d_319972665_d_638781731=="353358909") %>% 
-#   mutate(Kit_Status_int = factor(Kit_Status_int,
-#                                  levels=c("Undeliverable","Initialized", 
-#                                           "Address Printed", "Assigned", "Shipped", "Received")),
-#          elg = case_when(is.na(d_173836415_d_266600170_d_319972665_d_759651991) ~ "Ineligible",
-#                          TRUE~ "Eligible"),
-#          elg = factor(elg,levels=c("Eligible","Ineligible"))) 
+# add d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991
+### Request a kit table 1
+
+# req_kit <- kit_table %>%
+#   filter(d_173836415_d_266600170_d_319972665_d_638781731 == "353358909") %>%
+#   mutate(req = if_else(!is.na(d_173836415_d_266600170_d_319972665_d_759651991),
+#                        "Requested", "Not Requested"),
+#          elg = "Eligible")  
 # 
+# req_kit_table1 <- req_kit %>% 
+#   count(Site, req, name = "Requested") %>%             
+#   mutate(Eligible = sum(Requested), .by = Site) %>%     # All are eligible
+#   filter(req == "Requested") %>%               
+#   select(Site, Eligible, Requested) %>% 
+#   #summary row
+#   bind_rows(summarise(.data = ., 
+#                       Site = "Total",
+#                       Eligible = sum(Eligible),
+#                       Requested = sum(Requested))) %>% 
+#   #percentage
+#   mutate(Requested = paste0(Requested, " (",
+#                             round((Requested/Eligible)*100,2), "%)"))
 # 
-# req_kit_table1 <- create_tbl_cross(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
-# colnames(req_kit_table1)[ncol(req_kit_table1)] <- "Total Kits Requested"
 # 
 # knitr::kable(req_kit_table1,
 #              caption="Table tbd: Request a Kit",
-#              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>% 
-#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>% 
+#              row.names=FALSE, align=c("l", "c"),booktabs = TRUE) %>%
+#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>%
 #   kable_styling(latex_options = "scale_down")
 # 
 # 
 # 
 # 
 # ### Request a kit table 2
-# req_kit2 <- req_kit %>% filter(elg=="Eligible")
-# 
-# req_kit_table2 <- create_tbl_cross(req_kit2, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
+# req_kit_table2 <- create_tbl_cross(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
 # colnames(req_kit_table2)[ncol(req_kit_table2)] <- "Total Kits Requested"
 # 
 # knitr::kable(req_kit_table2,
 #              caption="Table tbd2: Request a Kit",
-#              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>% 
-#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>% 
+#              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>%
+#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>%
 #   kable_styling(latex_options = "scale_down")
 
 
