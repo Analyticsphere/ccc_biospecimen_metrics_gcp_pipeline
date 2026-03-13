@@ -74,7 +74,7 @@ d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_54148
 d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_541483796_d_826941471,
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
 d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_331584571_d_266600170_d_840048338,
-d_914594314, d_685002411_d_194410742, d_685002411_d_949501163
+d_914594314, d_685002411_d_194410742, d_685002411_d_949501163, d_331584571_d_266600170_d_343048998
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
@@ -92,18 +92,7 @@ bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
 
 
-
-#bioqc_join= left_join(parts_data, bio_data, by="Connect_ID") 
-
-bioqc= inner_join(bio_data,parts_data,  by=c("Connect_ID", "d_827220437") )
-
-knitr::opts_chunk$set(comment = NA)
-
-
-
-
-
-bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
+parts_data <- parts_data %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
                                           d_827220437==531629870 ~ "HealthPartners",
                                           d_827220437==548392715 ~ "Henry Ford Health System",
                                           d_827220437==303349821 ~ "Marshfield Clinical Health System",
@@ -114,6 +103,10 @@ bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott
                                           d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
                                           d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
+
+bioqc= inner_join(bio_data,parts_data,  by=c("Connect_ID", "d_827220437") )
+
+knitr::opts_chunk$set(comment = NA)
 
 
 ##Report output needs to have the English text for yes/no or clinical/research/home, not the concept IDs
@@ -210,7 +203,8 @@ qc2_1a <- bioqc %>%  filter( d_973670172_d_593843561=="No"  & d_173836415_d_2666
                                                    "7536254831", "8685711133", "1573897668", "4332317182", '2643537513', "2145164291",
                                                    "4246383289", "9772303289", '6351945356', '5919403814', '7143228040', '6144633182', 
                                                    '4958431450', '9973370517', "9358513094", "7414720886", "4054300519", "9906761921", "7945071279", "8783197795", "1289559030", "6250053683", "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444", "6554752349",
-                                                   "1291437931", "3508580541", "8130614446", "6966066624")))
+                                                   "1291437931", "3508580541", "8130614446", "6966066624",
+                                                   "7304905537", "2321589610", "2911866308")))
 
 qc2_1a <- qc2_1a  %>% select(Site, Connect_ID, d_973670172_d_593843561, d_173836415_d_266600170_d_786930107)  %>%  safe_arrange(Site)
 
@@ -1051,7 +1045,8 @@ c_urine3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_17
                                                "4332317182", '2643537513', "2145164291", "4246383289", "6568449334", '3882691411', '6248007969',
                                                '9772303289', '6422794867','7338222763', '9973370517', '6351945356', '5919403814', '7143228040',
                                                '6144633182', '4958431450', '7414720886', '5367655537', "4054300519", "9906761921", "9358513094", "7945071279", "8783197795", "1289559030", "6250053683", "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444", "6554752349",
-                                               "1291437931", "3508580541", "8130614446", '3108798408', '6966066624')))   %>%  
+                                               "1291437931", "3508580541", "8130614446", '3108798408', '6966066624',
+                                               "7304905537", "2321589610", "2911866308")))   %>%  
 
     select(Site, Connect_ID, d_167958071, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
 
@@ -1335,19 +1330,19 @@ knitr::kable(shipt, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ### 39. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received, and and kit level should populate
 ```{r recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
-## needs to be fixed regardless- wrong count of columns and column names; should be using parts vars for the second two is.na vars
+## Because we need to determine the kit level to asses each sceario, we do not need separate code to find whether or not kit level is populated (like we do for the date/time and tracking variables)
 recvd <- Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017=="Received" & kit_level=="Initial Kit" & 
                                  (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160) | 
-                                    is.na(d_173836415_d_266600170_d_319972665_d_826941471) |  is.na(d_137401245))) |
+                                    is.na(d_173836415_d_266600170_d_319972665_d_826941471) )) |
                                (d_173836415_d_266600170_d_541483796_d_221592017=="Received" & kit_level=="Replacement Kit 1" & 
                                   (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160) | 
-                                     is.na(d_173836415_d_266600170_d_541483796_d_826941471) |  is.na(d_137401245))) | 
+                                     is.na(d_173836415_d_266600170_d_541483796_d_826941471) )) | 
                                (d_173836415_d_266600170_d_641006239_d_221592017=="Received" & kit_level=="Replacement Kit 2" & 
                                   (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160) | 
-                                     is.na(d_173836415_d_266600170_d_641006239_d_826941471) |  is.na(d_137401245)))) %>%  
-  select(Site, Connect_ID, kit_level, d_531858099, d_137401245) %>%  safe_arrange(Site)
+                                     is.na(d_173836415_d_266600170_d_641006239_d_826941471) ))) %>%  
+  select(Site, Connect_ID, kit_level, d_531858099) %>%  safe_arrange(Site)
 
-colnames(recvd) <- c("Site", "Connect ID", "Kit Level", "SupplyKitTrack",  "CollCardRet")
+colnames(recvd) <- c("Site", "Connect ID", "Kit Level", "SupplyKitTrack")
 knitr::kable(recvd, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_position")
 
 ```
@@ -2397,8 +2392,8 @@ knitr::kable(Rsett_BioChk_TimeBL_v1r0, longtable = TRUE)  %>% kable_styling(late
 
 
 BioChk_TimeBL_v1r0_RschTmBL <- parts_data %>%  
-  filter((as.POSIXct(d_331584571_d_266600170_d_840048338) > 
-           pmin(as.POSIXct(d_173836415_d_266600170_d_561681068), as.POSIXct(d_173836415_d_266600170_d_847159717), na.rm=T)) & 
+  filter((as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)) > 
+           pmin(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_561681068)), as.POSIXct(ymd_hms(d_173836415_d_266600170_d_847159717)), na.rm=T)) & 
            !(Connect_ID %in% c('3972348378','7772455634','7400318404','3111954555','1106079872'))) %>% 
   select(Site, Connect_ID, d_331584571_d_266600170_d_840048338, d_173836415_d_266600170_d_561681068, 
          d_173836415_d_266600170_d_847159717) %>%  safe_arrange(Site)
@@ -2463,6 +2458,19 @@ knitr::kable(DrawOrder_Colct2, longtable = TRUE)  %>% kable_styling(latex_option
 ```
 
 
+### 81. The research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the check-out time (BioFin_CheckOutTmBL_v1r0).
+```{r Checkin_Checkout}
+
+Checkin_Checkoout <- bioqc %>%  
+  filter(as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)) > as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998))) %>%
+  select(Site, Connect_ID, d_331584571_d_266600170_d_840048338,
+         d_331584571_d_266600170_d_343048998) %>%  safe_arrange(Site)
+
+colnames(Checkin_Checkoout) <- c("Site", "Connect ID", "BioChk_TimeBL_v1r0", "BioFin_CheckOutTmBL_v1r0")
+knitr::kable(Checkin_Checkoout)  %>% kable_styling(latex_options = "scale_down")
+
+
+```
 
 
 
