@@ -3850,7 +3850,7 @@ table_32 <- kit_assembly %>%
                                    d_633640710_d_545319575==353358909 ~ "Package Crushed",
                                    d_633640710_d_938338155==353358909 ~ "Improper Packaging",
                                    d_633640710_d_205954477==353358909 ~ "Collection Cup Damaged",
-                                   d_633640710_d_289239334==353358909 ~ "Collection Cup Leaked Partially",
+                                   d_633640710_d_289239334==353358909 ~ "Collection Cup Leaked - Partial Loss",
                                    d_633640710_d_309189173==353358909 ~ "Collection Cup Leaked - Total Loss",
                                    d_633640710_d_992420392==353358909 ~ "Empty Cup Returned",
                                    d_633640710_d_541085383==353358909 ~ "Incorrect Collection Type Returned",
