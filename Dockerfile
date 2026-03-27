@@ -42,6 +42,14 @@ RUN Rscript -e 'tinytex::install_tinytex()'
 # Needed for summarytools namespace
 RUN Rscript -e 'install.packages("tcltk")'
 
+# Install xfun 0.55
+# xfun 0.56 deprecates xfun::attr() for xfun::attr2().
+# This causes the error:
+#   "object ‘attr’ is not exported by 'namespace:xfun'"
+# in downstream packages that still rely on xfun::attr().
+# See: https://github.com/yihui/xfun/releases/tag/v0.56
+RUN R -e "devtools::install_version('xfun', version='0.55', repos='https://cloud.r-project.org')"
+
 # Install R libraries
 RUN install2.r --error plumber gridExtra bigrquery dplyr \
                epiDisplay lubridate tidyverse gtsummary \
@@ -51,7 +59,6 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
                magrittr gmodels magick gargle tools expss config openxlsx boxr \
                scales rio readr reshape2 logger
               
-
 # These libraries might not be available from install2.R so use CRAN
 RUN R -e "install.packages(c('gt'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
 

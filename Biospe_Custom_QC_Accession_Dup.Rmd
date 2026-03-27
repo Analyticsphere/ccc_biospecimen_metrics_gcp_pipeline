@@ -4,6 +4,7 @@ author: "Kelsey Dowling"
 date: "`r Sys.Date()`"
 header-includes:  
     \usepackage{placeins}
+    \usepackage{threeparttable}
 
 
 output:
@@ -74,7 +75,7 @@ d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_54148
 d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_541483796_d_826941471,
 d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_641006239_d_379252329, 
 d_173836415_d_266600170_d_641006239_d_221592017, d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_331584571_d_266600170_d_840048338,
-d_914594314, d_685002411_d_194410742, d_685002411_d_949501163
+d_914594314, d_685002411_d_194410742, d_685002411_d_949501163, d_331584571_d_266600170_d_343048998
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` where Connect_ID IS NOT NULL and d_831041022='104430631'"
 
 
@@ -92,18 +93,7 @@ bio_data$Connect_ID <- as.numeric(bio_data$Connect_ID)
 parts_data$Connect_ID <- as.numeric(parts_data$Connect_ID)
 
 
-
-#bioqc_join= left_join(parts_data, bio_data, by="Connect_ID") 
-
-bioqc= inner_join(bio_data,parts_data,  by=c("Connect_ID", "d_827220437") )
-
-knitr::opts_chunk$set(comment = NA)
-
-
-
-
-
-bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
+parts_data <- parts_data %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott and White Health",
                                           d_827220437==531629870 ~ "HealthPartners",
                                           d_827220437==548392715 ~ "Henry Ford Health System",
                                           d_827220437==303349821 ~ "Marshfield Clinical Health System",
@@ -114,6 +104,10 @@ bioqc <- bioqc %>%  mutate(Site=case_when(d_827220437==472940358 ~ "Baylor Scott
                                           d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
                                           d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
+
+bioqc= inner_join(bio_data,parts_data,  by=c("Connect_ID", "d_827220437") )
+
+knitr::opts_chunk$set(comment = NA)
 
 
 ##Report output needs to have the English text for yes/no or clinical/research/home, not the concept IDs
@@ -209,7 +203,9 @@ qc2_1a <- bioqc %>%  filter( d_973670172_d_593843561=="No"  & d_173836415_d_2666
                                                    "2431356225", "1703960468", '6437389686', '7338222763', "5213644501", "3137297902",
                                                    "7536254831", "8685711133", "1573897668", "4332317182", '2643537513', "2145164291",
                                                    "4246383289", "9772303289", '6351945356', '5919403814', '7143228040', '6144633182', 
-                                                   '4958431450', '9973370517', "9358513094", "7414720886", "4054300519", "9906761921", "7945071279", "8783197795", "1289559030", "6250053683", "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444")))
+                                                   '4958431450', '9973370517', "9358513094", "7414720886", "4054300519", "9906761921", "7945071279", "8783197795", "1289559030", "6250053683", "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444", "6554752349",
+                                                   "1291437931", "3508580541", "8130614446", "6966066624",
+                                                   "7304905537", "2321589610", "2911866308")))
 
 qc2_1a <- qc2_1a  %>% select(Site, Connect_ID, d_973670172_d_593843561, d_173836415_d_266600170_d_786930107)  %>%  safe_arrange(Site)
 
@@ -326,7 +322,7 @@ knitr::kable(qc_8, longtable = TRUE)
 
 
 
-### 9. All baseline samples (BioFin_BaseBloodCol_v1r0,BioFin_BaseUrineCol_v1r0,BioFin_BaseMWCol_v1r0 for Research collections; BioFin_BaseBloodCol_v1r0,BioFin_BaseUrineCol_v1r0 for Clinical collections) are collected, and BioCol_ColTime_v1r0 occurred on or after 11/21/2022 then SMMet_BLSamplesColl_v1r0 must be YES
+### 9. All baseline samples (BioFin_BaseBloodCol_v1r0, BioFin_BaseUrineCol_v1r0, BioFin_BaseMWCol_v1r0 for Research collections; BioFin_BaseBloodCol_v1r0, BioFin_BaseUrineCol_v1r0 for Clinical collections) are collected, and BioCol_ColTime_v1r0 occurred on or after 11/21/2022 then SMMet_BLSamplesColl_v1r0 must be YES
 ```{r SMMET, echo=FALSE, warning=FALSE, message=FALSE}
 
 ## This rule needs to allow for participants with duplicate collections, so this will be a separate BQ pull
@@ -649,7 +645,7 @@ knitr::kable(qc_streck, longtable = TRUE)
 ```{r BioBPTL_DateRecResearch, echo=FALSE, warning=FALSE, message=FALSE}
 
 
- ###########chnage to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
+ ###########change to tube collected =yes and BioBPTL_DateRec_v1r0 is na for all & deviation!= discard deviation (one flag triggered)
 
 bioqcR <- bioqc %>%  filter(d_650516960=="Research")
 
@@ -1005,7 +1001,7 @@ c_blood3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_17
                                   ((d_173836415_d_266600170_d_592099155=="Research" | is.na(d_173836415_d_266600170_d_592099155)) | d_878865966=="No") &
                                   !(Connect_ID %in%  c("7848933050", "5885436394", "9258958214", "2300063524", "1176687465", "1850586900","6575901705", 
                                                        "3467573584", "1274744512", '3362078899',  '7789082855', '8148304740', '3882691411',
-                                                       '6248007969', '5367655537', '3939011113'))) %>% 
+                                                       '6248007969', '5367655537', '3939011113', '3108798408'))) %>% 
     select(Site, Connect_ID, d_878865966, d_173836415_d_266600170_d_592099155, d_173836415_d_266600170_d_982213346) %>%  safe_arrange(Site, Connect_ID)
 
 
@@ -1049,7 +1045,9 @@ c_urine3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_17
                                                '3137297902', '8370075725', '7789082855', '8148304740', "7536254831", "8685711133", "1573897668", 
                                                "4332317182", '2643537513', "2145164291", "4246383289", "6568449334", '3882691411', '6248007969',
                                                '9772303289', '6422794867','7338222763', '9973370517', '6351945356', '5919403814', '7143228040',
-                                               '6144633182', '4958431450', '7414720886', '5367655537', "4054300519", "9906761921", "9358513094", "7945071279", "8783197795", "1289559030", "6250053683", "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444")))   %>%  
+                                               '6144633182', '4958431450', '7414720886', '5367655537', "4054300519", "9906761921", "9358513094", "7945071279", "8783197795", "1289559030", "6250053683", "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444", "6554752349",
+                                               "1291437931", "3508580541", "8130614446", '3108798408', '6966066624',
+                                               "7304905537", "2321589610", "2911866308")))   %>%  
 
     select(Site, Connect_ID, d_167958071, d_173836415_d_266600170_d_718172863, d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
 
@@ -1080,12 +1078,12 @@ bioqc1 <- bioqc %>%
            (Site=="Henry Ford Health System" | Site=="University of Chicago Medicine") & #only HP and UC sends this
                #d_173836415_d_266600170_d_543608829 != "[]") & 
            !(Connect_ID %in% c("2824989966","3759939890" ,"4688823720" ,"8589481620" ,"6336258662","5461650381","4900116130",
-             "4462616750","9111871102","8476952861","2974054638" ,"3544623873","3293040395","7571439842","3165368475",
-             "6954174713","6361337944","1629086681","3544623873","3293040395","7571439842","3165368475","6954174713",
-             "6361337944","1629086681","9768745029","3770024701","8836251245","3312148528", "6806962114", # HFH exclusions
-             "4782195164", "6229346420", '1271036774','6288600449', '9692694571', '4327492344', '8372596629', '9399609746','1608206802', # UC exclusions
-             "8336144924","7515171846","9963945282" ,"9554775290" ,"8570090186", "4727512872","5506703775","8123989364","9843228847", "7152112646",
-             "1671653943")) & #SF exclusions 
+                               "4462616750","9111871102","8476952861","2974054638" ,"3544623873","3293040395","7571439842","3165368475",
+                               "6954174713","6361337944","1629086681","3544623873","3293040395","7571439842","3165368475","6954174713",
+                               "6361337944","1629086681","9768745029","3770024701","8836251245","3312148528", "6806962114", # HFH exclusions
+                               "4782195164", "6229346420", '1271036774','6288600449', '9692694571', '4327492344', '8372596629', '9399609746','1608206802', # UC exclusions
+                               "8336144924","7515171846","9963945282" ,"9554775290" ,"8570090186", "4727512872","5506703775","8123989364","9843228847", "7152112646",
+                               "1671653943", "6446294667")) & 
            !(Connect_ID %in% qc_8$`Connect ID`) # Don't count the empty bracket people if they're in rule #8, because those would be expected
   )
 
@@ -1121,7 +1119,7 @@ bioqc2 <- bioqc %>%  filter( as.numeric(round(difftime(currentDate, d_173836415_
                                !(Connect_ID %in% c("1629086681", "3165368475", "3293040395", "3544623873", "6361337944", "6954174713", "7571439842",
                                                    "3770024701", "8836251245", "9768745029", "5461650381", "4900116130", "4435276749",  '6288600449',
                                                    "6473532641", "6336258662", "8589481620", "4688823720", "3759939890", "2824989966", "1608206802",
-                                                   "1671653943", "6806962114")) & 
+                                                   "1671653943", "6806962114", "6446294667")) & 
                                !(Connect_ID %in% qc_7$`Connect ID`)) # Don't count the empty bracket people if they're in rule #7, because those would be expected
 
 #remove any brackets around polyID
@@ -1333,19 +1331,19 @@ knitr::kable(shipt, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_po
 ### 39. If kit status is Received, then supply kit tracking number, date/time kit shipped, date/time kit received, and and kit level should populate
 ```{r recvd, echo=FALSE, warning=FALSE, message=FALSE}
 
-## needs to be fixed regardless- wrong count of columns and column names; should be using parts vars for the second two is.na vars
+## Because we need to determine the kit level to asses each sceario, we do not need separate code to find whether or not kit level is populated (like we do for the date/time and tracking variables)
 recvd <- Bio_HMW %>%  filter((d_173836415_d_266600170_d_319972665_d_221592017=="Received" & kit_level=="Initial Kit" & 
                                  (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_319972665_d_661940160) | 
-                                    is.na(d_173836415_d_266600170_d_319972665_d_826941471) |  is.na(d_137401245))) |
+                                    is.na(d_173836415_d_266600170_d_319972665_d_826941471) )) |
                                (d_173836415_d_266600170_d_541483796_d_221592017=="Received" & kit_level=="Replacement Kit 1" & 
                                   (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_541483796_d_661940160) | 
-                                     is.na(d_173836415_d_266600170_d_541483796_d_826941471) |  is.na(d_137401245))) | 
+                                     is.na(d_173836415_d_266600170_d_541483796_d_826941471) )) | 
                                (d_173836415_d_266600170_d_641006239_d_221592017=="Received" & kit_level=="Replacement Kit 2" & 
                                   (is.na(d_531858099) | is.na(d_173836415_d_266600170_d_641006239_d_661940160) | 
-                                     is.na(d_173836415_d_266600170_d_641006239_d_826941471) |  is.na(d_137401245)))) %>%  
-  select(Site, Connect_ID, kit_level, d_531858099, d_137401245) %>%  safe_arrange(Site)
+                                     is.na(d_173836415_d_266600170_d_641006239_d_826941471) ))) %>%  
+  select(Site, Connect_ID, kit_level, d_531858099) %>%  safe_arrange(Site)
 
-colnames(recvd) <- c("Site", "Connect ID", "Kit Level", "SupplyKitTrack",  "CollCardRet")
+colnames(recvd) <- c("Site", "Connect ID", "Kit Level", "SupplyKitTrack")
 knitr::kable(recvd, longtable = TRUE) %>% kable_styling(latex_options = "HOLD_position")
 
 ```
@@ -2053,7 +2051,7 @@ issue212 <- HMW %>%
                                 '8188956474','8227438016','8482215929','8507644460','8607112027','8607385492','8811471144','8943073495','8992675461',
                                 '8997367478','9091358231','9181813667','9234234591','9273458271','9411992203','9499085205','9792382050','9813020733',
                                 '9839544037','9920404904','9977516520', '3797437285', '8811209117',  '5019127359', '3797437285',
-                                '8811209117', '5019127359','3486230846', '8954870489', '2254978243', '1050654902', '9863548767', '6288600449', '3805509458', "2401165994", "4967873956", "7192141098", "1242942518", "4545815202"))) %>%
+                                '8811209117', '5019127359','3486230846', '8954870489', '2254978243', '1050654902', '9863548767', '6288600449', '3805509458', "2401165994", "4967873956", "7192141098", "1242942518", "4545815202", "6244974048"))) %>%
   select(Site, Connect_ID, d_173836415_d_266600170_d_448660695, d_173836415_d_266600170_d_319972665_d_661940160, d_826941471) %>% safe_arrange(Site)
 
 
@@ -2395,8 +2393,8 @@ knitr::kable(Rsett_BioChk_TimeBL_v1r0, longtable = TRUE)  %>% kable_styling(late
 
 
 BioChk_TimeBL_v1r0_RschTmBL <- parts_data %>%  
-  filter((as.POSIXct(d_331584571_d_266600170_d_840048338) > 
-           pmin(as.POSIXct(d_173836415_d_266600170_d_561681068), as.POSIXct(d_173836415_d_266600170_d_847159717), na.rm=T)) & 
+  filter((as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)) > 
+           pmin(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_561681068)), as.POSIXct(ymd_hms(d_173836415_d_266600170_d_847159717)), na.rm=T)) & 
            !(Connect_ID %in% c('3972348378','7772455634','7400318404','3111954555','1106079872'))) %>% 
   select(Site, Connect_ID, d_331584571_d_266600170_d_840048338, d_173836415_d_266600170_d_561681068, 
          d_173836415_d_266600170_d_847159717) %>%  safe_arrange(Site)
@@ -2412,7 +2410,8 @@ knitr::kable(BioChk_TimeBL_v1r0_RschTmBL, longtable = TRUE)  %>% kable_styling(l
 ```{r DrawOrder_Verif4, echo=FALSE, warning=FALSE, message=FALSE}
 
 DrawOrder_Verif4 <- bioqc %>%  filter(str_sub(d_820476880, start=1, end=3)=="CXA" & #blood/urine only
-                                        (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4)) %>%
+                                        (as.numeric(difftime(d_914594314, d_173836415_d_266600170_d_184451682, units="days")) > 4) & 
+                                        !(Connect_ID %in% c('3259382811', '9402029018'))) %>%
   select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682) %>%  safe_arrange(Site)
 
 
@@ -2422,30 +2421,36 @@ knitr::kable(DrawOrder_Verif4, longtable = TRUE)  %>% kable_styling(latex_option
 
 ```
 
-###	79. Draw orders (BioClin_BldUrnPlcdTmBL_v1r0)should be placed within 30 days of verification (RcrtV_VerificationTm_v1r0). This excludes those from Henry Ford and those verified before 2/1/2023.
+###	79. If verification (RcrtV_VerificationTm_v1r0) occurred more than 14 days ago and Site is Henry Ford or Kaiser, and Draw orders (BioClin_BldOrUrnPlcdBL_v1r0) must be placed. This  excludes those from Henry Ford with Research Collections.
 
 ```{r DrawOrder_Verif30, echo=FALSE, warning=FALSE, message=FALSE}
 
-
- DrawOrder_Verif30 <- bioqc %>%  filter(d_914594314>=as.Date("2023-02-01") & Site!='Henry Ford Health System' &
-                                                         (as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_914594314, units="days")) > 30)) %>% 
+ DrawOrder_verif <- bioqc %>% filter(d_914594314<as.Date(currentDate -14) & (Site %in% 
+                                       c("Kaiser Permanente Colorado","Kaiser Permanente Georgia",
+                                         "Kaiser Permanente Hawaii","Kaiser Permanente Northwest",
+                                         "Henry Ford Health System")) &
+                                       is.na(d_173836415_d_266600170_d_184451682) & 
+                                       #Exclude HF Research collections
+                                       d_878865966=="No" & d_167958071=="No" & d_684635302 == "No") %>% 
    select(Site, Connect_ID, d_914594314, d_173836415_d_266600170_d_184451682) %>%  safe_arrange(Site)
-
-
- colnames(DrawOrder_Verif30) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL")
- knitr::kable(DrawOrder_Verif30, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
-
+ 
+ 
+ colnames(DrawOrder_verif) <- c("Site", "Connect ID", "RcrtV_VerificationTm", "BioClin_BldUrnPlcdTmBL")
+ knitr::kable(DrawOrder_verif, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
 
 ```
 
-###	80. The visit research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the date of the earliest blood or urine specimen finalized. (BioFin_ResearchBldTmBL_v1r0 and BioFin_ResearchUrnTmBL_v1r0)
+###	80. Clinical collection date (<173836415.266600170.982213346>BioClin_ClinBloodTmBL_v1r0 or 173836415.266600170.139245758>BioClin_ClinicalUrnTmBL_v1r0) should not precede draw order date (<184451682>BioClin_BldUrnPlcdTmBL_v1r0 ) by more than 2 days.
 ```{r DrawOrder_Colct2, echo=FALSE, warning=FALSE, message=FALSE}
 
-DrawOrder_Colct2 <- bioqc %>%  filter(as.numeric(difftime(d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346, units="days")) > 2  & 
-                                        Connect_ID!='1094193968') %>%
+
+DrawOrder_Colct2 <- bioqc %>%  filter(as.numeric(difftime(d_173836415_d_266600170_d_184451682,
+                                                          d_173836415_d_266600170_d_982213346, units="days") > 2 |
+                                                   difftime(d_173836415_d_266600170_d_184451682,
+                                                          d_173836415_d_266600170_d_139245758, units="days") > 2)  &
+                                        !(Connect_ID %in% c('1094193968', '8393015300')))  %>%
   select(Site, Connect_ID, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346,
          d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
-
 
 colnames(DrawOrder_Colct2) <- c("Site", "Connect ID", "BioClin_BldUrnPlcdTmBL", "BioClin_ClinBloodTmBL", "BioClin_ClinicalUrnTmBL")
 knitr::kable(DrawOrder_Colct2, longtable = TRUE)  %>% kable_styling(latex_options = "scale_down", full_width = FALSE, font_size=8)
@@ -2454,6 +2459,19 @@ knitr::kable(DrawOrder_Colct2, longtable = TRUE)  %>% kable_styling(latex_option
 ```
 
 
+### 81. The research collection visit check-in time (BioChk_TimeBL_v1r0) must be before the check-out time (BioFin_CheckOutTmBL_v1r0).
+```{r Checkin_Checkout}
+
+Checkin_Checkoout <- bioqc %>%  
+  filter(as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)) > as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998))) %>%
+  select(Site, Connect_ID, d_331584571_d_266600170_d_840048338,
+         d_331584571_d_266600170_d_343048998) %>%  safe_arrange(Site)
+
+colnames(Checkin_Checkoout) <- c("Site", "Connect ID", "BioChk_TimeBL_v1r0", "BioFin_CheckOutTmBL_v1r0")
+knitr::kable(Checkin_Checkoout)  %>% kable_styling(latex_options = "scale_down")
+
+
+```
 
 
 
