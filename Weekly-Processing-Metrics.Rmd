@@ -1,0 +1,96 @@
+---
+title: "Processing Weekly Metrics"
+author: "Michelle Hudson"
+date:  "Data Extracted and Report Ran: `r Sys.Date()`"
+header-includes:  
+    \usepackage[labelformat=empty]{caption}
+    \usepackage{placeins}
+    \usepackage{makecell}
+
+
+output:
+  pdf_document:
+    latex_engine: xelatex
+    extra_dependencies: ["float", "makecell"]
+    toc: yes
+    keep_tex: yes
+    fig_caption: true
+
+
+---
+
+```{r load-metrics, include=FALSE}
+source("BSI_recurring_metrics.R")
+library(kableExtra)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+
+# General Information
+
+This Weekly Processing Metrics report contains tables and plots on BPTL processing and receipt on a Friday - Thursday weekly basis. 
+
+\textbf{\textcolor{blue}{Do not share any data from this report that indicate the number of individuals at any of the Connect recruitment sites with individuals outside of the Connect Study.  This includes in manuscripts, abstracts, presentations, etc.}}.
+
+\newpage
+
+# Summary Information 
+
+
+```{r Table1, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+total_row_index <- which(rm1_metric$`Collection Setting` == "Total")
+
+knitr::kable(
+  rm1_metric,
+  booktabs = TRUE,
+  caption = "Table 1: Data Transfer Summary"
+) %>%
+  column_spec(1:ncol(rm1_metric), width = "2.5cm") %>%
+  row_spec(total_row_index, bold = TRUE)
+
+
+
+```
+
+
+\newpage
+
+# Daily Tube Counts by Tube Type
+
+```{r Table2, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+
+total_row_index <- which(rm7_metric$tube_type == "Total")
+
+
+knitr::kable(
+  rm7_metric,
+  booktabs = TRUE,
+  caption = "Table 2: Daily Tube Counts by Type"
+) %>%
+  kable_styling(latex_options = c("scale_down", "HOLD_position")) %>%  
+  column_spec(1:ncol(rm7_metric), width = "1.5cm") %>%
+  row_spec(total_row_index, bold = TRUE) 
+
+
+
+
+```
+
+\newpage 
+
+# Distribution of Time from Receipt at BPTL to Processing
+
+
+```{r rm3-plot, echo=FALSE, fig.height=8, fig.width=11, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+print(rm3_metric$plot) 
+```
