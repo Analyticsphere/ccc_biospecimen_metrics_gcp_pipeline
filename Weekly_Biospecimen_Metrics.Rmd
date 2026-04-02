@@ -468,6 +468,8 @@ recrver1 <- recrver1 %>%  mutate(Clin_Site_location=case_when(
                                   Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 9 | d_173836415_d_266600170_d_452847912 == 9) ~ "Burnsville Clinic and Specialty Center",
                                   Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 10 | d_173836415_d_266600170_d_452847912 == 10) ~ "Andover Clinic",
                                   Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 11 | d_173836415_d_266600170_d_452847912 == 11) ~ "St. Paul Clinic- Wabasha",
+                                  Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 12 | d_173836415_d_266600170_d_452847912 == 12) ~ "Olivia Hospital and Clinic",
+                                  Site=="HealthPartners" & (d_173836415_d_266600170_d_185243482 == 13 | d_173836415_d_266600170_d_452847912 == 13) ~ "Hutchinson Health Clinic",
                                   d_173836415_d_266600170_d_185243482 == 1050010095 | d_173836415_d_266600170_d_452847912 == 1050010095 |
                                     d_173836415_d_266600170_d_185243482 == 1050010034 | d_173836415_d_266600170_d_452847912 == 1050010034 ~ "Wyandotte",
                                   d_173836415_d_266600170_d_185243482 == 1060010063 |
@@ -782,8 +784,10 @@ col_num_1.2 <- col_num_1.2 %>%
                                  "Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO","Brownstown", "E Jefferson Pathology", 
                                  "Woodhaven Pathology", "CANPAV Pathology OP Lab", "Jackson Professional Building",
                                  "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
-    `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic",
-                                 "Burnsville Clinic and Specialty Center", "St. Paul Clinic- Wabasha", "Andover Clinic",
+    `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", 
+                                 "Clinic Stillwater", "New Richmond Clinic",
+                                 "Burnsville Clinic and Specialty Center", "Andover Clinic","St. Paul Clinic- Wabasha", 
+                                 "Olivia Hospital and Clinic","Hutchinson Health Clinic",
                                  "NSC", "Missing HP location") ~ "HealthPartners",   
     `Collection Location` %in% c("South Loop","Orland Park","Kenwood","River East","Dearborn Station", "Ingalls", "DCAM (Hyde Park)", 
                                  "Crown Point", "Missing UC location") ~ "University of Chicago Medicine",
@@ -1722,12 +1726,12 @@ Section3_Figures <- function(site, start_date, title) {
     summarise(n = sum(!is.na(checktmvisit)),
               hours3 = sum(hours3),
               pct3 = 100 * round(hours3 / n, 2),
-              .groups = "drop") %>% 
+              .groups = "drop")  
     # For weeks that have no data, manually add them and set to 0 so the trend line is not mislaeading
-    complete(Site,
-             col.Monday.date = seq(min(col.Monday.date), max(col.Monday.date), by = "week"),
-             fill = list(n = 0, hours3 = 0)) %>%
-    mutate(pct3 = ifelse(n == 0, 0, 100 * round(hours3 / n, 2)))
+    # complete(Site,
+    #          col.Monday.date = seq(min(col.Monday.date), max(col.Monday.date), by = "week"),
+    #          fill = list(n = 0, hours3 = 0)) %>%
+    # mutate(pct3 = ifelse(n == 0, 0, 100 * round(hours3 / n, 2)))
   
 
   plots3 <- ggplot(weekly_summary, aes(x = as.Date(col.Monday.date), y = pct3)) +
@@ -1754,13 +1758,21 @@ Section3_Figures <- function(site, start_date, title) {
 }
 
 
-research.4_1 <- Section3_Figures("Henry Ford Health", "2022-06-20","Figure 3.1: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Henry Ford Health")
+research.4_1 <- Section3_Figures("Henry Ford Health", "2022-06-20","Figure 3.1: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Henry Ford Health") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
-research.4_2 <- Section3_Figures("Sanford Health", "2022-06-20", "Figure 3.2: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Sanford Health")
+research.4_2 <- Section3_Figures("Sanford Health", "2022-06-20", "Figure 3.2: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Sanford Health") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
-research.4_3 <- Section3_Figures("University of Chicago Medicine", "2022-06-20", "Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, University of Chicago Medicine")
+research.4_3 <- Section3_Figures("University of Chicago Medicine", "2022-06-20", "Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, University of Chicago Medicine") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
-research.4_4 <- Section3_Figures("Baylor Scott and White Health", "2024-06-24", "Figure 3.4: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Baylor Scott and White Health")
+research.4_4 <- Section3_Figures("Baylor Scott and White Health", "2024-06-24", "Figure 3.4: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Baylor Scott and White Health") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
 ```
 
@@ -2163,8 +2175,11 @@ clin_coll_days <- clin_coll_days %>%
                                  "K1 HFH Main","Sterling Heights","Columbus", "Livonia","Taylor", "Ford Road", "NCO","Brownstown", 
                                  "E Jefferson Pathology", "Woodhaven Pathology", "CANPAV Pathology OP Lab", 
                                  "Jackson Professional Building", "Missing Both Location IDs", "Missing HFH location") ~ "Henry Ford Health", 
-    `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", "Clinic Stillwater", "New Richmond Clinic", 
-                                 "Burnsville Clinic and Specialty Center", "St. Paul Clinic- Wabasha", "Andover Clinic", "NSC", "Missing HP location") ~ "HealthPartners", 
+    `Collection Location` %in% c("Elk River", "Chanhassen", "Park Nicollet Minneapolis Clinic", "Brooklyn Center", 
+                                 "Clinic Stillwater", "New Richmond Clinic", 
+                                 "Burnsville Clinic and Specialty Center", "Andover Clinic","St. Paul Clinic- Wabasha",  
+                                 "Olivia Hospital and Clinic","Hutchinson Health Clinic",
+                                 "NSC", "Missing HP location") ~ "HealthPartners", 
     `Collection Location`== "KPCO" ~ "Kaiser Permanente Colorado",
     `Collection Location`== "KPGA" ~ "Kaiser Permanente Georgia",
     `Collection Location` %in% c("Oahu Clinics", "Non-Oahu Clinics", "Missing Both Location IDs","Missing KPHI location") ~ "Kaiser Permanente Hawaii",
@@ -3299,7 +3314,8 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
       scale_color_manual(values=c("NSC"="#99C0C4", "Elk River"="#565C65", "Chanhassen"="#CC7D15", "Park Nicollet Minneapolis Clinic"="#FDBE19",
                                 "Brooklyn Center"="#3C989E", "Clinic Stillwater"="#2973A5", "New Richmond Clinic"="#E7CCAD",
                                 "Burnsville Clinic and Specialty Center"= "#797D83", "St. Paul Clinic- Wabasha"="#164C71", 
-                                "NSC"="#309EBD", "Andover Clinic"="#B1C7D9"),
+                                "NSC"="#309EBD", "Andover Clinic"="#B1C7D9", "Olivia Hospital and Clinic"="#FBE5B5",
+                                "Hutchinson Health Clinic"="#B9D7E3"),
                          guide = guide_legend(nrow = 5, byrow = TRUE)) +
     labs(color = "Clinic Location") 
   } else if(site == "Baylor Scott and White Health" && settings=="Research"){
@@ -3437,7 +3453,7 @@ Section6_plot_function(coll_sett_all,start_date = "2023-01-16", site = "Kaiser P
 
 \newpage
 
-# Baseline Home Mouthwash Collections
+# Baseline Home Mouthwash Collections- Standard Workflow
 This section does not include data on participants who had mouthwash collected in the research setting and later had a home mouthwash kit sent to them for re-collection.
 \vspace{-0.5em}
 
@@ -3635,56 +3651,6 @@ status_elg_knC <- knitr::kable(status_elg7.1C,
 
 ```
 
-```{r RequestKits, include=FALSE, echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
-
-# ----- Not yet in prod -------------------------
-
-# add d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991
-### Request a kit table 1
-
-# req_kit <- kit_table %>%
-#   filter(d_173836415_d_266600170_d_319972665_d_638781731 == "353358909") %>%
-#   mutate(req = if_else(!is.na(d_173836415_d_266600170_d_319972665_d_759651991),
-#                        "Requested", "Not Requested"),
-#          elg = "Eligible")  
-# 
-# req_kit_table1 <- req_kit %>% 
-#   count(Site, req, name = "Requested") %>%             
-#   mutate(Eligible = sum(Requested), .by = Site) %>%     # All are eligible
-#   filter(req == "Requested") %>%               
-#   select(Site, Eligible, Requested) %>% 
-#   #summary row
-#   bind_rows(summarise(.data = ., 
-#                       Site = "Total",
-#                       Eligible = sum(Eligible),
-#                       Requested = sum(Requested))) %>% 
-#   #percentage
-#   mutate(Requested = paste0(Requested, " (",
-#                             round((Requested/Eligible)*100,2), "%)"))
-# 
-# 
-# knitr::kable(req_kit_table1,
-#              caption="Table tbd: Request a Kit",
-#              row.names=FALSE, align=c("l", "c"),booktabs = TRUE) %>%
-#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>%
-#   kable_styling(latex_options = "scale_down")
-# 
-# 
-# 
-# 
-# ### Request a kit table 2
-# req_kit_table2 <- create_tbl_cross(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
-# colnames(req_kit_table2)[ncol(req_kit_table2)] <- "Total Kits Requested"
-# 
-# knitr::kable(req_kit_table2,
-#              caption="Table tbd2: Request a Kit",
-#              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>%
-#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>%
-#   kable_styling(latex_options = "scale_down")
-
-
-```
- 
  
 ```{r Table_new_7.2, include=FALSE, echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
@@ -4324,3 +4290,97 @@ add_footnote(Table7_10a, "Note: In cases where the collection card is not return
          
 
 ```
+
+
+
+
+
+```{r RequestKits,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
+# \newpage
+# 
+# # Baseline Home Mouthwash Collections- Request a Kit Workflow
+# This section only includes data on participants who were invited to request a home mouthwash kit. Notifications were sent to these participants and home MW kits were requested via MyConnect or by the participant contacting the CSC. The Request a Kit workflow only applies to initial kits.
+
+
+# # ----- Not yet in prod -------------------------
+# 
+# # add d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991
+# ### Request a kit table 1
+# 
+# req_rec_kit_table1 <- kit_table %>%
+#   # The three columns
+#   mutate(
+#     invited   = d_173836415_d_266600170_d_319972665_d_638781731 == "353358909",
+#     requested = !is.na(d_173836415_d_266600170_d_319972665_d_759651991),
+#     received  = Kit_Status_int == "Received"
+#   ) %>%
+#   
+#   # Keep only those invited (denominator)
+#   filter(invited) %>%
+#   
+#   # Summarize by Site
+#   group_by(Site) %>%
+#   summarise(
+#     Invited   = n(),
+#     Requested = sum(requested, na.rm = TRUE),
+#     Received  = sum(received, na.rm = TRUE),
+#     .groups = "drop"
+#   ) %>%
+#   
+#   # Add total row
+#   bind_rows(
+#     summarise(.,
+#       Site = "Total",
+#       Invited = sum(Invited),
+#       Requested = sum(Requested),
+#       Received = sum(Received)
+#     )
+#   ) %>%
+#   
+#   # Create the pcts of the attrition columns
+#   mutate(
+#     # Of those that were invited how many requested a kit
+#     `MW Kit Requested` = paste0(
+#       Requested, " (",
+#       round(Requested / Invited * 100, 2), "%)"
+#     ),
+#     # Of those who requested a kit, how many have we received
+#     `MW Sample Received` = paste0(
+#       Received, " (",
+#       ifelse(Requested == 0, 0,
+#              round(Received / Requested * 100, 2)), "%)"
+#     )
+#   ) %>%
+#   
+#   select(
+#     Site,
+#     `Invited to Request a Kit` = Invited,
+#     `MW Kit Requested`,
+#     `MW Sample Received`
+#   )
+#  
+#    
+#  
+#  
+#  knitr::kable(req_rec_kit_table1,
+#               caption="Table 8.1 : Baseline- Home Mouthwash Kits Requested Among Participants Eligible to Request a Kit",
+#               row.names=FALSE, align=c("l", "c"),booktabs = TRUE) %>%
+#    add_indent(seq(1, nrow(req_kit_table1) - 1)) %>%
+#    kable_styling(latex_options = "scale_down")
+# 
+# 
+# 
+# 
+# ### Request a kit table 2
+# req_kit_table2 <- create_tbl_cross(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
+# colnames(req_kit_table2)[ncol(req_kit_table2)] <- "Total Kits Requested"
+# 
+# knitr::kable(req_kit_table2,
+#              caption="Table 8.2: Baseline- Home Mouthwash Initial Kit Status Among Participants who Requested a Kit",
+#              row.names=FALSE, align=c("l", rep("c", 7)),booktabs = TRUE) %>%
+#   add_indent(seq(1, nrow(req_kit_table1) - 1)) %>%
+#   kable_styling(latex_options = "scale_down")
+
+
+```
+ 
