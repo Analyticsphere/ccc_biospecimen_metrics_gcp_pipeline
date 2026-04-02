@@ -1722,12 +1722,12 @@ Section3_Figures <- function(site, start_date, title) {
     summarise(n = sum(!is.na(checktmvisit)),
               hours3 = sum(hours3),
               pct3 = 100 * round(hours3 / n, 2),
-              .groups = "drop") %>% 
+              .groups = "drop") 
     # For weeks that have no data, manually add them and set to 0 so the trend line is not mislaeading
-    complete(Site,
-             col.Monday.date = seq(min(col.Monday.date), max(col.Monday.date), by = "week"),
-             fill = list(n = 0, hours3 = 0)) %>%
-    mutate(pct3 = ifelse(n == 0, 0, 100 * round(hours3 / n, 2)))
+    # complete(Site,
+    #          col.Monday.date = seq(min(col.Monday.date), max(col.Monday.date), by = "week"),
+    #          fill = list(n = 0, hours3 = 0)) %>%
+    # mutate(pct3 = ifelse(n == 0, 0, 100 * round(hours3 / n, 2)))
   
 
   plots3 <- ggplot(weekly_summary, aes(x = as.Date(col.Monday.date), y = pct3)) +
@@ -1753,13 +1753,21 @@ Section3_Figures <- function(site, start_date, title) {
 }
 
 
-research.4_1 <- Section3_Figures("Henry Ford Health", "2022-06-20","Figure 3.1: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Henry Ford Health")
+research.4_1 <- Section3_Figures("Henry Ford Health", "2022-06-20","Figure 3.1: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Henry Ford Health") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
-research.4_2 <- Section3_Figures("Sanford Health", "2022-06-20", "Figure 3.2: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Sanford Health")
+research.4_2 <- Section3_Figures("Sanford Health", "2022-06-20", "Figure 3.2: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Sanford Health") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
-research.4_3 <- Section3_Figures("University of Chicago Medicine", "2022-06-20", "Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, University of Chicago Medicine")
+research.4_3 <- Section3_Figures("University of Chicago Medicine", "2022-06-20", "Figure 3.3: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, University of Chicago Medicine") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
-research.4_4 <- Section3_Figures("Baylor Scott and White Health", "2024-06-24", "Figure 3.4: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Baylor Scott and White Health")
+research.4_4 <- Section3_Figures("Baylor Scott and White Health", "2024-06-24", "Figure 3.4: Baseline- Weekly Percent of Biospecimen Surveys Submitted within 3 Hours of \n Research Collection Visit Check In, Baylor Scott and White Health") + 
+  labs(caption="No data point exists for weeks when there were no biospecimen collections.")+
+  theme(plot.caption = element_text(size = 8, hjust=0))
 
 ```
 
