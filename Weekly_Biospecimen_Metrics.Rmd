@@ -31,6 +31,22 @@ by health provider site. This information pertains to verified participants as o
 that are finalized. This report does not include information from participants whose data have been destroyed. This report is limited to information from participants' first finalized specimen collection. In the event that a participant donated specimen(s) in a repeat collection, that information is not reflected in this report.
 
 \textbf{\textcolor{blue}{Do not share any data from this report that indicate the number of individuals at any of the Connect recruitment sites with individuals outside of the Connect Study.  This includes in manuscripts, abstracts, presentations, etc. You may present data aggregated across all of the Connect sites.}}.
+
+
+```{r Coder_Notes, include= FALSE}
+
+
+######## Clinical blood/urine and Research blood/urine/mouthwash samples have a collection ID starting with CXA. Home MW start with CHA
+
+
+###### Ops no longer wants duplicate collections in this report
+  ## Method of removal- take the first collection only for blood and urine. (If there's multiple collections we take the earliest)
+  ## NOTE: Home MW collections are separate collections BUT they are not finalized, so they will not be removed from the dataframe 
+  ## Confirmed that duplicate HMW collections don't mess up these counts and are handled in the kit section 
+
+```
+
+
   
 ```{r setup,eval=TRUE,include=FALSE,echo=FALSE, warning=FALSE}
 
@@ -333,33 +349,12 @@ gt::gt_latex_dependencies()
 
 ```{r Removing_Duplicates, include=FALSE}
 
-# Ops no longer wants duplicate collections in this report
-## REMOVING DUPLICATES: Method- take the first collection only for blood and urine. (If there's multiple collections we take the earliest)
-##### NOTE: Home MW collections are separate collections BUT they are not finalized, so they will not be removed from the dataframe 
-  ## confirmed that duplicate HMW collections don't mess up these counts and are handled in the kit section 
 
-## Clinical blood/urine and Research blood/urine/mouthwash samples have a collection ID starting with CXA. Home MW start with CHA
-
-
-# Step 1: Find the duplicate rows
-actual_dups <- biospe %>%
-  filter(!is.na(d_556788178)) %>%
+no_dups <- biospe %>%
+  filter(!is.na(d_556788178)) %>% #Finalized collections will have a finalized date
   group_by(Connect_ID) %>%
-  filter(n() > 1)
-
-# Step2: Of the duplicate rows, keep the one with the first collection time stamp
-rows_to_keep <- actual_dups %>%
-  group_by(Connect_ID) %>%
-  filter(d_556788178 == min(d_556788178, na.rm = TRUE)) %>%
-  ungroup()
-
-
-# Take all duplicate rows out of the original dataframe
-non_duplicate_rows <- biospe %>%
-    anti_join(actual_dups, by = c("Connect_ID", "d_556788178"))  # Ensure all columns are included
-
-# Combine new overall dataframe with those duplicate rows we filtered with the earlier time stamp
-no_dups <- bind_rows(rows_to_keep, non_duplicate_rows)
+  slice_min(d_556788178, with_ties = FALSE) %>% #Keep only the first (earliest) finalized biospecimen collection
+  ungroup() 
 
 
 ```
@@ -660,7 +655,6 @@ settings_breakdown <- knitr::kable(table1_allsett,
 ## To be used in all Figures as the X-axis Date
 ## Weeks are considered Monday-Sunday
 coll_sett_all <- coll_sett_all %>%  
-  group_by(Connect_ID) %>% 
   mutate(col.Monday.date = floor_date(as.POSIXct(ymd_hms(d_556788178)), unit = "week", week_start = 1)) %>% # week of collection
   ungroup()
 
