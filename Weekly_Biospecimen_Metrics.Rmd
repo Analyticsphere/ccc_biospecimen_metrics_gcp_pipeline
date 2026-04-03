@@ -2983,7 +2983,7 @@ knitr::kable(crosstable.coll_bptl1,
 \newpage
 \newpage
 \FloatBarrier
-# Baseline Collection-To-Receipt Times
+# Baseline Collection-To-Receipt Times and Package Conditions
 \vspace{-0.5em}
 \FloatBarrier
 ```{r KnitrTable28_30,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
@@ -4296,8 +4296,10 @@ add_footnote(Table7_10a, "Note: In cases where the collection card is not return
 \newpage
 
 # Baseline Home Mouthwash Collections- Request a Kit Workflow
+\vspace{-0.5em}
 This section only includes data on participants who were invited to request a home mouthwash kit. Notifications were sent to these participants and home MW kits were requested via MyConnect or by the participant contacting the CSC. The Request a Kit workflow only applies to initial kits.
 
+\FloatBarrier
 ```{r RequestKits,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 
