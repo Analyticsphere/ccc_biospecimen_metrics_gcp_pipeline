@@ -106,7 +106,7 @@ function(report, testing = FALSE) {
   # Loop through CSV and PDF files, write them to GCP Cloud Storage, and print their names
   filelist <- list.files(pattern = "*.csv$|*.xlsx$|*.pdf$")
   uploaded_files <- lapply(filelist, function(x) {
-    gcs_upload(x, bucket = bucket, name = x)
+    gcs_upload(x, bucket = bucket, name = x, predefinedAcl = "bucketLevel")
     print(paste("Uploaded file:", x))
     x # Return the file name for further processing if needed
   })
