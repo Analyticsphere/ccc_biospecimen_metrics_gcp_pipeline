@@ -185,7 +185,7 @@ bioqc_csv <- bioqc %>%
                                                6554752349, 1291437931, 3508580541, 8130614446, 6966066624, 7304905537, 2321589610, 2911866308,
                                                9272279347, 4892006412, 4753650657)), 
                          "Rule 2b", " "),
-         # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes are not collected, this should be no
+         # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes ares not collected, this should be no
          Rule3 = ifelse(d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & 
                           d_454453939_d_593843561==104430631 & d_589588440_d_593843561==104430631 & d_958646668_d_593843561==104430631 & 
                           d_677469051_d_593843561==104430631 & d_683613884_d_593843561==104430631 & d_703954371_d_593843561==104430631 & 
