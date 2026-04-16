@@ -1644,7 +1644,9 @@ Table21R_After = postcovR_comp %>% group_by(Site) %>%
 ```{r Research_Srvy_Status, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ## Collection Visit Length 
 
-research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk)) 
+research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk)) %>% 
+  # Bio team explicitly asked to remove from table for QC issue, not updating prod data
+  filter(Connect_ID!="9005924628") 
 
 research.vt.length.table = research.vt.length %>%group_by(Site) %>% 
   dplyr::summarize('Number of Research Collection Visits'=n(),
@@ -3151,6 +3153,7 @@ clinical_plot(scatCHF, "2023-04-24", "Figure 5.13: Baseline- Collection-To-Recei
 
 
 
+
 \newpage
 
 # Baseline Weekly Biospecimen Collection
@@ -3480,7 +3483,7 @@ kitstatus <- "SELECT Connect_ID,
     WHEN d_173836415_d_266600170_d_319972665_d_221592017 = '277438316' THEN 'Shipped'
     WHEN d_173836415_d_266600170_d_319972665_d_221592017 = '375535639' THEN 'Received'
     WHEN d_173836415_d_266600170_d_319972665_d_221592017 = '332067457' THEN 'Undeliverable'
-    WHEN d_173836415_d_266600170_d_319972665_d_221592017 IS NULL THEN 'No Status'
+    --WHEN d_173836415_d_266600170_d_319972665_d_221592017 IS NULL THEN 'No Status'
     ELSE NULL
   END AS Kit_Status_int,
 
@@ -3491,7 +3494,7 @@ kitstatus <- "SELECT Connect_ID,
     WHEN d_173836415_d_266600170_d_541483796_d_221592017 = '277438316' THEN 'Shipped'
     WHEN d_173836415_d_266600170_d_541483796_d_221592017 = '375535639' THEN 'Received'
     WHEN d_173836415_d_266600170_d_541483796_d_221592017 = '332067457' THEN 'Undeliverable'
-    WHEN d_173836415_d_266600170_d_541483796_d_221592017 IS NULL THEN 'No Status'
+    --WHEN d_173836415_d_266600170_d_541483796_d_221592017 IS NULL THEN 'No Status'
     ELSE NULL
   END AS Kit_Status_r1,
 
@@ -3502,9 +3505,41 @@ kitstatus <- "SELECT Connect_ID,
     WHEN d_173836415_d_266600170_d_641006239_d_221592017 = '277438316' THEN 'Shipped'
     WHEN d_173836415_d_266600170_d_641006239_d_221592017 = '375535639' THEN 'Received'
     WHEN d_173836415_d_266600170_d_641006239_d_221592017 = '332067457' THEN 'Undeliverable'
-    WHEN d_173836415_d_266600170_d_641006239_d_221592017 IS NULL THEN 'No Status'
+    --WHEN d_173836415_d_266600170_d_641006239_d_221592017 IS NULL THEN 'No Status'
     ELSE NULL
   END AS Kit_Status_r2,
+
+  CASE
+    WHEN state_d_934298480 = '713781738' THEN '30-34'
+    WHEN state_d_934298480 = '631272782' THEN '35-39'
+    WHEN state_d_934298480 = '124276120' THEN '40-45'
+    WHEN state_d_934298480 = '450985724' THEN '46-50'
+    WHEN state_d_934298480 = '363147933' THEN '51-55'
+    WHEN state_d_934298480 = '636706443' THEN '56-60'
+    WHEN state_d_934298480 = '771230670' THEN '61-65'
+    WHEN state_d_934298480 = '722846087' THEN '66-70'
+    ELSE 'Unknown'
+    END AS age,
+
+  CASE
+    WHEN state_d_706256705 = '536341288' OR state_d_435027713 = '536341288' THEN 'Female'
+    WHEN state_d_706256705 = '654207589' OR state_d_435027713 = '654207589' THEN 'Male'
+    ELSE 'Unknown'
+    END AS sex,
+
+  CASE
+    WHEN d_100767870 = '353358909'
+    AND (d_878865966 = '353358909'
+      OR d_167958071 = '353358909')
+      THEN 'Completed Survey and Sample(s)'
+    WHEN d_100767870 = '353358909'
+      THEN 'Completed Survey, No Sample(s)'
+    WHEN d_878865966 = '353358909'
+      OR d_167958071 = '353358909'
+      THEN 'Completed Sample(s), No Survey'
+    ELSE 'Completed Neither'
+    END AS completion,
+
 
 d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_319972665_d_826941471,
 d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_759651991,
@@ -3513,23 +3548,39 @@ d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_54148
 
 d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_173836415_d_266600170_d_641006239_d_379252329, 
 
-d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991
+d_784810139, d_389890053, d_843688458, d_543379310, d_100767870, 
+d_517311251, d_832139544, d_770257102, d_264644252, d_199471989,
+
+d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991,
+d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_278539982,
+d_173836415_d_266600170_d_740582332
+-- d_569151507_d_371303487
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
 where Connect_ID is not null and 
 d_821247024 = '197316935' and d_831041022 = '104430631' and
-d_173836415_d_266600170_d_319972665_d_221592017 IS NOT NULL and 
+-- d_173836415_d_266600170_d_319972665_d_221592017 IS NOT NULL and 
 (d_173836415_d_266600170_d_915179629 = '103209024' or d_173836415_d_266600170_d_915179629 is null)" #sometimes it explicitly home and sometimes its null. Believe this was an update that just never had backfilling applied
 
 
 kitstatus_table <- bq_project_query(project, kitstatus)
-kit_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
+kit_status_table <- bq_table_download(kitstatus_table, bigint="integer64",n_max = Inf, page_size = 10000)
+
+
+kit_status_table <- kit_status_table %>%  
+    mutate(Kit_Status_int = factor(Kit_Status_int,levels=c("Undeliverable","Initialized", "Address Printed",
+                                                           "Assigned", "Shipped", "Received")),
+           Kit_Status_r1 = factor(Kit_Status_r1,levels=c("Undeliverable","Initialized", "Address Printed",
+                                                         "Assigned", "Shipped", "Received")),
+           Kit_Status_r2 = factor(Kit_Status_r2,levels=c("Undeliverable","Initialized", "Address Printed", 
+                                                        "Assigned", "Shipped", "Received")))
 
 
 
-kit_table <- kit_table %>%  
-    mutate(Kit_Status_int = factor(Kit_Status_int,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
-           Kit_Status_r1 = factor(Kit_Status_r1,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")),
-           Kit_Status_r2 = factor(Kit_Status_r2,levels=c("Undeliverable","No Status","Initialized", "Address Printed", "Assigned", "Shipped", "Received")))
+## Section 7 (HMW) must have an initial kit status response, cannot be null
+kit_table <- kit_status_table %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_221592017))
+# Section 8 (request a kit) will have null initial kit status when invited 
+kit_request_table <- kit_status_table %>% filter(d_173836415_d_266600170_d_319972665_d_638781731 == "353358909")
+
 
 
 
@@ -3650,7 +3701,7 @@ status_elg_knC <- knitr::kable(status_elg7.1C,
 
 ## Counts of Kits Shipped, Kits Shipped within the last 2 Weeks, and Kits Received, by Site
  
-filtered_data <- filter(kit_table, Kit_Status_int %in% c("Received", "Shipped"))
+filtered_data <- kit_table %>% filter(Kit_Status_int %in% c("Received", "Shipped"))
  
 summary_table2_all<- filtered_data %>%
   group_by(Site) %>%
@@ -3682,6 +3733,9 @@ all_shipped_2 <- rbind(summary_table2_all, total_df)
 all_shipped_2$Received_PCT <- paste0(all_shipped_2$Received, " (",
                                       round(as.numeric(all_shipped_2$Received)/as.numeric(all_shipped_2$Shipped_TwoWeeks)*100, digits=1),
                                       "%)")
+
+all_shipped_2_table <- all_shipped_2 %>%  select("Site", "Shipped", 
+                                                   "Shipped_TwoWeeks", "Received_PCT")
  
  
 ```
@@ -4081,10 +4135,14 @@ add_footnote(status_elg_knC, "Note: “Eligible participants” are those who ha
 \FloatBarrier
 ```{r KnitrTables7.2,eval=TRUE,echo=FALSE,message=FALSE, warning = FALSE, results='asis'}
  
-knitr::kable(all_shipped_2[, c(1:3,5)],format.args = list(big.mark = ","),
+knitr::kable(all_shipped_2_table,
+             format.args = list(big.mark = ","),
              col.names=c("Site", "Total Shipped","Shipped 2+ Weeks Ago", "Received"),
              caption='Table 7.2 Baseline- Home Mouthwash Initial Kit Return Rate for Packages Shipped at Least 2 Weeks Ago',
-             row.names=FALSE, align=c("l", rep("c", 3)),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
+             row.names=FALSE, align=c("l", rep("c", 3)),
+             digits=1, booktabs = TRUE) %>% 
+  add_indent(seq(1, nrow(all_shipped_2_table) - 1)) %>% 
+  kable_styling(latex_options = "HOLD_position")
  
 ```
  
@@ -4290,43 +4348,40 @@ add_footnote(Table7_10a, "Note: In cases where the collection card is not return
 \newpage
 
 # Baseline Home Mouthwash Collections- Request a Kit Workflow
-\vspace{-0.5em}
+
 This section only includes data on participants who were invited to request a home mouthwash kit. Notifications were sent to these participants and home MW kits were requested via MyConnect or by the participant contacting the CSC. The Request a Kit workflow only applies to initial kits.
 
 \FloatBarrier
-```{r RequestKits,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
+```{r RequestKits_Functions, include=FALSE}
+
+# -------   Functions for Section 8 ------------------
 
 
-
-### Request a kit table 1
-
-req_rec_kit_table1 <- kit_table %>%
-  # The three columns
-  mutate(
-    invited   = d_173836415_d_266600170_d_319972665_d_638781731 == "353358909",
-    requested = !is.na(d_173836415_d_266600170_d_319972665_d_759651991),
-    received  = Kit_Status_int == "Received"
-  ) %>%
-
-  # Keep only those invited (denominator)
-  filter(invited) %>%
-
-  # Summarize by Site
-  group_by(Site) %>%
-  summarise(
-    Invited   = n(),
-    Requested = sum(requested, na.rm = TRUE),
-    Received  = sum(received, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-
-  # Add total row
+## The percentages for type 1 relies on a row percentage out of Number of Invited
+## Requested and Received is out of Invited
+req_rec_inv_kable1 <- function(data, group_var, group_var_name, title) { 
+  
+  group_var <- rlang::ensym(group_var) 
+  
+  req_rec_inv <- data %>% 
+    mutate( Requested = !is.na(d_173836415_d_266600170_d_319972665_d_759651991), 
+            Received = Kit_Status_int == "Received",
+            Invited = d_173836415_d_266600170_d_319972665_d_638781731 == "353358909") %>% 
+    # Crosstab 
+    group_by(!!group_var, .drop = FALSE) %>% 
+    summarise( Requested = sum(Requested, na.rm = TRUE), 
+               Received = sum(Received, na.rm = TRUE), 
+               Invited = sum(Invited, na.rm = TRUE), .groups = "drop" ) %>% 
+    # Ensure column order 
+    select(!!group_var, Requested, Received, Invited) %>% 
+    
+    # Add total row
   bind_rows(
     summarise(.,
-      Site = "Total",
-      Invited = sum(Invited),
+      !!group_var := "Total",
       Requested = sum(Requested),
-      Received = sum(Received)
+      Received = sum(Received),
+      Invited = sum(Invited),
     )
   ) %>%
 
@@ -4338,44 +4393,121 @@ req_rec_kit_table1 <- kit_table %>%
       round(Requested / Invited * 100, 2), "%)"
     ),
     # Of those who requested a kit, how many have we received
-    `MW Sample Received` = paste0(
+    `MW Sample Received (of total invited)` = paste0(
       Received, " (",
       ifelse(Requested == 0, 0,
              round(Received / Invited * 100, 2)), "%)"
     )
   ) %>%
 
-  select(
-    Site,
-    `Invited to Request a Kit` = Invited,
-    `MW Kit Requested`,
-    `MW Sample Received`
-  )
+    # Remove helper columns (prior to percentage added) and fix column order
+  select(!!group_var, `MW Kit Requested`, `MW Sample Received (of total invited)`, Invited)
+  
+  colnames(req_rec_inv)[1] <- group_var_name
+  colnames(req_rec_inv)[4] <- "Total Participants Invited to Request a Kit"
+
+  knitr::kable(req_rec_inv, 
+               caption = title, 
+               row.names = FALSE,
+               align=c("l", rep("c", 3)),
+               digits=1, booktabs = TRUE) %>% 
+    add_indent(seq(1, nrow(req_rec_inv) - 1)) %>%
+    kable_styling(latex_options ="scale_down") 
+}
 
 
 
+## The percentage of table type 2 is a column percentage ONLY for Received and Requested
 
- knitr::kable(req_rec_kit_table1,
-              caption="Table 8.1 : Baseline- Home Mouthwash Kits Requested Among Participants Invited to Request a Kit",
-              row.names=FALSE, align=c("l", "c"),booktabs = TRUE) %>%
-   add_indent(seq(1, nrow(req_rec_kit_table1) - 1)) %>%
-   kable_styling(latex_options = "scale_down")
+req_rec_inv_kable2 <- function(data, group_var, group_var_name, title) { 
+  
+  group_var <- rlang::ensym(group_var) 
+  
+  # Helper to format N (%), with safe handling for 0 denominators
+  ## Otherwise if a column has a total of 0, we get '0 (NaN%)' insead of '0 (0%)'
+  fmt_npct <- function(n, total) {
+    if (is.na(total) || total == 0) {
+      return("0 (0%)")
+    }
+    paste0(n, " (", round(n / total * 100, 2), "%)")
+  }
+  
+  req_rec_inv <- data %>% 
+    mutate( Requested = !is.na(d_173836415_d_266600170_d_319972665_d_759651991), 
+            Received = Kit_Status_int == "Received",
+            Invited = d_173836415_d_266600170_d_319972665_d_638781731 == "353358909") %>% 
+    # Crosstab 
+    group_by(!!group_var, .drop = FALSE) %>% 
+    summarise( Requested = sum(Requested, na.rm = TRUE), 
+               Received = sum(Received, na.rm = TRUE), 
+               Invited = sum(Invited, na.rm = TRUE), 
+               .groups = "drop" ) %>% 
+    # Ensure column order 
+    select(!!group_var, Requested, Received, Invited) %>% 
+
+  # Create N (%) columns with column percentage and add a Total Row
+    
+    {
+      # totals across all groups, before adding the Total row
+      tot_requested <- sum(.$Requested, na.rm = TRUE)
+      tot_received  <- sum(.$Received,  na.rm = TRUE)
+      tot_invited   <- sum(.$Invited,   na.rm = TRUE)
+      
+      bind_rows(
+        .,
+        summarise(.,
+          !!group_var := "Total",
+          Requested = tot_requested,
+          Received  = tot_received,
+          Invited   = tot_invited
+        )
+      ) %>%
+        mutate(
+          `MW Kit Requested` = vapply(Requested, fmt_npct, character(1), total = tot_requested),
+          `MW Sample Received (of total invited)` = vapply(Received, fmt_npct, character(1), total = tot_received),
+          #`Total Participants Invited to Request a Kit` = vapply(Invited, fmt_npct, character(1), total = tot_invited)
+          `Total Participants Invited to Request a Kit` = as.character(Invited)
+        )
+    } %>% 
+
+    # Remove helper columns (prior to percentage added) and fix column order
+  select(!!group_var, `MW Kit Requested`, `MW Sample Received (of total invited)`, 
+         `Total Participants Invited to Request a Kit`)
+  
+  colnames(req_rec_inv)[1] <- group_var_name
+
+  knitr::kable(req_rec_inv, 
+               caption = title, 
+               row.names = FALSE,  
+               align=c("l", rep("c", 3)),
+               digits=1, booktabs = TRUE) %>% 
+    add_indent(seq(1, nrow(req_rec_inv) - 1)) %>%
+    kable_styling(latex_options ="scale_down") 
+}
 
 
+```
 
 
-### Request a kit table 2
+```{r RequestKits_1,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
+
+
+req_rec_inv_kable1(kit_request_table, Site, "Site", 
+                   "Table 8.1: Baseline- Home Mouthwash Kits Requested Among Participants Invited to Request a Kit")
+
+
+```
  
- ## Need to get subgroup of only those who were invited
+
+\FloatBarrier
+```{r RequestKits2,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
+
+## Need to get subgroup of only those who requested a kit
+ req_kit <- kit_request_table %>% 
+   filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991))
+   
  
- req_kit <- kit_table %>% 
-   filter(
-     #invited -- some requested weren't invited
-     d_173836415_d_266600170_d_319972665_d_638781731 == "353358909" &
-     #date requested
-     !is.na(d_173836415_d_266600170_d_319972665_d_759651991))
-   
-   
+  
 req_kit_table2 <- create_tbl_cross(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
 colnames(req_kit_table2)[ncol(req_kit_table2)] <- "Total Kits Requested"
 
@@ -4385,6 +4517,203 @@ knitr::kable(req_kit_table2,
   add_indent(seq(1, nrow(req_kit_table2) - 1)) %>%
   kable_styling(latex_options = "scale_down")
 
+```
+
+
+
+```{r RequestKits3,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+
+kit_request_table <- kit_request_table %>% 
+  mutate(tm_don_inv_years = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982)),
+                                        as.POSIXct(ymd_hms(d_173836415_d_266600170_d_740582332)),units="days")),
+#Specifically requested to have labels as months with these exact counts of days
+         tm_don_inv = case_when(as.numeric(tm_don_inv_years) < 730 ~ "Less than 2 years",
+                                  as.numeric(tm_don_inv_years) < 911 ~"2- <2.5 years",
+                                  as.numeric(tm_don_inv_years) < 1094 ~ "2.5- <3 years",
+                                  as.numeric(tm_don_inv_years) < 1276 ~ "3- <3.5 years",
+                                  as.numeric(tm_don_inv_years) < 1459 ~ "3.5- <4 years",
+                                  as.numeric(tm_don_inv_years) >= 1460 ~ "4 years or more",
+                                  TRUE ~ "Missing Time Stamp(s)"),
+         tm_don_inv = factor(tm_don_inv, levels=c("Less than 2 years","2- <2.5 years",
+                                                  "2.5- <3 years", "3- <3.5 years",
+                                                  "3.5- <4 years",
+                                                  "4 years or more",
+                                                  "Missing Time Stamp(s)")))
+
+req_rec_inv_kable1(kit_request_table, tm_don_inv, "Time from Clinical Biospecimen Donation to Invitation", 
+                   "Table 8.3: Baseline- Home MW Response Rates by Time from Clinical Biospecimen Donation to Invited to Request a Kit")
 
 ```
+
+
+
+```{r RequestKits4,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+
+kit_request_table <- kit_request_table %>% 
+  mutate(tm_don_inv_weeks = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_759651991)),
+                                              as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982)),units="days")),
+         tm_don_inv = case_when(as.numeric(tm_don_inv_weeks) < 5 ~ "Less than 5 days",
+                                  as.numeric(tm_don_inv_weeks) < 10 ~"5- <10 days",
+                                  as.numeric(tm_don_inv_weeks) < 14 ~ "10- <14 days",
+                                  as.numeric(tm_don_inv_weeks) < 30 ~ "14- <30 days",
+                                  as.numeric(tm_don_inv_weeks) >= 30 ~ "30 days or more",
+                                  is.na(d_173836415_d_266600170_d_319972665_d_759651991) ~ "Have not requested a kit"),
+         tm_don_inv = factor(tm_don_inv, levels=c("Less than 5 days","5- <10 days", 
+                                                  "10- <14 days", "14- <30 days", 
+                                                  "30 days or more",
+                                                  "Have not requested a kit")))
+
+req_rec_inv_kable1(kit_request_table, tm_don_inv, 
+                   "Time from Invitation to Kit Requested", 
+                   "Table 8.4:  Baseline- Home MW Response Rates by Time (in Days) from Invitation to Kit Requested")
+
+```
+
+
+```{r RequestKits5,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+
+kit_request_table <- kit_request_table %>% 
+  mutate(last_survey = pmax(as.Date(d_784810139), #COVID completion time
+                            as.Date(d_389890053), #CSH completion time
+                            as.Date(d_843688458), #PROMIS completion time
+                            as.Date(d_543379310), #ROI completion time
+                            as.Date(d_517311251), #BOH completion time
+                            as.Date(d_832139544), #MRE completion time
+                            as.Date(d_770257102), #SAS completion time
+                            as.Date(d_264644252), #LAW completion time
+                            as.Date(d_199471989), na.rm=T), #CES completion time
+         tm_surv_daymonths = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982)),
+                                          last_survey,units="days")),
+         #Specifically requested to have labels as months with these exact counts of days
+         tm_surv_inv = case_when(as.numeric(tm_surv_daymonths) < 182 ~ "Less than 6 months",
+                                  as.numeric(tm_surv_daymonths) < 364 ~"6- <12 months",
+                                  as.numeric(tm_surv_daymonths) < 546 ~ "12- <18 months",
+                                  as.numeric(tm_surv_daymonths) < 729 ~ "18- <24 months",
+                                  as.numeric(tm_surv_daymonths) < 911 ~ "24- <30 months",
+                                  as.numeric(tm_surv_daymonths) < 1094 ~ "30- <36 months",
+                                  as.numeric(tm_surv_daymonths) < 1276 ~ "36- <42 months",
+                                  as.numeric(tm_surv_daymonths) < 1459 ~ "42- <48 months",
+                                  as.numeric(tm_surv_daymonths) >= 1460 ~ "48 months or more",
+                                 # didn't complete any surveys but was invited
+                                 is.na(last_survey) ~ "No Surveys Completed",
+                                  TRUE ~ "Missing Time Stamp(s)"),
+         tm_surv_inv = factor(tm_surv_inv, levels=c("Less than 6 months","6- <12 months", 
+                                                  "12- <18 months", "18- <24 months","24- <30 months", 
+                                                  "30- <36 months", "36- <42 months", "42- <48 months", 
+                                                  "48 months or more", "No Surveys Completed",
+                                                  "Missing Time Stamp(s)")))
+
+req_rec_inv_kable1(kit_request_table, tm_surv_inv, "Time from Last Survey Completion to Kit Request Eligible", 
+                   "Table 8.5: Baseline- Home MW Response Rates by Time from Last Survey Completion to Invited to Request a Kit")
+
+```
+
+
+
+```{r RequestKits7,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+
+# Row order
+kit_request_table$completion <- factor(kit_request_table$completion, 
+                                       levels = c('Completed Survey and Sample(s)','Completed Survey, No Sample(s)', 
+                                                  'Completed Sample(s), No Survey', 'Completed Neither'))
+
+
+req_rec_inv_kable1(kit_request_table, completion, "Completion", 
+                   "Table 8.7: Baseline- Home MW Response Rates by Baseline Data Completeness Among Participants Invited to Request a Kit")
+
+```
+
+
+```{r RequestKits8,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+
+# Row order
+kit_request_table$sex <- factor(kit_request_table$sex, 
+                                       levels = c("Female", "Male", "Unknown"))
+
+
+req_by_sex <- req_rec_inv_kable1(kit_request_table, sex, "Sex", 
+                   "Table 8.8: Baseline- Home MW Response Rates by Sex Among Participants Invited to Request a Kit")
+
+req_by_sex %>% 
+  footnote(general="Note: Sex defined as the de-identified sex data reported by sites at time of invitation.",
+           general_title = "",
+           footnote_as_chunk = TRUE,
+           escape = FALSE,
+           threeparttable = TRUE)
+
+```
+
+
+```{r RequestKits9,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+
+# Row order
+kit_request_table$age <- factor(kit_request_table$age, 
+                                       levels = c("30-34", "35-39", "40-45", "46-50", "51-55", "56-60",
+                                                  "61-65", "66-70","Unknown"))
+
+
+req_by_age <- req_rec_inv_kable1(kit_request_table, age, "Age", 
+                   "Table 8.9: Baseline- Home MW Response Rates by Age Among Participants Invited to Request a Kit")
+
+req_by_age %>% 
+  footnote(general="Note: Age defined as the de-identified age data reported by sites at time of invitation, not current age at the time of specimen collection.",
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+```
+
+\FloatBarrier
+
+```{r RequestKits11,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+
+## Counts of Kits Shipped, Kits Shipped within the last 2 Weeks, and Kits Received, by Site
  
+req_shipped <- kit_request_table %>% filter(Kit_Status_int %in% c("Received", "Shipped"))
+ 
+summary_req_ship<- req_shipped %>%
+  group_by(Site) %>%
+  summarise(Shipped = sum(Kit_Status_int %in% c("Received", "Shipped")), #kits received were once shipped
+            Shipped_TwoWeeks = sum(Kit_Status_int %in% c("Received", "Shipped") &
+                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < currentDate-14),
+            Received = sum(Kit_Status_int == "Received")) 
+ 
+ 
+
+total_shipped <- sum(summary_req_ship$Shipped)
+total_received <- sum(summary_req_ship$Received)
+total_ship_previous_week <- sum(summary_req_ship$Shipped_TwoWeeks)
+total_received_percentage <- paste(total_received, "(", round(total_received/total_ship_previous_week*100, digits = 1), "%)")
+total_row <- c("Total", total_shipped, total_ship_previous_week, total_received)
+ 
+# Create a new data frame for the "Total" row
+total_df <- data.frame(t(total_row), stringsAsFactors = FALSE)
+ 
+# Set column names
+colnames(total_df) <- colnames(summary_req_ship)
+
+ 
+# Append the "Total" row to summary_req_ship
+req_shipped_total <- rbind(summary_req_ship, total_df)
+
+
+# Add percentages to received column (out of shipped two weeks ago)
+req_shipped_total$Received_PCT <- paste0(req_shipped_total$Received, " (",
+                                      round(as.numeric(req_shipped_total$Received)/as.numeric(req_shipped_total$Shipped_TwoWeeks)*100, digits=1),
+                                     "%)")
+
+req_shipped_total <- req_shipped_total %>%  select("Site", "Shipped", 
+                                                   "Shipped_TwoWeeks", "Received_PCT")
+
+knitr::kable(req_shipped_total,
+             format.args = list(big.mark = ","),
+             col.names=c("Site", "Total Shipped","Shipped 2+ Weeks Ago", "Received"),
+             caption='Table 8.11: Home Mouthwash Kit Return Rate for Packages Shipped at Least 2 Weeks Ago to Participants Invited to Request a Kit',
+             row.names=FALSE, align=c("l", rep("c", 3)),
+             digits=1, booktabs = TRUE) %>% 
+  add_indent(seq(1, nrow(req_shipped_total) - 1)) %>% 
+  kable_styling(latex_options = "HOLD_position")
+
+```
+
