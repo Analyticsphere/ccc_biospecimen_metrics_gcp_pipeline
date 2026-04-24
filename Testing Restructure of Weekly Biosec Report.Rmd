@@ -622,8 +622,7 @@ biocol.tb <- biocol.tb %>%
          d_915838974 = as.POSIXct(ymd_hms(d_915838974)),
          d_556788178 = as.POSIXct(ymd_hms(d_556788178)),
          d_822499427 = as.POSIXct(ymd_hms(d_822499427)),
-         d_222161762 = as.POSIXct(ymd_hms(d_222161762)),
-         d_678166505 = as.Date(d_678166505))
+         d_222161762 = as.POSIXct(ymd_hms(d_222161762)))
 
 ```
 
@@ -2150,8 +2149,8 @@ coll_bptl_diff2 <- biospe__2  %>% group_by(as.character(Connect_ID),Site, Clin_S
   mutate(any_collection = min(d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119,
                               d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119,
                               d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, na.rm=T),
-         clin_coll_bu = min(d_173836415_d_266600170_d_982213346, d_173836415_d_266600170_d_139245758, na.rm=T),
-         day_past = difftime(as.Date(any_collection), as.Date(clin_coll_bu), units="days"),
+         clin_coll_bu = as.Date(min(d_173836415_d_266600170_d_982213346, d_173836415_d_266600170_d_139245758, na.rm=T)),
+         day_past = difftime(as.Date(any_collection), clin_coll_bu, units="days"),
          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",
                                  ifelse(as.numeric(day_past)<3,"2 Days",
                                         ifelse(as.numeric(day_past)<4,"3 Days", 
@@ -3053,19 +3052,19 @@ ctable_clin_loc_bptl
 ## Collection to Receipt Times, Stratified by Appt Day of the Week
 
 coll_bptl_diff <- coll_bptl_diff %>% 
-  mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_678166505)), units="hours"),
-         hrs_past = as.numeric(hrs_past),
-         Weekdays = factor(weekdays(as.Date(d_678166505))),
-         Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%  
+  mutate(hrs_past = as.numeric(difftime(any_collection, d_678166505, units="hours")),
+         Weekdays = factor(weekdays(as.Date(d_678166505)),
+                           levels=c("Sunday", "Monday", "Tuesday", "Wednesday", 
+                                    "Thursday", "Friday", "Saturday"))) %>%  
   filter(hrs_past>0)
 
 
 
 coll_bptl_diff2 <- coll_bptl_diff2 %>% 
-  mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(clin_coll_bu)), units="hours"),
-         hrs_past = as.numeric(hrs_past),
-         Weekdays = factor(weekdays(as.Date(clin_coll_bu))),
-         Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")))
+  mutate(hrs_past = as.numeric(difftime(any_collection, clin_coll_bu, units="hours")),
+         Weekdays = factor(weekdays(clin_coll_bu),
+                           levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", 
+                                    "Friday", "Saturday")))
 
 
 ## TESTING THIS CHANGE
@@ -3109,7 +3108,7 @@ research_plot <- function(df, site_name, start_date, plot_title){
                  #labels = function(x) paste0(substr(format(x, "%b"), 1, 1), "-", format(x, "%y")), 
                  date_labels = "%y-%m-%d", 
                date_breaks = "4 weeks",
-               limits=c( as.Date(start_date),as.Date(currentDate)-7), expand=c(0,0)) + 
+               limits=c( as.Date(start_date), (currentDate-7)), expand=c(0,0)) + 
   scale_y_continuous(name="Number of Hours",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
   scale_color_manual(values=c("Sunday"="#B1C7D9", "Monday"="#164C71", "Tuesday"="#FDBE19", "Wednesday"="#FBE5B5", 
                               "Thursday"="#565C65", "Friday"="#3C989E", "Saturday"="#CC7D15")) +
@@ -3126,9 +3125,9 @@ research_plot <- function(df, site_name, start_date, plot_title){
 
 clinical_plot <- function(df, site_name, start_date, plot_title){
   
-  data <- df %>% filter(Site==site_name)
+  data <- coll_bptl_diff2 %>% filter(Site==site_name)
   
-  ggplot(df, aes(x = as.Date(clin_coll_bu), y = hrs_past, color = factor(weekdays(as.Date(clin_coll_bu))))) + 
+  ggplot(df, aes(x = clin_coll_bu, y = hrs_past, color = factor(weekdays(clin_coll_bu)))) + 
   geom_point() + 
     scale_x_date(name="Collection Date",
                  #Bio Team wants first letter of the month - year
@@ -3165,7 +3164,7 @@ clinical_plot(coll_bptl_diff2, "Sanford Health", "2024-03-25",
 
 research_plot(coll_bptl_diff, "University of Chicago Medicine", "2022-06-20", 
               "Figure 5.4: Baseline Collection-To-Receipt Time (in Hours),  \n University of Chicago Medicine Research Setting")
-clinical_plot(scatCUC, "University of Chicago Medicine", "2024-03-25", 
+clinical_plot(coll_bptl_diff2, "University of Chicago Medicine", "2024-03-25", 
               "Figure 5.5: Baseline- Collection-To-Receipt Time (in Hours), \n University of Chicago Medicine Clinical Setting")
 
 clinical_plot(coll_bptl_diff2, "Kaiser Permanente Colorado", "2022-10-10", 
@@ -3408,6 +3407,7 @@ Section6_plot_function(coll_sett_all,start_date = "2022-06-20", title = "Figure 
 \newpage
 
 ```{r Section6_Figures2, fig.height=7, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
+
 #Figure 6.2
 Section6_plot_function(coll_sett_all,start_date = "2022-06-20", site = "Henry Ford Health", 
                        color_by_setting = TRUE, color_var="all_settings",
@@ -3416,10 +3416,21 @@ Section6_plot_function(coll_sett_all,start_date = "2022-06-20", site = "Henry Fo
 Section6_plot_function2(coll_sett_all,start_date = "2022-06-20", 
                         title="Figure 6.3: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Henry Ford Health", 
                         site="Henry Ford Health", settings="Research", color_var="Site_location")
+
+```
+
+
+```{r Section6_Figures3, fig.height=9, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
+
 #Figure 6.4
 Section6_plot_function2(coll_sett_all,start_date = "2023-05-22", 
                         title="Figure 6.4: Baseline- Weekly Clinical Biospecimen Collections \n by Clinic Location, Henry Ford Health", 
                         site="Henry Ford Health", settings="Clinical", color_var="Clin_Site_location")
+
+```
+
+```{r Section6_Figures4, fig.height=7, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
+
 #Figure 6.5
 Section6_plot_function(coll_sett_all,start_date = "2022-06-20", site = "University of Chicago Medicine", 
                        title = "Figure 6.5: Baseline- Weekly Biospecimen Collections, \n University of Chicago Medicine")
