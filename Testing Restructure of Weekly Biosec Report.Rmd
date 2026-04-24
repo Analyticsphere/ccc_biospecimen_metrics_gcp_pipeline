@@ -602,7 +602,29 @@ biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
 ```
 
 
+```{r Date_Conversions, include=FALSE}
 
+## all vars for collection times need to be converted from character vars to proper time stamps
+
+## These tend to stall the code when being ran repeatedly as new requests come up
+
+biocol.tb <- biocol.tb %>%
+  mutate(across(ends_with("d_926457119"), ~ as.POSIXct(lubridate::ymd_hms(.))),
+         d_678166505 = as.POSIXct(ymd_hms(d_678166505)),
+         d_822499427 = as.POSIXct(ymd_hms(d_822499427)),
+         d_331584571_d_266600170_d_840048338 = as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)),
+         d_331584571_d_266600170_d_343048998 = as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998)),
+         d_173836415_d_266600170_d_139245758 = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_139245758)),
+         d_173836415_d_266600170_d_982213346 = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_982213346)),
+         d_173836415_d_266600170_d_740582332 = as.POSIXct(ymd_hms(d_173836415_d_266600170_d_740582332)),
+         d_764863765 = as.POSIXct(ymd_hms(d_764863765)),
+         d_534669573 = as.POSIXct(ymd_hms(d_534669573)),
+         d_915838974 = as.POSIXct(ymd_hms(d_915838974)),
+         d_556788178 = as.POSIXct(ymd_hms(d_556788178)),
+         d_822499427 = as.POSIXct(ymd_hms(d_822499427)),
+         d_222161762 = as.POSIXct(ymd_hms(d_222161762)))
+
+```
 
 
 
@@ -1558,6 +1580,7 @@ discard.site[nrow(discard.site),c(2:ncol(discard.site))] <- paste(discard.site[n
 ```
 
 
+
 ```{r Research_Collections_Surveys, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 # Setting up variables for all research specific Tables and Figures
@@ -1647,7 +1670,9 @@ Table21R_After = postcovR_comp %>% group_by(Site) %>%
 ```{r Research_Srvy_Status, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 ## Collection Visit Length 
 
-research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk)) 
+research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk)) %>% 
+  # Bio team explicitly asked to remove from table for QC issue, not updating prod data
+  filter(Connect_ID!="9005924628") 
 
 research.vt.length.table = research.vt.length %>%group_by(Site) %>% 
   dplyr::summarize('Number of Research Collection Visits'=n(),
@@ -2124,8 +2149,8 @@ coll_bptl_diff2 <- biospe__2  %>% group_by(as.character(Connect_ID),Site, Clin_S
   mutate(any_collection = min(d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, d_505347689_d_926457119,
                               d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, d_703954371_d_926457119,
                               d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119, na.rm=T),
-         clin_coll_bu = min(d_173836415_d_266600170_d_982213346, d_173836415_d_266600170_d_139245758, na.rm=T),
-         day_past = difftime(as.Date(any_collection), as.Date(clin_coll_bu), units="days"),
+         clin_coll_bu = as.Date(min(d_173836415_d_266600170_d_982213346, d_173836415_d_266600170_d_139245758, na.rm=T)),
+         day_past = difftime(as.Date(any_collection), clin_coll_bu, units="days"),
          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",
                                  ifelse(as.numeric(day_past)<3,"2 Days",
                                         ifelse(as.numeric(day_past)<4,"3 Days", 
@@ -3027,59 +3052,63 @@ ctable_clin_loc_bptl
 ## Collection to Receipt Times, Stratified by Appt Day of the Week
 
 coll_bptl_diff <- coll_bptl_diff %>% 
-  mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(d_678166505)), units="hours"),
-         hrs_past = as.numeric(hrs_past),
-         Weekdays = factor(weekdays(as.Date(d_678166505))),
-         Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%  
+  mutate(hrs_past = as.numeric(difftime(any_collection, d_678166505, units="hours")),
+         Weekdays = factor(weekdays(as.Date(d_678166505)),
+                           levels=c("Sunday", "Monday", "Tuesday", "Wednesday", 
+                                    "Thursday", "Friday", "Saturday"))) %>%  
   filter(hrs_past>0)
 
 
 
 coll_bptl_diff2 <- coll_bptl_diff2 %>% 
-  mutate(hrs_past = difftime(as.POSIXct(ymd_hms(any_collection)), as.POSIXct(ymd_hms(clin_coll_bu)), units="hours"),
-         hrs_past = as.numeric(hrs_past),
-         Weekdays = factor(weekdays(as.Date(clin_coll_bu))),
-         Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")))
+  mutate(hrs_past = as.numeric(difftime(any_collection, clin_coll_bu, units="hours")),
+         Weekdays = factor(weekdays(clin_coll_bu),
+                           levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", 
+                                    "Friday", "Saturday")))
 
 
+## TESTING THIS CHANGE
 
-
-scatMF <- coll_bptl_diff %>%  filter(Site=="Marshfield Clinic Health System")
-scatSF <- coll_bptl_diff %>%  filter(Site=="Sanford Health")
-scatUC <- coll_bptl_diff %>%  filter(Site=="University of Chicago Medicine")
-scatRHF <- coll_bptl_diff %>%  filter(Site=="Henry Ford Health")
-scatRHP <- coll_bptl_diff %>%  filter(Site=="HealthPartners")
-
-scatKPCO <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Colorado")
-scatKPGA <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Georgia")
-scatKPHI <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Hawaii")
-scatKPNW <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Northwest")
-scatCHF <- coll_bptl_diff2 %>%  filter(Site=="Henry Ford Health")
-scatCHP <- coll_bptl_diff2 %>%  filter(Site=="HealthPartners")
-scatCSF <- coll_bptl_diff2 %>%  filter(Site=="Sanford Health")
-scatCUC <- coll_bptl_diff2 %>%  filter(Site=="University of Chicago Medicine")
-
-
-scatRHP$coldate <- scatRHP$d_678166505
-scatCHP$coldate <- scatCHP$clin_coll_bu
-scatCSF$coldate <- scatCSF$clin_coll_bu
-scatCUC$coldate <- scatCUC$clin_coll_bu
-scatRHF$coldate <- scatRHF$d_678166505
-scatCHF$coldate <- scatCHF$clin_coll_bu
+# scatMF <- coll_bptl_diff %>%  filter(Site=="Marshfield Clinic Health System")
+# scatSF <- coll_bptl_diff %>%  filter(Site=="Sanford Health")
+# scatUC <- coll_bptl_diff %>%  filter(Site=="University of Chicago Medicine")
+# scatRHF <- coll_bptl_diff %>%  filter(Site=="Henry Ford Health")
+# scatRHP <- coll_bptl_diff %>%  filter(Site=="HealthPartners")
+# 
+# scatKPCO <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Colorado")
+# scatKPGA <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Georgia")
+# scatKPHI <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Hawaii")
+# scatKPNW <- coll_bptl_diff2 %>%  filter(Site=="Kaiser Permanente Northwest")
+# scatCHF <- coll_bptl_diff2 %>%  filter(Site=="Henry Ford Health")
+# scatCHP <- coll_bptl_diff2 %>%  filter(Site=="HealthPartners")
+# scatCSF <- coll_bptl_diff2 %>%  filter(Site=="Sanford Health")
+# scatCUC <- coll_bptl_diff2 %>%  filter(Site=="University of Chicago Medicine")
+# 
+# 
+# scatRHP$coldate <- scatRHP$d_678166505
+# scatCHP$coldate <- scatCHP$clin_coll_bu
+# scatCSF$coldate <- scatCSF$clin_coll_bu
+# scatCUC$coldate <- scatCUC$clin_coll_bu
+# scatRHF$coldate <- scatRHF$d_678166505
+# scatCHF$coldate <- scatCHF$clin_coll_bu
 
 
 weekday_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
 
 
-research_plot <- function(df, start_date, plot_title){
-  ggplot(df, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) + 
+research_plot <- function(df, site_name, start_date, plot_title){
+  
+  data <- df %>% filter(Site==site_name)
+  
+  ggplot(data, aes(x=as.Date(d_678166505), y=hrs_past, color = Weekdays)) + 
   geom_point() + 
     scale_x_date(name="Collection Date",
                  #Bio Team wants first letter of the month - year
                  ## b for abbreviate, 1,1 for first letter of the month
-                 labels = function(x) paste0(substr(format(x, "%b"), 1, 1), "-", format(x, "%y")), 
+                 #labels = function(x) paste0(substr(format(x, "%b"), 1, 1), "-", format(x, "%y")), 
+                 date_labels = "%y-%m-%d", 
                date_breaks = "4 weeks",
-               limits=c( as.Date(start_date),as.Date(currentDate)-7), expand=c(0,0)) + 
+               limits=c( as.Date(start_date), (currentDate-7)), expand=c(0,0)) + 
   scale_y_continuous(name="Number of Hours",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
   scale_color_manual(values=c("Sunday"="#B1C7D9", "Monday"="#164C71", "Tuesday"="#FDBE19", "Wednesday"="#FBE5B5", 
                               "Thursday"="#565C65", "Friday"="#3C989E", "Saturday"="#CC7D15")) +
@@ -3094,13 +3123,17 @@ research_plot <- function(df, start_date, plot_title){
 }
 
 
-clinical_plot <- function(df, start_date, plot_title){
-  ggplot(df, aes(x = as.Date(clin_coll_bu), y = hrs_past, color = factor(weekdays(as.Date(clin_coll_bu))))) + 
+clinical_plot <- function(df, site_name, start_date, plot_title){
+  
+  data <- coll_bptl_diff2 %>% filter(Site==site_name)
+  
+  ggplot(df, aes(x = clin_coll_bu, y = hrs_past, color = factor(weekdays(clin_coll_bu)))) + 
   geom_point() + 
     scale_x_date(name="Collection Date",
                  #Bio Team wants first letter of the month - year
                  ## b for abbreviate, 1,1 for first letter of the month
-                 labels = function(x) paste0(substr(format(x, "%b"), 1, 1), "-", format(x, "%y")), 
+                 #labels = function(x) paste0(substr(format(x, "%b"), 1, 1), "-", format(x, "%y")), 
+                 date_labels = "%y-%m-%d",
                date_breaks = "4 weeks",
                limits=c( as.Date(start_date),(as.Date(currentDate)-7)), expand=c(0,0)) + 
   scale_y_continuous(name="Number of Hours",  breaks=seq(0,168,24), limits = c(0, 168), expand = c(0, 0)) +
@@ -3121,24 +3154,36 @@ clinical_plot <- function(df, start_date, plot_title){
 
 
 
-research_plot(scatMF, "2022-06-20", "Figure 5.1: Baseline Collection-To-Receipt Time (in Hours), \n Marshfield")
+research_plot(coll_bptl_diff, "Marshfield Clinic Health System", "2022-06-20", 
+              "Figure 5.1: Baseline Collection-To-Receipt Time (in Hours), \n Marshfield")
 
-research_plot(scatSF, "2022-06-20", "Figure 5.2: Baseline Collection-To-Receipt Time (in Hours), \n Sanford Health Research Setting")
-clinical_plot(scatCSF, "2024-03-25", "Figure 5.3: Baseline- Collection-To-Receipt Time (in Hours), \n Sanford Health Clinical Setting")
+research_plot(coll_bptl_diff, "Sanford Health", "2022-06-20", 
+              "Figure 5.2: Baseline Collection-To-Receipt Time (in Hours), \n Sanford Health Research Setting")
+clinical_plot(coll_bptl_diff2, "Sanford Health", "2024-03-25", 
+              "Figure 5.3: Baseline- Collection-To-Receipt Time (in Hours), \n Sanford Health Clinical Setting")
 
-research_plot(scatUC, "2022-06-20", "Figure 5.4: Baseline Collection-To-Receipt Time (in Hours),  \n University of Chicago Medicine Research Setting")
-clinical_plot(scatCUC, "2024-03-25", "Figure 5.5: Baseline- Collection-To-Receipt Time (in Hours), \n University of Chicago Medicine Clinical Setting")
+research_plot(coll_bptl_diff, "University of Chicago Medicine", "2022-06-20", 
+              "Figure 5.4: Baseline Collection-To-Receipt Time (in Hours),  \n University of Chicago Medicine Research Setting")
+clinical_plot(coll_bptl_diff2, "University of Chicago Medicine", "2024-03-25", 
+              "Figure 5.5: Baseline- Collection-To-Receipt Time (in Hours), \n University of Chicago Medicine Clinical Setting")
 
-clinical_plot(scatKPCO, "2022-10-10", "Figure 5.6: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Colorado")
-clinical_plot(scatKPGA, "2022-10-10", "Figure 5.7: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Georgia")
-clinical_plot(scatKPHI, "2022-10-10", "Figure 5.8: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Hawaii")
-clinical_plot(scatKPCO, "2022-10-10", "Figure 5.9: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Northwest")
+clinical_plot(coll_bptl_diff2, "Kaiser Permanente Colorado", "2022-10-10", 
+              "Figure 5.6: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Colorado")
+clinical_plot(coll_bptl_diff2, "Kaiser Permanente Georgia", "2022-10-10", 
+              "Figure 5.7: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Georgia")
+clinical_plot(coll_bptl_diff2, "Kaiser Permanente Hawaii", "2022-10-10", 
+              "Figure 5.8: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Hawaii")
+clinical_plot(coll_bptl_diff2, "Kaiser Permanente Northwest", "2022-10-10", 
+              "Figure 5.9: Baseline Collection-To-Receipt Time (in Hours),  \n Kaiser Permanente Northwest")
 
-research_plot(scatRHP, "2022-06-20", "Figure 5.10: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Research Setting")
-clinical_plot(scatCHP, "2023-10-23", "Figure 5.11: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Clinical Setting")
+research_plot(coll_bptl_diff, "HealthPartners", "2022-06-20", 
+              "Figure 5.10: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Research Setting")
+clinical_plot(coll_bptl_diff2, "HealthPartners", "2023-10-23", 
+              "Figure 5.11: Baseline- Collection-To-Receipt Time (in Hours), \n HealthPartners Clinical Setting")
 
-research_plot(scatRHF, "2022-06-20", "Figure 5.12: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Research Setting")
-clinical_plot(scatCHF, "2023-04-24", "Figure 5.13: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Clinical Setting")
+research_plot(coll_bptl_diff, "Henry Ford Health", "2022-06-20", "Figure 5.12: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Research Setting")
+clinical_plot(coll_bptl_diff2, "Henry Ford Health", "2023-04-24", 
+              "Figure 5.13: Baseline- Collection-To-Receipt Time (in Hours), \n Henry Ford Clinical Setting")
 
 
 ```
@@ -3362,6 +3407,7 @@ Section6_plot_function(coll_sett_all,start_date = "2022-06-20", title = "Figure 
 \newpage
 
 ```{r Section6_Figures2, fig.height=7, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
+
 #Figure 6.2
 Section6_plot_function(coll_sett_all,start_date = "2022-06-20", site = "Henry Ford Health", 
                        color_by_setting = TRUE, color_var="all_settings",
@@ -3370,10 +3416,21 @@ Section6_plot_function(coll_sett_all,start_date = "2022-06-20", site = "Henry Fo
 Section6_plot_function2(coll_sett_all,start_date = "2022-06-20", 
                         title="Figure 6.3: Baseline- Weekly Research Biospecimen Collections \n by Collection Location, Henry Ford Health", 
                         site="Henry Ford Health", settings="Research", color_var="Site_location")
+
+```
+
+
+```{r Section6_Figures3, fig.height=9, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
+
 #Figure 6.4
 Section6_plot_function2(coll_sett_all,start_date = "2023-05-22", 
                         title="Figure 6.4: Baseline- Weekly Clinical Biospecimen Collections \n by Clinic Location, Henry Ford Health", 
                         site="Henry Ford Health", settings="Clinical", color_var="Clin_Site_location")
+
+```
+
+```{r Section6_Figures4, fig.height=7, eval=TRUE,echo=FALSE, warning = FALSE, message = FALSE}
+
 #Figure 6.5
 Section6_plot_function(coll_sett_all,start_date = "2022-06-20", site = "University of Chicago Medicine", 
                        title = "Figure 6.5: Baseline- Weekly Biospecimen Collections, \n University of Chicago Medicine")
