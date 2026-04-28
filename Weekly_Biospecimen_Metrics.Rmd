@@ -4339,8 +4339,8 @@ This section only includes data on participants who were invited to request a ho
 # -------   Functions for Section 8 ------------------
 
 
-## The percentages for type 1 relies on a row percentage out of Number of Invited
-## Requested and Received is out of Invited
+
+## The percentages for Requested and Received is out of Invited
 req_rec_inv_kable1 <- function(data, group_var, group_var_name, title) { 
   
   group_var <- rlang::ensym(group_var) 
@@ -4439,7 +4439,7 @@ knitr::kable(req_kit_table2,
 kit_request_table <- kit_request_table %>% 
   mutate(tm_don_inv_years = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982)),
                                         as.POSIXct(ymd_hms(d_173836415_d_266600170_d_740582332)),units="days")),
-#Specifically requested to have labels as months with these exact counts of days
+#Specifically requested to have labels as years with these exact counts of days
          tm_don_inv = case_when(as.numeric(tm_don_inv_years) < 730 ~ "Less than 2 years",
                                   as.numeric(tm_don_inv_years) < 911 ~"2- <2.5 years",
                                   as.numeric(tm_don_inv_years) < 1094 ~ "2.5- <3 years",
@@ -4603,7 +4603,7 @@ req_rec_inv_kable1(kit_request_table, tm_surv_inv, "Time from Last Survey Comple
 
 ```{r RequestKits7,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
-# Row order
+# Row order, and ensures all leves included
 kit_request_table$completion <- factor(kit_request_table$completion, 
                                        levels = c('Completed Survey and Sample(s)','Completed Survey, No Sample(s)', 
                                                   'Completed Sample(s), No Survey', 'Completed Neither'))
@@ -4617,7 +4617,7 @@ req_rec_inv_kable1(kit_request_table, completion, "Completion",
 
 ```{r RequestKits8,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
-# Row order
+# Row order, and ensures all leves included
 kit_request_table$sex <- factor(kit_request_table$sex, 
                                        levels = c("Female", "Male", "Unknown"))
 
@@ -4637,7 +4637,7 @@ req_by_sex %>%
 
 ```{r RequestKits9,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
-# Row order
+# Row order, and ensures all leves included
 kit_request_table$age <- factor(kit_request_table$age, 
                                        levels = c("30-34", "35-39", "40-45", "46-50", "51-55", "56-60",
                                                   "61-65", "66-70","Unknown"))
@@ -4763,6 +4763,7 @@ summary_req_ship<- req_shipped %>%
 total_shipped <- sum(summary_req_ship$Shipped)
 total_received <- sum(summary_req_ship$Received)
 total_ship_previous_week <- sum(summary_req_ship$Shipped_TwoWeeks)
+
 total_received_percentage <- paste(total_received, "(", round(total_received/total_ship_previous_week*100, digits = 1), "%)")
 total_row <- c("Total", total_shipped, total_ship_previous_week, total_received)
  
