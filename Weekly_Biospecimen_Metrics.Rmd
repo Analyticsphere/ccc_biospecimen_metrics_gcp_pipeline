@@ -3631,13 +3631,8 @@ kit_assembly <- bq_table_download(kit_assmb_table, bigint="integer64",n_max = In
  
 
 ### Initial Kit Status Count
-status_elgA <- kit_table %>%
-  #Not everyone will have a requested initial kit
-  #filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991) | Kit_Status_int!="No Status") %>% -- already in the BQ conditionality 
-  mutate(Kit_Status_int = factor(Kit_Status_int,
-                                 levels=c("Undeliverable","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))) 
  
-status_elg7.1A <- create_tbl_cross(status_elgA, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
+status_elg7.1A <- create_tbl_cross(kit_table, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
 colnames(status_elg7.1A)[ncol(status_elg7.1A)] <- "Total Eligible"
 
 status_elg_knA <- knitr::kable(status_elg7.1A,
@@ -3652,9 +3647,7 @@ status_elg_knA <- knitr::kable(status_elg7.1A,
 
 ### Replacement Kit 1 Status Count
 status_elgB <-kit_table %>%
-  filter( Kit_Status_r1!="No Status") %>% 
-  mutate(Kit_Status_r1 = factor(Kit_Status_r1,
-                                 levels=c("Undeliverable","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))) 
+  filter( Kit_Status_r1!="No Status")
 
  
 status_elg7.1B <- create_tbl_cross(status_elgB, "Site", "Kit_Status_r1", "row", "Site", "Kit Status")
@@ -3670,9 +3663,7 @@ status_elg_knB <- knitr::kable(status_elg7.1B,
  
 ### Replacement Kit 2 Status Count
 status_elgC <- kit_table %>%
-  filter(!is.na(d_173836415_d_266600170_d_641006239_d_759651991)  & Kit_Status_r2!="No Status") %>% 
-  mutate(Kit_Status_r2 = factor(Kit_Status_r2,
-                                 levels=c("Undeliverable","Initialized", "Address Printed", "Assigned", "Shipped", "Received"))) 
+  filter(!is.na(d_173836415_d_266600170_d_641006239_d_759651991)  & Kit_Status_r2!="No Status") 
 
 status_elg7.1C <- create_tbl_cross(status_elgC, "Site", "Kit_Status_r2", "row", "Site", "Kit Status")
 colnames(status_elg7.1C)[ncol(status_elg7.1C)] <- "Total Requested"
@@ -4510,7 +4501,7 @@ kit_tm_don_inv <- kit_request_table %>%
                digits=1, booktabs = TRUE) %>% 
     add_indent(seq(1, nrow(kit_tm_don_inv) - 1)) %>%
     kable_styling(latex_options ="scale_down") %>% 
-    footnote(general="Note: Reminders are sent on Days 5 and 14 following initial invitation.",
+    footnote(general="Note: Reminders are sent on Days 5, 14 and 30 following initial invitation.",
            general_title = "",
            footnote_as_chunk = TRUE, 
            escape = FALSE, 
@@ -4669,38 +4660,54 @@ req_by_age %>%
 
 
 up_hist_query <- bq_project_query(project, 
-query= "WITH status_counts AS (
+query= "WITH address_update_flags AS (
 
-  --  Once we have people with address updated this will be all we need
+  -- Join first so we have access to participant date bounds, then collapse to one row per participant
+  ---- Needed because the user_profile_history table has >1 row per participant 
+  
   SELECT
-    CASE
-      WHEN DATE(up.ts_user_profile_updated) > DATE(p.d_173836415_d_266600170_d_319972665_d_278539982)
-       AND DATE(up.ts_user_profile_updated) < DATE(p.d_173836415_d_266600170_d_319972665_d_278539982)
-      THEN 'Address Update'
-      ELSE 'No Address Update'
-    END AS Address_Update_Status,
-    COUNT(*) AS n
+    p.Connect_ID,
+    MAX(
+      CASE
+        WHEN DATE(up.ts_user_profile_updated) > DATE(p.d_173836415_d_266600170_d_319972665_d_278539982)
+         AND DATE(up.ts_user_profile_updated) < DATE(p.d_173836415_d_266600170_d_319972665_d_759651991)
+        THEN 1 ELSE 0
+      END
+    ) AS has_address_update
   FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` p
   LEFT JOIN `nih-nci-dceg-connect-prod-6d04.FlatConnect.user_profile_history` up
     ON p.Connect_ID = up.Connect_ID
   WHERE p.d_173836415_d_266600170_d_319972665_d_638781731 = '353358909'
     AND p.d_173836415_d_266600170_d_319972665_d_759651991 IS NOT NULL
+  GROUP BY p.Connect_ID  -- One row per participant
+),
+
+
+----------- Generate the row counts ------------------------------------------
+status_counts AS (
+  SELECT
+    CASE
+      WHEN has_address_update = 1 THEN 'Address Update'
+      ELSE 'No Address Update'
+    END AS Address_Update_Status,
+    COUNT(*) AS n
+  FROM address_update_flags
   GROUP BY 1
 ),
 
--- But because there are 0 and we want both rows included, we have to manually complete: 
-
+----------- This forces both rows to appear even if one has count of 0 -------
 all_status AS (
   SELECT 'Address Update' AS Address_Update_Status
   UNION ALL
   SELECT 'No Address Update'
 )
+
 SELECT
   a.Address_Update_Status,
   COALESCE(s.n, 0) AS N
 FROM all_status a
 LEFT JOIN status_counts s
-USING (Address_Update_Status)
+  USING (Address_Update_Status)
 ORDER BY a.Address_Update_Status;")
 
 up_hist <- bq_table_download(up_hist_query, bigint="integer64",

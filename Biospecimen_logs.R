@@ -1,27 +1,15 @@
 
 # Upload all libraries ################################
-library(DBI) 
-library(bigrquery)
-library(data.table) ###to write or read and data management 
-library(tidyverse) ###for data management https://tidyselect.r-lib.org/reference/faq-external-vector.html
-library(listr) ###to work on a list of vector, files or..
+library(DBI) ## to get the BQ connection
+library(bigrquery) ## to get the BQ connection
+library(tidyverse) ###for data management 
 library(lubridate) ###date time
-library(RColorBrewer) ###visions color http://www.sthda.com/english/wiki/colors-in-r
 library(tinytex) #for pdf
 library(rmarkdown) ###for the output tables into other files: pdf, rtf, etc.
-library(janitor) #to get the summary sum
-#library(epiDisplay) ##recommended applied here crosstable, tab1
-library(gmodels) ##recommended but not applied in this R code
-library(arsenal)
-library(gtsummary)
-library(kableExtra)
-library(rio)
-library(scales)
-library(openxlsx)
-library(glue)
+library(openxlsx) # specifically for xlxs instead of csv
+library(glue) # for the current data and boxfolder to be part of the file name cleanly
 library(logger) ## allows us to add messages in logs to find out when/where code breaks are happening
-#install.packages("pak")
-library(pak)
+library(pak) # necessary for the dbi function in R (and GCP?) 
 pak::pak("r-dbi/bigrquery")
 pak::pak("tidyverse/dbplyr")
 
@@ -45,10 +33,6 @@ con <- dbConnect(
 log_info("Finished setting up DBI connection")
 
 
-
-## Needed for all csvs:
-currentDate <- Sys.Date()
-outputpath=''
 
 ##########################################################################
 
@@ -89,12 +73,13 @@ logs_figs <- tbl(con,"participants") %>%
 
 
 log_info("Creating additional variables for the logs")
+## POSIXct an factoring doesn't run nicely with the con/SQL before the data is pulled
 
 logs_figs <- logs_figs %>% 
-  mutate(mw.time =case_when(d_173836415_d_266600170_d_915179629=="534621077" ~ ymd_hms(d_173836415_d_266600170_d_448660695)), #Research MW times only-- to many issues with manual entry time errors for Home Collections
-  
-         ## UC doesn't have biospecimen collections anymore so it's excluded 
-         Site = factor(Site, levels = c("BSWH", "HFH","HP", "KPCO", "KPGA", "KPHI", "KPNW", "MF", "SF", "UC")),
+  mutate(
+    #Research MW times only-- to many issues with manual entry time errors for Home Collections
+    mw.time =case_when(d_173836415_d_266600170_d_915179629=="534621077" ~ ymd_hms(d_173836415_d_266600170_d_448660695)), 
+    Site = factor(Site, levels = c("BSWH", "HFH","HP", "KPCO", "KPGA", "KPHI", "KPNW", "MF", "SF", "UC")),
   
   #date variables are all showing as character variables, but want to make sure the rounding of the original counts are preserved so keeping time 
   recruit_date = as.POSIXct(ymd_hms(d_471593703)),
@@ -120,6 +105,7 @@ SELECT CASE
     WHEN b.d_827220437 = '809703864' THEN 'UC'
   END AS Site_acrnm,
 
+--- Date Received - Site Shipment -------
   d_299553921_d_926457119, #SST1 
   d_703954371_d_926457119, #SST2 
   d_376960806_d_926457119, #SST3
@@ -147,10 +133,10 @@ bio_figs <- bio_figs %>%
   mutate(Site_acrnm = factor(Site_acrnm, 
                              levels = c("BSWH", "HFH","HP", "KPCO", "KPGA", "KPHI", "KPNW", "MF", "SF", "UC")))
 
-
+log_info("Biospecimen Data pulled")
 
 ### Weeks in the logs are Monday-Sunday
-#------------- Create weekly date sequence ---------------------------------------------- 
+#------------- Create weekly date sequence from 4/20/26 on -------------------------------
 week_seq <- tibble(Week = seq(from = as.Date("2026-04-20"),
                               to = floor_date(Sys.Date(), unit = "week", week_start = 1),
                               by = "week"))
@@ -170,6 +156,7 @@ log_info("Generating weekly counts")
         dplyr::count(Week, Site, name = "n") %>%
         group_by(Week) %>%
         mutate(`Total Verifications per week` = sum(n)) %>%
+        ## Also need weekly totals by site
         ungroup() %>%
         arrange(Site) %>%
         pivot_wider(
@@ -177,6 +164,7 @@ log_info("Generating weekly counts")
           values_from = n,
           values_fill = 0
         ) %>%
+        # Add Site names to those column
         rename_with(
           ~ paste("Verified per week from", .),
           .cols = -c(Week, `Total Verifications per week`)
@@ -192,6 +180,7 @@ log_info("Generating weekly counts")
   
   all_invited_by_week <- week_seq %>%
     left_join(
+      ### Total invites = initial + reinvites
       bind_rows(
         # Initial invitations
         logs_figs %>%
@@ -207,12 +196,14 @@ log_info("Generating weekly counts")
         group_by(Week) %>%
         mutate(`Total Invitations per week` = sum(n)) %>%
         ungroup() %>%
+        ## Also need weekly totals by site
         arrange(Site) %>%
         pivot_wider(
           names_from  = Site,
           values_from = n,
           values_fill = 0
         ) %>%
+        # Add Site names to those column
         rename_with(
           ~ paste("Invitations per week", .),
           .cols = -c(Week, `Total Invitations per week`)
@@ -234,12 +225,14 @@ log_info("Generating weekly counts")
         group_by(Week) %>%
         mutate(`Total Collections (Research and Clinical) per week` = sum(n)) %>%
         ungroup() %>%
+        ## Also need weekly totals by site
         arrange(Site) %>%
         pivot_wider(
           names_from  = Site,
           values_from = n,
           values_fill = 0
         ) %>%
+        # Add Site names to those column
         rename_with(
           ~ paste("Total Collections per week from", .),
           .cols = -c(Week, `Total Collections (Research and Clinical) per week`)
@@ -255,6 +248,7 @@ log_info("Generating weekly counts")
     left_join(
       bio_figs %>%
         pivot_longer(
+          ### Date Received - Site Shipment
           cols      = c(d_299553921_d_926457119, #SST1 
                         d_703954371_d_926457119,  #SST2 
                         d_376960806_d_926457119,  #SST3
@@ -264,6 +258,7 @@ log_info("Generating weekly counts")
                         d_677469051_d_926457119,  #EDTAT2 
                         d_683613884_d_926457119,  #EDTAT3 
                         d_505347689_d_926457119), #STRT1 
+          #### NOT including ACD or HEP1/2 -- no longer collected
           names_to  = "date_type",
           values_to = "blood_date"
         ) %>%
@@ -276,12 +271,14 @@ log_info("Generating weekly counts")
         group_by(Week) %>%
         mutate(`Total Blood Tubes Received at BPTL per week` = sum(n)) %>%
         ungroup() %>%
+        ## Also need weekly totals by site
         arrange(Site_acrnm) %>%
         pivot_wider(
           names_from  = Site_acrnm,
           values_from = n,
           values_fill = 0
         ) %>%
+        # Add Site names to those column
         rename_with(
           ~ paste("Blood Tubes Received at BPTL per week from", .),
           .cols = -c(Week, `Total Blood Tubes Received at BPTL per week`)
@@ -305,12 +302,14 @@ log_info("Generating weekly counts")
         group_by(Week) %>%
         mutate(`Total Urine Tubes Received at BPTL per week` = sum(n)) %>%
         ungroup() %>%
+        ## Also need weekly totals by site
         arrange(Site_acrnm) %>%
         pivot_wider(
           names_from  = Site_acrnm,
           values_from = n,
           values_fill = 0
         ) %>%
+        # Add Site names to those column
         rename_with(
           ~ paste("Urine Tubes Received at BPTL per week from", .),
           .cols = -c(Week, `Total Urine Tubes Received at BPTL per week`)
@@ -334,12 +333,14 @@ log_info("Generating weekly counts")
         group_by(Week) %>%
         mutate(`Total MW Tubes Received at BPTL per week (RESEARCH)` = sum(n)) %>%
         ungroup() %>%
+        ## Also need weekly totals by site
         arrange(Site_acrnm) %>%
         pivot_wider(
           names_from  = Site_acrnm,
           values_from = n,
           values_fill = 0
         ) %>%
+        # Add Site names to those column
         rename_with(
           ~ paste("MW Tubes Received at BPTL per week from", .),
           .cols = -c(Week, `Total MW Tubes Received at BPTL per week (RESEARCH)`)
@@ -373,7 +374,7 @@ log_info("Generating weekly counts")
     ) %>%
     replace_na(list('Total MW Tubes Received at BPTL per week (HOME)' = 0)) %>%
     arrange(Week)
-  
+  ### This one didn't need columns by Site
   
   
   req_kit_by_week <- week_seq %>%
@@ -390,10 +391,13 @@ log_info("Generating weekly counts")
     ) %>%
     replace_na(list('Total Home Mouthwash Request A Kit Invitations Sent per week' = 0)) %>%
     arrange(Week)
+  ### This one didn't need columns by Site
   
   
   
   ########### Combine all into one table ########### 
+  log_info("Joining the count dataframes")
+  
   weekly_counts <- week_seq %>%
     left_join(all_invited_by_week, by = "Week") %>%
     left_join(verified_by_week, by = "Week") %>%
@@ -409,6 +413,7 @@ log_info("Generating weekly counts")
   weekly_counts <- weekly_counts %>% 
     dplyr::rename(Week_Starting_Monday = Week) %>% 
     mutate(recruit_week = row_number(),
+           # Weeks are counted Monday-Sunday
            Week_Ending_Sunday = Week_Starting_Monday + days(6))
   
   
@@ -435,10 +440,20 @@ log_info("Finished the overall dataframe")
 
 log_info("Creating logs xlxs file")
 
-### ALl Sites
+
 box_dir_id = "378173022120"
-write.csv(weekly_counts[which(weekly_counts$Week_Starting_Monday < as.Date(currentDate) & weekly_counts$Week_Ending_Sunday < as.Date(currentDate)),], 
-          paste(outputpath,"CCC_biospecimens_weekly_log_", currentDate, "_boxfolder_",box_dir_id, ".csv",sep=""), na="", row.names=F)
+
+currentDate <- Sys.Date()
+
+## NOTE!! If you run this code on a day other than Monday, the criteria will cut off all the current week's data
+#### This is meant to run on Mondays and count the weekly data
+#### Weeks are Sunday-Monday. We purposely avoid midweek counts
+openxlsx::write.xlsx(weekly_counts[which(weekly_counts$Week_Starting_Monday < as.Date(currentDate) & weekly_counts$Week_Ending_Sunday < as.Date(currentDate)),],
+                     glue("CCC_biospecimens_weekly_log_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
+
+
+### If you want to review the code functionality INCLUING this week's data:
+#openxlsx::write.xlsx(weekly_counts,glue("CCC_biospecimens_weekly_log_{currentDate}_boxfolder_{boxfolder}.xlsx"),row.names = F,na="")
 
 
 log_info("Full code completed")

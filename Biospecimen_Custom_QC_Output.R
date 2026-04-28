@@ -183,7 +183,7 @@ bioqc_csv <- bioqc %>%
                                                9973370517, 9358513094, 7414720886, 4054300519, 9906761921, 7945071279, 8783197795, 1289559030, 
                                                6250053683, 3720410076, 8288718444, 5967357815, 3968179760, 2452097537, 8926083140, 1376492836, 8288718444,
                                                6554752349, 1291437931, 3508580541, 8130614446, 6966066624, 7304905537, 2321589610, 2911866308,
-                                               9272279347, 4892006412, 4753650657)), 
+                                               9272279347, 4892006412, 4753650657, 1474401708)), 
                          "Rule 2b", " "),
          # 3. (Derived) Baseline blood sample collected (BioFin_BaseBloodCol_v1r0): If all blood tubes ares not collected, this should be no
          Rule3 = ifelse(d_232343615_d_593843561==104430631 & d_299553921_d_593843561==104430631 & d_376960806_d_593843561==104430631 & 
@@ -1329,7 +1329,7 @@ c_urine3.4 <- parts_data %>%  filter(as.numeric(round(difftime(currentDate, d_17
                                                            '5367655537', "4054300519", "9906761921", "9358513094", "7945071279", "8783197795", "1289559030", "6250053683", 
                                                            "3720410076", "8288718444", "5967357815", "3968179760", "2452097537", "8926083140", "1376492836", "8288718444",
                                                            "6554752349", "1291437931", "3508580541", "8130614446", '3108798408', '6966066624', "7304905537", "2321589610", 
-                                                           "2911866308", "9272279347", "4892006412", "4753650657")))
+                                                           "2911866308", "9272279347", "4892006412", "4753650657", "1474401708")))
 
 
 ########## These rules need to allow for duplicates
@@ -1374,8 +1374,8 @@ bioqc_csv3 <- full_join(bioqc_csv2, split_setting, by = c("Connect_ID", "Collect
 bioqc_csv3$Rule48 = ifelse(bioqc_csv3$Connect_ID %in% split_setting$Connect_ID, "Rule 48", " ")
 bioqc_csv3$Rule29b = ifelse(bioqc_csv3$Connect_ID %in% c_blood3.4$Connect_ID, "Rule 29.b", " ")
 bioqc_csv3$Rule30b = ifelse(bioqc_csv3$Connect_ID %in% c_urine3.4$Connect_ID, "Rule 30.b", " ")
-bioqc_csv3$Rule30b = ifelse(bioqc_csv3$Connect_ID %in% Rsett_BioChk_TimeBL_v1r0$Connect_ID, "Rule 76", " ")
-bioqc_csv3$Rule30b = ifelse(bioqc_csv3$Connect_ID %in% BioChk_TimeBL_v1r0_RschTmBL$Connect_ID, "Rule 77", " ")
+bioqc_csv3$Rule76 = ifelse(bioqc_csv3$Connect_ID %in% Rsett_BioChk_TimeBL_v1r0$Connect_ID, "Rule 76", " ")
+bioqc_csv3$Rule77 = ifelse(bioqc_csv3$Connect_ID %in% BioChk_TimeBL_v1r0_RschTmBL$Connect_ID, "Rule 77", " ")
 
 
 
