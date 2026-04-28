@@ -441,7 +441,7 @@ log_info("Finished the overall dataframe")
 log_info("Creating logs xlxs file")
 
 
-box_dir_id = "378173022120"
+boxfolder = "378173022120"
 
 currentDate <- Sys.Date()
 
