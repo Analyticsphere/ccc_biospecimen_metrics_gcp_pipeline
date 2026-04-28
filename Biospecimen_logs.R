@@ -9,9 +9,9 @@ library(rmarkdown) ###for the output tables into other files: pdf, rtf, etc.
 library(openxlsx) # specifically for xlxs instead of csv
 library(glue) # for the current data and boxfolder to be part of the file name cleanly
 library(logger) ## allows us to add messages in logs to find out when/where code breaks are happening
-library(pak) # necessary for the dbi function in R (and GCP?) 
-pak::pak("r-dbi/bigrquery")
-pak::pak("tidyverse/dbplyr")
+#library(pak) # necessary for the dbi function in R (and GCP?) 
+#pak::pak("r-dbi/bigrquery")
+#pak::pak("tidyverse/dbplyr")
 
 bq_auth()
 2
@@ -441,7 +441,7 @@ log_info("Finished the overall dataframe")
 log_info("Creating logs xlxs file")
 
 
-box_dir_id = "378173022120"
+boxfolder = "378173022120"
 
 currentDate <- Sys.Date()
 
