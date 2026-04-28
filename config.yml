@@ -68,7 +68,7 @@ biospecimen_custom_qc:
   r_file_name: "Biospecimen_Custom_QC_Output.R"
   report_file_name: ""
   box_folders:
-    - "378173022120"
+    - "221297686961"
   gcp_info:
     cloud_scheduler: ccc-biospecimen-custom-qc
     frequency: "30 11 * * 1" # every Monday at 11:30 AM"
@@ -80,5 +80,5 @@ biospecimen_logs:
   box_folders:
     - "378173022120"
   gcp_info:
-    cloud_scheduler: ccc-biospecimen-custom-qc
+    cloud_scheduler: ccc-biospecimen_logs
     frequency: "30 10 * * 1" # every Monday at 10:30 AM"
