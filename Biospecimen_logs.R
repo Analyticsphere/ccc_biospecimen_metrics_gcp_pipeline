@@ -326,8 +326,8 @@ log_info("Generating weekly counts")
       bio_figs %>%
         filter(!is.na(d_143615646_d_926457119)) %>%
         mutate(
-          urine_date = as.Date(d_143615646_d_926457119),
-          Week = floor_date(urine_date, unit = "week", week_start = 1)
+          rsch_mw_date = as.Date(d_143615646_d_926457119),
+          Week = floor_date(rsch_mw_date, unit = "week", week_start = 1)
         ) %>%
         count(Week, Site_acrnm, name = "n") %>%
         group_by(Week) %>%
@@ -350,8 +350,7 @@ log_info("Generating weekly counts")
     replace_na(list("Total MW Tubes Received at BPTL per week (RESEARCH)" = 0)) %>%
     arrange(Week) %>% 
     # Removing Sites that no longer collect MW
-    select(-c("MW Tubes Received at BPTL per week from HFH",
-              "MW Tubes Received at BPTL per week from UC"))
+    select("MW Tubes Received at BPTL per week from UC")
   
   
   HMW_tubes_by_week <- week_seq %>%

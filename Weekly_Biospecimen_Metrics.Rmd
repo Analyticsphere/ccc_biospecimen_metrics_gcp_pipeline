@@ -953,7 +953,7 @@ BLCol_by_Race <- knitr::kable(BLCol_by_Race_df,
 
 
 
-```{r Sanford_Table_1.5, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Sanford_Table_1.5B, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 ### Separate code for Sanford clinical locations counts 
 
@@ -964,77 +964,77 @@ table1_4_locations$biocol.appoint[table1_4_locations$biocol.appoint == "Baseline
 
 ## The amount of SF clinical locations is EXTEREMELY long. Saved in a separate csv 'Sanford_Clinical_Locations.csv' and that is extracted here
 
-add_Site_location <- function(table1_4_locations, csv_file_path) {
+add_dept_name <- function(table1_4_locations, csv_file_path) {
   site_data <- read_csv(csv_file_path, locale = locale(encoding = "Latin1"), show_col_types = FALSE)
 
   # Ensure columns are character and convert/clean encoding to UTF-8
   site_data <- site_data %>%
     mutate(
-      ID = as.character(ID),
-      Site_location = iconv(as.character(Site_location), from = "Latin1", to = "UTF-8", sub = ""),
-      Region = iconv(as.character(Region), from = "Latin1", to = "UTF-8", sub = "")
+      DEPARTMENT_ID = as.character(DEPARTMENT_ID),
+      DEPARTMENT_NAME = iconv(as.character(DEPARTMENT_NAME), from = "Latin1", to = "UTF-8", sub = ""),
+      REGION = iconv(as.character(REGION), from = "Latin1", to = "UTF-8", sub = "")
     )
   
 
-  if (!all(c("ID", "Site_location", "Region") %in% colnames(site_data))) {
-    stop("The CSV file must contain 'ID', 'Site_location', and 'Region' columns.")
+  if (!all(c("DEPARTMENT_ID", "DEPARTMENT_NAME", "REGION") %in% colnames(site_data))) {
+    stop("The CSV file must contain 'DEPARTMENT_ID', 'DEPARTMENT_NAME', and 'REGION' columns.")
   }
 
    # Normalize and clean
   site_data <- site_data %>%
     mutate(
-      ID = as.character(ID) %>% trimws(),
-      Site_location = iconv(as.character(Site_location), from = "Latin1", to = "UTF-8", sub = ""),
-      Region = iconv(as.character(Region), from = "Latin1", to = "UTF-8", sub = "")
+      DEPARTMENT_ID = as.character(DEPARTMENT_ID) %>% trimws(),
+      DEPARTMENT_NAME = iconv(as.character(DEPARTMENT_NAME), from = "Latin1", to = "UTF-8", sub = ""),
+      REGION = iconv(as.character(REGION), from = "Latin1", to = "UTF-8", sub = "")
     )
 
   # Build named lookup vectors (safe and fast, avoids parse/eval and nchar on large concatenated strings)
-  loc_map <- setNames(site_data$Site_location, site_data$ID)
-  reg_map <- setNames(site_data$Region, site_data$ID)
+  loc_map <- setNames(site_data$DEPARTMENT_NAME, site_data$DEPARTMENT_ID)
+  reg_map <- setNames(site_data$REGION, site_data$DEPARTMENT_ID)
 
-  # Map IDs in the table to locations/regions. Use both blood and urine ID fields and coalesce.
+  # Map DEPARTMENT_IDs in the table to locations/regions. Use both blood and urine DEPARTMENT_ID fields and coalesce.
 
   
   table1_4_locations <- table1_4_locations %>%
     mutate(
-    #   Site_location = eval(parse(text = paste0("case_when(\n", case_when_string_location, "\n)"))),
-    #   Region = eval(parse(text = paste0("case_when(\n", case_when_string_region, "\n)")))
+    #   DEPARTMENT_NAME = eval(parse(text = paste0("case_when(\n", case_when_string_location, "\n)"))),
+    #   REGION = eval(parse(text = paste0("case_when(\n", case_when_string_region, "\n)")))
     # )
           .id_bld = as.character(d_173836415_d_266600170_d_185243482),
       .id_urn = as.character(d_173836415_d_266600170_d_452847912),
-      Site_location = dplyr::coalesce( loc_map[.id_bld], loc_map[.id_urn] ),
-      Region = dplyr::coalesce( reg_map[.id_bld], reg_map[.id_urn] )
+      DEPARTMENT_NAME = dplyr::coalesce( loc_map[.id_bld], loc_map[.id_urn] ),
+      REGION = dplyr::coalesce( reg_map[.id_bld], reg_map[.id_urn] )
     ) %>%
     select(-.id_bld, -.id_urn)
   
   return(table1_4_locations)
 }
 
-# Apply the updated function to add Site_location and Region
-table1_4_locations <- add_Site_location(table1_4_locations, "Sanford_Clincal_Locations.csv") 
+# Apply the updated function to add DEPARTMENT_NAME and Region
+table1_4_locations <- add_dept_name(table1_4_locations, "Sanford_Clincal_Locations.csv") 
 
 
 ## Some locations have two IDs from EPIC, need to be combined for tables
-table1_4_locations$Site_location[table1_4_locations$Site_location=="Sioux Falls SD 32nd & Ellis Lab Old" | table1_4_locations$Site_location=="Sioux Falls SD 32nd & Ellis Lab"]="Sioux Falls SD 32nd & Ellis Lab "
-table1_4_locations$Site_location[table1_4_locations$Site_location=="Sioux Falls SD 69th & Minnesota Lab A" | table1_4_locations$Site_location=="Sioux Falls SD 69th & Minnesota Lab B"]="Sioux Falls SD 69th & Minnesota Lab"
-table1_4_locations$Site_location[table1_4_locations$Site_location=="Sioux Falls SD 69th & Louise Lab A" | table1_4_locations$Site_location=="Sioux Falls SD 69th & Louise Lab B"]="Sioux Falls SD 69th & Louise Lab"
+table1_4_locations$DEPARTMENT_NAME[table1_4_locations$DEPARTMENT_NAME=="Sioux Falls SD 32nd & Ellis Lab Old" | table1_4_locations$DEPARTMENT_NAME=="Sioux Falls SD 32nd & Ellis Lab"]="Sioux Falls SD 32nd & Ellis Lab "
+table1_4_locations$DEPARTMENT_NAME[table1_4_locations$DEPARTMENT_NAME=="Sioux Falls SD 69th & Minnesota Lab A" | table1_4_locations$DEPARTMENT_NAME=="Sioux Falls SD 69th & Minnesota Lab B"]="Sioux Falls SD 69th & Minnesota Lab"
+table1_4_locations$DEPARTMENT_NAME[table1_4_locations$DEPARTMENT_NAME=="Sioux Falls SD 69th & Louise Lab A" | table1_4_locations$DEPARTMENT_NAME=="Sioux Falls SD 69th & Louise Lab B"]="Sioux Falls SD 69th & Louise Lab"
 
 
 
 ## Handle those with missing location IDs
-table1_4_locations$Site_location[is.na(table1_4_locations$d_173836415_d_266600170_d_185243482) &  
+table1_4_locations$DEPARTMENT_NAME[is.na(table1_4_locations$d_173836415_d_266600170_d_185243482) &  
                                    is.na(table1_4_locations$d_173836415_d_266600170_d_452847912)]="Missing Both Location IDs" #doesn't have a blood or urine location ID
 
-table1_4_locations$Site_location[is.na(table1_4_locations$Site_location) & 
+table1_4_locations$DEPARTMENT_NAME[is.na(table1_4_locations$DEPARTMENT_NAME) & 
                                    !(is.na(table1_4_locations$d_173836415_d_266600170_d_185243482) &  is.na(table1_4_locations$d_173836415_d_266600170_d_452847912))]="Unidentified SF Location" #has location ID(s) but SF hasn't told us its name yet
 
-table1_4_locations$Region[table1_4_locations$Site_location=="Missing Both Location IDs" | table1_4_locations$Site_location=="Unidentified SF Location"] = "Unknown"
+table1_4_locations$REGION[table1_4_locations$DEPARTMENT_NAME=="Missing Both Location IDs" | table1_4_locations$DEPARTMENT_NAME=="Unidentified SF Location"] = "Unknown"
 
 
 
-## Aggregate counts by Site_location and Region
+## Aggregate counts by DEPARTMENT_NAME and Region
 count_all <- table1_4_locations %>%
-  count(Region, Site_location) %>%
+  count(REGION, DEPARTMENT_NAME) %>%
   dplyr::rename(Count_Total = n)
 
 total_all <- sum(count_all$Count_Total)
@@ -1048,37 +1048,41 @@ count_all <- count_all %>%
 ### Note: If any are tied, we'll have more than 10
 
 top10 <- count_all %>%
-  group_by(Region) %>%
+  group_by(REGION) %>%
   top_n(10, Count_Total) %>%                 
-  arrange(Region, desc(Count_Total))  %>%     
+  arrange(REGION, desc(Count_Total))  %>%     
   ungroup() 
 
 
-colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "Total Percentage")
+colnames(top10) <- c("REGION", "Collection Location", "Top Collection Counts", "Total Percentage")
 
-SF_top10_collections <- top10 %>%
-  dplyr::select(-Region) %>%  
+SF_top10_collections2 <- top10 %>%
+  dplyr::select(-REGION) %>%  
    kbl(caption = "Table 1.5 Top Baseline Clinical Collection Locations at Sanford Health by Region",
        booktabs = TRUE, longtable = TRUE) %>%
   kable_styling(latex_options = "scale_down", full_width = FALSE) %>%
   row_spec(0, bold = TRUE) %>%
-  pack_rows(index = table(top10$Region))  # Group by Region for display
+  pack_rows(index = table(top10$REGION))  # Group by Region for display
 
 
-colnames(top10) <- c("Region", "Collection Location", "Top Collection Counts", "Total Percentage")
+colnames(top10) <- c("REGION", "Collection Location", "Top Collection Counts", "Total Percentage")
 
 ## Used in footnote
-SF_footnote <- count_all %>%  group_by(Region) %>%  tally(Count_Total) 
+SF_footnote <- count_all %>%  group_by(REGION) %>%  tally(Count_Total) 
 
-Bi_count <- SF_footnote$n[SF_footnote$Region=="Bismarck"]
-F_count <- SF_footnote$n[SF_footnote$Region=="Fargo"]
-S_count <- SF_footnote$n[SF_footnote$Region=="Sioux Falls"]
-Be_count <- SF_footnote$n[SF_footnote$Region=="Bemidji"]
-UK_count <- SF_footnote$n[SF_footnote$Region=="Unknown"]
+Bi_count <- SF_footnote$n[SF_footnote$REGION=="Bismarck"]
+F_count <- SF_footnote$n[SF_footnote$REGION=="Fargo"]
+S_count <- SF_footnote$n[SF_footnote$REGION=="Sioux Falls"]
+Be_count <- SF_footnote$n[SF_footnote$REGION=="Bemidji"]
+Bo_count <- SF_footnote$n[SF_footnote$REGION=="Bozeman"]
+BH_count <- SF_footnote$n[SF_footnote$REGION=="Black Hills"]
+UK_count <- SF_footnote$n[SF_footnote$REGION=="Unknown"]
 
-footnote_text <- paste0("This table reflects Clinical Collections at the top 10 collection locations in each region. ",
+footnote_text2 <- paste0("This table reflects Clinical Collections at the top 10 collection locations in each region. ",
                         "The total number of Clinical Collections in each region are as follows: Bemidji: ", Be_count,
-                        "; Bismarck: ", Bi_count, "; Fargo: ", F_count, "; Sioux Falls: ", S_count, "; Missing Location IDs: ", UK_count, ".")
+                        "; Bismarck: ", Bi_count, "; Fargo: ", F_count, "; Sioux Falls: ", S_count, 
+                         "; Black Hills: ", BH_count, "; Bozeman: ", Bo_count, 
+                        "; Missing Location IDs: ", UK_count, ".")
 
 
 
@@ -2535,12 +2539,16 @@ col_num_1.1_gt
 col_num_1.2_gt 
 ```
 
-\FloatBarrier
-```{r KnitrTables1.5, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
-add_footnote(SF_top10_collections,footnote_text, notation= "none") 
+
+\FloatBarrier
+```{r KnitrTables1.5b, eval=TRUE,echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+#Testing SF requested changes
+add_footnote(SF_top10_collections2,footnote_text2, notation= "none")
 
 ```
+
 \FloatBarrier
 ```{r KnitrTables1.7, eval=TRUE,echo=FALSE,error=FALSE, message=FALSE, warning=FALSE, results='asis'}
 biospe.bld 
@@ -4669,8 +4677,8 @@ query= "WITH address_update_flags AS (
     p.Connect_ID,
     MAX(
       CASE
-        WHEN DATE(up.ts_user_profile_updated) > DATE(p.d_173836415_d_266600170_d_319972665_d_278539982)
-         AND DATE(up.ts_user_profile_updated) < DATE(p.d_173836415_d_266600170_d_319972665_d_759651991)
+        WHEN DATE(up.d_371303487) > DATE(p.d_173836415_d_266600170_d_319972665_d_278539982)
+         AND DATE(up.d_371303487) < DATE(p.d_173836415_d_266600170_d_319972665_d_759651991)
         THEN 1 ELSE 0
       END
     ) AS has_address_update
