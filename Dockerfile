@@ -37,7 +37,7 @@ RUN apt-get update \
 
 # Install tinytex
 RUN Rscript -e 'devtools::install_version("tinytex", version="0.59", repos="https://cloud.r-project.org")' && \
-    Rscript -e 'tinytex::install_tinytex(version = "2026.04", bundle = "TinyTeX-1", repository = "https://mirror.math.princeton.edu")'
+    Rscript -e 'tinytex::install_tinytex(version = "2026.04", bundle = "TinyTeX-1", repository = "https://mirror.math.princeton.edu/pub/CTAN")'
 
 # Needed for summarytools namespace
 RUN Rscript -e 'install.packages("tcltk")'
