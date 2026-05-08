@@ -136,8 +136,8 @@ bio_figs <- bio_figs %>%
 log_info("Biospecimen Data pulled")
 
 ### Weeks in the logs are Monday-Sunday
-#------------- Create weekly date sequence from 4/20/26 on -------------------------------
-week_seq <- tibble(Week = seq(from = as.Date("2026-04-20"),
+#------------- Create weekly date sequence from 7/19/21 on -------------------------------
+week_seq <- tibble(Week = seq(from = as.Date("2021-07-19"),
                               to = floor_date(Sys.Date(), unit = "week", week_start = 1),
                               by = "week"))
 
@@ -172,8 +172,7 @@ log_info("Generating weekly counts")
       by = "Week"
     ) %>%
     replace_na(list('Total Verifications per week' = 0)) %>%
-    arrange(Week) %>% 
-    select(-"Verified per week from UC") 
+    arrange(Week)
 
   
 
@@ -211,8 +210,7 @@ log_info("Generating weekly counts")
       by = "Week"
     ) %>%
     replace_na(list(`Total Invitations per week` = 0)) %>%
-    arrange(Week) %>% 
-    select(-"Invitations per week UC") 
+    arrange(Week)  
   
   
   biospec_by_week <- week_seq %>%
@@ -240,8 +238,7 @@ log_info("Generating weekly counts")
       by = "Week"
     ) %>%
     replace_na(list('Total Collections (Research and Clinical) per week ' = 0)) %>%
-    arrange(Week) %>% 
-    select(-"Total Collections per week from UC") 
+    arrange(Week)
   
   
   blood_tubes_by_week <- week_seq %>%
@@ -286,8 +283,7 @@ log_info("Generating weekly counts")
       by = "Week"
     ) %>%
     replace_na(list("Total Blood Tubes Received at BPTL per week" = 0)) %>%
-    arrange(Week)  %>% 
-    select(-"Blood Tubes Received at BPTL per week from UC")
+    arrange(Week)  
   
   
   urine_tubes_by_week <- week_seq %>%
@@ -317,8 +313,7 @@ log_info("Generating weekly counts")
       by = "Week"
     ) %>%
     replace_na(list("Total Urine Tubes Received at BPTL per week" = 0)) %>%
-    arrange(Week) %>% 
-    select(-"Urine Tubes Received at BPTL per week from UC")
+    arrange(Week) 
   
   
   rs_mw_tubes_by_week <- week_seq %>%
@@ -348,9 +343,7 @@ log_info("Generating weekly counts")
       by = "Week"
     ) %>%
     replace_na(list("Total MW Tubes Received at BPTL per week (RESEARCH)" = 0)) %>%
-    arrange(Week) %>% 
-    # Removing Sites that no longer collect MW
-    select("MW Tubes Received at BPTL per week from UC")
+    arrange(Week) 
   
   
   HMW_tubes_by_week <- week_seq %>%
@@ -411,14 +404,14 @@ log_info("Generating weekly counts")
   
   weekly_counts <- weekly_counts %>% 
     dplyr::rename(Week_Starting_Monday = Week) %>% 
-    mutate(recruit_week = row_number(),
-           # Weeks are counted Monday-Sunday
+    mutate(# Weeks are counted Monday-Sunday
            Week_Ending_Sunday = Week_Starting_Monday + days(6))
   
   
 
   
   weekly_counts <- weekly_counts %>%
+    group_by(Week_Starting_Monday) %>% 
     mutate(`Total Tubes Received at BPTL per week` = sum(`Total Blood Tubes Received at BPTL per week`, 
                                                          `Total Urine Tubes Received at BPTL per week`, 
                                                          `Total MW Tubes Received at BPTL per week (RESEARCH)`, 
@@ -427,7 +420,7 @@ log_info("Generating weekly counts")
   ########### Reorder the columns ########### 
   
 # Need week starting, ending, invitations, verifs, R/C collections, Kit Req, Total Tubes, Blood, Urine, RMW, HMW
-  weekly_counts <- weekly_counts[1, c(1, 60, 2:32, 61, 33:58)]
+  weekly_counts <- weekly_counts[, c(1, 66, 2:35, 67, 36:65)]
   
 
 
