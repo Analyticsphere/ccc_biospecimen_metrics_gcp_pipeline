@@ -4382,7 +4382,7 @@ req_rec_inv_kable1 <- function(data, group_var, group_var_name, title) {
       Requested, " (",
       round(Requested / Invited * 100, 2), "%)"
     ),
-    # Of those who requested a kit, how many have we received
+    # Of those that were invited, how many have we received
     `MW Sample Received (of total invited)` = paste0(
       Received, " (",
       ifelse(Requested == 0, 0,
@@ -4442,17 +4442,17 @@ knitr::kable(req_kit_table2,
 
 
 
-```{r RequestKits3,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits3,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_request_table <- kit_request_table %>% 
   mutate(tm_don_inv_years = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982)),
                                         as.POSIXct(ymd_hms(d_173836415_d_266600170_d_740582332)),units="days")),
 #Specifically requested to have labels as years with these exact counts of days
-         tm_don_inv = case_when(as.numeric(tm_don_inv_years) < 730 ~ "Less than 2 years",
-                                  as.numeric(tm_don_inv_years) < 911 ~"2- <2.5 years",
-                                  as.numeric(tm_don_inv_years) < 1094 ~ "2.5- <3 years",
-                                  as.numeric(tm_don_inv_years) < 1276 ~ "3- <3.5 years",
-                                  as.numeric(tm_don_inv_years) < 1459 ~ "3.5- <4 years",
+         tm_don_inv = case_when(as.numeric(tm_don_inv_years) < 731 ~ "Less than 2 years",
+                                  as.numeric(tm_don_inv_years) < 912 ~"2- <2.5 years",
+                                  as.numeric(tm_don_inv_years) < 1095 ~ "2.5- <3 years",
+                                  as.numeric(tm_don_inv_years) < 1277 ~ "3- <3.5 years",
+                                  as.numeric(tm_don_inv_years) < 1460 ~ "3.5- <4 years",
                                   as.numeric(tm_don_inv_years) >= 1460 ~ "4 years or more",
                                   TRUE ~ "Missing Time Stamp(s)"),
          tm_don_inv = factor(tm_don_inv, levels=c("Less than 2 years","2- <2.5 years",
@@ -4468,7 +4468,7 @@ req_rec_inv_kable1(kit_request_table, tm_don_inv, "Time from Clinical Biospecime
 
 
 
-```{r RequestKits4,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits4,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_tm_don_inv <- kit_request_table %>% 
   filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991)) %>% 
@@ -4523,7 +4523,7 @@ kit_tm_don_inv <- kit_request_table %>%
 
 
 
-```{r RequestKits5,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits5,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_tm_inv_recvd <- kit_request_table %>% 
   filter(Kit_Status_int=="Received") %>% 
@@ -4569,18 +4569,18 @@ kit_tm_inv_recvd <- kit_request_table %>%
 ```
 
 
-```{r RequestKits6,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits6,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_request_table <- kit_request_table %>% 
-  mutate(last_survey = pmax(as.Date(d_784810139), #COVID completion time
-                            as.Date(d_389890053), #CSH completion time
-                            as.Date(d_843688458), #PROMIS completion time
-                            as.Date(d_543379310), #ROI completion time
-                            as.Date(d_517311251), #BOH completion time
-                            as.Date(d_832139544), #MRE completion time
-                            as.Date(d_770257102), #SAS completion time
-                            as.Date(d_264644252), #LAW completion time
-                            as.Date(d_199471989), na.rm=T), #CES completion time
+  mutate(last_survey = pmax(as.POSIXct(ymd_hms(d_784810139)), #COVID completion time
+                            as.POSIXct(ymd_hms(d_389890053)), #CSH completion time
+                            as.POSIXct(ymd_hms(d_843688458)), #PROMIS completion time
+                            as.POSIXct(ymd_hms(d_543379310)), #ROI completion time
+                            as.POSIXct(ymd_hms(d_517311251)), #BOH completion time
+                            as.POSIXct(ymd_hms(d_832139544)), #MRE completion time
+                            as.POSIXct(ymd_hms(d_770257102)), #SAS completion time
+                            as.POSIXct(ymd_hms(d_264644252)), #LAW completion time
+                            as.POSIXct(ymd_hms(d_199471989)), na.rm=T), #CES completion time
          tm_surv_daymonths = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982)),
                                           last_survey,units="days")),
          #Specifically requested to have labels as months with these exact counts of days
@@ -4609,7 +4609,7 @@ req_rec_inv_kable1(kit_request_table, tm_surv_inv, "Time from Last Survey Comple
 
 
 
-```{r RequestKits7,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits7,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 # Row order, and ensures all leves included
 kit_request_table$completion <- factor(kit_request_table$completion, 
@@ -4623,7 +4623,7 @@ req_rec_inv_kable1(kit_request_table, completion, "Completion",
 ```
 
 
-```{r RequestKits8,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits8,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 # Row order, and ensures all leves included
 kit_request_table$sex <- factor(kit_request_table$sex, 
@@ -4643,7 +4643,7 @@ req_by_sex %>%
 ```
 
 
-```{r RequestKits9,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits9,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 # Row order, and ensures all leves included
 kit_request_table$age <- factor(kit_request_table$age, 
@@ -4664,7 +4664,7 @@ req_by_age %>%
 ```
 
 \FloatBarrier
-```{r RequestKits10, echo=FALSE, message=FALSE,warning=FALSE, results='hold', include=FALSE}
+```{r RequestKits10, echo=FALSE, message=FALSE,warning=FALSE, results='hold'}
 
 
 up_hist_query <- bq_project_query(project, 
@@ -4677,8 +4677,8 @@ query= "WITH address_update_flags AS (
     p.Connect_ID,
     MAX(
       CASE
-        WHEN DATE(up.d_371303487) > DATE(p.d_173836415_d_266600170_d_319972665_d_278539982)
-         AND DATE(up.d_371303487) < DATE(p.d_173836415_d_266600170_d_319972665_d_759651991)
+        WHEN TIMESTAMP(up.d_371303487) > TIMESTAMP(p.d_173836415_d_266600170_d_319972665_d_278539982)
+         AND TIMESTAMP(up.d_371303487) < TIMESTAMP(p.d_173836415_d_266600170_d_319972665_d_759651991)
         THEN 1 ELSE 0
       END
     ) AS has_address_update
@@ -4753,9 +4753,9 @@ up_hist <- up_hist %>%
 
 \FloatBarrier
 
-```{r RequestKits11,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits11,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
-## Counts of Kits Shipped, Kits Shipped within the last 2 Weeks, and Kits Received, by Site
+## Counts of Kits Shipped, Kits Shipped at Least 2 Weeks Ago, and Kits Received, by Site
  
 req_shipped <- kit_request_table %>% filter(Kit_Status_int %in% c("Received", "Shipped"))
  
