@@ -833,7 +833,8 @@ col_num_1.2_gt <- col_num_1.2_gt %>%  summary_rows(
   groups = TRUE,
   columns = vars("Total Clinical Collections"),
   fns = (Sum = ~sum(.)),
-) %>% tab_header("Table 1.4: Baseline Clinical Biospecimen Collections by Clinic Location") 
+) %>% tab_header("Table 1.4: Baseline Clinical Biospecimen Collections by Clinic Location")  %>% 
+  tab_options(table.font.size = px(8))
 
 
 
@@ -4442,7 +4443,7 @@ knitr::kable(req_kit_table2,
 
 
 
-```{r RequestKits3,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits3,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_request_table <- kit_request_table %>% 
   mutate(tm_don_inv_years = as.numeric(difftime(as.POSIXct(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982)),
@@ -4468,7 +4469,7 @@ req_rec_inv_kable1(kit_request_table, tm_don_inv, "Time from Clinical Biospecime
 
 
 
-```{r RequestKits4,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits4,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_tm_don_inv <- kit_request_table %>% 
   filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991)) %>% 
@@ -4523,7 +4524,7 @@ kit_tm_don_inv <- kit_request_table %>%
 
 
 
-```{r RequestKits5,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits5,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_tm_inv_recvd <- kit_request_table %>% 
   filter(Kit_Status_int=="Received") %>% 
@@ -4569,7 +4570,7 @@ kit_tm_inv_recvd <- kit_request_table %>%
 ```
 
 
-```{r RequestKits6,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits6,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_request_table <- kit_request_table %>% 
   mutate(last_survey = pmax(as.POSIXct(ymd_hms(d_784810139)), #COVID completion time
@@ -4609,7 +4610,7 @@ req_rec_inv_kable1(kit_request_table, tm_surv_inv, "Time from Last Survey Comple
 
 
 
-```{r RequestKits7,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits7,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 # Row order, and ensures all leves included
 kit_request_table$completion <- factor(kit_request_table$completion, 
@@ -4623,7 +4624,7 @@ req_rec_inv_kable1(kit_request_table, completion, "Completion",
 ```
 
 
-```{r RequestKits8,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits8,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 # Row order, and ensures all leves included
 kit_request_table$sex <- factor(kit_request_table$sex, 
@@ -4643,7 +4644,7 @@ req_by_sex %>%
 ```
 
 
-```{r RequestKits9,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits9,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 # Row order, and ensures all leves included
 kit_request_table$age <- factor(kit_request_table$age, 
@@ -4664,7 +4665,7 @@ req_by_age %>%
 ```
 
 \FloatBarrier
-```{r RequestKits10, echo=FALSE, message=FALSE,warning=FALSE, results='hold', include=FALSE}
+```{r RequestKits10, echo=FALSE, message=FALSE,warning=FALSE, results='hold'}
 
 
 up_hist_query <- bq_project_query(project, 
@@ -4753,7 +4754,7 @@ up_hist <- up_hist %>%
 
 \FloatBarrier
 
-```{r RequestKits11,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits11,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 ## Counts of Kits Shipped, Kits Shipped at Least 2 Weeks Ago, and Kits Received, by Site
  
