@@ -1546,14 +1546,12 @@ boxfolder <- "382627330982"
 # -- Standalone PNG ----------------------------------------------------------
 
 ggsave(
-  filename = here::here(
-    "bsi_outputs",
-    paste0("RM3_processing_time_distribution_", download_date, ".png")
-  ),
+  filename = glue("RM3_processing_time_distribution_{download_date}_boxfolder_{boxfolder}.pdf"),
   plot = rm3_metric$plot,
   width = 12,
   height = 8,
-  dpi = 300
+  dpi = 300,
+  device = "pdf"
 )
 
 
