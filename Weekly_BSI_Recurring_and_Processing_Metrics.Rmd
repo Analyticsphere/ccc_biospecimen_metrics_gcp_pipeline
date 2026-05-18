@@ -1,0 +1,1820 @@
+---
+title: "Processing Weekly Metrics"
+author: "Michelle Hudson"
+date:  "Data Extracted and Report Ran: `r Sys.Date()`"
+header-includes:  
+    \usepackage[labelformat=empty]{caption}
+    \usepackage{placeins}
+    \usepackage{makecell}
+
+
+output:
+  pdf_document:
+    latex_engine: xelatex
+    extra_dependencies: ["float", "makecell"]
+    toc: yes
+    keep_tex: yes
+    fig_caption: true
+---
+
+```{r libraries, include=FALSE}
+# data download tools
+library(googleCloudStorageR)
+library(gargle)
+library(bigrquery)
+
+
+# cleaning, analysis, and plotting tools
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(tools)
+
+# export tools 
+library(openxlsx)
+library(glue)
+library(here)
+
+# table output tools
+library(kableExtra)
+
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r Functions, include=FALSE}
+
+# Previously bsi_recurring_functions.R
+# Contains reusable functions for BSI recurring metrics
+# ------------------------------------------------------------
+
+# ===============================
+# DATA IMPORT
+# ===============================
+
+read_bsi_gcs <- function(download_date = Sys.Date(), bucket = NULL) {
+  
+  if (!is.null(bucket)) {
+    gcs_global_bucket(bucket)
+  }
+  
+  download_date <- as.Date(download_date)
+  if (is.na(download_date)) {
+    stop("`download_date` must be coercible to Date.")
+  }
+  
+  date_folder <- format(download_date, "%Y-%m-%d")
+  prefix <- glue::glue("{date_folder}/")
+  
+  objects <- gcs_list_objects(prefix = prefix)
+  
+  if (nrow(objects) == 0) {
+    stop(glue::glue("No objects found for prefix: {prefix}"))
+  }
+  
+  csv_objects <- objects %>%
+    filter(
+      str_detect(name, regex("\\.csv$", ignore_case = TRUE))
+    )
+  
+  if (nrow(csv_objects) == 0) {
+    stop(glue::glue("No CSV files found for prefix: {prefix}"))
+  }
+  
+  data_raw <- csv_objects$name %>%
+    purrr::map_dfr(function(obj) {
+      
+      tf <- tempfile(fileext = ".csv")
+      
+      gcs_get_object(
+        object_name = obj,
+        saveToDisk  = tf,
+        overwrite   = TRUE
+      )
+      
+      readr::read_csv(tf, col_types = readr::cols(.default = "c")) %>%
+        janitor::clean_names() %>%
+        mutate(source_file = basename(obj))
+    }) %>%
+    mutate(
+      across(c(date_drawn, date_received, date_processed),
+             ~ na_if(.x, "")),
+      across(c(date_drawn, date_received, date_processed),
+             ~ stringr::str_trim(.x)),
+      date_drawn     = lubridate::mdy_hm(date_drawn),
+      date_received  = lubridate::mdy_hm(date_received),
+      date_processed = lubridate::mdy_hm(date_processed),
+      data_delivery_date = download_date
+    )
+  
+  return(data_raw)
+}
+
+
+# ===============================
+# RM 1
+# ===============================
+
+rm_1 <- function(data, label = NULL) {
+  
+  by_setting <- data %>%
+    group_by(collection_setting) %>%
+    summarise(
+      data_delivery_date = max(data_delivery_date, na.rm = TRUE),
+      start_date = min(date_received, na.rm = TRUE),
+      end_date   = max(date_received, na.rm = TRUE),
+      n_tubes = n_distinct(bsi_id),
+      n_participants = n_distinct(subject_id),
+      .groups = "drop"
+    )
+  
+  total_row <- data %>%
+    summarise(
+      data_delivery_date = max(data_delivery_date, na.rm = TRUE),
+      collection_setting = "Total",
+      start_date = min(date_received, na.rm = TRUE),
+      end_date   = max(date_received, na.rm = TRUE),
+      n_tubes = n_distinct(bsi_id),
+      n_participants = n_distinct(subject_id)
+    )
+  
+  bind_rows(by_setting, total_row) %>%
+    select(data_delivery_date,
+           collection_setting,
+           start_date,
+           end_date,
+           n_tubes,
+           n_participants) %>%
+    rename(
+      "BSI Download Date" = data_delivery_date,
+      "Collection Setting" = collection_setting,
+      "BPTL Receipt Date Range - Start" = start_date,
+      "BPTL Receipt Date Range - End" = end_date,
+      "Number of Tubes" = n_tubes,
+      "Number of Participants" = n_participants
+    )
+}
+
+# ===============================
+# RM 2
+# ===============================
+
+rm_2 <- function(data, data_bio, download_date) {
+  
+  end_thursday <- floor_date(download_date, unit = "week", week_start = 5) - days(1)
+  start_friday <- end_thursday - days(6)
+  
+  data_bio_week <- data_bio %>%
+    filter(
+      !is.na(tube_received_date_connect),
+      as.Date(tube_received_date_connect) >= start_friday,
+      as.Date(tube_received_date_connect) <= end_thursday
+    )
+  
+  missing_BSI <- anti_join(
+    data_bio_week %>% select(tube_id_connect),
+    data %>% select(bsi_id),
+    by = c("tube_id_connect" = "bsi_id")
+  )
+  
+  if (nrow(missing_BSI) == 0) {
+    return(
+      data.frame(
+        status = "All expected parent tubes received at BPTL are in BSI",
+        stringsAsFactors = FALSE
+      )
+    )
+  }
+  
+  rm2 <- data_bio %>%
+    filter(tube_id_connect %in% missing_BSI$tube_id_connect) %>%
+    select(Connect_ID, tube_id_connect, tube_received_date_connect) %>%
+    filter(
+      !is.na(tube_received_date_connect),
+      as.Date(tube_received_date_connect) < download_date
+    )
+  
+  return(rm2)
+}
+
+
+# ===============================
+# RM 3
+# ===============================
+
+
+rm_3 <- function(df) {
+
+  
+  # 1. Categorize processing time
+  df_cat <- df %>%
+    mutate(
+      processing_category = case_when(
+        is.na(days_to_process) ~ "Not processed",
+        days_to_process <= 1   ~ "<= 1 day",
+        days_to_process == 2   ~ "2 days",
+        days_to_process >= 3 & days_to_process <= 5 ~ "3–5 days",
+        days_to_process > 5    ~ "> 5 days"
+      ),
+      processing_category = factor(
+        processing_category,
+        levels = c("<= 1 day", "2 days", "3–5 days", "> 5 days", "Not processed")
+      )
+    )
+  
+  # 2. Distribution table
+  plot_data <- df_cat %>%
+    count(tube_type, processing_category, name = "n") %>%
+    complete(
+      tube_type,
+      processing_category,
+      fill = list(n = 0)
+    ) %>%
+    group_by(tube_type) %>%
+    mutate(
+      total = sum(n),
+      pct = if_else(total > 0, n / total, 0)
+    ) %>%
+    ungroup() %>%
+    group_by(tube_type) %>%
+    mutate(
+      tube_label = paste0(tube_type, " (N = ", unique(total), ")")
+    ) %>%
+    ungroup()
+  
+  # 3. Plot
+  plot <- ggplot(plot_data,
+                 aes(x = processing_category, y = n)) +
+    geom_col() +
+    geom_text(
+      aes(label = paste0(n, " (", scales::percent(pct, accuracy = 0.1), ")")),
+      vjust = -0.3,
+      size = 3
+    ) +
+    facet_wrap(~ tube_label, scales = "free_y") +
+    labs(
+      title = glue("Distribution of Time from Receipt at BPTL to Processing {start_friday} - {end_thursday}"),
+      x = "Time to Processing",
+      y = "Number of Samples",
+      caption = "Blood and urine are expected to be processed within 48 hours and mouthwash within 10 days."
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  # 4. Exceptions
+  exceptions <- df_cat %>%
+    filter(
+      (tube_type == "Mouthwash" &
+         (processing_category == "Not processed" | days_to_process > 5)) |
+        (tube_type != "Mouthwash" &
+           (processing_category == "Not processed" | days_to_process >= 3))
+    ) %>%
+    select(
+      bsi_id,
+      date_received,
+      days_to_process,
+      processing_category,
+      saturday_receipt,
+      tube_type
+    ) %>%
+    arrange(tube_type, date_received)
+  
+  # format outputs
+  df[] <- lapply(df, function(x) {
+    if (is.character(x)) {
+      gsub("[\u2010-\u2015\u2212]", "-", x, perl = TRUE)
+    } else x
+  })
+  
+  # 5. Return structured output
+  list(
+    plot = plot,
+    plot_data = plot_data,
+    exceptions = exceptions
+  )
+}
+
+
+# ===============================
+# RM 4
+# ===============================
+
+rm_4 <- function(df) {
+  
+  results <- df %>%
+    filter(!is.na(vial_warnings), vial_warnings != "") %>%
+    select(bsi_id, date_received, vial_warning = vial_warnings)
+  
+  if (nrow(results) == 0) {
+    return(
+      tibble::tibble(
+        message = "No vial warnings found."
+      )
+    )
+  }
+  
+  return(results)
+}
+
+
+# ===============================
+# RM 5
+# ===============================
+
+rm_5 <- function(df, bsi_pull_date) {
+  
+  bsi_pull_date <- as.Date(bsi_pull_date)
+  
+  bad_dates <- df %>%
+    filter(
+      is.na(date_received) |
+        is.na(date_processed) |
+        date_processed < date_received |
+        date_processed > bsi_pull_date
+    ) %>%
+    select(bsi_id, date_received, date_processed)
+  
+  if (nrow(bad_dates) == 0) {
+    return(
+      tibble::tibble(
+        message = "No incorrect processing dates were found."
+      )
+    )
+  }
+  
+  return(bad_dates)
+}
+
+
+# ===============================
+# RM 6
+# ===============================
+
+rm_6 <- function(df) {
+  
+  valid_material_types <- c("WHOLE BL", "URINE", "SALIVA")
+  
+  results <- df %>%
+    filter(is.na(material_type) |
+             !material_type %in% valid_material_types) %>%
+    select(bsi_id, material_type, additive_preservative)
+  
+  if (nrow(results) == 0) {
+    return(
+      tibble::tibble(
+        message = "No unexpected material types were found."
+      )
+    )
+  }
+  
+  return(results)
+}
+
+
+# ===============================
+# RM 7
+# ===============================
+rm_7 <- function(df) {
+  
+  df <- df %>%
+    mutate(date_received = as.Date(date_received))
+  
+  # Full sequence of dates in the data
+  all_dates <- seq(
+    min(df$date_received, na.rm = TRUE),
+    max(df$date_received, na.rm = TRUE),
+    by = "day"
+  )
+  
+  result <- df %>%
+    mutate(
+      date_label = paste0(
+        "Received on ",
+        format(date_received, "%Y-%m-%d"),
+        " (",
+        wday(date_received, label = TRUE, abbr = TRUE),
+        ")"
+      )
+    ) %>%
+    count(
+      tube_type,
+      date_label,
+      name = "n_tubes"
+    ) %>%
+    complete(
+      tube_type,
+      date_label = paste0(
+        "Received on ",
+        format(all_dates, "%Y-%m-%d"),
+        " (",
+        wday(all_dates, label = TRUE, abbr = TRUE),
+        ")"
+      ),
+      fill = list(n_tubes = 0)
+    ) %>%
+    pivot_wider(
+      names_from  = date_label,
+      values_from = n_tubes,
+      values_fill = 0
+    ) %>%
+    mutate(
+      Total = rowSums(across(where(is.numeric)))
+    ) %>%
+    arrange(
+      factor(
+        tube_type,
+        levels = c("SST", "EDTA", "Streck", "Urine", "Mouthwash")
+      )
+    )
+  
+  # ---- ADD TOTAL ROW ----
+  
+  numeric_cols <- result %>% select(where(is.numeric))
+  
+  total_row <-  result %>%
+    summarise(
+      across(where(is.numeric), \(x) sum(x, na.rm = TRUE))
+    ) %>%
+    mutate(tube_type = "Total") %>%
+    select(tube_type, everything())
+  
+  bind_rows(result, total_row)
+}
+
+
+
+# ===============================
+# RM 8
+# ===============================
+
+
+rm_8_1 <- function(df) {
+  parent_child_map <- tibble::tribble(
+    ~tube_type, ~expected_child_tube_type,
+    "SST",      "Serum",
+    "EDTA",     "EDTA plasma",
+    "EDTA",     "EDTA buffy coat/RBC",
+    "Streck",   "Streck plasma",
+    "Streck",   "Streck buffy coat/RBC",
+    "Mouthwash", "Mouthwash",
+    "Urine",     "Urine"
+  )
+  
+  parents <- df %>%
+    filter(
+      parent_tube == TRUE,
+      unprocessed == FALSE,
+      vial_status != "Discarded"
+    ) %>%
+    select(sample_id, bsi_id, tube_type) %>%
+    left_join(parent_child_map, by = "tube_type")
+  
+  child_parent_links <- df %>%
+    filter(
+      parent_tube == FALSE,
+      vial_status != "Discarded"
+    ) %>%
+    select(sample_id, tube_type) %>%
+    distinct() %>%
+    rename(child_tube_type = tube_type)
+  
+  parent_status <- parents %>%
+    left_join(
+      child_parent_links %>% mutate(has_child_vial = TRUE),
+      by = c(
+        "sample_id" = "sample_id",
+        "expected_child_tube_type" = "child_tube_type"
+      )
+    ) %>%
+    group_by(sample_id, bsi_id, tube_type) %>%
+    summarise(
+      has_child_vial = any(coalesce(has_child_vial, FALSE)),
+      .groups = "drop"
+    )
+  
+  summary_table <- parent_status %>%
+    group_by(tube_type) %>%
+    summarise(
+      parent_tube_count = n(),
+      parents_with_child_vial_count = sum(has_child_vial),
+      pct_parents_with_child_vial = 100 * mean(has_child_vial),
+      .groups = "drop"
+    ) %>%
+    arrange(desc(parent_tube_count))
+  
+  no_children_table <- parent_status %>%
+    filter(!has_child_vial) %>%
+    select(bsi_id, sample_id, tube_type) %>%
+    arrange(tube_type, bsi_id)
+  
+  list(
+    summary = summary_table,
+    no_children = no_children_table
+  )
+}
+
+  
+  
+
+rm_8_2 <- function(df) {
+  
+  category_levels <- c(
+    "Fewer than expected",
+    "Expected",
+    "Greater than expected"
+  )
+  
+  expected_counts <- bind_rows(
+    tibble(
+      collection_setting = NA_character_,
+      tube_type = c(
+        "Serum",
+        "EDTA plasma",
+        "EDTA buffy coat/RBC",
+        "Streck plasma",
+        "Streck buffy coat/RBC",
+        "Urine",
+        "Mouthwash"
+      ),
+      expected_count = c(10, 5, 3, 5, 3, 8, 2)
+    ),
+    tibble(
+      collection_setting = "Clinical",
+      tube_type = c(
+        "Serum",
+        "EDTA plasma",
+        "EDTA buffy coat/RBC",
+        "Streck plasma",
+        "Streck buffy coat/RBC",
+        "Urine",
+        "Mouthwash"
+      ),
+      expected_count = c(10, 5, 3, 5, 3, 8, 2)
+    )
+  )
+  
+  individual_vial_counts <- df %>%
+    filter(parent_tube == FALSE) %>%
+    group_by(collection_setting, sample_id, tube_type) %>%
+    summarise(
+      actual_count = n(),
+      site = first(site),
+      vial_warnings = paste(unique(na.omit(vial_warnings)), collapse = "; "),
+      .groups = "drop"
+    )
+  
+  vial_comparison <- individual_vial_counts %>%
+    left_join(
+      expected_counts %>% filter(collection_setting == "Clinical"),
+      by = c("collection_setting", "tube_type")
+    ) %>%
+    mutate(
+      expected_count = ifelse(
+        is.na(expected_count),
+        ifelse(
+          tube_type %in% c(
+            "Serum",
+            "EDTA plasma",
+            "EDTA buffy coat/RBC",
+            "Streck plasma",
+            "Streck buffy coat/RBC",
+            "Urine",
+            "Mouthwash"
+          ),
+          c(
+            "Serum" = 10,
+            "EDTA plasma" = 5,
+            "EDTA buffy coat/RBC" = 3,
+            "Streck plasma" = 5,
+            "Streck buffy coat/RBC" = 3,
+            "Urine" = 8,
+            "Mouthwash" = 2
+          )[tube_type],
+          NA_real_
+        ),
+        expected_count
+      )
+    ) %>%
+    mutate(
+      category = case_when(
+        actual_count < expected_count ~ "Fewer than expected",
+        actual_count == expected_count ~ "Expected",
+        actual_count > expected_count ~ "Greater than expected"
+      )
+    )
+  
+  collection_settings <- unique(vial_comparison$collection_setting)
+  
+  # Map collection settings to table labels
+  table_labels <- c(
+    "Research" = "2a",
+    "Clinical" = "2b",
+    "Home" = "2c"
+  )
+  
+  table_titles <- c(
+    "Research" = "Table 2a. Number (and percent) of expected child vials created (Research)",
+    "Clinical" = "Table 2b. Number (and percent) of expected child vials created (Clinical)",
+    "Home" = "Table 2c. Number (and percent) of expected child vials created (Home)"
+  )
+  
+  table_footnotes <- c(
+    "Research" = "number of expected child vials are serum (10), EDTA plasma (5), EDTA buffy coat/RBC (3), Streck plasma (5), Streck buffy coat (3), Urine (8) and Mouthwash (2)",
+    "Clinical" = "number of expected child vials are serum (10), EDTA plasma (5), EDTA buffy coat/RBC (3), Streck plasma (5), Streck buffy coat (3), Urine (8) and Mouthwash (2)",
+    "Home" = "number of expected child vials are Mouthwash (2)"
+  )
+  
+  results <- lapply(collection_settings, function(cs) {
+    table_data <- vial_comparison %>%
+      filter(collection_setting == cs) %>%
+      mutate(
+        category = factor(category, levels = category_levels)
+      ) %>%
+      group_by(tube_type, category) %>%
+      summarise(
+        n = n_distinct(sample_id),
+        .groups = "drop"
+      ) %>%
+      group_by(tube_type) %>%
+      mutate(
+        total = sum(n),
+        percent = round(100 * n / total, 1),
+        display = paste0(n, " (", percent, "%)")
+      ) %>%
+      ungroup() %>%
+      select(tube_type, category, display) %>%
+      pivot_wider(
+        names_from = category,
+        values_from = display,
+        names_expand = TRUE,
+        values_fill = ""
+      ) %>%
+      select(tube_type, all_of(category_levels))
+    
+    unexpected_tubes <- vial_comparison %>%
+      filter(category != "Expected") %>%
+      select(sample_id, site, collection_setting, tube_type, actual_count, expected_count, vial_warnings, category) %>%
+      arrange(sample_id, site, collection_setting, tube_type, actual_count, expected_count, vial_warnings, category)
+    
+    # Return list with table, title, and footnote
+    list(
+      table = table_data,
+      unexpected_tubes = unexpected_tubes,
+      title = table_titles[cs],
+      footnote = table_footnotes[cs]
+    )
+  })
+  
+  names(results) <- paste("RM8_Table2", table_labels[collection_settings], sep = "_")
+  
+  return(results)
+}
+
+
+rm_8_3 <- function(df) {
+  
+  category_levels <- c(
+    "Less than expected",
+    "Expected",
+    "More than expected"
+  )
+  
+  expected_volumes <- bind_rows(
+    tibble(
+      collection_setting = "Research",
+      tube_type = c(
+        "Serum",
+        "EDTA plasma",
+        "EDTA buffy coat/RBC",
+        "Streck plasma",
+        "Streck buffy coat/RBC",
+        "Urine",
+        "Mouthwash"
+      ),
+      expected_volume = c(6.5, 2.8, 1.5, 4.0, 1.5, 8.0, 1.6)
+    ),
+    tibble(
+      collection_setting = "Clinical",
+      tube_type = c(
+        "Serum",
+        "EDTA plasma",
+        "EDTA buffy coat/RBC",
+        "Streck plasma",
+        "Streck buffy coat/RBC",
+        "Urine",
+        "Mouthwash"
+      ),
+      expected_volume = c(6.5, 2.8, 1.5, 4.0, 1.5, 8.0, 1.6)
+    ),
+    tibble(
+      collection_setting = "Home",
+      tube_type = "Mouthwash",
+      expected_volume = 1.6
+    )
+  )
+  
+  subject_level_volumes <- df %>%
+    filter(
+      parent_tube == FALSE,
+      !is.na(volume),
+      tube_type != "DNA"
+    ) %>%
+    group_by(collection_setting, site, sample_id, tube_type) %>%
+    summarise(
+      total_volume = round(sum(volume, na.rm = TRUE), 1),
+      vial_warnings = paste(unique(na.omit(vial_warnings)), collapse = "; "),
+      .groups = "drop"
+    )
+  
+  volume_comparison <- subject_level_volumes %>%
+    left_join(expected_volumes, by = c("collection_setting", "tube_type")) %>%
+    mutate(
+      category = case_when(
+        total_volume < expected_volume - 0.01 ~ "Less than expected",
+        abs(total_volume - expected_volume) <= 0.01 ~ "Expected",
+        total_volume > expected_volume + 0.01 ~ "More than expected"
+      )
+    )
+  
+  volume_collection_settings <- unique(volume_comparison$collection_setting)
+  
+  table_labels <- c(
+    "Research" = "3a",
+    "Clinical" = "3b",
+    "Home" = "3c"
+  )
+  
+  table_titles <- c(
+    "Research" = "Table 3a. Number (and percent) of child vial volumes less than expected, expected, and more than expected by material type (Research collections)",
+    "Clinical" = "Table 3b. Number (and percent) of child vial volumes less than expected, expected, and more than expected by material type (Clinical collections)",
+    "Home" = "Table 3c. Number (and percent) of child vial volumes less than expected, expected, and more than expected by material type (Home collections)"
+  )
+  
+  table_footnotes <- c(
+    "Research" = "Expected child vial volumes are serum (6.5 ml), EDTA plasma (2.8 ml), EDTA buffy coat/RBC (1.5 ml), Streck plasma (4.0 ml), Streck buffy coat/RBC (1.5 ml), Urine (8.0 ml), and Mouthwash (1.6 ml).",
+    "Clinical" = "Expected child vial volumes are serum (6.5 ml), EDTA plasma (2.8 ml), EDTA buffy coat/RBC (1.5 ml), Streck plasma (4.0 ml), Streck buffy coat/RBC (1.5 ml), Urine (8.0 ml), and Mouthwash (1.6 ml).",
+    "Home" = "Expected child vial volume is Mouthwash (1.6 ml)."
+  )
+  
+  results <- lapply(volume_collection_settings, function(cs) {
+    cs_data <- volume_comparison %>%
+      filter(collection_setting == cs)
+    
+    table_data <- cs_data %>%
+      mutate(category = factor(category, levels = category_levels)) %>%
+      group_by(tube_type, category) %>%
+      summarise(
+        n = n_distinct(sample_id),
+        .groups = "drop"
+      ) %>%
+      group_by(tube_type) %>%
+      mutate(
+        total = sum(n),
+        percent = round(100 * n / total, 1),
+        display = paste0(n, " (", percent, "%)")
+      ) %>%
+      ungroup() %>%
+      select(tube_type, category, display) %>%
+      pivot_wider(
+        names_from = category,
+        values_from = display,
+        names_expand = TRUE,
+        values_fill = ""
+      ) %>%
+      select(tube_type, all_of(category_levels))
+    
+    unexpected_volumes <- cs_data %>%
+      filter(category != "Expected") %>%
+      select(
+        sample_id,
+        site,
+        collection_setting,
+        tube_type,
+        total_volume,
+        expected_volume,
+        vial_warnings, 
+        category
+      ) %>%
+      arrange(
+        sample_id,
+        site,
+        collection_setting,
+        tube_type,
+        total_volume,
+        expected_volume,
+        vial_warnings, 
+        category
+      )
+    
+    list(
+      table = table_data,
+      unexpected_volumes = unexpected_volumes,
+      title = table_titles[cs],
+      footnote = table_footnotes[cs]
+    )
+  })
+  
+  names(results) <- paste("RM8_Table3", table_labels[volume_collection_settings], sep = "_")
+  
+  return(results)
+}
+
+
+
+# ===============================
+# RM 9
+# ===============================
+
+rm_9 <- function(df) {
+  
+  results <- df %>%
+    filter(vial_description %in% c("Discarded", "Destroyed/Broken")) %>%
+    select(bsi_id, material_type, date_received, site, vial_description)
+  
+  if (nrow(results) == 0) {
+    return(
+      tibble::tibble(
+        message = "No discarded or broken vials were found."
+      )
+    )
+  }
+  
+  return(results)
+}
+
+
+```
+
+```{r BQ_Pull, include=FALSE}
+
+
+bq_auth()
+
+project = "nih-nci-dceg-connect-prod-6d04"
+
+# from participants
+
+query_ppts <- "
+SELECT  
+  Connect_ID, 
+  d_827220437,
+  CASE d_827220437
+    WHEN '472940358' THEN 'Baylor Scott and White'
+    WHEN '125001209' THEN 'KP Colorado'
+    WHEN '327912200' THEN 'KP Georgia'
+    WHEN '300267574' THEN 'KP Hawaii'
+    WHEN '452412599' THEN 'KP Northwest'
+    WHEN '548392715' THEN 'Henry Ford'
+    WHEN '531629870' THEN 'HealthPartners'
+    WHEN '303349821' THEN 'Marshfield'
+    WHEN '657167265' THEN 'Sanford'
+    WHEN '809703864' THEN 'UChicago'
+    ELSE NULL
+  END AS site
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants`
+WHERE Connect_ID IS NOT NULL
+"
+
+# from cancer occurrence
+
+query_cancer <- "SELECT Connect_ID, d_525972260 
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.cancerOccurrence` where Connect_ID IS NOT NULL"
+
+# from biospec -- Connect ID, collection ID, tube types, tube received dates
+
+
+# bio pull for tubes
+
+query_bio <- "
+SELECT
+  Connect_ID,
+  d_820476880 AS collection_id_connect,
+  tube.tube_id_connect,
+  tube.tube_received_date_connect,
+  tube.tube_type_connect
+
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen` b
+CROSS JOIN UNNEST([
+  STRUCT('SST1' AS tube_type_connect,
+         d_299553921_d_825582494 AS tube_id_connect,
+         d_299553921_d_926457119 AS tube_received_date_connect),
+
+  STRUCT('SST2',
+         d_703954371_d_825582494,
+         d_703954371_d_926457119),
+
+  STRUCT('SST3',
+         d_376960806_d_825582494,
+         d_376960806_d_926457119),
+
+  STRUCT('SST4',
+         d_232343615_d_825582494,
+         d_232343615_d_926457119),
+
+  STRUCT('SST5',
+         d_589588440_d_825582494,
+         d_589588440_d_926457119),
+
+  STRUCT('EDTA1',
+         d_454453939_d_825582494,
+         d_454453939_d_926457119),
+
+  STRUCT('EDTA2',
+         d_677469051_d_825582494,
+         d_677469051_d_926457119),
+
+  STRUCT('EDTA3',
+         d_683613884_d_825582494,
+         d_683613884_d_926457119),
+
+  STRUCT('ACD',
+         d_652357376_d_825582494,
+         d_652357376_d_926457119),
+
+  STRUCT('Hep1',
+         d_838567176_d_825582494,
+         d_838567176_d_926457119),
+
+  STRUCT('Hep2',
+         d_958646668_d_825582494,
+         d_958646668_d_926457119),
+
+  STRUCT('STRECK',
+         d_505347689_d_825582494,
+         d_505347689_d_926457119),
+
+  STRUCT('Urine',
+         d_973670172_d_825582494,
+         d_973670172_d_926457119),
+
+  STRUCT('Mouthwash',
+         d_143615646_d_825582494,
+         COALESCE(d_143615646_d_926457119, d_143615646_d_826941471))
+]) AS tube
+
+WHERE
+  d_820476880 IS NOT NULL
+  AND (d_410912345 ='353358909' or SUBSTR(tube.tube_id_connect, 1, 3)='CHA')
+  AND tube.tube_id_connect IS NOT NULL
+"
+
+
+# bio pull for collection setting
+
+query_coll <- "
+SELECT 
+  d_820476880 AS collection_id_connect,
+  CASE
+    WHEN d_650516960 = '534621077' THEN 'Research'
+    WHEN d_650516960 = '664882224' THEN 'Clinical'
+    ELSE 'Home'
+  END AS collection_setting
+FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.biospecimen`
+WHERE
+  d_820476880 IS NOT NULL
+  AND (
+    d_410912345 = '353358909'
+    OR STARTS_WITH(d_820476880, 'CHA')
+  )
+"
+
+  
+
+# finish pull for each table, join in R for downstream join to BSI
+
+# Participants
+q_ppts <- bq_project_query(project, query_ppts)
+data_ppts <- bq_table_download(q_ppts, bigint = "integer64")
+
+# Cancer
+q_cancer <- bq_project_query(project, query_cancer)
+data_cancer <- bq_table_download(q_cancer, bigint = "integer64")
+
+# Bio
+q_bio <- bq_project_query(project, query_bio)
+data_bio <- bq_table_download(q_bio, bigint = "integer64", page_size = NULL)
+
+# Coll
+q_coll <- bq_project_query(project, query_coll)
+data_coll <- bq_table_download(q_coll, bigint = "integer64", page_size = NULL)
+
+
+
+
+
+# GCP Authentication ---------------------------------------------
+
+# Authenticate with Google Storage, set up folders
+scope <- c("https://www.googleapis.com/auth/cloud-platform")
+token <- token_fetch(scopes = scope)
+2
+gcs_auth(token = token)
+
+
+gcs_global_bucket("bsi_tables")
+
+# buckets <- gcs_list_buckets(project)
+bucket <- "bsi_tables"
+
+
+```
+
+
+```{r Pre_BQ_Pull_Data_Clean, include=FALSE}
+
+# dedupe ppts
+
+data_ppts %>%
+  count(Connect_ID) %>%
+  filter(n > 1)
+
+
+# dedupe cancer 
+
+data_cancer_one <- data_cancer %>%
+  group_by(Connect_ID) %>%
+  summarise(
+    cancer_diag = any(!is.na(d_525972260)),
+    .groups = "drop"
+  )
+
+data_connect_persons <- data_ppts %>%
+  left_join(data_cancer_one, by = "Connect_ID")
+
+
+
+
+data_bio %>%
+  group_by(tube_type_connect) %>%
+  summarise(
+    total = n(),
+    na_received_dates = sum(is.na(tube_received_date_connect)),
+    pct_na = 100 * na_received_dates / total
+  ) %>%
+  arrange(desc(pct_na))
+
+
+# fix dates in data_bio to remove timestamp
+
+data_bio <- data_bio %>%
+  mutate(
+    tube_received_date_connect     = as.Date(tube_received_date_connect)
+  )
+
+
+```
+
+
+```{r Data_Call, include=FALSE}
+
+# Data download call function methods ----------------------------------------------------
+
+# sys date (today)
+data_raw <- read_bsi_gcs()
+
+
+# # specific date (must be a bucket folder named this)
+# data_raw <- read_bsi_gcs("2026-02-02") # the last full download before weekly
+
+# 
+data_raw <- read_bsi_gcs("2026-03-23")
+# 
+
+# # explicit bucket
+# data_raw <- read_bsi_gcs(
+#   download_date = "2026-02-06",
+#   bucket = "bsi_tables"
+# )
+
+```
+
+
+```{r Post_BQ_Pull_Data_Clean, include=FALSE}
+
+
+# for this analysis, remove timestamps, as some dates do not have them 
+data_raw <- data_raw %>%
+  mutate(
+    date_drawn     = as.Date(date_drawn),
+    date_received  = as.Date(date_received),
+    date_processed = as.Date(date_processed)
+  )
+
+ download_date <- as.Date(data_raw$data_delivery_date[1])
+
+#Manual 
+# download_date <- as.Date("01-26-2026", format = "%m-%d-%Y")
+
+
+# Define the most recent completed Friday–Thursday window
+
+end_thursday <- floor_date(download_date, unit = "week", week_start = 5) - days(1)
+start_friday <- end_thursday - days(6)
+
+
+
+# if needed
+# 
+# data_raw <- data_raw %>%
+#   filter(
+#     date_received >= start_friday,
+#     date_received <= end_thursday
+#   )
+
+data <- data_raw
+
+
+# it's parent tube if both the parent_id and source_id are blank
+
+data <- data %>%
+  mutate(
+    parent_tube = is.na(parent_id) & is.na(source_id)
+  )
+
+data <- data %>%
+  mutate(
+    tube_type = case_when(
+      sequence %in% c("1","2","11","12","21","22","31","71","81","91") ~ "SST",
+      sequence %in% c("3","13","33","63","73","83","93") ~ "Heparin",
+      sequence %in% c("4","14","24","34","64") ~ "EDTA",
+      sequence == "5" ~ "ACD",
+      sequence %in% c("6","16","26") ~ "Urine",
+      sequence == "7" ~ "Mouthwash",
+      sequence %in% c("60", "61") ~ "Streck",
+      sequence %in% c("100","101","102","103","104","105","106","107","108","109") ~ "Serum",
+      sequence %in% c("2001","2002", "2003") ~ "DNA",
+      sequence %in% c("400","401","402","403","404") ~ "EDTA plasma",
+      sequence %in% c("405","406","407") ~ "EDTA buffy coat/RBC",
+      sequence %in% c("600","601","602","603","604","605","606","607") ~ "Urine",
+      sequence %in% c("700","701") ~ "Mouthwash",
+      sequence %in% c("800","801","802","803","804") ~ "Streck plasma",
+      sequence %in% c("805","806","807") ~ "Streck buffy coat/RBC",
+      TRUE ~ "QC check"
+    )
+  )
+
+
+## Extract unexpected sequence values for QC
+sequence_QC <- data %>%
+  filter(
+    tube_type == "QC check"
+  ) %>%
+  select(subject_id, sample_id, sequence)
+
+## Remove only QC check rows where parent_tube == TRUE
+data <- data %>% 
+  filter(!(tube_type == "QC check"))
+
+ # determine vial status and update description, removed discarded from analysis
+
+data <- data %>% 
+  mutate(
+    vial_description = case_when(
+      vial_status == "Empty" ~ "Aliquoted Parent",
+      vial_status == "Reserved" ~ "Reserved Child",
+      vial_status == "In" ~ "In Child",
+      vial_status == "Discarded" ~ "Discarded",
+      vial_status == "Destroyed/Broken" ~ "Destroyed/Broken",
+      TRUE~ "QC check"
+    )
+  )
+  
+vial_status_QC <- data %>%
+  filter(
+    vial_description == "QC check") %>%
+  select(subject_id, sample_id, sequence, vial_status)
+
+
+# # check subject_ids
+
+id_violations <- data %>%
+  mutate(subject_id = as.character(subject_id)) %>%
+  filter(nchar(subject_id) != 10)
+
+
+# if date_processed is null, then the tube is unprocessed
+
+data <- data %>%
+  mutate(
+    unprocessed = is.na(date_processed)
+  )
+
+# make a container of tube types to loop over in metrics
+
+tube_types <- c("SST", "EDTA", "Heparin", "ACD", "Streck", "Urine", "Mouthwash")
+
+
+# Define tube groups for use in metrics 
+
+blood_tubes     <- c("SST", "EDTA", "Heparin", "Streck", "ACD")
+urine_tubes     <- "Urine"
+mouthwash_tubes <- "Mouthwash"
+
+
+# add a "days since receipt" variable and make volume a number
+
+data <- data %>%
+  mutate(
+    volume = as.numeric(volume),
+    days_since_receipt = as.numeric(difftime(data_delivery_date, date_received, units = "days"))
+  )
+
+
+# add variable "days_to_process" 
+
+data <- data %>%
+  mutate(days_to_process = as.numeric(difftime(date_processed, date_received, units = "days")))
+
+
+# if date_received is a Saturday, TRUE 
+
+data <- data %>%
+  mutate(saturday_receipt = wday(date_received) == 7)
+
+
+# add PARTICIPANT data from connect pull
+
+data <- data %>%
+  left_join(data_connect_persons, by = c("subject_id" = "Connect_ID"))
+
+# add COLLECTION data from connect pull
+
+data <- data %>%
+  left_join(data_coll, by = c("sample_id" = "collection_id_connect"))
+
+
+# Separate into Child and Parent code for RMs
+# remove Discarded from this and then use "data" dataframe for RM9
+
+data_no_discard <- data %>% 
+  filter(!vial_description %in% c("Discarded", "Destroyed/Broken"))
+
+data_parent <- data %>% 
+  filter(parent_tube == TRUE, 
+         !vial_description %in% c("Discarded", "Destroyed/Broken")
+  )
+
+data_child <- data %>% 
+  filter(
+    parent_tube == FALSE,
+    !vial_description %in% c("Discarded", "Destroyed/Broken")
+  )
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r NOTE1, include=FALSE}
+
+# PART 1 : WEEKLY BSI RECURRING METRICS
+
+```
+
+
+```{r RM1, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+# Date of BSI Download
+# Date range of "Date Received at BPTL"
+# Number of tubes
+# Number of individual participants
+
+rm1_metric <- rm_1(data_parent)
+
+```
+
+
+```{r RM2, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+# Provide a list of parent tubes that were received at BPTL according to the
+# Connect data System but are not in the BSI.  Ideally there are no samples on
+# this list, in which case please indicate “All expected parent tubes received
+# at BPTL are in BSI”
+
+# Connect ID | Tube ID | Date Received at BPTL
+
+# use data dataframe for this which includes discarded tubes, because they are discarded, not missing
+# rm2 function will limit to parent tubes
+
+rm2_metric <- rm_2(data, data_bio, download_date)
+
+
+```
+
+
+```{r RM3, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+# “Distribution of Date from Receipt at BPTL to Date of Processing”
+
+# Categorize the number of dates from date received at BPTL to date processed into these groups:
+# •	<=1 day
+# •	2 days
+# •	3-5 days
+# •	>5 days
+# •	Not processed 
+
+# For each parent tube type (tube_type), show a figure with these time
+# periods on the X axis and numbers on the y-axis. Display a bar chart including
+# the number and % of samples in each column.  The denominator for the %
+# calculation is the number of tubes of the parent type that were received at
+# BPTL. 
+
+# For mouthwash samples not processed or processed >5 days and for all other samples not
+# processed or processed 3+ days, show a list with this information: 
+# •	BSI ID (bsi_id)
+# •	Date received (date_received)
+# •	# days from Receipt at BPTL to day processed (days_to_process) 
+# •	Saturday receipt (yes/no) (saturday_receipt)
+
+rm3_metric <- rm_3(data_parent)
+
+
+```
+
+
+```{r RM4, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+
+# Print a list of all vial warnings including:
+# •	BSI ID
+# •	Date received at BPTL
+# •	Vial Warning (vial_warnings)
+# If no vial warnings were found, output “No vial warnings found.”
+
+rm4_metric <- rm_4(data_parent)
+
+
+
+```
+
+
+```{r RM5, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+# “Impossible or incorrect processing dates”
+
+# Print out list of impossible or incorrect processing dates.  Base this on the following criteria:
+
+# •	Processing date cannot be before the Date received at BPTL
+# •	Processing date cannot be after the date the BSI data were pulled
+
+# The list will include:
+
+# •	BSI ID
+# •	Date received at BPTL
+# •	Date processed
+
+# If no impossible or incorrect  processing dates were found, output 
+# “No incorrect processing dates were found.”
+
+
+rm5_metric <- rm_5(data_parent, bsi_pull_date = download_date)
+
+
+
+```
+
+
+```{r RM6, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+# “Unexpected Material Types”
+
+# These are the only valid material types for Parent tubes:
+# •	WHOLE BL
+# •	URINE
+# •	SALIVA
+
+# Print out list of unexpected material types including:
+# •	BSI ID (bsi_id)
+# •	Material Type (material_type)
+# •	Additive/Preservative (additive_preservative)
+
+# If no unexpected material types were found, output “No unexpected material types were found.”
+
+
+rm6_metric <- rm_6(data_parent)
+
+
+
+```
+
+
+```{r RM7, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+
+# Number of tubes received per day, by tube type 
+# Table of the number of # tubes received each day
+
+# Rows: - SST, EDTA, Streck, Urine, Mouthwash
+# Columns: Day of the week / full date - a week is Friday start - ends on Thursday
+
+rm7_metric <- rm_7(data_parent)
+
+
+
+
+```
+
+
+```{r RM8, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+# Evaluation of child vials // updated via email instruction 3/23/36
+
+# Table 1: were any child vials created from parent
+# tubes that were processed (by material type) 
+# Number and percent of parent
+# tubes with any child vials created 
+# of parent tubes with a processed date, 
+# of parent tubes with a processed date that had CV created 
+# % calculation of the two above
+
+rm8_metric_1 <- rm_8_1(data_no_discard)
+
+
+# Table 2: How many child vials were created, by material type and collection setting
+# < expected, expected, > expected
+
+
+# Table 2a number and percent of child vials created, research 
+# Table 2a
+# footnote: number of expected child vials are serum (10), EDTA plasma (5), EDTA
+# buffy coat/RBC (3), Streck plasma (5), Streck buffy coat/RBC (3), Urine (8)
+# and Mouthwash (2)
+
+
+# Serum
+# EDTA-plasma
+# EDTA-buffy coat
+# Streck - plasma
+# Streck - buffy coat
+# Urine
+# Mouthwash
+# 
+
+
+
+# Table 2b number and percent of child vials created, clinical
+# Table 2b footnote: number of expected child vials are serum (10), EDTA plasma (5), EDTA
+# buffy coat/RBC (3), Streck plasma (5), Streck buffy coat/RBC (3), Urine (8)
+# and Mouthwash (2)
+
+# Table 2c number and percent of child vials created, home
+# Table 2c footnote: number of expected child vials are Mouthwash (2)
+
+
+rm8_metric_2 <- rm_8_2(data_no_discard)
+
+
+# For any tube that does not fall in the “Expected” column, we would like a print out of:
+# Sample ID
+# Site it was collected from
+# Actual # of child vials created
+# All vial warnings entered by the site
+
+
+# Table 3: What is the total volume of material in the child vials that were created?
+# by material type, collection setting, and site
+
+
+# We have received updated volume expectations from the lab which are now the
+# same for clinical and research: Serum 6.5ml EDTA plasma 2.8 ml EDTA buffy
+# coat/RBC 1.5 ml Streck plasma 4 ml Streck buffy coat/RBC 1.5 ml Urine 8ml
+# Mouthwash 1.6 ml
+
+# Table 3a Research
+
+# Table 3b Clinical
+
+# Table 3c Home Table 3c footnote: Volume expected child vials are Mouthwash
+# (1.6ml)
+
+# Instead of showing the means & range, we think it would be more useful to make
+# this similar to table 2, where you show the number of tubes that have fewer
+# than expected, expected, and greater than expected aliquot sizes.  Then for
+# any that do not fall in the Expected category, create a similar list as above
+# of:
+# 
+# Sample ID
+# Site it was collected from
+# Actual volume of the child vial that was not expected
+# All vial warnings entered by the site
+
+
+rm8_metric_3 <- rm_8_3(data_no_discard)
+
+
+```
+
+
+```{r RM9, eval=TRUE, echo=FALSE, message=FALSE, warning = FALSE}
+
+# For any tube marked as discarded, we would want a list including: Connect ID,
+# Collection ID, material type, date received, and collection site (which of the
+# 10 partner sites)
+
+
+rm9_metric <- rm_9(data)
+
+```
+
+
+
+```{r Recurring_Metrics_Excel, echo=FALSE, message=FALSE, warning = FALSE}
+
+# Exports -----------------------------------------------------------------
+
+
+
+boxfolder <- "382627330982"
+
+# -- Standalone PNG ----------------------------------------------------------
+
+ggsave(
+  filename = here::here(
+    "bsi_outputs",
+    paste0("RM3_processing_time_distribution_", download_date, ".png")
+  ),
+  plot = rm3_metric$plot,
+  width = 12,
+  height = 8,
+  dpi = 300
+)
+
+
+# -- Standalone RM3 plot_data xlsx -------------------------------------------
+wb_rm3 <- createWorkbook()
+addWorksheet(wb_rm3, "RM3_Receipt_to_Processing_Dates")
+writeData(wb_rm3, "RM3_Receipt_to_Processing_Dates", rm3_metric$plot_data)
+
+center_style <- createStyle(halign = "center", valign = "center")
+setColWidths(wb_rm3, sheet = "RM3_Receipt_to_Processing_Dates", cols = 1:50, widths = "auto")
+addStyle(
+    wb_rm3,
+    sheet = "RM3_Receipt_to_Processing_Dates",
+    style = center_style,
+    rows = 1:500,
+    cols = 1:50,
+    gridExpand = TRUE,
+    stack = TRUE
+)
+
+saveWorkbook(
+    wb_rm3,
+    file = glue("RM3_processing_time_table_{download_date}_boxfolder_{boxfolder}.xlsx"),
+    overwrite = TRUE
+)
+
+# -- Main workbook -----------------------------------------------------------
+
+
+# Create and export workbook
+wb <- createWorkbook()
+
+addWorksheet(wb, "RM1_Data_Transfer_Summary")
+writeData(wb, "RM1_Data_Transfer_Summary", rm1_metric)
+
+addWorksheet(wb, "RM2_Parent_Tubes_Not_in_BSI")
+writeData(wb, "RM2_Parent_Tubes_Not_in_BSI", rm2_metric)
+
+addWorksheet(wb, "RM3_Exceptions")
+writeData(wb, "RM3_Exceptions", rm3_metric$exceptions)
+
+addWorksheet(wb, "RM3_Receipt_to_Processing_Dates")
+writeData(wb, "RM3_Receipt_to_Processing_Dates", rm3_metric$plot_data)
+
+addWorksheet(wb, "RM4_Vial_Warnings")
+writeData(wb, "RM4_Vial_Warnings", rm4_metric)
+
+addWorksheet(wb, "RM5_Invalid_Processing_Dates")
+writeData(wb, "RM5_Invalid_Processing_Dates", rm5_metric)
+
+addWorksheet(wb, "RM6_Unexpected_Material_Types")
+writeData(wb, "RM6_Unexpected_Material_Types", rm6_metric)
+
+addWorksheet(wb, "RM7_Daily_Tube_Counts_by_Type")
+writeData(wb, "RM7_Daily_Tube_Counts_by_Type", rm7_metric)
+
+addWorksheet(wb, "RM8_1_Parents_With_Children")
+start_row <- 1
+
+rm8_1_header <- "Table 1. Parent tubes with child vials created"
+rm8_1_footer <- "Percent is based on non-discarded, processed parent tubes."
+
+writeData(
+  wb,
+  "RM8_1_Parents_With_Children",
+  rm8_1_header,
+  startRow = start_row,
+  colNames = FALSE
+)
+writeData(
+  wb,
+  "RM8_1_Parents_With_Children",
+  rm8_metric_1$summary,
+  startRow = start_row + 1
+)
+writeData(
+  wb,
+  "RM8_1_Parents_With_Children",
+  rm8_1_footer,
+  startRow = start_row + nrow(rm8_metric_1$summary) + 3,
+  colNames = FALSE
+)
+
+
+addWorksheet(wb, "RM8_1_Missing_Child_Vials")
+writeData(wb, "RM8_1_Missing_Child_Vials", rm8_metric_1$no_children)
+
+
+addWorksheet(wb, "RM8_2_Expected_Vials")
+start_row <- 1
+
+rm8_metric_2_order <- c("RM8_Table2_2a", "RM8_Table2_2b", "RM8_Table2_2c")
+rm8_metric_2_order <- rm8_metric_2_order[rm8_metric_2_order %in% names(rm8_metric_2)]
+
+for (nm in rm8_metric_2_order) {
+  writeData(
+    wb,
+    "RM8_2_Expected_Vials",
+    rm8_metric_2[[nm]]$title,
+    startRow = start_row,
+    colNames = FALSE
+  )
+  writeData(
+    wb,
+    "RM8_2_Expected_Vials",
+    rm8_metric_2[[nm]]$table,
+    startRow = start_row + 1
+  )
+  writeData(
+    wb,
+    "RM8_2_Expected_Vials",
+    rm8_metric_2[[nm]]$footnote,
+    startRow = start_row + nrow(rm8_metric_2[[nm]]$table) + 3,
+    colNames = FALSE
+  )
+  start_row <- start_row + nrow(rm8_metric_2[[nm]]$table) + 6
+}
+
+addWorksheet(wb, "RM8_2_Unexpected_Vials")
+writeData(wb, "RM8_2_Unexpected_Vials", rm8_metric_2$RM8_Table2_2a$unexpected_tubes)
+
+addWorksheet(wb, "RM8_3_Expected_Volume")
+start_row <- 1
+rm8_metric_3_order <- c("RM8_Table3_3a", "RM8_Table3_3b", "RM8_Table3_3c")
+rm8_metric_3_order <- rm8_metric_3_order[rm8_metric_3_order %in% names(rm8_metric_3)]
+
+for (nm in rm8_metric_3_order) {
+  writeData(
+    wb,
+    "RM8_3_Expected_Volume",
+    rm8_metric_3[[nm]]$title,
+    startRow = start_row,
+    colNames = FALSE
+  )
+  writeData(
+    wb,
+    "RM8_3_Expected_Volume",
+    rm8_metric_3[[nm]]$table,
+    startRow = start_row + 1
+  )
+  writeData(
+    wb,
+    "RM8_3_Expected_Volume",
+    rm8_metric_3[[nm]]$footnote,
+    startRow = start_row + nrow(rm8_metric_3[[nm]]$table) + 3,
+    colNames = FALSE
+  )
+  start_row <- start_row + nrow(rm8_metric_3[[nm]]$table) + 6
+}
+
+addWorksheet(wb, "RM8_3_Unexpected_Volume")
+writeData(wb, "RM8_3_Unexpected_Volume", rm8_metric_3$RM8_Table3_3a$unexpected_volumes)
+
+addWorksheet(wb, "RM9_Discarded_Tubes")
+writeData(wb, "RM9_Discarded_Tubes", rm9_metric)
+
+# Apply to every sheet
+center_style <- createStyle(halign = "center", valign = "center")
+
+for (sheet in names(wb)) {
+  setColWidths(wb, sheet = sheet, cols = 1:50, widths = "auto")
+  addStyle(
+    wb,
+    sheet = sheet,
+    style = center_style,
+    rows = 1:500,
+    cols = 1:50,
+    gridExpand = TRUE,
+    stack = TRUE
+  )
+}
+
+
+saveWorkbook(wb,
+             file = glue("BSI_metrics_{download_date}_boxfolder_{boxfolder}.xlsx"),
+             overwrite = TRUE)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r NOTE2, include=FALSE}
+
+# PART 2 : WEEKLY PROCESSING METRICS
+
+```
+
+
+
+# General Information
+
+This Weekly Processing Metrics report contains tables and plots on BPTL processing and receipt on a Friday - Thursday weekly basis. 
+
+\textbf{\textcolor{blue}{Do not share any data from this report that indicate the number of individuals at any of the Connect recruitment sites with individuals outside of the Connect Study.  This includes in manuscripts, abstracts, presentations, etc.}}.
+
+\newpage
+
+# Summary Information 
+
+
+```{r Table1, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+total_row_index <- which(rm1_metric$`Collection Setting` == "Total")
+
+knitr::kable(
+  rm1_metric,
+  booktabs = TRUE,
+  caption = "Table 1: Data Transfer Summary"
+) %>%
+  column_spec(1:ncol(rm1_metric), width = "2.5cm") %>%
+  row_spec(total_row_index, bold = TRUE)
+
+
+
+```
+
+
+\newpage
+
+# Daily Tube Counts by Tube Type
+
+```{r Table2, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+
+total_row_index <- which(rm7_metric$tube_type == "Total")
+
+
+knitr::kable(
+  rm7_metric,
+  booktabs = TRUE,
+  caption = "Table 2: Daily Tube Counts by Type"
+) %>%
+  kable_styling(latex_options = c("scale_down", "HOLD_position")) %>%  
+  column_spec(1:ncol(rm7_metric), width = "1.5cm") %>%
+  row_spec(total_row_index, bold = TRUE) 
+
+
+
+
+```
+
+\newpage 
+
+# Distribution of Time from Receipt at BPTL to Processing
+
+
+```{r rm3-plot, echo=FALSE, fig.height=8, fig.width=11, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+print(rm3_metric$plot) 
+```
+
