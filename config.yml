@@ -1,6 +1,6 @@
 default:
-  report_maintainer: Kelsey Dowling
-  pipeline_maintainer: Jake Peters
+  report_maintainer: Kelsey Sanchez and Michelle Hudson
+  pipeline_maintainer: Kelsey Sanchez
   consumer: Dominique Hopkins
   bucket: ccc_weekly_metrics_report
   test_box_folders: 
@@ -16,7 +16,7 @@ weekly_biospecimen_metrics:
     - "204235111776" 
   gcp_info:
     cloud_scheduler: ccc-weekly-biospecimen-metrics
-    frequency: "0 11 * * 1" # every Monday at 11 AM"
+    frequency: "30 11 * * 1" # every Monday at 11:30 AM"
 
 weekly_biospecimen_metrics_csvs:
   r_file_name: "Weekly Biospecimen CSV Outputs.R"
@@ -25,7 +25,7 @@ weekly_biospecimen_metrics_csvs:
     - "221280601453" 
   gcp_info:
     cloud_scheduler: ccc-weekly-biospecimen-metrics-csvs
-    frequency: "15 11 * * 1" # every Monday at 11:15 AM"
+    frequency: "00 12 * * 1" # every Monday at 12 PM"
 
 biospecimen_qc_metrics:
   r_file_name: Biospe_Custom_QC_Accession_Dup.Rmd
@@ -34,7 +34,7 @@ biospecimen_qc_metrics:
     - "221297686961" 
   gcp_info:
     cloud_scheduler: ccc-biospecimen-qc-metrics
-    frequency: "30 11 * * 1" # every Monday at 11:30 AM"
+    frequency: "30 12 * * 1" # every Monday at 12:30 PM"
     
 bu_clinical_survey_stats:
   r_file_name: "BU Clinical Survey Summary Statistics.Rmd"
@@ -52,7 +52,7 @@ bum_research_survey_stats:
     - "251314285484"
   gcp_info:
     cloud_scheduler: ccc-bum-research-biospecimen-survey-stats
-    frequency: "0 12 1 * *"# first of the Month at 12 PM"
+    frequency: "30 15 1 * *"# first of the Month at 3:30 PM"
 
 covid_survey_stats:
   r_file_name: "COVID Survey Summary Statistics.Rmd"
@@ -61,7 +61,7 @@ covid_survey_stats:
     - "251314285484"
   gcp_info:
     cloud_scheduler: ccc-covid-survey-stats
-    frequency: "30 12 1 * *"# first of the Month at 12:30 PM"
+    frequency: "00 14 1 * *"# first of the Month at 2 PM"
 
 
 biospecimen_custom_qc:
@@ -71,7 +71,7 @@ biospecimen_custom_qc:
     - "221297686961"
   gcp_info:
     cloud_scheduler: ccc-biospecimen-custom-qc
-    frequency: "30 11 * * 1" # every Monday at 11:30 AM"
+    frequency: "00 13 * * 1" # every Monday at 1 PM"
     
 
 biospecimen_logs:
@@ -82,3 +82,23 @@ biospecimen_logs:
   gcp_info:
     cloud_scheduler: ccc-biospecimen_logs
     frequency: "30 10 * * 1" # every Monday at 10:30 AM"
+
+
+weekly_processing_metrics:
+  r_file_name: Weekly-Processing-Metrics.Rmd
+  report_file_name: Weekly_Processing_Metrics.pdf
+  box_folders:
+    - "382627330982" 
+  gcp_info:
+    cloud_scheduler: ccc-weekly-processing-metrics
+    frequency: "0 11 * * 1" # every Monday at 11 AM"
+    
+
+bsi_recurring_metrics:
+  r_file_name: "BSI_recurring_metrics.R"
+  report_file_name: ""
+  box_folders:
+    - "382627330982"
+  gcp_info:
+    cloud_scheduler: ccc-bsi-recurring-metrics
+    frequency: "30 13 * * 1" # every Monday at 1:30 PM"    
