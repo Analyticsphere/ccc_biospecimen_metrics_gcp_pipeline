@@ -57,7 +57,7 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
                RColorBrewer stringr janitor expss magrittr arsenal rio \
                finalfit sqldf gmodels glue webshot2 cowplot crosstable \
                magrittr gmodels magick gargle tools expss config openxlsx boxr \
-               scales rio readr reshape2 logger DBI 
+               scales rio readr reshape2 logger DBI here
               
 # These libraries might not be available from install2.R so use CRAN
 RUN R -e "install.packages(c('gt'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
@@ -84,6 +84,8 @@ COPY ["./Sanford_Clincal_Locations.csv", "./Sanford_Clincal_Locations.csv"]
 COPY ["./Weekly Biospecimen CSV Outputs.R", "./Weekly Biospecimen CSV Outputs.R"]
 COPY ["./Biospecimen_Custom_QC_Output.R", "./Biospecimen_Custom_QC_Output.R"]
 COPY ["./Biospecimen_logs.R", "./Biospecimen_logs.R"]
+COPY ["./Weekly-Processing-Metrics.Rmd", "./Weekly-Processing-Metrics.Rmd"]
+COPY ["./BSI_recurring_metrics.R", "./BSI_recurring_metrics.R"]
 COPY ["./config.yml", "./config.yml"]
 
 # Run R code
