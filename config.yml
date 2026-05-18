@@ -98,7 +98,7 @@ bsi_recurring_metrics:
   r_file_name: "BSI_recurring_metrics.R"
   report_file_name: ""
   box_folders:
-    - "378173022120"
+    - "382627330982"
   gcp_info:
     cloud_scheduler: ccc-bsi-recurring-metrics
     frequency: "30 13 * * 1" # every Monday at 1:30 PM"    
