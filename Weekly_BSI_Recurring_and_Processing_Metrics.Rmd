@@ -126,7 +126,7 @@ rm_1 <- function(data, label = NULL) {
   
   by_setting <- data %>%
     group_by(collection_setting) %>%
-    summarise(
+    dplyr::summarise(
       data_delivery_date = max(data_delivery_date, na.rm = TRUE),
       start_date = min(date_received, na.rm = TRUE),
       end_date   = max(date_received, na.rm = TRUE),
@@ -136,7 +136,7 @@ rm_1 <- function(data, label = NULL) {
     )
   
   total_row <- data %>%
-    summarise(
+    dplyr::summarise(
       data_delivery_date = max(data_delivery_date, na.rm = TRUE),
       collection_setting = "Total",
       start_date = min(date_received, na.rm = TRUE),
@@ -152,7 +152,7 @@ rm_1 <- function(data, label = NULL) {
            end_date,
            n_tubes,
            n_participants) %>%
-    rename(
+    dplyr::rename(
       "BSI Download Date" = data_delivery_date,
       "Collection Setting" = collection_setting,
       "BPTL Receipt Date Range - Start" = start_date,
@@ -439,7 +439,7 @@ rm_7 <- function(df) {
   numeric_cols <- result %>% select(where(is.numeric))
   
   total_row <-  result %>%
-    summarise(
+    dplyr::summarise(
       across(where(is.numeric), \(x) sum(x, na.rm = TRUE))
     ) %>%
     mutate(tube_type = "Total") %>%
@@ -483,7 +483,7 @@ rm_8_1 <- function(df) {
     ) %>%
     select(sample_id, tube_type) %>%
     distinct() %>%
-    rename(child_tube_type = tube_type)
+    dplyr::rename(child_tube_type = tube_type)
   
   parent_status <- parents %>%
     left_join(
@@ -494,14 +494,14 @@ rm_8_1 <- function(df) {
       )
     ) %>%
     group_by(sample_id, bsi_id, tube_type) %>%
-    summarise(
+    dplyr::summarise(
       has_child_vial = any(coalesce(has_child_vial, FALSE)),
       .groups = "drop"
     )
   
   summary_table <- parent_status %>%
     group_by(tube_type) %>%
-    summarise(
+    dplyr::summarise(
       parent_tube_count = n(),
       parents_with_child_vial_count = sum(has_child_vial),
       pct_parents_with_child_vial = 100 * mean(has_child_vial),
@@ -563,7 +563,7 @@ rm_8_2 <- function(df) {
   individual_vial_counts <- df %>%
     filter(parent_tube == FALSE) %>%
     group_by(collection_setting, sample_id, tube_type) %>%
-    summarise(
+    dplyr::summarise(
       actual_count = n(),
       site = first(site),
       vial_warnings = paste(unique(na.omit(vial_warnings)), collapse = "; "),
@@ -638,7 +638,7 @@ rm_8_2 <- function(df) {
         category = factor(category, levels = category_levels)
       ) %>%
       group_by(tube_type, category) %>%
-      summarise(
+      dplyr::summarise(
         n = n_distinct(sample_id),
         .groups = "drop"
       ) %>%
@@ -727,7 +727,7 @@ rm_8_3 <- function(df) {
       tube_type != "DNA"
     ) %>%
     group_by(collection_setting, site, sample_id, tube_type) %>%
-    summarise(
+    dplyr::summarise(
       total_volume = round(sum(volume, na.rm = TRUE), 1),
       vial_warnings = paste(unique(na.omit(vial_warnings)), collapse = "; "),
       .groups = "drop"
@@ -770,7 +770,7 @@ rm_8_3 <- function(df) {
     table_data <- cs_data %>%
       mutate(category = factor(category, levels = category_levels)) %>%
       group_by(tube_type, category) %>%
-      summarise(
+      dplyr::summarise(
         n = n_distinct(sample_id),
         .groups = "drop"
       ) %>%
@@ -1040,7 +1040,7 @@ data_ppts %>%
 
 data_cancer_one <- data_cancer %>%
   group_by(Connect_ID) %>%
-  summarise(
+  dplyr::summarise(
     cancer_diag = any(!is.na(d_525972260)),
     .groups = "drop"
   )
@@ -1053,7 +1053,7 @@ data_connect_persons <- data_ppts %>%
 
 data_bio %>%
   group_by(tube_type_connect) %>%
-  summarise(
+  dplyr::summarise(
     total = n(),
     na_received_dates = sum(is.na(tube_received_date_connect)),
     pct_na = 100 * na_received_dates / total
@@ -1074,18 +1074,28 @@ data_bio <- data_bio %>%
 
 ```{r Data_Call, include=FALSE}
 
-# Data download call function methods ----------------------------------------------------
+# Data download call function methods ------------------------------------------
+
+# Data uploaded on Mondays of each weeek 
+monday_this_week <- floor_date(Sys.Date(), unit = "week", week_start = 1)
+
+data_raw <- read_bsi_gcs(monday_this_week)
+
+
+
+
+
+
+
+# Other options ---------------------------------------------------------------
 
 # sys date (today)
-data_raw <- read_bsi_gcs()
+#data_raw <- read_bsi_gcs()
 
 
 # # specific date (must be a bucket folder named this)
 # data_raw <- read_bsi_gcs("2026-02-02") # the last full download before weekly
-
-# 
-data_raw <- read_bsi_gcs("2026-03-23")
-# 
+ 
 
 # # explicit bucket
 # data_raw <- read_bsi_gcs(
