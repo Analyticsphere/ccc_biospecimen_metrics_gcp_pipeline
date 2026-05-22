@@ -1566,6 +1566,7 @@ ggsave(
 
 
 # -- Standalone RM3 plot_data xlsx -------------------------------------------
+
 # wb_rm3 <- createWorkbook()
 # addWorksheet(wb_rm3, "RM3_Receipt_to_Processing_Dates")
 # writeData(wb_rm3, "RM3_Receipt_to_Processing_Dates", rm3_metric$plot_data)
@@ -1610,7 +1611,6 @@ saveWorkbook(
     file = glue("BSI_QC_{download_date}_boxfolder_{boxfolder}.xlsx"),
     overwrite = TRUE
 )
-
 
 
 # -- Main workbook -----------------------------------------------------------
