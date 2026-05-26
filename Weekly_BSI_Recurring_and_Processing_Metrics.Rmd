@@ -1566,27 +1566,52 @@ ggsave(
 
 
 # -- Standalone RM3 plot_data xlsx -------------------------------------------
-wb_rm3 <- createWorkbook()
-addWorksheet(wb_rm3, "RM3_Receipt_to_Processing_Dates")
-writeData(wb_rm3, "RM3_Receipt_to_Processing_Dates", rm3_metric$plot_data)
+
+# wb_rm3 <- createWorkbook()
+# addWorksheet(wb_rm3, "RM3_Receipt_to_Processing_Dates")
+# writeData(wb_rm3, "RM3_Receipt_to_Processing_Dates", rm3_metric$plot_data)
+# 
+# center_style <- createStyle(halign = "center", valign = "center")
+# setColWidths(wb_rm3, sheet = "RM3_Receipt_to_Processing_Dates", cols = 1:50, widths = "auto")
+# addStyle(
+#     wb_rm3,
+#     sheet = "RM3_Receipt_to_Processing_Dates",
+#     style = center_style,
+#     rows = 1:500,
+#     cols = 1:50,
+#     gridExpand = TRUE,
+#     stack = TRUE
+# )
+# 
+# saveWorkbook(
+#     wb_rm3,
+#     file = glue("RM3_processing_time_table_{download_date}_boxfolder_{boxfolder}.xlsx"),
+#     overwrite = TRUE
+# )
+
+
+# -- QC output xlsx -------------------------------------------
+wb_qc <- createWorkbook()
+
+
+addWorksheet(wb_qc, "ID_violations")
+writeData(wb_qc, "ID_violations", id_violations)
+
+addWorksheet(wb_qc, "Sequence_QC")
+writeData(wb_qc, "Sequence_QC", sequence_QC)
+
+
+addWorksheet(wb_qc, "Vial_Status_QC")
+writeData(wb_qc, "Vial_Status_QC", vial_status_QC)
 
 center_style <- createStyle(halign = "center", valign = "center")
-setColWidths(wb_rm3, sheet = "RM3_Receipt_to_Processing_Dates", cols = 1:50, widths = "auto")
-addStyle(
-    wb_rm3,
-    sheet = "RM3_Receipt_to_Processing_Dates",
-    style = center_style,
-    rows = 1:500,
-    cols = 1:50,
-    gridExpand = TRUE,
-    stack = TRUE
-)
 
 saveWorkbook(
-    wb_rm3,
-    file = glue("RM3_processing_time_table_{download_date}_boxfolder_{boxfolder}.xlsx"),
+    wb_qc,
+    file = glue("BSI_QC_{download_date}_boxfolder_{boxfolder}.xlsx"),
     overwrite = TRUE
 )
+
 
 # -- Main workbook -----------------------------------------------------------
 
