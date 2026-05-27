@@ -73,7 +73,6 @@ library(rio)
 library(scales) #for commas in the thousands place to be applied automatically
 
 currentDate <- Sys.Date()
-currentDate <- as.Date(currentDate)
 
 bq_auth()
 
@@ -2505,7 +2504,7 @@ Table_bld_draw= table1 %>%  filter(grepl("^Kaiser", Site)) %>% ## excluding hybr
 ## Days since Verif for those with No Biospecimen Collection
 
 ver_date_diff <-table1  %>% filter(biocol.appoint=="No Baseline Collection")  %>% 
-  mutate(day_past = difftime(currentDate, d_914594314, units="days"),
+  mutate(day_past = difftime(currentDate, as.Date(d_914594314), units="days"),
          coll_days_diff = case_when(as.numeric(day_past)<30 ~ "< 30 Days",
                                     as.numeric(day_past)<60 ~ "30 to <60 Days",
                                     as.numeric(day_past)<90 ~ "60 to <90 Days",
@@ -3530,19 +3529,29 @@ kitstatus <- "SELECT Connect_ID,
     END AS completion,
 
 
-d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_319972665_d_826941471,
-d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_759651991,
+DATE(d_173836415_d_266600170_d_319972665_d_661940160) as d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, 
+DATE(d_173836415_d_266600170_d_319972665_d_826941471) as d_173836415_d_266600170_d_319972665_d_826941471,
+d_173836415_d_266600170_d_319972665_d_379252329, 
+DATE(d_173836415_d_266600170_d_319972665_d_759651991) as d_173836415_d_266600170_d_319972665_d_759651991,
 
-d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_541483796_d_826941471, d_173836415_d_266600170_d_541483796_d_379252329,
+DATE(d_173836415_d_266600170_d_541483796_d_661940160) as d_173836415_d_266600170_d_541483796_d_661940160, 
+DATE(d_173836415_d_266600170_d_541483796_d_759651991) as d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, 
+DATE(d_173836415_d_266600170_d_541483796_d_826941471) as d_173836415_d_266600170_d_541483796_d_826941471, d_173836415_d_266600170_d_541483796_d_379252329,
 
-d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_173836415_d_266600170_d_641006239_d_379252329, 
+DATE(d_173836415_d_266600170_d_641006239_d_661940160) as d_173836415_d_266600170_d_641006239_d_661940160, 
+DATE(d_173836415_d_266600170_d_641006239_d_759651991) as d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, 
+DATE(d_173836415_d_266600170_d_641006239_d_826941471) as d_173836415_d_266600170_d_641006239_d_826941471, d_173836415_d_266600170_d_641006239_d_379252329, 
 
-d_784810139, d_389890053, d_843688458, d_543379310, d_100767870, 
-d_517311251, d_832139544, d_770257102, d_264644252, d_199471989,
+DATE(d_784810139) as d_784810139, DATE(d_389890053) as d_389890053, DATE(d_843688458) as d_843688458, DATE(d_543379310) as d_543379310, d_100767870, 
+DATE(d_517311251) as d_517311251, DATE(d_832139544) as d_832139544, DATE(d_770257102) as d_770257102, DATE(d_264644252) as d_264644252, DATE(d_199471989) as d_199471989,
 
-d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991,
-d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_278539982,
-d_173836415_d_266600170_d_740582332
+d_265193023, d_547363263, 
+DATE(d_173836415_d_266600170_d_448660695) as d_173836415_d_266600170_d_448660695, 
+DATE(d_195145666) as d_195145666, 
+d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991,
+d_173836415_d_266600170_d_319972665_d_221592017, 
+DATE(d_173836415_d_266600170_d_319972665_d_278539982) as d_173836415_d_266600170_d_319972665_d_278539982,
+DATE(d_173836415_d_266600170_d_740582332) as d_173836415_d_266600170_d_740582332
 -- d_569151507_d_371303487
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
 where Connect_ID is not null and 
@@ -3687,7 +3696,7 @@ summary_table2_all<- filtered_data %>%
   group_by(Site) %>%
   summarise(Shipped = sum(Kit_Status_int %in% c("Received", "Shipped")), #kits received were once shipped
             Shipped_TwoWeeks = sum(Kit_Status_int %in% c("Received", "Shipped") &
-                                    d_173836415_d_266600170_d_319972665_d_661940160 < currentDate-14),
+                                    d_173836415_d_266600170_d_319972665_d_661940160 < (currentDate-14)),
             Received = sum(Kit_Status_int == "Received")) 
  
  
@@ -3767,7 +3776,9 @@ test30 <- kit_table %>%
   filter(Kit_Status_int=="Received" & !is.na(d_173836415_d_266600170_d_319972665_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
  
 test30 <-  test30 %>%
-  mutate(ctime = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_826941471,d_173836415_d_266600170_d_319972665_d_661940160,units="days"))) %>% 
+  mutate(ctime = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_826941471,
+                                     d_173836415_d_266600170_d_319972665_d_661940160,
+                                     units="days"))) %>% 
   filter(ctime>0)
  
 Table7.4 = test30 %>% group_by(Site) %>%
@@ -3808,7 +3819,8 @@ test31 <- first_col_time %>%
  
 test31 <-  test31 %>%
   mutate(ctime = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_661940160,
-                                     d_556788178,units="days")))
+                                     as.Date(d_556788178),
+                                     units="days")))
 test31b <-  test31 %>%  filter(ctime>0)
  
  
@@ -3989,7 +4001,7 @@ MW_Coll_Kits <- ggplot(fig5_week_final, aes(x = col.Monday.date)) +
  
 ################# Received
 kit_set_col_2 <- kit_table %>% filter(Kit_Status_int=="Received") %>% 
-  mutate(col.Monday.date = floor_date(as.Date(d_173836415_d_266600170_d_319972665_d_826941471), unit = "week", week_start = 1))
+  mutate(col.Monday.date = floor_date(d_173836415_d_266600170_d_319972665_d_826941471, unit = "week", week_start = 1))
 
  
 fig5_new_2 <- kit_set_col_2 %>%
@@ -4010,7 +4022,7 @@ fig5_week_total_2 <- left_join(all_mondays, fig5_week_total_2, by = "col.Monday.
  
 ############### Shipped
 kit_table2 <- kit_table %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)) %>% 
-  mutate(col.Monday.date = floor_date(as.Date(d_173836415_d_266600170_d_319972665_d_661940160), unit = "week", week_start = 1))
+  mutate(col.Monday.date = floor_date(d_173836415_d_266600170_d_319972665_d_661940160, unit = "week", week_start = 1))
 
  
  
@@ -4291,7 +4303,8 @@ add_footnote(tbl_7_10, "Note: In cases where the collection card is not returned
 
 
 survey_cc_int <- kit_table %>%  
-  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & d_195145666 > as.Date("2025-05-01") & d_547363263 == '231311385') %>% 
+  filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & 
+           d_195145666 > as.Date("2025-05-01") & d_547363263 == '231311385') %>% 
   mutate(ctime = round(as.numeric(difftime(d_195145666,
                                            d_173836415_d_266600170_d_448660695,units="days")), 
                        digits=0),
@@ -4753,7 +4766,7 @@ summary_req_ship<- req_shipped %>%
   group_by(Site) %>%
   summarise(Shipped = sum(Kit_Status_int %in% c("Received", "Shipped")), #kits received were once shipped
             Shipped_TwoWeeks = sum(Kit_Status_int %in% c("Received", "Shipped") &
-                                    d_173836415_d_266600170_d_319972665_d_661940160 < currentDate-14),
+                                    d_173836415_d_266600170_d_319972665_d_661940160 < (currentDate-14)),
             Received = sum(Kit_Status_int == "Received")) 
  
  

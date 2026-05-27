@@ -82,34 +82,13 @@ biospecimen_logs:
   gcp_info:
     cloud_scheduler: ccc-biospecimen_logs
     frequency: "30 10 * * 1" # every Monday at 10:30 AM"
-
-
-weekly_processing_metrics:
-  r_file_name: Weekly-Processing-Metrics.Rmd
-  report_file_name: Weekly_Processing_Metrics.pdf
-  box_folders:
-    - "382627330982" 
-  gcp_info:
-    cloud_scheduler: ccc-weekly-processing-metrics
-    frequency: "0 11 * * 1" # every Monday at 11 AM"
-    
-
-bsi_recurring_metrics:
-  r_file_name: "BSI_recurring_metrics.R"
-  report_file_name: ""
-  box_folders:
-    - "382627330982"
-  gcp_info:
-    cloud_scheduler: ccc-bsi-recurring-metrics
-    frequency: "30 13 * * 1" # every Monday at 1:30 PM"    
-    
     
 
 weekly_recurring_processing_metrics:
   r_file_name: Weekly_BSI_Recurring_and_Processing_Metrics.Rmd
   report_file_name: Weekly_Processing_Metrics.pdf
   box_folders:
-    - "382627330982" 
+    - "384799242931" 
   gcp_info:
     cloud_scheduler: ccc-weekly-recurring-processing-metrics
     frequency: "0 11 * * 1" # every Monday at 11 AM"
