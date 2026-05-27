@@ -1079,7 +1079,20 @@ data_bio <- data_bio %>%
 # Data uploaded on Mondays of each weeek 
 monday_this_week <- floor_date(Sys.Date(), unit = "week", week_start = 1)
 
-data_raw <- read_bsi_gcs(monday_this_week)
+## In case of Monday holidays or other delays
+data_raw <- tryCatch(
+  {
+    read_bsi_gcs(monday_this_week)
+  },
+  error = function(e) {
+    if (grepl("No objects found", conditionMessage(e))) {
+      message("No objects found for this Monday; using today's date instead")
+      read_bsi_gcs("2026-05-26")
+    } else {
+      stop(e)  # Re-throw if it's a different error
+    }
+  }
+)
 
 
 
@@ -1545,13 +1558,13 @@ rm9_metric <- rm_9(data)
 
 
 
-```{r Recurring_Metrics_Excel, echo=FALSE, message=FALSE, warning = FALSE}
+```{r Recurring_Metrics_Excel, echo=FALSE, message=FALSE, warning = FALSE, include=FALSE}
 
 # Exports -----------------------------------------------------------------
 
 
 
-boxfolder <- "382627330982"
+boxfolder <- "384801995902"
 
 # -- Standalone PNG ----------------------------------------------------------
 
@@ -1564,30 +1577,6 @@ ggsave(
   device = "pdf"
 )
 
-
-# -- Standalone RM3 plot_data xlsx -------------------------------------------
-
-# wb_rm3 <- createWorkbook()
-# addWorksheet(wb_rm3, "RM3_Receipt_to_Processing_Dates")
-# writeData(wb_rm3, "RM3_Receipt_to_Processing_Dates", rm3_metric$plot_data)
-# 
-# center_style <- createStyle(halign = "center", valign = "center")
-# setColWidths(wb_rm3, sheet = "RM3_Receipt_to_Processing_Dates", cols = 1:50, widths = "auto")
-# addStyle(
-#     wb_rm3,
-#     sheet = "RM3_Receipt_to_Processing_Dates",
-#     style = center_style,
-#     rows = 1:500,
-#     cols = 1:50,
-#     gridExpand = TRUE,
-#     stack = TRUE
-# )
-# 
-# saveWorkbook(
-#     wb_rm3,
-#     file = glue("RM3_processing_time_table_{download_date}_boxfolder_{boxfolder}.xlsx"),
-#     overwrite = TRUE
-# )
 
 
 # -- QC output xlsx -------------------------------------------
@@ -1628,8 +1617,19 @@ writeData(wb, "RM2_Parent_Tubes_Not_in_BSI", rm2_metric)
 addWorksheet(wb, "RM3_Exceptions")
 writeData(wb, "RM3_Exceptions", rm3_metric$exceptions)
 
+
+### Issues pasting the png depending on the openxlsx package version
+# Save the plot to a temp PNG file
+tmp <- tempfile(fileext = ".png")
+ggsave(tmp, plot = rm3_metric$plot, width = 12, height = 7, dpi = 300)
+# Insert the image into the worksheet
 addWorksheet(wb, "RM3_Receipt_to_Processing_Dates")
-writeData(wb, "RM3_Receipt_to_Processing_Dates", rm3_metric$plot_data)
+insertImage(wb, "RM3_Receipt_to_Processing_Dates",
+            file = tmp,
+            width = 12, height = 7, units = "in",
+            startRow = 2, startCol = 2)  # slight offset from edge
+
+
 
 addWorksheet(wb, "RM4_Vial_Warnings")
 writeData(wb, "RM4_Vial_Warnings", rm4_metric)
