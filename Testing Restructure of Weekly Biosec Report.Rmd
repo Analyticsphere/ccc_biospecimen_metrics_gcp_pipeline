@@ -1838,7 +1838,7 @@ coll_bptl_diff <- biospe__all %>%
   mutate(any_collection = min(d_143615646_d_926457119, d_232343615_d_926457119, d_299553921_d_926457119, d_376960806_d_926457119, d_454453939_d_926457119, 
                               d_505347689_d_926457119, d_589588440_d_926457119, d_652357376_d_926457119, d_677469051_d_926457119, d_683613884_d_926457119, 
                               d_703954371_d_926457119, d_838567176_d_926457119, d_958646668_d_926457119, d_973670172_d_926457119,  na.rm=T),
-         day_past = difftime(as.Date(any_collection), as.Date(d_678166505), units="days"),
+         day_past = difftime(any_collection, d_678166505, units="days"),
          coll_days_diff = ifelse(as.numeric(day_past)<2,"1 Day",
                                  ifelse(as.numeric(day_past)<3,"2 Days",
                                         ifelse(as.numeric(day_past)<4,"3 Days", 

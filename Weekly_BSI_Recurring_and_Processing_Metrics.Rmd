@@ -1579,6 +1579,29 @@ ggsave(
 
 
 
+# -- QC output xlsx -------------------------------------------
+wb_qc <- createWorkbook()
+
+
+addWorksheet(wb_qc, "ID_violations")
+writeData(wb_qc, "ID_violations", id_violations)
+
+addWorksheet(wb_qc, "Sequence_QC")
+writeData(wb_qc, "Sequence_QC", sequence_QC)
+
+
+addWorksheet(wb_qc, "Vial_Status_QC")
+writeData(wb_qc, "Vial_Status_QC", vial_status_QC)
+
+center_style <- createStyle(halign = "center", valign = "center")
+
+saveWorkbook(
+    wb_qc,
+    file = glue("BSI_QC_{download_date}_boxfolder_{boxfolder}.xlsx"),
+    overwrite = TRUE
+)
+
+
 # -- Main workbook -----------------------------------------------------------
 
 
