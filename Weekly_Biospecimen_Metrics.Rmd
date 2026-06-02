@@ -291,40 +291,6 @@ cross_table_df <- as.data.frame(cross__table)[-1, ]
 
 
 
-# Function to add total row, total column, and calculate row/column percentages
-add_totals_and_percentages <- function(df, total_position = c("row", "col", "both"), 
-                                       percentage_type = c("row", "col")) {
-  
-  # Ensure the 'total_position' and 'percentage_type' are valid options
-  total_position <- match.arg(total_position)
-  percentage_type <- match.arg(percentage_type)
-  
-  # Add totals (row, column, or both)
-  if (total_position == "row" || total_position == "both") {
-    df <- df %>%
-      adorn_totals("row")  # Add total row
-  }
-  
-  if (total_position == "col" || total_position == "both") {
-    df <- df %>%
-      adorn_totals("col")  # Add total column
-  }
-  
-  # Save counts separately to combine with percentages
-  counts <- df
-  
-  # Calculate percentages (row or column)
-  df <- df %>%
-    adorn_percentages(percentage_type) %>%
-    adorn_pct_formatting(digits = 1)
-  
-  # Combine counts and percentages in the desired format: "count (percentage)"
-  df <- counts %>%
-    mutate(across(-1, ~ paste0(comma(.x), " (", df[[cur_column()]], ")")))
-  
-  return(df)
-}
-
 
 
 #add one decimal place, even .0 for whole numbers
@@ -4810,18 +4776,20 @@ knitr::kable(req_shipped_total,
 
 
 
-```{r RequestKits12,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits12,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 
 # Counts
 req_rec_lags <- kit_request_table %>%
   mutate(
     # Kit requested at least 2 weeks ago
-    Requested_2Weeks = as.numeric(difftime(currentDate, d_173836415_d_266600170_d_319972665_d_759651991, units = "days")) >= 14,
+    # Recommended
+    Requested_2Weeks = as.Date(d_173836415_d_266600170_d_319972665_d_759651991) <= (currentDate - 14),
     #All Received
     Received = Kit_Status_int == "Received",
     # Invited at least 3 weeks ago
-    Invited_3Weeks = as.numeric(difftime(currentDate, d_173836415_d_266600170_d_319972665_d_278539982, units = "days")) >= 21) %>%
+    Invited_3Weeks = as.Date(d_173836415_d_266600170_d_319972665_d_278539982) <= (currentDate - 21)) %>%
+  
   summarise(Requested_2Weeks = sum(Requested_2Weeks, na.rm = TRUE),
             Received         = sum(Received, na.rm = TRUE),
             Invited_3Weeks   = sum(Invited_3Weeks, na.rm = TRUE))
@@ -4842,7 +4810,7 @@ req_rec_lags <- req_rec_lags %>%
 knitr::kable(req_rec_lags,
              format.args = list(big.mark = ","),
              col.names=c("MW Kits Requested as of 2 Weeks Ago", "MW Samples Received to Date (of total invited as of 3 weeks ago)", "Total Participants Invited to Request a Kit as of 3 Weeks Ago"),
-             caption='8.12: Baseline- Home Mouthwash Kits Requested Among Participants Invited to Request a Kit (with time lags)',
+             caption='Table 8.12: Baseline- Home Mouthwash Kits Requested Among Participants Invited to Request a Kit (with time lags)',
              row.names=FALSE, align=c("l", rep("c", 2)),
              digits=1, booktabs = TRUE) %>% 
   column_spec(c(1:3), width = "5cm")  %>%  # make column 2's long title wrap into 2 lines
