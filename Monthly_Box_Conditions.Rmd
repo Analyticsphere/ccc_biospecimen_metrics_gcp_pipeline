@@ -1,0 +1,98 @@
+---
+title: "Monthly Box Conditions"
+author: "Kelsey Sanchez"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+
+
+```{r libraries, include=FALSE}
+
+library(bigrquery)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(gtsummary)
+library(scales)
+
+```
+
+
+```{r Setup, include=FALSE}
+project <- "nih-nci-dceg-connect-prod-6d04"
+
+box_cond_bq <- "SELECT d_959708259, 
+d_238268405_d_679749262, d_238268405_d_922995819, d_238268405_d_847410060, 
+d_238268405_d_595987358, d_238268405_d_387564837, d_238268405_d_399948893, 
+d_238268405_d_958000780, d_238268405_d_678483571, d_238268405_d_933646000
+--d_238268405_d_631290535
+FROM`nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes`
+where d_959708259 is not null"
+
+box_cond_table <- bq_project_query(project, box_cond_bq)
+box_conditions <- bq_table_download(box_cond_table, bigint="integer64",n_max = Inf, page_size = 10000)
+
+```
+
+
+```{r Counts, include=FALSE}
+
+
+box_conditions_counts <- box_conditions %>% 
+  dplyr::rename(c('Package in Good Condition' = d_238268405_d_679749262, 
+                  'Manifest/Paperwork/Vial info do not match' = d_238268405_d_922995819, 
+                  'Improper Packaging' = d_238268405_d_847410060, 
+                  'Cold Packs - Warm' = d_238268405_d_595987358, 
+                  'Damaged Vials' = d_238268405_d_387564837, 
+                  'No Connect Label on Vials' = d_238268405_d_399948893, 
+                  'Shipment Delay' = d_238268405_d_958000780, 
+                  'Damaged Container' = d_238268405_d_678483571, 
+                  'Other' = d_238268405_d_933646000)) %>% 
+  pivot_longer(cols = c('Package in Good Condition', 'Manifest/Paperwork/Vial info do not match',
+                        'Improper Packaging', 'Cold Packs - Warm', 'Damaged Vials', 
+                        'No Connect Label on Vials', 'Shipment Delay', 'Damaged Container',
+                        'Other'),
+               names_to = "Condition", values_to = "Flag") %>%
+  filter(Flag == 1) %>% 
+  mutate(Condition = factor(Condition, 
+                            levels = c('Package in Good Condition', 'Manifest/Paperwork/Vial info do not match',
+                                       'Improper Packaging', 'Cold Packs - Warm', 'Damaged Vials', 
+                                       'No Connect Label on Vials', 'Shipment Delay', 'Damaged Container',
+                                       'Other'))) %>% 
+  select(Condition, d_959708259) %>% 
+  distinct(d_959708259, Condition) %>%
+  group_by(Condition) %>% 
+  tally() %>% 
+  mutate(P = round(n/sum(n)*100, 2))
+  
+
+cond_total <- box_conditions_counts %>% 
+  dplyr::summarise(Condition="Total",
+                   n = sum(n),
+                   P=sum(P))
+
+box_conditions_counts <- bind_rows(box_conditions_counts, cond_total)
+
+box_conditions_counts <- box_conditions_counts %>% 
+  mutate( 'N (%)' = paste0(scales::comma(n), " (", P, "%)")) %>% 
+  select('Condition', 'N (%)')
+
+```
+
+
+```{r Output, echo=FALSE, warning=FALSE, message=FALSE}
+
+knitr::kable(box_conditions_counts, 
+             caption=' Baseline- Package Conditions Reported for Site Shipments', 
+             row.names=FALSE,align=c("l", "c"), booktabs = TRUE) %>%  
+  add_indent(seq(1, nrow(box_conditions_counts) - 1)) %>% 
+  kable_styling(latex_options = "scale_down") %>% 
+  footnote(general = "Note: The number of package conditions recorded may exceed the number of packages received from sites, as more than one condition may be selected.", 
+           general_title = "",
+           footnote_as_chunk = TRUE, 
+           escape = FALSE, 
+           threeparttable = TRUE)
+
+```
+

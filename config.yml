@@ -90,5 +90,16 @@ weekly_recurring_processing_metrics:
   box_folders:
     - "204235111776" 
   gcp_info:
-    cloud_scheduler: ccc-weekly-recurring-processing-metrics
+    cloud_scheduler: ccc-bsi-recurring-processing-metrics
     frequency: "0 11 * * 1" # every Monday at 11 AM"
+
+
+box_conditions:
+  r_file_name: "Monthly_Box_Conditions.Rmd"
+  report_file_name: Monthly_Box_Conditions.pdf
+  box_folders:
+    - "251314285484"
+  gcp_info:
+    cloud_scheduler: ccc-covid-survey-stats
+    frequency: "30 15 1 * *"# first of the Month at 3:30 PM"
+    
