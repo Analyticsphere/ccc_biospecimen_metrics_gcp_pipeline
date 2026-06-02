@@ -88,7 +88,7 @@ weekly_recurring_processing_metrics:
   r_file_name: Weekly_BSI_Recurring_and_Processing_Metrics.Rmd
   report_file_name: Weekly_Processing_Metrics.pdf
   box_folders:
-    - "384799242931" 
+    - "204235111776" 
   gcp_info:
     cloud_scheduler: ccc-weekly-recurring-processing-metrics
     frequency: "0 11 * * 1" # every Monday at 11 AM"

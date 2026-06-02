@@ -1087,7 +1087,7 @@ data_raw <- tryCatch(
   error = function(e) {
     if (grepl("No objects found", conditionMessage(e))) {
       message("No objects found for this Monday; using today's date instead")
-      read_bsi_gcs("2026-05-26")
+      read_bsi_gcs()
     } else {
       stop(e)  # Re-throw if it's a different error
     }
@@ -1564,7 +1564,7 @@ rm9_metric <- rm_9(data)
 
 
 
-boxfolder <- "384801995902"
+boxfolder <- "364418428018"
 
 # -- Standalone PNG ----------------------------------------------------------
 
