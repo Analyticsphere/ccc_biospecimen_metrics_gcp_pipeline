@@ -2063,7 +2063,7 @@ issue212 <- HMW %>%
 
 
 colnames(issue212) <- c("Site", "Connect ID", "BioFin_BMTimeBL"	,"BioKit_KitShipTm",	"BioKit_KitRecdTm")
-knitr::kable(issue212, longtable = TRUE) %>% add_footnote("Excludes those where BioFin_BMTimeBL_v1r0 is in the same month OR the month on either side of BioKit_KitShipTm_v1r0 or BioKit_KitRecdTm_v1r0", notation= "none")
+knitr::kable(issue212, longtable = TRUE, font_size=7) %>% add_footnote("Excludes those where BioFin_BMTimeBL_v1r0 is in the same month OR the month on either side of BioKit_KitShipTm_v1r0 or BioKit_KitRecdTm_v1r0", notation= "none")
 
 ```
 
@@ -2446,7 +2446,7 @@ knitr::kable(DrawOrder_Verif4, longtable = TRUE)  %>% kable_styling(latex_option
 
 ```
 
-###	80. Clinical collection date (<173836415.266600170.982213346>BioClin_ClinBloodTmBL_v1r0 or 173836415.266600170.139245758>BioClin_ClinicalUrnTmBL_v1r0) should not precede draw order date (<184451682>BioClin_BldUrnPlcdTmBL_v1r0 ) by more than 2 days.
+###	80. Clinical collection date (BioClin_ClinBloodTmBL_v1r0 or BioClin_ClinicalUrnTmBL_v1r0) should not precede draw order date (BioClin_BldUrnPlcdTmBL_v1r0) by more than 2 days.
 ```{r DrawOrder_Colct2, echo=FALSE, warning=FALSE, message=FALSE}
 
 
