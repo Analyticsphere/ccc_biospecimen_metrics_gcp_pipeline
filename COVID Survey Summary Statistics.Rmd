@@ -462,11 +462,20 @@ create_kable_table_w_footnote <- function(df, group_by_vriable, Title){
 
 #Histogram Function --- can't get them to work
 hist_funct <- function(CID,Title, Xlab, Ylab) {
+  
   CID_SYM <- rlang::ensym(CID)
-  CVD_tib %>% dplyr::mutate(!!CID_SYM:=as.numeric(!!CID_SYM)) %>%
-    filter(!is.na(!!CID_SYM)) %>% ggplot(aes(x=!!CID_SYM))+
-     xlab(Xlab) + ylab(Ylab) + geom_histogram()+  ggtitle(Title)+
-    geom_histogram(color="black")+ scale_y_continuous(breaks=pretty_breaks()) +
+  
+  CVD_tib %>% 
+    dplyr::mutate(!!CID_SYM:=as.numeric(!!CID_SYM),
+                  Perc.99 = quantile(!!CID_SYM, 0.99, na.rm=T)) %>%
+    filter(!is.na(!!CID_SYM) & 
+             !!CID_SYM < Perc.99 & 
+             !!CID_SYM >=0) %>% 
+    ggplot(aes(x=!!CID_SYM))+
+     xlab(Xlab) + ylab(Ylab) + 
+    ggtitle(Title)+
+    geom_histogram(color="black")+ 
+    scale_y_continuous(breaks=pretty_breaks()) +
     geom_vline(aes(xintercept=mean(!!CID_SYM, na.rm=T)), colour="#2973A5" , linetype="solid")
   
 }
@@ -1424,12 +1433,9 @@ two_skip_funct(D_749956170_D_463689026 , "Length of Time Experiencing Muscle Ach
 ```{r vaccine, warning=FALSE, echo=FALSE,  message=FALSE}
 #COV25    
 #Include both versions from earlier surveys
-#CVD_tib <- CVD_tib %>% mutate(D_890156588_V2 = ifelse(!is.na(D_890156588_V2), D_890156588_V2, D_890156588))
-
-   COV25 <- CVD_tib  %>%  filter(d_822499427>as.Date("2022-12-1")) %>% 
-  select(Connect_ID, D_890156588_V2) 
+CVD_tib <- CVD_tib %>% mutate(D_890156588_V2= ifelse(is.na(D_890156588_V2), D_890156588, D_890156588_V2))
    
-create_kable_table(COV25, D_890156588_V2, "Received COVID-19 Vaccination test 1") 
+create_kable_table(CVD_tib,D_890156588_V2, "Received COVID-19 Vaccination test 1") 
 
    
 

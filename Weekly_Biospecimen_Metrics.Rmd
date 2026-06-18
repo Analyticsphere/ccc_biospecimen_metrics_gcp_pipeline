@@ -291,40 +291,6 @@ cross_table_df <- as.data.frame(cross__table)[-1, ]
 
 
 
-# Function to add total row, total column, and calculate row/column percentages
-add_totals_and_percentages <- function(df, total_position = c("row", "col", "both"), 
-                                       percentage_type = c("row", "col")) {
-  
-  # Ensure the 'total_position' and 'percentage_type' are valid options
-  total_position <- match.arg(total_position)
-  percentage_type <- match.arg(percentage_type)
-  
-  # Add totals (row, column, or both)
-  if (total_position == "row" || total_position == "both") {
-    df <- df %>%
-      adorn_totals("row")  # Add total row
-  }
-  
-  if (total_position == "col" || total_position == "both") {
-    df <- df %>%
-      adorn_totals("col")  # Add total column
-  }
-  
-  # Save counts separately to combine with percentages
-  counts <- df
-  
-  # Calculate percentages (row or column)
-  df <- df %>%
-    adorn_percentages(percentage_type) %>%
-    adorn_pct_formatting(digits = 1)
-  
-  # Combine counts and percentages in the desired format: "count (percentage)"
-  df <- counts %>%
-    mutate(across(-1, ~ paste0(comma(.x), " (", df[[cur_column()]], ")")))
-  
-  return(df)
-}
-
 
 
 #add one decimal place, even .0 for whole numbers
@@ -428,6 +394,9 @@ no_dups <- no_dups %>%
       d_951355211 == 749199085 ~ "Temple Westfield",
       d_951355211 == 471260082 ~ "Waco Fishpond",
       d_951355211 == 603989030	~ "Killeen Main",
+      d_951355211 == 528017143	~ "Southwest Family Medicine",
+      d_951355211 == 253098609	~ "Grapevine",
+      d_951355211 == 864987193	~ "Plano Heart",
       #SF
       d_951355211 == 769594361 ~ "Fargo Amber Valley",
       d_951355211 == 589224449 ~ "Sioux Falls Imagenetics",
@@ -678,17 +647,22 @@ rownames(col_num_1.1) <- col_num_1.1$`Collection Location`
 
 col_num_1.1 <- col_num_1.1 %>%
   mutate(Site_Group = case_when(
-    `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
+    `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", 
+                                 "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
     `Collection Location` %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
-    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", "Colby Abbotsford", "Merrill",
-                                 "Stevens Point", "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
-    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University","Edith Sanford Breast Center (coded as Sanford Center)", 
-                                  "Edith Sanford Breast Center","Fargo Amber Valley","Bemidji Clinic","Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
-                                 "HFH Detroit Northwest","In-home Collection", "HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
-    `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth",
-                                 "North Garland", "Temple CDM", "Temple Roney", "Waco - MacArthur","Temple Westfield",
-                                 "Waco Fishpond","Killeen Main",
+    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", 
+                                 "Colby Abbotsford", "Merrill", "Stevens Point", "Neillsville", 
+                                 "Missing MF location") ~ "Marshfield Clinic Health System",
+    `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University",
+                                 "Edith Sanford Breast Center (coded as Sanford Center)", 
+                                  "Edith Sanford Breast Center","Fargo Amber Valley","Bemidji Clinic",
+                                 "Missing SF location") ~ "Sanford Health",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", 
+                                 "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "HFH Jackson",
+                                 "Missing HFH location") ~ "Henry Ford Health",
+    `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository",
+                                 "BCC- Fort Worth", "North Garland", "Temple CDM", "Temple Roney", "Waco - MacArthur","Temple Westfield",
+                                 "Waco Fishpond","Killeen Main","Southwest Family Medicine","Grapevine","Plano Heart",
                                  "Missing BSWH location") ~ "Baylor Scott and White Health",
     TRUE ~ "Other"
   ))
@@ -1799,16 +1773,19 @@ coll_bptl_diff <- biospe__all %>%
                                 levels=c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving",
                                          "Irving", "NTX Biorepository","BCC- Fort Worth","North Garland", "Temple CDM",
                                          "Temple Roney", "Waco - MacArthur","Temple Westfield","Waco Fishpond","Killeen Main",
-                                         "Missing BSWH location",
+                                         "Southwest Family Medicine","Grapevine","Plano Heart","Missing BSWH location",
                                          "HP Research Clinic", "HP Park Nicollet", "Missing HP location",
                                          "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
-                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "HFH Jackson","Missing HFH location",
+                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", 
+                                         "HFH Jackson","Missing HFH location",
                                          "Neillsville", "Missing MF location",
                                          "Marshfield", "MF Pop-Up","Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
                                          "Colby Abbotsford","Minocqua","Merrill","Stevens Point",
-                                         "Sioux Falls Imagenetics","Fargo South University","Edith Sanford Breast Center (coded as Sanford Center)", 
+                                         "Sioux Falls Imagenetics","Fargo South University",
+                                         "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley", "Bemidji Clinic",
-                                         "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park", "Missing UC location")),
+                                         "Ingalls Harvey", "River East","South Loop","UCM Pop-Up","UC-DCAM","Orland Park", 
+                                  "Missing UC location")),
          Site = factor(Site, levels=c("Baylor Scott and White Health","HealthPartners","Henry Ford Health",
                                       "Marshfield Clinic Health System","Sanford Health","University of Chicago Medicine")))  %>% 
   group_by(as.character(Connect_ID),Site, Site_location) %>% 
@@ -1859,13 +1836,15 @@ ctable_rsch_loc_bptl <- rsch_loc_coll_bptl %>%
     Collection_Location %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", 
                                  "Colby Abbotsford", "Merrill", "Stevens Point",
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
-    Collection_Location %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)", 
-                                  "Edith Sanford Breast Center","Fargo Amber Valley","Bemidji Clinic","Missing SF location") ~ "Sanford Health",
-    Collection_Location %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
-                                 "HFH Detroit Northwest", "In-home Collection","HFH Jackson","Missing HFH location") ~ "Henry Ford Health",
-    Collection_Location %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository","BCC- Fort Worth", 
-                                 "North Garland", "Temple CDM","Temple Roney", "Waco - MacArthur", "Temple Westfield",
-                               "Waco Fishpond","Killeen Main",
+    Collection_Location %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)",
+                                  "Edith Sanford Breast Center","Fargo Amber Valley","Bemidji Clinic",
+                               "Missing SF location") ~ "Sanford Health",
+    Collection_Location %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", 
+                               "HFH Pop-Up", "HFH Detroit Northwest", "In-home Collection","HFH Jackson",
+                               "Missing HFH location") ~ "Henry Ford Health",
+    Collection_Location %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository",
+                               "BCC- Fort Worth", "North Garland", "Temple CDM","Temple Roney", "Waco - MacArthur", "Temple Westfield",
+                               "Waco Fishpond","Killeen Main","Southwest Family Medicine","Grapevine","Plano Heart",
                                "Missing BSWH location") ~ "Baylor Scott and White Health",
     Collection_Location %in% c("Unidentified location") ~ "Other",
     TRUE ~ " "
@@ -3298,7 +3277,8 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
   } else if(site == "HealthPartners" && settings=="Clinical"){
       
     plt <- ggplot(weekly_counts, aes(x = as.Date(col.Monday.date), y = n, color = .data[[color_var]])) +
-      scale_color_manual(values=c("NSC"="#99C0C4", "Elk River"="#565C65", "Chanhassen"="#CC7D15", "Park Nicollet Minneapolis Clinic"="#FDBE19",
+      scale_color_manual(values=c("NSC"="#99C0C4", "Elk River"="#565C65", "Chanhassen"="#CC7D15", 
+                                  "Park Nicollet Minneapolis Clinic"="#FDBE19",
                                 "Brooklyn Center"="#3C989E", "Clinic Stillwater"="#2973A5", "New Richmond Clinic"="#E7CCAD",
                                 "Burnsville Clinic and Specialty Center"= "#797D83", "St. Paul Clinic- Wabasha"="#164C71", 
                                 "NSC"="#309EBD", "Andover Clinic"="#B1C7D9", "Olivia Hospital and Clinic"="#FBE5B5",
@@ -3313,7 +3293,8 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
                                 "BCC- Plano"="#FBE5B5","BCC- Irving"="#E7CCAD","Irving"="#309EBD",
                                 "North Garland"="#CC7D15", "Temple CDM"="#BBBEC1", "Temple Roney"="#2973A5",
                                 "Waco - MacArthur"="#99C0C4", "Temple Westfield"="#B9D7E3",
-                                "Waco Fishpond"="#A8B7C5","Killeen Main"= "#797D83"),
+                                "Waco Fishpond"="#A8B7C5","Killeen Main"= "#797D83",
+                                "Southwest Family Medicine"="#648EB4","Grapevine"="#51708A","Plano Heart"="#F6CC6C"),
                          guide = guide_legend(nrow = 4, byrow = TRUE)) +
     labs(color = "Collection Location") +
   theme(
@@ -4810,18 +4791,20 @@ knitr::kable(req_shipped_total,
 
 
 
-```{r RequestKits12,echo=FALSE, message=FALSE,warning=FALSE,results='hold', include=FALSE}
+```{r RequestKits12,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 
 # Counts
 req_rec_lags <- kit_request_table %>%
   mutate(
     # Kit requested at least 2 weeks ago
-    Requested_2Weeks = as.numeric(difftime(currentDate, d_173836415_d_266600170_d_319972665_d_759651991, units = "days")) >= 14,
+    # Recommended
+    Requested_2Weeks = as.Date(d_173836415_d_266600170_d_319972665_d_759651991) <= (currentDate - 14),
     #All Received
     Received = Kit_Status_int == "Received",
     # Invited at least 3 weeks ago
-    Invited_3Weeks = as.numeric(difftime(currentDate, d_173836415_d_266600170_d_319972665_d_278539982, units = "days")) >= 21) %>%
+    Invited_3Weeks = as.Date(d_173836415_d_266600170_d_319972665_d_278539982) <= (currentDate - 21)) %>%
+  
   summarise(Requested_2Weeks = sum(Requested_2Weeks, na.rm = TRUE),
             Received         = sum(Received, na.rm = TRUE),
             Invited_3Weeks   = sum(Invited_3Weeks, na.rm = TRUE))
@@ -4842,7 +4825,7 @@ req_rec_lags <- req_rec_lags %>%
 knitr::kable(req_rec_lags,
              format.args = list(big.mark = ","),
              col.names=c("MW Kits Requested as of 2 Weeks Ago", "MW Samples Received to Date (of total invited as of 3 weeks ago)", "Total Participants Invited to Request a Kit as of 3 Weeks Ago"),
-             caption='8.12: Baseline- Home Mouthwash Kits Requested Among Participants Invited to Request a Kit (with time lags)',
+             caption='Table 8.12: Baseline- Home Mouthwash Kits Requested Among Participants Invited to Request a Kit (with time lags)',
              row.names=FALSE, align=c("l", rep("c", 2)),
              digits=1, booktabs = TRUE) %>% 
   column_spec(c(1:3), width = "5cm")  %>%  # make column 2's long title wrap into 2 lines

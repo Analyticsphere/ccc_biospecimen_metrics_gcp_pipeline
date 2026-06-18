@@ -41,12 +41,14 @@ log_info("Finished setting up DBI connection")
 log_info("Starting DBI connection pull from the participants table for the logs")
 
 logs_figs <- tbl(con,"participants") %>% 
-  # Data destruction allowed (which would remove the active or passive flag)
-  filter(d_831041022 == '353358909' | 
-           # If they don't have data destroyed, they cannot be non-active
-           (d_512820379 != '180583933' & 
-              # Either passive OR active but not an active duplicate; passive duplicates are acceptable
-              (d_512820379 != '486306141' | d_821247024 != '922622075'))) %>% 
+  # No 'Non-Active' Recruit Status
+  filter(d_512820379 != '180583933' & 
+           # No data destruction requests
+           d_831041022=='104430631' & 
+           # Site cannot be null
+           !is.na(d_827220437) & 
+           # No duplicates
+           d_821247024 !='922622075') %>%
   mutate(Site = case_when(d_827220437=='472940358' ~ "BSWH",
                           d_827220437=='125001209' ~ "KPCO",
                           d_827220437=='327912200' ~ "KPGA",
