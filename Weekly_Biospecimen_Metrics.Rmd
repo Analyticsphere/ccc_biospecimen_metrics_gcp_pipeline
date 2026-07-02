@@ -1,4 +1,3 @@
-
 ---
 title: "Biospecimen Weekly Metrics RMD"
 author: "Kelsey Sanchez"
@@ -132,13 +131,19 @@ recrvar.bio <- recrvar_nd_label[which(recrvar_nd_label$Primary.Source =="Biospec
 query <- unique(recrvar.bio$column_name)
 select <- paste(recrvar.bio$column_name,collapse=",")
 
-tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT token,Connect_ID,d_512820379,d_821247024,d_914594314,d_827220437,d_699625233, d_265193023, d_822499427, 
-                               d_222161762, state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, state_d_119643471, state_d_253532712, state_d_435027713,
-                               state_d_706256705, d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, 
-                               d_949302066, d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_641006239_d_221592017,
-                               d_173836415_d_266600170_d_915179629,",
+tb_bq <- eval(parse(text=paste("bq_project_query(project, query=\"SELECT
+token,Connect_ID,d_512820379,d_821247024, d_827220437,d_699625233, d_265193023, 
+DATE(d_914594314) as d_914594314, d_949302066, 
+-- datetime for these two still comes back as characters
+d_822499427, d_222161762, 
+state_d_667474224, state_d_934298480, state_d_684926335, state_d_849518448, 
+state_d_119643471, state_d_253532712, state_d_435027713,state_d_706256705, 
+d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491,
+d_173836415_d_266600170_d_319972665_d_221592017,
+d_173836415_d_266600170_d_541483796_d_221592017, d_173836415_d_266600170_d_641006239_d_221592017,",
                                select,
-                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` Where Connect_ID is not null and d_821247024 = '197316935' and 
+                               "FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
+                               Where Connect_ID is not null and d_821247024 = '197316935' and 
                                d_831041022 = '104430631'\")",
                                sep=" ")))
 #removed "date", as it is no longer in the participants table
@@ -328,6 +333,39 @@ summarize_time <- function(data, group_var, n_label, time_var,
 }
 
 
+## Reused summarize function, optional additions
+summarize_time <- function(data, group_var, n_label, time_var,
+                           std_dv  = FALSE,
+                           perc_80 = FALSE,
+                           perc_90 = FALSE,
+                           perc_95 = FALSE,
+                           perc_98 = FALSE,
+                           digits  = 1) {
+  data %>%
+    group_by({{ group_var }}) %>%
+    dplyr::summarize(
+      !!n_label := n(),
+      Min    = round(min({{ time_var }}, na.rm = TRUE), digits),
+      Q1     = round(quantile({{ time_var }}, 0.25, na.rm = TRUE), digits),
+      Median = round(median({{ time_var }}, na.rm = TRUE), digits),
+      Mean   = round(mean({{ time_var }}, na.rm = TRUE), digits),
+      .SD    = if (std_dv)  round(sd({{ time_var }}, na.rm = TRUE), digits)               else NULL,
+      Q3     = round(quantile({{ time_var }}, 0.75, na.rm = TRUE), digits),
+      .P80   = if (perc_80) round(quantile({{ time_var }}, 0.80, na.rm = TRUE), digits)   else NULL,
+      .P90   = if (perc_90) round(quantile({{ time_var }}, 0.90, na.rm = TRUE), digits)   else NULL,
+      .P95   = if (perc_95) round(quantile({{ time_var }}, 0.95, na.rm = TRUE), digits)   else NULL,
+      .P98   = if (perc_98) round(quantile({{ time_var }}, 0.98, na.rm = TRUE), digits)   else NULL,
+      Max    = round(max({{ time_var }}, na.rm = TRUE), digits),
+      .groups = "drop"
+    ) %>%
+    rename(any_of(c(
+      "SD"      = ".SD",
+      "Perc.80" = ".P80",
+      "Perc.90" = ".P90",
+      "Perc.95" = ".P95",
+      "Perc.98" = ".P98"
+    )))
+}
 
 
 #add one decimal place, even .0 for whole numbers
@@ -605,6 +643,32 @@ biocol.tb <- left_join(recrver1, no_dups, by=c("Connect_ID", "Site"))
 ```
 
 
+```{r Date_Conversions, include=FALSE}
+
+### This prevents the need from running as.Date() or ymd_hms() throughout the report for all diff_time()'s--------------------
+
+
+tube_time_cols <- names(biocol.tb)[grepl("d_926457119", names(biocol.tb))]
+
+biocol.tb <- biocol.tb %>%
+    mutate(across(all_of(tube_time_cols), ymd_hms),
+           d_556788178 = ymd_hms(d_556788178),
+           d_678166505 = ymd_hms(d_678166505),
+           d_822499427 = ymd_hms(d_822499427),
+           d_222161762 = ymd_hms(d_222161762),
+           d_764863765 = ymd_hms(d_764863765),
+           d_534669573 = ymd_hms(d_534669573),
+           d_915838974 = ymd_hms(d_915838974),
+           d_331584571_d_266600170_d_840048338 = ymd_hms(d_331584571_d_266600170_d_840048338),
+           d_331584571_d_266600170_d_343048998 = ymd_hms(d_331584571_d_266600170_d_343048998), 
+           d_173836415_d_266600170_d_139245758 = ymd_hms(d_173836415_d_266600170_d_139245758),
+           d_173836415_d_266600170_d_982213346 = ymd_hms(d_173836415_d_266600170_d_982213346),
+           d_173836415_d_266600170_d_740582332 = ymd_hms(d_173836415_d_266600170_d_740582332),
+           d_173836415_d_266600170_d_822274939 = ymd_hms(d_173836415_d_266600170_d_822274939),
+           d_173836415_d_266600170_d_184451682 = as.Date(d_173836415_d_266600170_d_184451682),
+           d_173836415_d_266600170_d_769615780 = as.Date(d_173836415_d_266600170_d_769615780))
+
+```
 
 
 
@@ -661,7 +725,7 @@ settings_breakdown <- knitr::kable(table1_allsett,
 ## To be used in all Figures as the X-axis Date
 ## Weeks are considered Monday-Sunday
 coll_sett_all <- coll_sett_all %>%  
-  mutate(col.Monday.date = floor_date(ymd_hms(d_556788178), unit = "week", week_start = 1)) %>% # week of collection
+  mutate(col.Monday.date = floor_date(d_556788178, unit = "week", week_start = 1)) %>% # week of collection
   ungroup()
 
 
@@ -687,19 +751,21 @@ col_num_1.1 <- col_num_1.1 %>%
     `Collection Location` %in% c("UC-DCAM", "Ingalls Harvey", "River East", "South Loop", "UCM Pop-Up", 
                                  "Orland Park", "Missing UC location") ~ "University of Chicago Medicine",
     `Collection Location` %in% c("HP Research Clinic",  "HP Park Nicollet", "Missing HP location") ~ "HealthPartners",
-    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", 
-                                 "Colby Abbotsford", "Merrill", "Stevens Point", "Neillsville", 
-                                 "Missing MF location") ~ "Marshfield Clinic Health System",
+    `Collection Location` %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", 
+                                 "Rice Lake", "Colby Abbotsford", "Merrill",
+                                 "Stevens Point", "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
     `Collection Location` %in% c("Sioux Falls Imagenetics", "Fargo South University",
                                  "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Bemidji Clinic",
                                  "Missing SF location") ~ "Sanford Health",
-    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", 
-                                 "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", "HFH Jackson",
+    `Collection Location` %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", 
+                                 "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
+                                 "HFH Detroit Northwest","In-home Collection", "HFH Jackson",
                                  "Missing HFH location") ~ "Henry Ford Health",
-    `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository",
-                                 "BCC- Fort Worth", "North Garland", "Temple CDM", "Temple Roney", "Waco - MacArthur","Temple Westfield",
-                                 "Waco Fishpond","Killeen Main","Southwest Family Medicine","Grapevine","Plano Heart",
+    `Collection Location` %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving",
+                                 "NTX Biorepository","BCC- Fort Worth",
+                                 "North Garland", "Temple CDM", "Temple Roney", "Waco - MacArthur","Temple Westfield",
+                                 "Waco Fishpond","Killeen Main", "Southwest Family Medicine","Grapevine","Plano Heart",
                                  "Missing BSWH location") ~ "Baylor Scott and White Health",
     TRUE ~ "Other"
   ))
@@ -962,6 +1028,274 @@ BLCol_by_Race <- knitr::kable(BLCol_by_Race_df,
 
 ```
 
+
+
+```{r Mod1_Race_BioComp, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
+
+
+## -------- This table requires race from Module 1 ------------------------------
+
+######## MERGE MOD1V1 & MOD1V2 with the participants table exclusions
+
+
+
+
+## BQ Pull from the participants table just to use for versioning
+recr_M1 <- bq_project_query(project, query="SELECT token,Connect_ID, d_821247024, d_914594314,  d_827220437,d_512820379,
+                            d_949302066 , d_517311251  
+                            FROM  `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` WHERE  d_821247024='197316935' and 
+                            d_949302066 ='231311385'")
+recr_m1 <- bq_table_download(recr_M1,bigint = "integer64")
+cnames <- names(recr_m1)
+# Check that it doesn't match any non-number
+numbers_only <- function(x) !grepl("\\D", x)
+# to check variables in recr_noinact_wl1
+for (i in 1: length(cnames)){
+  varname <- cnames[i]
+  var<-pull(recr_m1,varname)
+  recr_m1[,cnames[i]] <- ifelse(numbers_only(var), as.numeric(as.character(var)), var)
+}
+
+
+
+
+#### Handling participants that somehow completed both Mod1 version 1 and Mod1 version 2
+
+sql_M1_1 <- bq_project_query(project, query = "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.module1_v1` WHERE Connect_ID IS NOT NULL")
+sql_M1_2 <- bq_project_query(project, query = "SELECT * FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.module1_v2` WHERE Connect_ID IS NOT NULL")
+
+M1_V1 <- bq_table_download(sql_M1_1, bigint = "integer64")
+M1_V2 <- bq_table_download(sql_M1_2, bigint = "integer64")
+
+# Select matching column names
+M1_V1_vars <- colnames(M1_V1)
+M1_V2_vars <- colnames(M1_V2)
+common_vars <- intersect(M1_V1_vars, M1_V2_vars)
+
+# Subset to common columns
+M1_V1_common <- M1_V1[, common_vars]
+M1_V2_common <- M1_V2[, common_vars]
+
+# Add version indicator
+M1_V1_common$version <- 1
+M1_V2_common$version <- 2
+
+# Identify columns with mismatched types
+mismatched_cols <- names(M1_V1_common)[sapply(names(M1_V1_common), function(col) {
+  class(M1_V1_common[[col]]) != class(M1_V2_common[[col]])
+})]
+
+# Convert mismatched columns to character for consistency
+M1_V1_common <- M1_V1_common %>%
+  mutate(across(all_of(mismatched_cols), as.character))
+M1_V2_common <- M1_V2_common %>%
+  mutate(across(all_of(mismatched_cols), as.character))
+
+# Combine both versions for participants who completed both
+M1_common <- bind_rows(M1_V1_common, M1_V2_common) %>%
+  arrange(Connect_ID, desc(version))
+
+# For columns unique to each version
+V1_only_vars <- setdiff(M1_V1_vars, common_vars)
+V2_only_vars <- setdiff(M1_V2_vars, common_vars)
+
+# Subset each version for unique columns and add version indicator
+m1_v1_only <- M1_V1[, c("Connect_ID", V1_only_vars)] %>%
+  mutate(version = 1)
+m1_v2_only <- M1_V2[, c("Connect_ID", V2_only_vars)] %>%
+  mutate(version = 2)
+
+# Combine the unique and common data
+
+M1_common$Connect_ID <- as.numeric(M1_common$Connect_ID)
+m1_v1_only$Connect_ID <- as.numeric(m1_v1_only$Connect_ID)
+m1_v2_only$Connect_ID <- as.numeric(m1_v2_only$Connect_ID)
+
+m1_common_v1 <- left_join(M1_common, m1_v1_only, by = c("Connect_ID", "version"))
+
+m1_common_v1$Connect_ID <- as.numeric(m1_common_v1$Connect_ID)
+m1_combined_v1v2 <- left_join(m1_common_v1, m1_v2_only, by = c("Connect_ID", "version"))
+
+# Filter for complete cases where specific completion criteria are met
+m1_complete <- m1_combined_v1v2 %>%
+  filter(Connect_ID %in% recr_m1$Connect_ID[recr_m1$d_949302066 == 231311385]) %>%
+  arrange(desc(version))
+
+# Remove duplicates, keeping only the most recent version for each Connect_ID
+irb_race <- m1_complete[!duplicated(m1_complete$Connect_ID),]
+
+
+
+## Link back to main dataset 
+coll_sett_all_m1 <- left_join(coll_sett_all, irb_race, by="Connect_ID")
+
+
+
+
+
+#-------- Multi-racial ------------
+
+#NOT including Hispanic here because its being considered an ethnicity instead of a race-- if they choose Hispanic and ONE other race they shouldn't be counted as multi-racial
+race_columns <- c("D_384191091_D_384191091_D_583826374", 
+                  "D_384191091_D_384191091_D_636411467",
+                  "D_384191091_D_384191091_D_458435048",
+                  "D_384191091_D_384191091_D_973565052",
+                  "D_384191091_D_384191091_D_586825330",
+                  "D_384191091_D_384191091_D_412790539",
+                  "D_384191091_D_384191091_D_807835037")
+
+# All data is currently string values, need to convert "1" and "0" to 1 and 0 to be summarized
+coll_sett_all_m1[race_columns] <- lapply(coll_sett_all_m1[race_columns], as.numeric)
+
+coll_sett_all_m1$multi_racial <- ifelse(rowSums(coll_sett_all_m1[race_columns], na.rm = TRUE) > 1, 1, 0)
+
+
+
+
+#---- Combine stacked crosstabulations for Race, Sex, and Ethnicity by Collection Setting-------
+
+## Race, Sex, and Ethnicity are their own tables, merged into one long table
+### However, the columns are also independent: 
+    # Research collections by race, sex, ethnicity 
+    # Clinical collections by race, sex, ethnicity
+    # Home collections by race, sex ethnicity (match denominator from section 7)
+
+
+
+
+# Set IRB defined race, sex, and Hispanic ethicity
+coll_sett_all_m1 = coll_sett_all_m1 %>%  
+  mutate(irb_race= case_when(d_949302066!=231311385 ~ "Missing",
+                         d_949302066==231311385 & multi_racial==1 ~ "More than One Race",
+                         d_949302066==231311385 &  (D_384191091_D_384191091_D_412790539==1 | 
+                                                      D_384191091_D_384191091_D_973565052==1) ~ "White",
+                         d_949302066==231311385 &  D_384191091_D_384191091_D_583826374==1 ~ "American Indian/Alaska Native",
+                         d_949302066==231311385 &  D_384191091_D_384191091_D_636411467==1 ~ "Asian",
+                         d_949302066==231311385 &  D_384191091_D_384191091_D_458435048==1 ~ "Black or African American",
+                            #category instead
+                         #d_949302066==231311385 &  D_384191091_D_384191091_D_706998638==1 ~ "Hispanic, Latino, or Spanish", 
+                            #grouped with White as requested
+                         #d_949302066==231311385 &  D_384191091_D_384191091_D_973565052==1 ~ "Middle Eastern or North African", 
+                         d_949302066==231311385 &  D_384191091_D_384191091_D_586825330==1 ~ "Native Hawaiian or Other Pacific Islander",
+                         TRUE  ~ "Unknown"),
+         race = factor(race, levels=c("More than One Race", "American Indian/Alaska Native",
+                                                "Asian", "Black or African American",
+                                                "Native Hawaiian or Other Pacific Islander", "White",
+                                                "Unknown", "Missing")),
+         race_hisp= case_when(d_949302066!=231311385 ~ "Missing",
+                              d_949302066==231311385 & D_384191091_D_384191091_D_706998638==0 ~ "No",
+                              d_949302066==231311385 & D_384191091_D_384191091_D_706998638==1 ~ "Yes",
+                              TRUE  ~ "Unknown"),
+         race_hisp = factor(race_hisp, levels=c("Yes", "No", "Unknown", "Missing")),
+         irb_race = fct_relevel(irb_race, "Module 1 Not Yet Completed", after = Inf))
+
+
+
+
+
+
+
+# Count collections by Setting
+coll_sett_all_m1 <- coll_sett_all_m1 %>% 
+  # Need 'yes' values to be the same value (1) for the pivot longer to work
+  mutate(rsch_coll = case_when(all_settings=="Research" ~ 1),
+         clin_coll = case_when(all_settings=="Clinical" ~ 1),
+                              # Home setting only
+         hmw_coll = case_when(BL_BioSpm_MWSetting_v1r0=="Home" & 
+                                # Initial/Replacement1/Replacement2 HMW Kit rec'vd
+                                (d_173836415_d_266600170_d_319972665_d_221592017 == '375535639' |
+                                   d_173836415_d_266600170_d_541483796_d_221592017 == '375535639' |
+                                   d_173836415_d_266600170_d_641006239_d_221592017 == '375535639') ~ 1)) %>% 
+  # HMW is independent of research/clinical setting so pivot longer needed
+  pivot_longer(
+    cols = c(
+      rsch_coll, 
+      clin_coll, 
+      hmw_coll  
+    ),
+    names_to = "sett",
+    values_to = "received"
+  ) %>%
+  filter(received==1) 
+
+
+
+# Specific Column Name Request
+Rsch_m1 <- paste0("Research Collections N(%) (N=",
+                  scales::comma(sum(coll_sett_all_m1$sett=="rsch_coll")),
+                  ")")
+Cl_m1 <- paste0("Clinical Collections N(%) (N=", 
+                scales::comma(sum(coll_sett_all_m1$sett=="clin_coll")),
+                ")")
+H_m1 <- paste0("Home Collections N(%) (N=", 
+               scales::comma(sum(coll_sett_all_m1$sett=="hmw_coll")),
+               ")")
+
+
+# Column Order
+coll_sett_all_m1 <- coll_sett_all_m1 %>% 
+  mutate(setting_header = case_when(sett=="rsch_coll" ~ Rsch_m1,
+                                    sett=="clin_coll" ~ Cl_m1,
+                                    sett=="hmw_coll" ~ H_m1),
+         setting_header = factor(setting_header, levels=c(Rsch_m1, Cl_m1, H_m1)))
+
+
+# Idividual crosstabulations
+
+BioCol_by_IRB_Race <- coll_sett_all_m1 %>%  
+  tbl_cross(
+    row = irb_race,
+    col = setting_header,
+    digits=c(0,2),
+    percent = "column",
+    label=list(irb_race ~ "Race",
+               setting_header= " "),
+    missing="ifany",
+    margin=NULL)
+
+
+BioCol_by_Sex <- coll_sett_all_m1 %>%  
+  tbl_cross(
+    row = sex,
+    col = setting_header,
+    digits=c(0,2),
+    percent = "column",
+    label=list(sex ~ "Gender",
+               setting_header= " "),
+    missing="ifany",
+    margin=NULL)
+
+
+BioCol_by_IRB_Eth <- coll_sett_all_m1 %>%  
+  tbl_cross(
+    row = race_hisp,
+    col = setting_header,
+    digits=c(0,2),
+    percent = "column",
+    label=list(race_hisp ~ "Hispanic",
+               setting_header= " "),
+    missing="ifany",
+    margin=NULL)
+
+
+# Stakced crosstabs
+stacked_IRB_demo_BioCols <- tbl_stack(list(BioCol_by_IRB_Race, BioCol_by_Sex, BioCol_by_IRB_Eth))
+
+
+IRB_demo_BioCols <- stacked_IRB_demo_BioCols %>% 
+  bold_labels() %>%
+  modify_header() %>%
+  modify_caption("Table 1.10: Baseline Biospecimen Collection Setting by Gender, Race, and Ethnicity") %>%
+  as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
+  kable_styling(latex_options = "scale_down") %>% 
+  footnote("Note: Ethnicity information for participants who have not completed Module 1 is Missing. Race is defined as the de-identified race data reported by sites at time of invitation.",
+          general_title = "",
+         footnote_as_chunk = TRUE, 
+         escape = FALSE, 
+         threeparttable = TRUE)
+
+```
 
 
 
@@ -1743,8 +2077,8 @@ discard.site[nrow(discard.site),c(2:ncol(discard.site))] <- paste(discard.site[n
 
 research.survey <- coll_sett_all %>% filter(all_settings == "Research") %>%
   mutate(Site=droplevels(as.factor(Site)),
-         ctime = round(as.numeric(difftime(ymd_hms(d_222161762),ymd_hms(d_822499427),units="mins")), digits=1),
-         tm_biocolsuv = difftime(ymd_hms(d_222161762),ymd_hms(d_331584571_d_266600170_d_840048338),units="hours"), #time b/w survey completion to bio collection visit check in
+         ctime = round(as.numeric(difftime(d_222161762,ymd_hms(d_822499427),units="mins")), digits=1),
+         tm_biocolsuv = difftime(d_222161762,ymd_hms(d_331584571_d_266600170_d_840048338),units="hours"), #time b/w survey completion to bio collection visit check in
          checktmvisit = case_when( as.numeric(tm_biocolsuv) >72 ~"> 72hrs",
                                    72 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 48 ~ "> 48 hrs to 72 hrs",
                                    48 >= as.numeric(tm_biocolsuv) & as.numeric(tm_biocolsuv) > 24 ~ "> 24 hrs to 48 hrs",   
@@ -1795,27 +2129,21 @@ precovR_comp <- research.survey %>%  filter(d_222161762<as.Date("2023-07-05") & 
 postcovR_comp <- research.survey %>%  filter(d_222161762>=as.Date("2023-07-05") & d_265193023 == "Submitted" & ctime>0)
 
 
-Table21R_Before = precovR_comp %>% group_by(Site) %>% 
-  dplyr::summarize('Number of Submitted Research Surveys'=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Perc.95= quantile(ctime, 0.95),
-                   Max = max(ctime))
+Table21R_Before <- summarize_time(
+  precovR_comp,
+  group_var = Site,
+  n_label   = "Number of Submitted Research Surveys",
+  time_var  = ctime,
+  perc_95   = TRUE
+)
 
-
-Table21R_After = postcovR_comp %>% group_by(Site) %>% 
-  dplyr::summarize('Number of Submitted Research Surveys'=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Perc.95= quantile(ctime, 0.95),
-                   Max = max(ctime))
-
+Table21R_After <- summarize_time(
+  postcovR_comp,
+  group_var = Site,
+  n_label   = "Number of Submitted Research Surveys",
+  time_var  = ctime,
+  perc_95   = TRUE
+)
 
 
 
@@ -1829,17 +2157,15 @@ research.vt.length <- research.survey %>%  mutate(time=as.numeric(time_biochk)) 
   # Bio team explicitly asked to remove from table for QC issue, not updating prod data
   filter(Connect_ID!="9005924628") 
 
-research.vt.length.table = research.vt.length %>%group_by(Site) %>% 
-  dplyr::summarize('Number of Research Collection Visits'=n(),
-                   Min = min(time,na.rm = TRUE),
-                   Q1 = quantile(time, 0.25,na.rm = TRUE),
-                   Median = median(time,na.rm = TRUE),
-                   Mean = mean(time,na.rm = TRUE),
-                   Q3 = quantile(time, 0.75,na.rm = TRUE),
-                   Perc.90= quantile(time, 0.90,na.rm = TRUE),
-                   Perc.95= quantile(time, 0.95,na.rm = TRUE),
-                   Perc.98= quantile(time, 0.98,na.rm = TRUE),
-                   Max = max(time,na.rm = TRUE))
+research.vt.length.table <- summarize_time(
+  research.vt.length,
+  group_var = Site,
+  n_label   = "Number of Research Collection Visits",
+  time_var  = time,
+  perc_90   = TRUE,
+  perc_95   = TRUE,
+  perc_98   = TRUE
+)
 
 ```
 
@@ -1945,6 +2271,7 @@ biospe__missings = biospe__all %>%  filter(is.na(d_143615646_d_926457119) & is.n
                                                            is.na(d_677469051_d_926457119) & is.na(d_683613884_d_926457119) & 
                                                            is.na(d_703954371_d_926457119) & is.na(d_838567176_d_926457119) &
                                                            is.na(d_958646668_d_926457119) & is.na(d_973670172_d_926457119))
+
 #Used for this table- BPTL not null
 coll_bptl_diff <- biospe__all %>%  
   filter(!is.na(d_143615646_d_926457119) | !is.na(d_232343615_d_926457119) |
@@ -1958,11 +2285,12 @@ coll_bptl_diff <- biospe__all %>%
                                 levels=c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving",
                                          "Irving", "NTX Biorepository","BCC- Fort Worth","North Garland", "Temple CDM",
                                          "Temple Roney", "Waco - MacArthur","Temple Westfield","Waco Fishpond","Killeen Main",
-                                         "Southwest Family Medicine","Grapevine","Plano Heart","Missing BSWH location",
+                                         "Southwest Family Medicine","Grapevine","Plano Heart",
+                                         "Missing BSWH location",
                                          "HP Research Clinic", "HP Park Nicollet", "Missing HP location",
                                          "HFH K-13 Research Clinic","HFH Cancer Pavilion Research Clinic",
-                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest","In-home Collection", 
-                                         "HFH Jackson","Missing HFH location",
+                                         "HFH Livonia Research Clinic", "HFH Pop-Up", "HFH Detroit Northwest",
+                                         "In-home Collection", "HFH Jackson","Missing HFH location",
                                          "Neillsville", "Missing MF location",
                                          "Marshfield", "MF Pop-Up","Weston","Lake Hallie", "Rice Lake","Wisconsin Rapids", 
                                          "Colby Abbotsford","Minocqua","Merrill","Stevens Point",
@@ -2021,15 +2349,19 @@ ctable_rsch_loc_bptl <- rsch_loc_coll_bptl %>%
     Collection_Location %in% c("Lake Hallie", "Marshfield", "MF Pop-Up", "Minocqua", "Weston", "Wisconsin Rapids", "Rice Lake", 
                                  "Colby Abbotsford", "Merrill", "Stevens Point",
                                  "Neillsville", "Missing MF location") ~ "Marshfield Clinic Health System",
-    Collection_Location %in% c("Sioux Falls Imagenetics", "Fargo South University", "Edith Sanford Breast Center (coded as Sanford Center)",
+    Collection_Location %in% c("Sioux Falls Imagenetics", "Fargo South University", 
+                               "Edith Sanford Breast Center (coded as Sanford Center)", 
                                   "Edith Sanford Breast Center","Fargo Amber Valley","Bemidji Clinic",
                                "Missing SF location") ~ "Sanford Health",
-    Collection_Location %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", "HFH Cancer Pavilion Research Clinic", 
-                               "HFH Pop-Up", "HFH Detroit Northwest", "In-home Collection","HFH Jackson",
+    Collection_Location %in% c("HFH K-13 Research Clinic", "HFH Livonia Research Clinic", 
+                               "HFH Cancer Pavilion Research Clinic", "HFH Pop-Up", 
+                                 "HFH Detroit Northwest", "In-home Collection","HFH Jackson",
                                "Missing HFH location") ~ "Henry Ford Health",
-    Collection_Location %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving","NTX Biorepository",
-                               "BCC- Fort Worth", "North Garland", "Temple CDM","Temple Roney", "Waco - MacArthur", "Temple Westfield",
-                               "Waco Fishpond","Killeen Main","Southwest Family Medicine","Grapevine","Plano Heart",
+    Collection_Location %in% c("BCC- HWC","FW All Saints","BCC- Plano","BCC- Worth St","BCC- Irving","Irving",
+                               "NTX Biorepository","BCC- Fort Worth", 
+                                 "North Garland", "Temple CDM","Temple Roney", "Waco - MacArthur", "Temple Westfield",
+                               "Waco Fishpond","Killeen Main",
+                               "Southwest Family Medicine","Grapevine","Plano Heart",
                                "Missing BSWH location") ~ "Baylor Scott and White Health",
     Collection_Location %in% c("Unidentified location") ~ "Other",
     TRUE ~ " "
@@ -2146,26 +2478,21 @@ precovC_comp <- clinical.survey %>%  filter(d_764863765<as.Date("2023-07-05") & 
 postcovC_comp <- clinical.survey %>%  filter(d_764863765>=as.Date("2023-07-05") & clin.sv == "Submitted" & ctime>0)
 
 
-ClinSrvy_Lgth_Before = precovC_comp %>% group_by(Site) %>% 
-  dplyr::summarize('Number of Submitted \n Clinical Surveys'=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Perc.95= quantile(ctime, 0.95),
-                   Max = max(ctime))
+ClinSrvy_Lgth_Before <- summarize_time(
+  precovC_comp,
+  group_var = Site,
+  n_label   = "Number of Submitted \n Clinical Surveys",
+  time_var  = ctime,
+  perc_95   = TRUE
+)
 
-
-ClinSrvy_Lgth_After = postcovC_comp %>% group_by(Site) %>% 
-  dplyr::summarize('Number of Submitted \n Clinical Surveys'=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Perc.95= quantile(ctime, 0.95),
-                   Max = max(ctime))
+ClinSrvy_Lgth_After <- summarize_time(
+  postcovC_comp,
+  group_var = Site,
+  n_label   = "Number of Submitted \n Clinical Surveys",
+  time_var  = ctime,
+  perc_95   = TRUE
+)
 
 
 
@@ -2177,17 +2504,14 @@ clinical.survey <- clinical.survey %>%
                                                   ymd_hms(d_173836415_d_266600170_d_139245758), na.rm=TRUE),units="hours")))
 
 
-BU_coll_DB_comp = clinical.survey %>% group_by(Site) %>% 
-  filter(coll_to_DB_BU >= 0) %>% #request to exclude negative values
-  dplyr::summarize('Number of Clinical Collection Visits'=n(),
-                   Min = round(min(coll_to_DB_BU,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(coll_to_DB_BU, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(coll_to_DB_BU,na.rm = TRUE), digits=1),
-                   Mean = round(mean(coll_to_DB_BU,na.rm = TRUE), digits=1),
-                   SD= round(sd(coll_to_DB_BU,na.rm = TRUE), digits=1),
-                   Q3= round(quantile(coll_to_DB_BU, 0.75,na.rm = TRUE), digits=1),
-                   'Perc.95'= round(quantile(coll_to_DB_BU, 0.95,na.rm = TRUE), digits=1),
-                   Max = round(max(coll_to_DB_BU,na.rm = TRUE), digits=1))
+BU_coll_DB_comp <- summarize_time(
+  clinical.survey %>% filter(coll_to_DB_BU >= 0),
+  group_var = Site,
+  n_label   = "Number of Clinical Collection Visits",
+  time_var  = coll_to_DB_BU,
+  std_dv    = TRUE,
+  perc_95   = TRUE
+)
 
 
 
@@ -2197,16 +2521,14 @@ clinical.survey <- clinical.survey %>%
   mutate(trig_to_comp_BU = as.numeric(difftime(ymd_hms(d_764863765),ymd_hms(d_915838974),units="hours")))
 
 
-BU_trig_comp = clinical.survey %>% group_by(Site) %>% 
-  dplyr::summarize('Number of Clinical Collection Visits'=n(),
-                   Min = round(min(trig_to_comp_BU,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(trig_to_comp_BU, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(trig_to_comp_BU,na.rm = TRUE), digits=1),
-                   Mean = round(mean(trig_to_comp_BU,na.rm = TRUE), digits=1),
-                   SD= round(sd(trig_to_comp_BU,na.rm = TRUE), digits=1),
-                   Q3= round(quantile(trig_to_comp_BU, 0.75,na.rm = TRUE), digits=1),
-                   'Perc.95'= round(quantile(trig_to_comp_BU, 0.95,na.rm = TRUE), digits=1),
-                   Max = round(max(trig_to_comp_BU,na.rm = TRUE), digits=1))
+BU_trig_comp <- summarize_time(
+  clinical.survey,
+  group_var = Site,
+  n_label   = "Number of Clinical Collection Visits",
+  time_var  = trig_to_comp_BU,
+  std_dv    = TRUE,
+  perc_95   = TRUE
+)
 
 ```
 
@@ -2214,24 +2536,24 @@ BU_trig_comp = clinical.survey %>% group_by(Site) %>%
 
 ## Draw Order Placement to Clinical Collection
 
-avg_draw_order <- clinical.survey %>%  filter(Site!='HealthPartners' & Site!="Sanford Health" & Site!='University of Chicago Medicine') %>% 
-  mutate(time = as.numeric(difftime(
-    #Blood or urine, whichever occured first
-    pmin(ymd_hms(d_173836415_d_266600170_d_982213346), ymd_hms(d_173836415_d_266600170_d_139245758)), 
-    #and BldUrnPlcdTmBL
-    ymd_hms(d_173836415_d_266600170_d_184451682),
-    units="days"))) %>%
-  group_by(Site) %>% 
-  dplyr::summarize('Number of Clinical Collections'=n(),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   Perc.80= quantile(time, 0.80,na.rm = TRUE),
-                   Perc.90= quantile(time, 0.90,na.rm = TRUE),
-                   Perc.95= quantile(time, 0.95,na.rm = TRUE),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
+avg_draw_order <- summarize_time(
+  clinical.survey %>% filter(
+    Site != 'HealthPartners' &
+    Site != "Sanford Health" &
+    Site != 'University of Chicago Medicine'
+  ) %>% mutate(time = as.numeric(difftime(
+    pmin(as.Date(d_173836415_d_266600170_d_982213346),
+         as.Date(d_173836415_d_266600170_d_139245758)),
+    as.Date(d_173836415_d_266600170_d_184451682),
+    units = "days"
+  ))),
+  group_var = Site,
+  n_label   = "Number of Clinical Collections",
+  time_var  = time,
+  perc_80   = TRUE,
+  perc_90   = TRUE,
+  perc_95   = TRUE
+)
 
 ```
 
@@ -2278,6 +2600,8 @@ coll_bptl_diff2 <- biospe__2  %>% group_by(as.character(Connect_ID),Site, Clin_S
                                                       ifelse(as.numeric(day_past)>=5,">4 Days", "Missing Time Stamp(s)"))))),
          coll_days_diff=factor(coll_days_diff, levels=c("1 Day","2 Days","3 Days","4 Days",">4 Days","Missing time stamp(s)")))
 
+
+#testing
 coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
 
 ```
@@ -2374,33 +2698,35 @@ ctable_clin_loc_bptl <- knitr::kable(clin_coll_times[, c(1:7)],
 
 
 
-```{r Table21a21b, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+```{r Tm_Verif_BL_Coll, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 
-## Time from Verif to Research Collection
+##--------------- Time from Verif to BL Collection -------------------------
 
-baseline_colct <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178))
-
-
-# ON OR AFTER 8/1/22
-
-baseline_colctD <- baseline_colct %>%  filter(d_914594314>=as.Date("2022-08-01") & all_settings=="Research")
-
-BSL_colctD <- baseline_colctD %>%  mutate(time = as.numeric(difftime(d_556788178,d_914594314,units="days")))
+baseline_colct <- coll_sett_all %>%  
+  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178)) %>% 
+  mutate(time = as.numeric(difftime(as.Date(d_556788178),d_914594314,units="days")))
 
 
-verif_BSL_colctD = BSL_colctD %>% group_by(Site) %>% 
-  dplyr::summarize('Number of Research Collection Visits'= scales::comma(n()),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   SD= round(sd(time,na.rm = TRUE), digits=1),
-                   Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1)) 
 
-verif_BSL_colctD_total <- BSL_colctD %>% 
+
+
+## Research, ON OR AFTER 8/1/22
+
+BL_coll_rsch_8 <- baseline_colct %>%  
+  filter(d_914594314>=as.Date("2022-08-01") & all_settings=="Research")
+
+
+verif_BSL_colct_rsch_8 <- summarize_time(
+  BL_coll_rsch_8,
+  group_var = Site,
+  n_label   = "Number of Research Collection Visits",
+  time_var  = time,
+  std_dv    = TRUE,
+  perc_95   = TRUE
+)
+
+verif_BSL_colct_rsch_8_total <- BL_coll_rsch_8 %>% 
   dplyr::summarize(Site = "All Sites",
                    'Number of Research Collection Visits'= scales::comma(n()),
                    Min = round(min(time,na.rm = TRUE), digits=1),
@@ -2413,25 +2739,32 @@ verif_BSL_colctD_total <- BSL_colctD %>%
                    Max = round(max(time,na.rm = TRUE), digits=1))
 
 
-verif_BSL_colctD <- rbind(verif_BSL_colctD, verif_BSL_colctD_total)
+verif_BSL_colct_rsch_8 <- rbind(verif_BSL_colct_rsch_8, verif_BSL_colct_rsch_8_total)
 
 # for the footnote
-baseline_colctC <- baseline_colct %>%  filter(d_914594314<as.Date("2022-08-01"))
+verif_BSL_colct_rsch_8_footnote <- baseline_colct %>%  filter(d_914594314<as.Date("2022-08-01"))
 
 
 
 
 
-# BEFORE 2/1/23
-baseline_colctA <- baseline_colct %>%  filter(d_914594314<as.Date("2023-02-01") & all_settings=="Clinical")
-
-BSL_colctA <- baseline_colctA %>%  mutate(time = as.numeric(difftime(d_556788178,d_914594314,units="days")),
-                                          "Number of Participants" = n(),
-                                          'Number of Baseline Collections' = case_when(!is.na(d_556788178) ~ n()))
+## Clinical, BEFORE 2/1/23
+BL_coll_clin_2Before <- baseline_colct %>%  
+  filter(d_914594314<as.Date("2023-02-01") & all_settings=="Clinical")
 
 
-verif_BSL_colctA = BSL_colctA %>% group_by(Site) %>%
-  dplyr::summarize('Number of Clinical Collections' = scales::comma(n()),
+verif_BSL_colctC_2Before <- summarize_time(
+  BL_coll_clin_2Before,
+  group_var = Site,
+  n_label   = "Number of Clinical Collections",
+  time_var  = time,
+  std_dv   = TRUE,
+  perc_90   = TRUE
+)
+
+verif_BSL_colctC_2Before_total <- BL_coll_clin_2Before %>% 
+  dplyr::summarize(Site = "All Sites",
+                   'Number of Clinical Collections'= scales::comma(n()),
                    Min = round(min(time,na.rm = TRUE), digits=1),
                    Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
                    Median = round(median(time,na.rm = TRUE), digits=1),
@@ -2457,17 +2790,31 @@ verif_BSL_colctA_total <- BSL_colctA %>%
 verif_BSL_colctA <- rbind(verif_BSL_colctA, verif_BSL_colctA_total)
 
 
+verif_BSL_colctC_2Before <- rbind(verif_BSL_colctC_2Before, verif_BSL_colctC_2Before_total)
 
 
-## ON OR AFTER 2/1/23
-
-baseline_colctB <- baseline_colct %>%  filter(d_914594314>=as.Date("2023-02-01")  & all_settings=="Clinical")
-
-BSL_colctB <- baseline_colctB %>%  mutate(time = as.numeric(difftime(d_556788178,d_914594314,units="days")))
 
 
-verif_BSL_colctB = BSL_colctB %>% group_by(Site) %>%
-  dplyr::summarize('Number of Clinical Collections'= scales::comma(n()),
+## Clinical, ON OR AFTER 2/1/23
+
+BL_coll_clin_2After <- baseline_colct %>%  
+  filter(d_914594314>=as.Date("2023-02-01")  & all_settings=="Clinical")
+
+
+verif_BSL_colctC_2After <- summarize_time(
+  BL_coll_clin_2After,
+  group_var = Site,
+  n_label   = "Number of Clinical Collections",
+  time_var  = time,
+  std_dv   = TRUE,
+  perc_90   = TRUE
+)
+
+
+
+verif_BSL_colctC_2After_total <- BL_coll_clin_2After %>% 
+  dplyr::summarize(Site = "All Sites",
+                   'Number of Clinical Collections'= scales::comma(n()),
                    Min = round(min(time,na.rm = TRUE), digits=1),
                    Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
                    Median = round(median(time,na.rm = TRUE), digits=1),
@@ -2493,45 +2840,36 @@ verif_BSL_colctB_total <- BSL_colctB %>%
 verif_BSL_colctB <- rbind(verif_BSL_colctB, verif_BSL_colctB_total)
 
 
+verif_BSL_colctC_2After <- rbind(verif_BSL_colctC_2After, verif_BSL_colctC_2After_total)
+
+
+
+
+### Verification to Collection (R+C) Total 
+verif_BL_RC <- baseline_colct %>%  
+  #Clin & Rsch became available at different times
+  filter( (all_settings=="Clinical" & d_914594314>=as.Date("2023-02-01")) | 
+          (all_settings=="Research" & d_914594314>=as.Date("2022-08-01"))) %>% 
+    dplyr::summarize('Number of Collections'= scales::comma(n()),
+                     Min = round(min(time,na.rm = TRUE), digits=1),
+                     Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
+                     Median = round(median(time,na.rm = TRUE), digits=1),
+                     Mean = round(mean(time,na.rm = TRUE), digits=1),
+                     SD= round(sd(time,na.rm = TRUE), digits=1),
+                     Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
+                     'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),
+                     Max = round(max(time,na.rm = TRUE), digits=1))
 
 
 
 
 
 
+## Verification to Collection (R+C) by Campaign Type
 
-
-##########################
-
-## Verification to Draw Order
-
-ver_draw <- biocol.tb %>%  filter(!is.na(d_173836415_d_266600170_d_769615780) & d_914594314>=as.Date("2023-02-01")  & 
-                                    Site!='HealthPartners' & Site!='Sanford Health' & Site!='University of Chicago Medicine' &  
-                                       Site!='Henry Ford Health') %>% mutate(Site = droplevels(Site))
-
-verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(ymd_hms(d_173836415_d_266600170_d_769615780),ymd_hms(d_914594314),units="days")))
-
-
-verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>%
-  mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
-                                  as.numeric(time) <1 ~"Within 1 Day",
-                                  as.numeric(time) < 3 ~ "1-3 Days",
-                                  as.numeric(time) <30 ~ "4-30 Days",
-                                  as.numeric(time) >= 30 ~ "More than 30 Days",
-                                  TRUE ~ "Missing Time Stamp(s)"),
-         checktmvisit = factor(checktmvisit, levels=c("Negative Time", "Within 1 Day", "1-3 Days",
-                                                      "4-30 Days", "More than 30 Days", "Missing Time Stamp(s)")))
-
-verif_draw_order <- create_tbl_cross(verif_draw, "checktmvisit", "Site", "column", " ", " ")
-colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placements"
-
-
-
-## Verification to Collection  by Campaign Type
-
-verif_BL_Af <- coll_sett_all %>%  filter(d_331584571== 266600170 & !is.na(d_914594314) & !is.na(d_556788178) & d_914594314>=as.Date("2022-06-01")) %>%  
-  mutate(time = as.numeric(difftime(ymd_hms(d_556788178),ymd_hms(d_914594314),units="days")),
-         campaign = case_when((state_d_667474224==348281054 | state_d_667474224==324692899) ~ "Upcoming Appointment",
+verif_BL_Af <- baseline_colct %>%  
+  filter(d_914594314>=as.Date("2022-06-01")) %>%  
+  mutate(campaign = case_when((state_d_667474224==348281054 | state_d_667474224==324692899) ~ "Upcoming Appointment",
                                TRUE ~ "All Other Campaigns"),
          Site = factor(Site,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
                                                      "Marshfield Clinic Health System",
@@ -2583,13 +2921,50 @@ verif_baseline_Af_final <- bind_rows(verif_baseline_Af, total_summary)
 
 ```
 
+
+
+```{r Tm_Verif_Draw_Order, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
+
+
+
+ver_draw <- biocol.tb %>%  
+  filter(!is.na(d_173836415_d_266600170_d_769615780) & d_914594314>=as.Date("2023-02-01")  & 
+           !(Site %in% c('HealthPartners', 'Sanford Health', 
+                         'University of Chicago Medicine',
+                         'Henry Ford Health'))) %>% 
+  mutate(Site = droplevels(Site))
+
+verif_draw <- ver_draw %>%  mutate(time = as.numeric(difftime(d_173836415_d_266600170_d_769615780,d_914594314,units="days")))
+
+
+verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>%
+  mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
+                                  as.numeric(time) <1 ~"Within 1 Day",
+                                  as.numeric(time) < 3 ~ "1-3 Days",
+                                  as.numeric(time) <30 ~ "4-30 Days",
+                                  as.numeric(time) >= 30 ~ "More than 30 Days",
+                                  TRUE ~ "Missing Time Stamp(s)"),
+         checktmvisit = factor(checktmvisit, levels=c("Negative Time", "Within 1 Day", "1-3 Days",
+                                                      "4-30 Days", "More than 30 Days", "Missing Time Stamp(s)")))
+
+verif_draw_order <- create_tbl_cross(verif_draw, "checktmvisit", "Site", "column", " ", " ")
+colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placements"
+
+
+
+```
+
+
+
 ```{r Collection_BU_BUM_Sub, include=FALSE, echo=FALSE, warning=FALSE}
 
 # One varibale is renamed to Not Started, Started, Submitted; the other is not; need to fix later
-all_coll_to_sub <- coll_sett_all %>%  filter(d_265193023 == 'Submitted' | d_253883960=='231311385') %>% 
-  mutate(collection = ifelse(d_265193023 == 'Submitted', ymd_hms(d_678166505), ymd_hms(d_556788178)),
-         surv_sub = ifelse(d_265193023 == 'Submitted', ymd_hms(d_222161762), ymd_hms(d_764863765)),
-         coll_to_sub = as.numeric(round(difftime(surv_sub, collection, units="days"), digits=0)),
+all_coll_to_sub <- coll_sett_all %>%  
+  filter(d_265193023 == 'Submitted' | d_253883960=='231311385') %>% 
+  mutate(collection = if_else(d_265193023 == 'Submitted', d_678166505, d_556788178),
+         surv_sub = if_else(d_265193023 == 'Submitted', d_222161762, d_764863765),
+         coll_to_sub = as.numeric(round(difftime(as.Date(surv_sub), as.Date(collection),
+                                                 units="days"), digits=0)),
          time = case_when(as.numeric(coll_to_sub) <=1 ~"Within 1 Day",
                           as.numeric(coll_to_sub) <= 3 ~ "2-3 Days",
                           as.numeric(coll_to_sub) <=5 ~ "4-5 Days",
@@ -2630,20 +3005,25 @@ all_coll_to_sub_with_pct <- rbind(all_coll_to_sub_with_pct[, c(1,3)], total_df)
 
 ## Draw Order Placement to Today for those with no blood colletion yet
 
-avg_bldorder_present <- table1 %>%  filter(d_878865966=="No blood collected" & !is.na(d_173836415_d_266600170_d_769615780) & 
-                                           Site!='HealthPartners' & Site!='Henry Ford Health'  & Site!='Sanford Health') %>%  
-  mutate(time = as.numeric(difftime(currentDate,ymd_hms(d_173836415_d_266600170_d_769615780),units="days"))) %>% 
-  group_by(Site) %>% 
-  dplyr::summarize('Number of Unfilled \n Blood Draw Orders'=n(),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   Q3 = round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   Perc.80= quantile(time, 0.80,na.rm = TRUE),
-                   Perc.90= quantile(time, 0.90,na.rm = TRUE),
-                   Perc.95= quantile(time, 0.95,na.rm = TRUE),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
+avg_bldorder_present <- summarize_time(
+  table1 %>% filter(
+    d_878865966 == "No blood collected" &
+    !is.na(d_173836415_d_266600170_d_769615780) &
+    Site != 'HealthPartners' &
+    Site != 'Henry Ford Health' &
+    Site != 'Sanford Health'
+  ) %>% mutate(time = as.numeric(difftime(
+    currentDate,
+    as.Date(d_173836415_d_266600170_d_769615780),
+    units = "days"
+  ))),
+  group_var = Site,
+  n_label   = "Number of Unfilled \n Blood Draw Orders",
+  time_var  = time,
+  perc_80   = TRUE,
+  perc_90   = TRUE,
+  perc_95   = TRUE
+)
 
 
 ```
@@ -2690,7 +3070,7 @@ Table_bld_draw= table1 %>%  filter(grepl("^Kaiser", Site)) %>% ## excluding hybr
 ## Days since Verif for those with No Biospecimen Collection
 
 ver_date_diff <-table1  %>% filter(biocol.appoint=="No Baseline Collection")  %>% 
-  mutate(day_past = difftime(as.Date(currentDate), as.Date(d_914594314), units="days"),
+  mutate(day_past = difftime(currentDate, d_914594314, units="days"),
          coll_days_diff = case_when(as.numeric(day_past)<30 ~ "< 30 Days",
                                     as.numeric(day_past)<60 ~ "30 to <60 Days",
                                     as.numeric(day_past)<90 ~ "60 to <90 Days",
@@ -2766,6 +3146,8 @@ biospe.bld
 
 
 
+
+
 \FloatBarrier
 ```{r KnitrTables1.14_1.16, eval=TRUE,echo=FALSE,warning=FALSE, message=FALSE, results='asis'}
 
@@ -2775,7 +3157,7 @@ BLCol_by_Age
 
 BLCol_by_Race
 
-#IRB_demo_BioCols        # pending approval
+IRB_demo_BioCols
 
 ```
 
@@ -3028,7 +3410,7 @@ add_footnote(tab23,"Note: Expected visit length for each site is as follows: (1)
 
 ```{r KnitrTable21_26,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
-knitr::kable(verif_BSL_colctD,
+knitr::kable(verif_BSL_colct_rsch_8,
                       caption='Table 4.2: Baseline- Time (in Days) from Verification to Research Collection Among Participants Verified on or After 8/01/2022',
                       row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down") %>% 
@@ -3036,18 +3418,13 @@ knitr::kable(verif_BSL_colctD,
            footnote_as_chunk = TRUE, 
            escape = FALSE, 
            threeparttable = TRUE) %>% 
-  footnote(paste0(nrow(baseline_colctC), " research collection visits occurred for participants verified before 8/1/2022."))
-
-# add_footnote(tabbB,
-#              paste0("Note: August 2022 marks when research collection appointments were routinely offered to all new recruits at or near the time of verification. UChicago participant verification largely occurs at or near the time of collection.
-#                     Note: ",
-#                nrow(BSL_colctD), 
-#                    " research collection visits occurred for participants verified before 8/1/2022. "),
-#              notation = "none")
+  footnote(paste0(nrow(verif_BSL_colct_rsch_8_footnote), " research collection visits occurred for participants verified before 8/1/2022."))
 
 
 
-BSL_A <- knitr::kable(verif_BSL_colctA,
+
+
+BSL_A <- knitr::kable(verif_BSL_colctC_2Before,
                       caption='Table 4.3: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified Before 2/01/2023',
                       row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down") 
@@ -3057,11 +3434,21 @@ add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in Februar
 
 
 
-BSL_B <-knitr::kable(verif_BSL_colctB,
+BSL_B <-knitr::kable(verif_BSL_colctC_2After,
                      caption='Table 4.4: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified on or After 2/01/2023',
                      row.names=FALSE,  align=c("l", rep("c", 8)),digits=1, booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down")
 add_footnote(BSL_B,"Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago.", notation = "none")
+
+
+
+knit_verif_BL_RC <- knitr::kable(verif_BL_RC,
+              caption='Table 4.5 Baseline- Time (in Days) from Verification to Collection (Research or Clinical Collection) Among Participants ',
+              row.names=FALSE,  align=c("l", rep("c", 8)),digits=1, booktabs = TRUE) %>% 
+  kable_styling(latex_options = "scale_down")
+#pending approval
+# add_footnote(knit_verif_BL_RC,"Note: This table includes data on participants who completed a research collection that were verified on or after 08/01/2022 and those who completed a clinical collection that were verified on or after 02/01/2023, which correspond with the dates each type of collection became available.", notation = "none")
+
 
 
 
@@ -3172,7 +3559,7 @@ ctable_clin_loc_bptl
 ## Collection to Receipt Times, Stratified by Appt Day of the Week
 
 coll_bptl_diff <- coll_bptl_diff %>% 
-  mutate(hrs_past = difftime(ymd_hms(any_collection), ymd_hms(d_678166505), units="hours"),
+  mutate(hrs_past = difftime(ymd_hms(any_collection), d_678166505, units="hours"),
          hrs_past = as.numeric(hrs_past),
          Weekdays = factor(weekdays(as.Date(d_678166505))),
          Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))) %>%  
@@ -3185,7 +3572,6 @@ coll_bptl_diff2 <- coll_bptl_diff2 %>%
          hrs_past = as.numeric(hrs_past),
          Weekdays = factor(weekdays(as.Date(clin_coll_bu))),
          Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")))
-
 
 
 weekday_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
@@ -3427,8 +3813,7 @@ Section6_plot_function2 <- function(data, start_date, title, site, settings, col
   } else if(site == "HealthPartners" && settings=="Clinical"){
       
     plt <- ggplot(weekly_counts, aes(x = as.Date(col.Monday.date), y = n, color = .data[[color_var]])) +
-      scale_color_manual(values=c("NSC"="#99C0C4", "Elk River"="#565C65", "Chanhassen"="#CC7D15", 
-                                  "Park Nicollet Minneapolis Clinic"="#FDBE19",
+      scale_color_manual(values=c("NSC"="#99C0C4", "Elk River"="#565C65", "Chanhassen"="#CC7D15", "Park Nicollet Minneapolis Clinic"="#FDBE19",
                                 "Brooklyn Center"="#3C989E", "Clinic Stillwater"="#2973A5", "New Richmond Clinic"="#E7CCAD",
                                 "Burnsville Clinic and Specialty Center"= "#797D83", "St. Paul Clinic- Wabasha"="#164C71", 
                                 "NSC"="#309EBD", "Andover Clinic"="#B1C7D9", "Olivia Hospital and Clinic"="#FBE5B5",
@@ -3654,19 +4039,29 @@ kitstatus <- "SELECT Connect_ID,
     END AS completion,
 
 
-d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, d_173836415_d_266600170_d_319972665_d_826941471,
-d_173836415_d_266600170_d_319972665_d_379252329, d_173836415_d_266600170_d_319972665_d_759651991,
+DATE(d_173836415_d_266600170_d_319972665_d_661940160) as d_173836415_d_266600170_d_319972665_d_661940160, d_173836415_d_266600170_d_319972665_d_687158491, 
+DATE(d_173836415_d_266600170_d_319972665_d_826941471) as d_173836415_d_266600170_d_319972665_d_826941471,
+d_173836415_d_266600170_d_319972665_d_379252329, 
+DATE(d_173836415_d_266600170_d_319972665_d_759651991) as d_173836415_d_266600170_d_319972665_d_759651991,
 
-d_173836415_d_266600170_d_541483796_d_661940160, d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, d_173836415_d_266600170_d_541483796_d_826941471, d_173836415_d_266600170_d_541483796_d_379252329,
+DATE(d_173836415_d_266600170_d_541483796_d_661940160) as d_173836415_d_266600170_d_541483796_d_661940160, 
+DATE(d_173836415_d_266600170_d_541483796_d_759651991) as d_173836415_d_266600170_d_541483796_d_759651991, d_173836415_d_266600170_d_541483796_d_687158491, 
+DATE(d_173836415_d_266600170_d_541483796_d_826941471) as d_173836415_d_266600170_d_541483796_d_826941471, d_173836415_d_266600170_d_541483796_d_379252329,
 
-d_173836415_d_266600170_d_641006239_d_661940160, d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, d_173836415_d_266600170_d_641006239_d_826941471, d_173836415_d_266600170_d_641006239_d_379252329, 
+DATE(d_173836415_d_266600170_d_641006239_d_661940160) as d_173836415_d_266600170_d_641006239_d_661940160, 
+DATE(d_173836415_d_266600170_d_641006239_d_759651991) as d_173836415_d_266600170_d_641006239_d_759651991, d_173836415_d_266600170_d_641006239_d_687158491, 
+DATE(d_173836415_d_266600170_d_641006239_d_826941471) as d_173836415_d_266600170_d_641006239_d_826941471, d_173836415_d_266600170_d_641006239_d_379252329, 
 
-d_784810139, d_389890053, d_843688458, d_543379310, d_100767870, 
-d_517311251, d_832139544, d_770257102, d_264644252, d_199471989,
+DATE(d_784810139) as d_784810139, DATE(d_389890053) as d_389890053, DATE(d_843688458) as d_843688458, DATE(d_543379310) as d_543379310, d_100767870, 
+DATE(d_517311251) as d_517311251, DATE(d_832139544) as d_832139544, DATE(d_770257102) as d_770257102, DATE(d_264644252) as d_264644252, DATE(d_199471989) as d_199471989,
 
-d_265193023, d_547363263, d_173836415_d_266600170_d_448660695, d_195145666, d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991,
-d_173836415_d_266600170_d_319972665_d_221592017, d_173836415_d_266600170_d_319972665_d_278539982,
-d_173836415_d_266600170_d_740582332
+d_265193023, d_547363263, 
+DATE(d_173836415_d_266600170_d_448660695) as d_173836415_d_266600170_d_448660695, 
+DATE(d_195145666) as d_195145666, 
+d_286191859, d_123868967, d_906417725, d_747006172, d_987563196, d_167958071, d_878865966, d_684635302, d_173836415_d_266600170_d_915179629, d_914594314, d_173836415_d_266600170_d_982213346,d_173836415_d_266600170_d_139245758, d_265193023, d_253883960, d_173836415_d_266600170_d_319972665_d_638781731, d_173836415_d_266600170_d_319972665_d_759651991,
+d_173836415_d_266600170_d_319972665_d_221592017, 
+DATE(d_173836415_d_266600170_d_319972665_d_278539982) as d_173836415_d_266600170_d_319972665_d_278539982,
+DATE(d_173836415_d_266600170_d_740582332) as d_173836415_d_266600170_d_740582332
 -- d_569151507_d_371303487
 FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.participants` 
 where Connect_ID is not null and 
@@ -3810,7 +4205,7 @@ summary_table2_all<- filtered_data %>%
   group_by(Site) %>%
   summarise(Shipped = sum(Kit_Status_int %in% c("Received", "Shipped")), #kits received were once shipped
             Shipped_TwoWeeks = sum(Kit_Status_int %in% c("Received", "Shipped") &
-                                    as.Date(d_173836415_d_266600170_d_319972665_d_661940160) < currentDate-14),
+                                    d_173836415_d_266600170_d_319972665_d_661940160 < currentDate-14),
             Received = sum(Kit_Status_int == "Received")) 
  
  
@@ -3887,20 +4282,21 @@ Coll_Card_Status <- create_tbl_cross(kit_assembly, "Site", "Card_Status", "row",
 
 ## Shipment time to BPTL receipt time
 test30 <- kit_table %>%
-  filter(Kit_Status_int=="Received" & !is.na(d_173836415_d_266600170_d_319972665_d_826941471) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+  filter(Kit_Status_int=="Received" & !is.na(d_173836415_d_266600170_d_319972665_d_826941471) &
+           !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
  
 test30 <-  test30 %>%
-  mutate(ctime = as.numeric(difftime(ymd_hms(d_173836415_d_266600170_d_319972665_d_826941471),ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160),units="days"))) %>% 
+  mutate(ctime = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_826941471,
+                                     d_173836415_d_266600170_d_319972665_d_661940160,units="days"))) %>% 
   filter(ctime>0)
  
-Table7.4 = test30 %>% group_by(Site) %>%
-  dplyr::summarize(N=n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Max = max(ctime))
+Table7.4 <- summarize_time(
+    test30,
+    group_var = Site,
+    n_label   = "N",
+    time_var  = ctime
+)
+
 
 total_row <- test30 %>%
   dplyr::summarize(
@@ -3930,29 +4326,27 @@ test31 <- first_col_time %>%
   filter(!is.na(d_556788178) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
  
 test31 <-  test31 %>%
-  mutate(ctime = as.numeric(difftime(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160),
-                                     ymd_hms(d_556788178),units="days")))
+  mutate(ctime = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_661940160,
+                                     as.Date(d_556788178),units="days")))
 test31b <-  test31 %>%  filter(ctime>0)
  
  
-Table7.5 = test31b %>% group_by(Site) %>%
-  dplyr::summarize(N =n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Max = max(ctime))
+Table7.5 <- summarize_time(
+    test31b,
+    group_var = Site,
+    n_label   = "N",
+    time_var  = ctime
+)
+
  
-total_row <- test31b %>% 
-  dplyr::summarize(Site = "Total",
-                   N =n(),
-                   Min = min(ctime),
-                   Q1 = quantile(ctime, 0.25),
-                   Median = median(ctime),
-                   Mean = mean(ctime),
-                   Q3 = quantile(ctime, 0.75),
-                   Max = max(ctime))
+total_row <- summarize_time(
+    test31b,
+    group_var = NA,
+    n_label   = "N",
+    time_var  = ctime
+) %>% 
+  dplyr::rename("Site" = 'NA') %>% 
+  mutate(Site = case_when(is.na(Site) ~ "Total"))
 
 Table7.5 <- bind_rows(Table7.5, total_row)
  
@@ -4022,7 +4416,7 @@ received_long <- kit_table %>%
   ) %>%
   filter(!is.na(received_date)) %>%  # only keep actual kits
   mutate(
-    col.Monday.date = floor_date(ymd_hms(received_date), unit = "week", week_start = 1)
+    col.Monday.date = floor_date(received_date, unit = "week", week_start = 1)
   ) %>%
   filter(
     d_173836415_d_266600170_d_319972665_d_379252329 == 976461859,
@@ -4056,7 +4450,7 @@ shipped_long <- kit_table %>%
   ) %>%
   filter(!is.na(shipped_date)) %>%
   mutate(
-    col.Monday.date = floor_date(ymd_hms(shipped_date), unit = "week", week_start = 1)
+    col.Monday.date = floor_date(shipped_date, unit = "week", week_start = 1)
   ) %>%
   filter(
     d_173836415_d_266600170_d_319972665_d_379252329 == 976461859,
@@ -4112,7 +4506,8 @@ MW_Coll_Kits <- ggplot(fig5_week_final, aes(x = as.Date(col.Monday.date))) +
  
 ################# Received
 kit_set_col_2 <- kit_table %>% filter(Kit_Status_int=="Received") %>% 
-  mutate(col.Monday.date = floor_date(ymd_hms(d_173836415_d_266600170_d_319972665_d_826941471), unit = "week", week_start = 1))
+  mutate(col.Monday.date = floor_date(d_173836415_d_266600170_d_319972665_d_826941471, 
+                                      unit = "week", week_start = 1))
 
  
 fig5_new_2 <- kit_set_col_2 %>%
@@ -4133,7 +4528,7 @@ fig5_week_total_2 <- left_join(all_mondays, fig5_week_total_2, by = "col.Monday.
  
 ############### Shipped
 kit_table2 <- kit_table %>%  filter(!is.na(d_173836415_d_266600170_d_319972665_d_661940160)) %>% 
-  mutate(col.Monday.date = floor_date(ymd_hms(d_173836415_d_266600170_d_319972665_d_661940160), unit = "week", week_start = 1))
+  mutate(col.Monday.date = floor_date(d_173836415_d_266600170_d_319972665_d_661940160, unit = "week", week_start = 1))
 
  
  
@@ -4169,7 +4564,9 @@ fig5_week_total2 <- fig5_week_total2 %>%
  
 ##Percentage they want noted is the total received as of today/total shipped as of end of week prior
 #all_shipped_2_filtered already looks at initial kits only
-thus_far <- round(sum(as.numeric(all_shipped_2_filtered$Received))/sum(as.numeric(all_shipped_2_filtered$Shipped_TwoWeeks))*100, digits=2)
+thus_far <- round(sum(as.numeric(all_shipped_2_filtered$Received))/
+                    sum(as.numeric(all_shipped_2_filtered$Shipped_TwoWeeks))*100, 
+                  digits=2)
  
  
 
@@ -4353,8 +4750,10 @@ generate_mw_table <- function(comparison) {
   kit_table %>% 
     filter(d_547363263 == '231311385' & !is.na(d_195145666) & 
              (Kit_Status_r2 == "Received" | Kit_Status_r1 == "Received" | Kit_Status_int == "Received") &
-             eval(parse(text = paste0("as.Date(d_173836415_d_266600170_d_319972665_d_661940160) ", comparison, " as.Date('2024-05-22')")))) %>%
-    mutate(MW_completion = difftime(as.Date(d_173836415_d_266600170_d_448660695), as.Date(d_195145666), units = "days"),
+             eval(parse(text = paste0("d_173836415_d_266600170_d_319972665_d_661940160 ", 
+                                      comparison, " as.Date('2024-05-22')")))) %>%
+    mutate(MW_completion = difftime(d_173836415_d_266600170_d_448660695, 
+                                    d_195145666, units = "days"),
            MW_comp_diff = case_when(as.numeric(MW_completion) <= -4 ~ "4+ Days before Collection",
                                     as.numeric(MW_completion) == -3 ~ "3 Days before Collection",
                                     as.numeric(MW_completion) == -2 ~ "2 Days before Collection",
@@ -4415,8 +4814,8 @@ add_footnote(tbl_7_10, "Note: In cases where the collection card is not returned
 
 survey_cc_int <- kit_table %>%  
   filter(!is.na(d_195145666) & !is.na(d_173836415_d_266600170_d_448660695) & as.Date(d_195145666) > "2025-05-01" & d_547363263 == '231311385') %>% 
-  mutate(ctime = round(as.numeric(difftime(ymd_hms(d_195145666),
-                                           ymd_hms(d_173836415_d_266600170_d_448660695),units="days")), 
+  mutate(ctime = round(as.numeric(difftime(d_195145666,
+                                           d_173836415_d_266600170_d_448660695,units="days")), 
                        digits=0),
          MW_comp_card = case_when(as.numeric(ctime) <= -4 ~ "4+ Days before Collection",
                                   as.numeric(ctime) == -3 ~ "3 Days before Collection",
@@ -4558,8 +4957,8 @@ knitr::kable(req_kit_table2,
 ```{r RequestKits3,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_request_table <- kit_request_table %>% 
-  mutate(tm_don_inv_years = as.numeric(difftime(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982),
-                                        ymd_hms(d_173836415_d_266600170_d_740582332),units="days")),
+  mutate(tm_don_inv_years = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_278539982,
+                                        d_173836415_d_266600170_d_740582332,units="days")),
 #Specifically requested to have labels as years with these exact counts of days
          tm_don_inv = case_when(as.numeric(tm_don_inv_years) < 731 ~ "Less than 2 years",
                                   as.numeric(tm_don_inv_years) < 912 ~"2- <2.5 years",
@@ -4585,8 +4984,9 @@ req_rec_inv_kable1(kit_request_table, tm_don_inv, "Time from Clinical Biospecime
 
 kit_tm_don_inv <- kit_request_table %>% 
   filter(!is.na(d_173836415_d_266600170_d_319972665_d_759651991)) %>% 
-  mutate(tm_don_inv_diff = as.numeric(difftime(ymd_hms(d_173836415_d_266600170_d_319972665_d_759651991),
-                                              ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982),units="days")),
+  mutate(tm_don_inv_diff = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_759651991,
+                                               d_173836415_d_266600170_d_319972665_d_278539982,
+                                               units="days")),
          tm_don_inv = case_when(as.numeric(tm_don_inv_diff) < 5 ~ "Less than 5 days",
                                   as.numeric(tm_don_inv_diff) < 10 ~"5- <10 days",
                                   as.numeric(tm_don_inv_diff) < 14 ~ "10- <14 days",
@@ -4640,8 +5040,8 @@ kit_tm_don_inv <- kit_request_table %>%
 
 kit_tm_inv_recvd <- kit_request_table %>% 
   filter(Kit_Status_int=="Received") %>% 
-  mutate(tm_inv_recvd_weeks = as.numeric(difftime(ymd_hms(d_173836415_d_266600170_d_319972665_d_826941471),
-                                              ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982),units="weeks")),
+  mutate(tm_inv_recvd_weeks = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_826941471,
+                                              d_173836415_d_266600170_d_319972665_d_278539982,units="weeks")),
          tm_inv_recvd = case_when(as.numeric(tm_inv_recvd_weeks) < 1 ~ "Less than 1 week",
                                   as.numeric(tm_inv_recvd_weeks) < 2 ~"1-<2 weeks",
                                   as.numeric(tm_inv_recvd_weeks) < 3 ~ "2-<3 weeks",
@@ -4685,16 +5085,16 @@ kit_tm_inv_recvd <- kit_request_table %>%
 ```{r RequestKits6,echo=FALSE, message=FALSE,warning=FALSE,results='hold'}
 
 kit_request_table <- kit_request_table %>% 
-  mutate(last_survey = pmax(ymd_hms(d_784810139), #COVID completion time
-                            ymd_hms(d_389890053), #CSH completion time
-                            ymd_hms(d_843688458), #PROMIS completion time
-                            ymd_hms(d_543379310), #ROI completion time
-                            ymd_hms(d_517311251), #BOH completion time
-                            ymd_hms(d_832139544), #MRE completion time
-                            ymd_hms(d_770257102), #SAS completion time
-                            ymd_hms(d_264644252), #LAW completion time
-                            ymd_hms(d_199471989), na.rm=T), #CES completion time
-         tm_surv_daymonths = as.numeric(difftime(ymd_hms(d_173836415_d_266600170_d_319972665_d_278539982),
+  mutate(last_survey = pmax(d_784810139, #COVID completion time
+                            d_389890053, #CSH completion time
+                            d_843688458, #PROMIS completion time
+                            d_543379310, #ROI completion time
+                            d_517311251, #BOH completion time
+                            d_832139544, #MRE completion time
+                            d_770257102, #SAS completion time
+                            d_264644252, #LAW completion time
+                            d_199471989, na.rm=T), #CES completion time
+         tm_surv_daymonths = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_278539982,
                                           last_survey,units="days")),
          #Specifically requested to have labels as months with these exact counts of days
          tm_surv_inv = case_when(as.numeric(tm_surv_daymonths) < 182 ~ "Less than 6 months",
