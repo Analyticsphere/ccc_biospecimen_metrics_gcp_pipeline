@@ -118,18 +118,25 @@ dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "53
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
-simple_funct_BU <- function(CID, Title){  
+simple_funct_BU <- function(CID, Title, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
 
        gt_yn <- BU_tib %>%
-        filter(as.numeric(D_860011428)>=3) %>% 
     group_by(!!CID_SYM) %>%
     summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
     ungroup() %>%
     mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
     replace_na(list(answer = "Skipped this Question")) %>%
     select(answer, n, percentage)
-      
+  
+# Apply factor ordering if provided
+if (!is.null(factor_levels)){
+    gt_yn <- gt_yn %>%
+        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
+        arrange(answer)
+}
+
+    
   gt_yn_kable <- gt_yn %>%
     mutate(
       percentage = round(percentage, 1),
@@ -156,7 +163,8 @@ simple_funct_BU <- function(CID, Title){
     kable_styling(latex_options = c("scale_down"))
 }
 
-menstrual_funct <- function(CID, Title){  
+
+menstrual_funct <- function(CID, Title, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
   
          gt_yn <- BU_tib %>%
@@ -167,7 +175,15 @@ menstrual_funct <- function(CID, Title){
     mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
     replace_na(list(answer = "Skipped this Question")) %>%
     select(answer, n, percentage)
-      
+   
+# Apply factor ordering if provided
+if (!is.null(factor_levels)){
+    gt_yn <- gt_yn %>%
+        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
+        arrange(answer)
+}
+
+   
   gt_yn_kable <- gt_yn %>%
     mutate(
       percentage = round(percentage, 1),
@@ -197,7 +213,7 @@ menstrual_funct <- function(CID, Title){
 
 
 #One skip logic (previous response was one particular response)
-one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){  
+one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
   
@@ -209,7 +225,15 @@ one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){
     mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
     replace_na(list(answer = "Skipped this Question")) %>%
     select(answer, n, percentage)
-      
+   
+# Apply factor ordering if provided
+if (!is.null(factor_levels)){
+    gt_yn <- gt_yn %>%
+        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
+        arrange(answer)
+}
+
+   
   gt_yn_kable <- gt_yn %>%
     mutate(
       percentage = round(percentage, 1),
@@ -238,7 +262,7 @@ one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer){
 
 
 #Two skip logic (previous response has one of two responses)
-two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_CID2, Previous_Answer2){  
+two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_CID2, Previous_Answer2, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
   CID_SYM_P <- rlang::ensym(Previous_CID)
   CID_SYM_P2 <- rlang::ensym(Previous_CID2)
@@ -251,7 +275,15 @@ two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_C
     mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
     replace_na(list(answer = "Skipped this Question")) %>%
     select(answer, n, percentage)
-      
+  
+# Apply factor ordering if provided
+if (!is.null(factor_levels)){
+    gt_yn <- gt_yn %>%
+        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
+        arrange(answer)
+}
+
+    
   gt_yn_kable <- gt_yn %>%
     mutate(
       percentage = round(percentage, 1),
@@ -286,7 +318,7 @@ two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_C
 
 
 
-create_kable_table_w_footnote <- function(df, group_by_vriable, Title){  
+create_kable_table_w_footnote <- function(df, group_by_vriable, Title, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(group_by_vriable)
   
   gt_yn <- df %>%
@@ -297,6 +329,14 @@ create_kable_table_w_footnote <- function(df, group_by_vriable, Title){
     replace_na(list(answer = "Skipped this Question")) %>%
     select(answer, n, percentage)
   
+# Apply factor ordering if provided
+if (!is.null(factor_levels)){
+    gt_yn <- gt_yn %>%
+        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
+        arrange(answer)
+}
+
+
   gt_yn_kable <- gt_yn %>%
     mutate(
       percentage = round(percentage, 1),
@@ -400,8 +440,8 @@ create_kable_table_w_footnote(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms
 
 
 #EATDRINKBEFORE
-BU_tib$D_867307558 <- factor(BU_tib$D_867307558,levels=c(110092955, 952212668, 330461666, "Skipped this Question"))
-simple_funct_BU(D_867307558, "Table 3: When Last Food or Beverage Consumed")
+simple_funct_BU(D_867307558, "Table 3: When Last Food or Beverage Consumed",
+factor_levels = c("The same day","The day before","More than a day before") )
 
 
 
@@ -524,15 +564,15 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 
 # Medications
 ```{r Meds, warning=FALSE, echo=FALSE,  message=FALSE}
-BU_tib$D_487532606_D_619765650 <- factor(BU_tib$D_487532606_D_619765650,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
-BU_tib$D_487532606_D_520755310 <- factor(BU_tib$D_487532606_D_520755310,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
-BU_tib$D_487532606_D_839329467 <- factor(BU_tib$D_487532606_D_839329467,levels=c(104430631, 974230748, 936042740, 731141335, 591670915, "Skipped this Question"))
 
-simple_funct_BU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken")
+simple_funct_BU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken",
+factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
-simple_funct_BU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken")
+simple_funct_BU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken",
+factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
-simple_funct_BU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken")
+simple_funct_BU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken",
+factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
 
 ```
@@ -543,17 +583,21 @@ simple_funct_BU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so
 ```{r ReproductiveHealth, warning=FALSE, echo=FALSE,  message=FALSE}
 
 #MENSTPRD
-menstrual_funct(D_380603392, "MENSTPRD: Had Menstrual Period in the Last 12 Months")
+menstrual_funct(D_380603392, "MENSTPRD: Had Menstrual Period in the Last 12 Months",
+                   factor_levels = c("Yes", "No"))
 
 
 #MENST60
-one_skip_funct(D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days", D_380603392, "353358909") 
+one_skip_funct(D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days", D_380603392, "353358909",
+                   factor_levels = c("Yes", "No")) 
 
 
 
 #MENSTART
-BU_tibM <- BU_tib %>%  filter(!is.na(BU_tib$D_644459734) & BU_tib$D_112151599=="353358909")
-str_sub(BU_tibM$D_644459734,1,4)[str_sub(BU_tibM$D_644459734,1,4)=="0024"] = "2024"
+BU_tibM <- BU_tib %>%  filter(!is.na(BU_tib$D_644459734) & BU_tib$D_112151599=="353358909" &
+                                #remove errors
+                                str_sub(D_644459734,1,4)>=2021)
+
 BU_tibM$Mdate <- as.Date(BU_tibM$D_644459734)
 
 BU_TimeM <- BU_tibM  %>% dplyr::group_by(Mdate) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(Mdate, n)
@@ -564,21 +608,27 @@ pM + scale_x_date(date_labels = "%b %Y")
 
 
 #PREGNANT
-menstrual_funct(D_518916981, "PREGNANT: Currently Pregnant")
+menstrual_funct(D_518916981, "PREGNANT: Currently Pregnant",
+                   factor_levels = c("Yes", "No"))
 
 #PREG3MON
-one_skip_funct(D_234714655, "Table 13: Been Pregnant in the Last 3 Months", D_518916981, "104430631") 
+one_skip_funct(D_234714655, "Table 13: Been Pregnant in the Last 3 Months", D_518916981, "104430631",
+                   factor_levels = c("Yes", "No")) 
 
 #BRSTFD
-menstrual_funct(D_798452445, "Table 14: Currently Breastfeeding")
+menstrual_funct(D_798452445, "Table 14: Currently Breastfeeding",
+                   factor_levels = c("Yes", "No"))
 
 #BRSTFD3MON
-one_skip_funct(D_563539159, "Table 15: Breastfed in the Last 3 Months", D_798452445, "104430631") 
+one_skip_funct(D_563539159, "Table 15: Breastfed in the Last 3 Months", D_798452445, "104430631",
+                   factor_levels = c("Yes", "No")) 
 
 #CONTRACEPT
-one_skip_funct(D_875535246, "Table 16: Used Hormonal Contraceptives in the Last Month", D_518916981, "104430631") 
+one_skip_funct(D_875535246, "Table 16: Used Hormonal Contraceptives in the Last Month", D_518916981, "104430631",
+                   factor_levels = c("Yes", "No")) 
 
 #HORMONE
-one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the Last Month", D_518916981, "104430631") 
+one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the Last Month", D_518916981, "104430631",
+                   factor_levels = c("Yes", "No")) 
 
 ```
