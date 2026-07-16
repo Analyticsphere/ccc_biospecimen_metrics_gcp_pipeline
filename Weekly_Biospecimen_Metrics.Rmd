@@ -4025,6 +4025,46 @@ total_row <- test30 %>%
   )
 
 Table7.4 <- bind_rows(Table7.4, total_row)
+
+
+
+
+
+### Shipment time to present day - in Shipped status (NOT received)
+all_shipped_to_date <- kit_table %>%
+  filter(Kit_Status_int=="Shipped" & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+ 
+all_shipped_to_date <-  all_shipped_to_date %>%
+  mutate(ctime = as.numeric(difftime(currentDate,
+                                     d_173836415_d_266600170_d_319972665_d_661940160,units="days"))) %>% 
+  filter(ctime>0)
+ 
+Shipped_TD <- summarize_time(
+    all_shipped_to_date,
+    group_var = Site,
+    n_label   = "N",
+    time_var  = ctime,
+    perc_90   = TRUE,
+    perc_95   = TRUE
+)
+
+
+total_row <- all_shipped_to_date %>%
+  dplyr::summarize(
+    Site = "Total",
+    N = n(),
+    Min = min(ctime),
+    Q1 = quantile(ctime, 0.25),
+    Median = median(ctime),
+    Mean = mean(ctime),
+    Q3 = quantile(ctime, 0.75),
+    Perc.90 = quantile(ctime, 0.90),
+    Perc.95 = quantile(ctime, 0.95),
+    Max = max(ctime)
+  )
+
+Shipped_TD <- bind_rows(Shipped_TD, total_row)
+
  
  
  
@@ -4410,6 +4450,15 @@ table7.4 <- knitr::kable(Table7.4,
   kable_styling(latex_options = "HOLD_position")
  
 add_footnote(table7.4, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
+
+
+## Pending approval-- new table 7.5
+pending_TD <- knitr::kable(Shipped_TD,
+                         caption='Table 7.5- Baseline Time (in Days) from Home Mouthwash Initial Kit Shipment to Present Date for Initial Kits Not Yet Received',
+                         row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE) %>% 
+  add_indent(seq(1, nrow(Shipped_TD) - 1)) %>% 
+  kable_styling(latex_options = "HOLD_position")
+
  
  
  

@@ -657,14 +657,12 @@ bioqc1 <- bioqc %>%
                            !is.na(d_646899796) & 
                            (Site=="Henry Ford Health System" | Site=="University of Chicago Medicine") & #only HP and UC sends this
                            !(Connect_ID %in% c( 
-                             # HFH exclusions
                              2824989966,3759939890,4688823720,8589481620, 6336258662,5461650381,4900116130,4462616750, 9111871102,8476952861,2974054638,3544623873,
                            3293040395,7571439842,3165368475,6954174713, 6361337944,1629086681,3544623873,3293040395, 7571439842,3165368475,6954174713,6361337944,
                            1629086681,9768745029,3770024701,8836251245, 3312148528 , 1608206802, 1671653943, 6806962114, 6446294667,
-                           # UC exclusions
+                           '1208904227', '9889955644', '6412332391', '5574963823',
                            4782195164,6229346420,8336144924,7515171846 ,9963945282,9554775290,8570090186,4727512872, 5506703775,8123989364 ,1271036774,6288600449,
                            9692694571, 4327492344, 8372596629, 9399609746,
-                           #SF exclusions ##this last one is somehow being shown as an error when it is not. Cannot find a workaround
                            9843228847, 7152112646)) &  
                            # Don't count the empty bracket people if they're in rule #8, because those would be expected
                            !(Connect_ID %in% qc_8$`Connect ID`))
