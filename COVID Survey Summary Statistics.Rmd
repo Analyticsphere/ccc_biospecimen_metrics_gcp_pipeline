@@ -141,10 +141,10 @@ dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
 
-simple_funct_CVD <- function(CID, Title, factor_levels = NULL){  
+simple_funct_CVD <- function(data,CID, Title, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
 
-      gt_yn <- CVD_tib %>%
+      gt_yn <- data %>%
     group_by(!!CID_SYM) %>%
     summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
     ungroup() %>%
@@ -571,7 +571,7 @@ date_hist_funct <- function(CID,Title, Xlab, Ylab){
 
 
 #COV1
-simple_funct_CVD(D_494226443, "Ever Have COVID-19", 
+simple_funct(CVD_tib,D_494226443, "Ever Have COVID-19", 
                    factor_levels = c("Yes", "No", "Do not Know"))
 
 
@@ -1407,7 +1407,7 @@ factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in
 
 
 #COV23B8A
-simple_funct_CVD(D_424718457_D_424718457, "Experienced any Other Symptom Since 2020",
+simple_funct(CVD_tib,D_424718457_D_424718457, "Experienced any Other Symptom Since 2020",
 factor_levels = c("Yes, another", "No") )
 
 #CVD_tib %>%  select(D_424718457_D_157417942) %>% filter(!is.na(D_424718457_D_157417942)) %>% gt() %>% cols_label(D_424718457_D_157417942= md("**Table 126: Experienced What Other Symptom Since 2020**"))

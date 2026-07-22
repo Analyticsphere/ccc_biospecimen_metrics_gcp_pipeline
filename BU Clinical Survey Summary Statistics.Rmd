@@ -118,10 +118,10 @@ dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "53
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
-simple_funct_BU <- function(CID, Title, factor_levels = NULL){  
+simple_funct <- function(data,CID, Title, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
 
-       gt_yn <- BU_tib %>%
+       gt_yn <- data %>%
     group_by(!!CID_SYM) %>%
     summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
     ungroup() %>%
@@ -392,7 +392,7 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
 
 
 #SEX
-simple_funct_BU(D_522008539, "SEX: Biological Sex at Birth")
+simple_funct(BU_tib,D_522008539, "SEX: Biological Sex at Birth")
 
 
 
@@ -440,7 +440,7 @@ create_kable_table_w_footnote(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms
 
 
 #EATDRINKBEFORE
-simple_funct_BU(D_867307558, "Table 3: When Last Food or Beverage Consumed",
+simple_funct(BU_tib,D_867307558, "Table 3: When Last Food or Beverage Consumed",
 factor_levels = c("The same day","The day before","More than a day before") )
 
 
@@ -565,13 +565,13 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 # Medications
 ```{r Meds, warning=FALSE, echo=FALSE,  message=FALSE}
 
-simple_funct_BU(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken",
+simple_funct(BU_tib,D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken",
 factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
-simple_funct_BU(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken",
+simple_funct(BU_tib,D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken",
 factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
-simple_funct_BU(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken",
+simple_funct(BU_tib,D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken",
 factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
 

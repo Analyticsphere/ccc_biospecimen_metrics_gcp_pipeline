@@ -117,10 +117,10 @@ dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Unknown", "536341
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
-simple_funct_BUM <- function(CID, Title, factor_levels = NULL){  
+simple_funct <- function(data,CID, Title, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
 
-       gt_yn <- BUM_tib %>%
+       gt_yn <- data %>%
         filter(as.numeric(D_860011428)>=3) %>% 
     group_by(!!CID_SYM) %>%
     summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
@@ -433,7 +433,7 @@ hist_funct <- function(CID,Title, Xlab, Ylab) {
 
 
 #SEX
-simple_funct_BUM(D_522008539, "SEX: Biological Sex at Birth")
+simple_funct(BUM_tib,D_522008539, "SEX: Biological Sex at Birth")
 
 
 
@@ -482,7 +482,7 @@ create_kable_table_w_footnote(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms
 
 
 #EATDRINKBEFORE
-simple_funct_BUM(D_867307558, "Table 3: When Last Food or Beverage Consumed")
+simple_funct(BUM_tib,D_867307558, "Table 3: When Last Food or Beverage Consumed")
 
 
 ```
@@ -626,13 +626,13 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 ```{r Meds, warning=FALSE, echo=FALSE,  message=FALSE}
 
 
-simple_funct_BUM(D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken",
+simple_funct(BUM_tib,D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken",
 factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
-simple_funct_BUM(D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken",
+simple_funct(BUM_tib,D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken",
 factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
-simple_funct_BUM(D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken",
+simple_funct(BUM_tib,D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken",
 factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
 
 
@@ -706,25 +706,25 @@ one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the 
 
 
 #ORALHLTH
-simple_funct_BUM(D_350251057, "Table 117: Overall Health Ranking",
+simple_funct(BUM_tib,D_350251057, "Table 117: Overall Health Ranking",
                  factor_levels = c("Excellent", "Very Good", "Good", "Fair", "Poor"))
 
 
 
 #MWBEFORE
-simple_funct_BUM(D_877878167, "Table 19: Brushed Teeth Within the Hour Before Sample Donation")
+simple_funct(BUM_tib,D_877878167, "Table 19: Brushed Teeth Within the Hour Before Sample Donation")
 
 
 #RINSEBEFORE
-simple_funct_BUM(D_800703566, "Table 20: Rinsed Mouth Within the Hour Before Sample Donation")
+simple_funct(BUM_tib,D_800703566, "Table 20: Rinsed Mouth Within the Hour Before Sample Donation")
 
 
 #GUMBEFORE
-simple_funct_BUM(D_294886836, "Table 21: Chewed Gum Within the Hour Before Sample Donation")
+simple_funct(BUM_tib,D_294886836, "Table 21: Chewed Gum Within the Hour Before Sample Donation")
 
 
 #TOBACCOBEFORE
-simple_funct_BUM(D_642044281, "Table 22: Smoke, Vape or Chew Products Within the Hour Before Sample Donation")
+simple_funct(BUM_tib,D_642044281, "Table 22: Smoke, Vape or Chew Products Within the Hour Before Sample Donation")
 ```
 
 \newpage
@@ -1032,27 +1032,27 @@ create_kable_table(dnt, products, "Table 43: Lost Permanent Adult Teeth, not Inc
 
 
 #DENTALCELAN
-simple_funct_BUM(D_339570897, "Table 143: Last Professional Dental Cleaning",
+simple_funct(BUM_tib,D_339570897, "Table 143: Last Professional Dental Cleaning",
 factor_levels = c("In the last month", "In the last 1-6 months", "In the past 6-12 months","Over a year, in the Last Two Years", "More than 2 years","Unknown") )
 
 
 #CAVITY
-simple_funct_BUM(D_983043203, "Table 45: Had Cavities in Adult Teeth",
+simple_funct(BUM_tib,D_983043203, "Table 45: Had Cavities in Adult Teeth",
 factor_levels = c("Yes", "No", "Unknown"))
 
 
 #GUMDISEASE
-simple_funct_BUM(D_736028153, "Table 46: Diagnosed with Gum Disease",
+simple_funct(BUM_tib,D_736028153, "Table 46: Diagnosed with Gum Disease",
 factor_levels = c("Yes", "No", "Unknown"))
 
 
 #GUMTX
-simple_funct_BUM(D_792134396, "Table 47: Treated for Gum Disease",
+simple_funct(BUM_tib,D_792134396, "Table 47: Treated for Gum Disease",
 factor_levels = c("Yes", "No", "Unknown"))
 
 
 #ANTIBIO
-simple_funct_BUM(D_736393021, "Table 48: Taken Antibiotics in the Last 2 Months",
+simple_funct(BUM_tib,D_736393021, "Table 48: Taken Antibiotics in the Last 2 Months",
 factor_levels = c("Yes", "No", "Unknown"))
 
 
