@@ -1292,7 +1292,7 @@ IRB_demo_BioCols <- stacked_IRB_demo_BioCols %>%
   modify_caption("Table 1.10: Baseline Biospecimen Collection Setting by Gender, Race, and Ethnicity") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down") %>% 
-  footnote("Note: Ethnicity information for participants who have not completed Module 1 is Missing. Race is defined as the de-identified race data reported by sites at time of invitation.",
+  footnote("Note: Race and ethnicity information are defined based on responses to questions in Module 1; for those who have not completed Module 1 those values are set to 'Missing'. Gender is defined from the de-identified data reported by sites at time of invitation.",
           general_title = "",
          footnote_as_chunk = TRUE, 
          escape = FALSE, 
@@ -1780,7 +1780,7 @@ notcol.reasons.research <- rbind(reseachnotes.notcol,reseachnotes.coltype)
 
 
 ## Reasons not collected by site 
-reason_notcol <- create_tbl_cross(research.notcol, "Site", "notcol.notes", "column", "Site", " ")
+reason_notcol <- create_tbl_cross(research.notcol, "Site", "notcol.notes", "row", "Site", " ")
 colnames(reason_notcol)[ncol(reason_notcol)] <- "Total Tubes Not Collected"
 colnames(reason_notcol)[1] <- "Site"
 
@@ -1802,10 +1802,9 @@ colnames(tube_type_notcolreasons)[1] <- "Tube Type"
 discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>% 
   mutate(Site=droplevels(as.factor(Site)),
          tube_type = droplevels(as.factor(tube_type)))
-discard.site <- n_pct_table(discard.tb$Site,discard.tb$tube_type)
-discard.site <- (discard.site[, c((ncol(discard.site)), 1:(ncol(discard.site)-1))])
 
-discard.site[nrow(discard.site),c(2:ncol(discard.site))] <- paste(discard.site[nrow(discard.site),c(2:ncol(discard.site))], "(100%)")
+
+discard.site <- create_tbl_cross(discard.tb, "Site", "tube_type", "row", "Site", " ")
 
 ```
 
@@ -2651,11 +2650,12 @@ verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>%
   mutate(checktmvisit = case_when(as.numeric(time) < 0 ~ "Negative Time",
                                   as.numeric(time) <1 ~"Within 1 Day",
                                   as.numeric(time) < 3 ~ "1-3 Days",
-                                  as.numeric(time) <30 ~ "4-30 Days",
-                                  as.numeric(time) >= 30 ~ "More than 30 Days",
+                                  as.numeric(time) <8 ~ "4-7 Days",
+                                  as.numeric(time) <31 ~ "8-30 Days",
+                                  as.numeric(time) > 30 ~ "More than 30 Days",
                                   TRUE ~ "Missing Time Stamp(s)"),
          checktmvisit = factor(checktmvisit, levels=c("Negative Time", "Within 1 Day", "1-3 Days",
-                                                      "4-30 Days", "More than 30 Days", "Missing Time Stamp(s)")))
+                                                      "4-7 Days", "8-30 Days", "More than 30 Days", "Missing Time Stamp(s)")))
 
 verif_draw_order <- create_tbl_cross(verif_draw, "checktmvisit", "Site", "column", " ", " ")
 colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placements"
@@ -2664,50 +2664,6 @@ colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placement
 
 ```
 
-
-
-```{r Collection_BU_BUM_Sub, include=FALSE, echo=FALSE, warning=FALSE}
-
-# One varibale is renamed to Not Started, Started, Submitted; the other is not; need to fix later
-all_coll_to_sub <- coll_sett_all %>%  
-  filter(d_265193023 == 'Submitted' | d_253883960=='231311385') %>% 
-  mutate(collection = if_else(d_265193023 == 'Submitted', d_678166505, d_556788178),
-         surv_sub = if_else(d_265193023 == 'Submitted', d_222161762, d_764863765),
-         coll_to_sub = as.numeric(round(difftime(as.Date(surv_sub), as.Date(collection),
-                                                 units="days"), digits=0)),
-         time = case_when(as.numeric(coll_to_sub) <=1 ~"Within 1 Day",
-                          as.numeric(coll_to_sub) <= 3 ~ "2-3 Days",
-                          as.numeric(coll_to_sub) <=5 ~ "4-5 Days",
-                          as.numeric(coll_to_sub) <=14 ~ "6-14 Days",
-                          as.numeric(coll_to_sub) <=30 ~ "15-30 Days",
-                          as.numeric(coll_to_sub) <=60 ~ "31-60 Days",
-                          as.numeric(coll_to_sub) <=90 ~ "61-90 Days",
-                          as.numeric(coll_to_sub) <=120 ~ "91-120 Days",
-                          as.numeric(coll_to_sub) <=180 ~ "121-180 Days",
-                          as.numeric(coll_to_sub) >180 ~ "More than 180 Days",
-                          TRUE ~ "Missing Time Stamp(s)"),
-         #time = droplevels(time), # don't include catgories with a count of 0
-         time = factor(time, levels=c("Within 1 Day", "2-3 Days","4-5 Days","6-14 Days","15-30 Days","31-60 Days",
-                                      "61-90 Days","91-120 Days","121-180 Days", "More than 180 Days", 
-                                      "Missing Time Stamp(s)"))) %>% 
-  group_by(time) %>%  tally()
-
-### Add percentage -- separating to a new df so the total row can be mereged in afterwards. % will throw off sum function
-all_coll_to_sub_with_pct <- all_coll_to_sub %>% 
-  mutate(n_pct = paste0(all_coll_to_sub$n, " (",
-                        round(all_coll_to_sub$n/sum(all_coll_to_sub$n)*100, digits=1), "%)"))
-
-### Add total row
-total_row <- c("Total", paste0(as.numeric(sum(all_coll_to_sub$n)), " (100%)"))
-
-total_df <- data.frame(t(total_row), stringsAsFactors = FALSE) #set to df to bind
- 
-colnames(total_df) <- colnames(all_coll_to_sub_with_pct[, c(1,3)])
-
-all_coll_to_sub_with_pct <- rbind(all_coll_to_sub_with_pct[, c(1,3)], total_df)
-
-
-```
 
 
 
@@ -2914,7 +2870,7 @@ tab2_8= knitr::kable(bloodtubetype_R,
                      row.names=FALSE,align=c("l",rep("c", 10)), booktabs = TRUE) %>%  
   add_indent(seq(1, nrow(bloodtubetype_R) - 1))  %>% 
   kable_styling(latex_options = "scale_down")
-add_footnote(tab2_8, "Note: Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 03/26/2025; Streck tube is only collected at certain sites .", notation = "none")
+add_footnote(tab2_8, "Note: Collection of ACD tube was discontinued on 03/01/2024; Collection of Heparin tube was discontinued on 03/26/2025; Streck tube collection was introduced at different time points across sites.", notation = "none")
 
 
 
@@ -2949,7 +2905,9 @@ tabe2_12 <- knitr::kable(reason_notcol,
                          row.names=FALSE,align=c("l",rep("c", 7)), booktabs = TRUE) %>%  
   add_indent(seq(1, nrow(reason_notcol) - 1)) %>% 
   kable_styling(latex_options = "scale_down")
-add_footnote(tabe2_12,"Note: The 'Short Draw' is applicable to blood collection tubes only.", notation="none")
+add_footnote(tabe2_12,c("Note: The 'Short Draw' is applicable to blood collection tubes only.",
+                        "Note: 'Supply Unavailable' counts reflect misclassification of reason not collected due to periods of time when certain tubes were listed in the Biospecimen Dashboard but not expected to be collected at a site, either due to removal or staggered addition of a tube type to collection protocol."),
+             notation="none")
 
 
 
@@ -2997,18 +2955,10 @@ knitr::kable(BU_status,
   kable_styling(latex_options = "scale_down")
 
 
-CTS <-knitr::kable(all_coll_to_sub_with_pct,
-                   caption='Table 3.3: Time (in Days) From Specimen Collection to Biospecimen Survey Completion',
-                   col.names = c("Time", "N(%)"),
-                   format.args = list(big.mark = ","),
-                   row.names=FALSE,  align=c("l", "c"),digits=1, booktabs = TRUE)  %>% 
-  add_indent(seq(1, nrow(all_coll_to_sub_with_pct) - 1))  %>%
-  kable_styling(latex_options = "scale_down")
-add_footnote(CTS,"Note: Collection times reflected in this table for collections that occurred in the clinical collection setting are an estimate, based on when samples were finalized in the Biospecimen Dashboard, actual collections would have occurred on average 1 day prior to the Connect team receiving the samples.", notation = "none")
 
 
 tbl19a <-knitr::kable(precovid_BUMtime, 
-                      caption='Table 3.4: Baseline Biospecimen Survey Completion Time from Research Collection Visit Check In \n (Pre-COVID- 19 Questions Removal)',
+                      caption='Table 3.3: Baseline Biospecimen Survey Completion Time from Research Collection Visit Check In \n (Pre-COVID- 19 Questions Removal)',
                       row.names=FALSE,align=c("l",rep("c", 6)), booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down")
 add_footnote(tbl19a,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none") 
@@ -3016,7 +2966,7 @@ add_footnote(tbl19a,"Note: The COVID-19 survey questions were separated from the
 
 
 tbl19b <- knitr::kable(postcovid_BUMtime, 
-                       caption='Table 3.5: Baseline Biospecimen Survey Completion Time from Research Collection Visit Check In \n (Post- COVID-19 Questions Removal)',
+                       caption='Table 3.4: Baseline Biospecimen Survey Completion Time from Research Collection Visit Check In \n (Post- COVID-19 Questions Removal)',
                        row.names=FALSE,align=c("l",rep("c", 6)), booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down")
 add_footnote(tbl19b,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none") 
@@ -3041,17 +2991,17 @@ research.4_4
 ```{r KnitrTables17_20,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
 
 knitr::kable(coll_comp_BU, 
-             caption='Table 3.6: Baseline Clinical Biospecimen Survey Complete Time from Collection Time', 
+             caption='Table 3.5: Baseline Clinical Biospecimen Survey Complete Time from Collection Time', 
              row.names=FALSE,align=c("l", rep("c", 8)), booktabs = TRUE)  %>% kable_styling(latex_options = "scale_down")
 
 knitr::kable(BU_coll_DB_comp,
-             caption='Table 3.6.a Time (in Hours) From Clinical Biospecimen Collection to Biospecimen Dashboard Entry',
+             caption='Table 3.5.a Time (in Hours) From Clinical Biospecimen Collection to Biospecimen Dashboard Entry',
              row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
   kable_styling(latex_options = "scale_down")
 
 
 knitr::kable(BU_trig_comp,
-             caption='Table 3.6.b Baseline Clinical Biospecimen Survey Complete Time (in Hours) From Survey Becoming Available',
+             caption='Table 3.5.b Baseline Clinical Biospecimen Survey Complete Time (in Hours) From Survey Becoming Available',
              row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>%
   kable_styling(latex_options = "scale_down")
 
@@ -3059,7 +3009,7 @@ knitr::kable(BU_trig_comp,
 
 
 tab21_rb=knitr::kable(Table21R_Before,
-                      caption='Table 3.7: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted \n Research Surveys (Pre-COVID-19 Questions Removal)',
+                      caption='Table 3.6: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted \n Research Surveys (Pre-COVID-19 Questions Removal)',
                       row.names=FALSE, align=c("l", rep("c", 11)),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
 add_footnote(tab21_rb,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023. Research biospecimen surveys with a negative completion time have been excluded.",notation = "none")
 
@@ -3067,7 +3017,7 @@ add_footnote(tab21_rb,"Note: The COVID-19 survey questions were separated from t
 
 
 tab21_ra=knitr::kable(Table21R_After,
-                      caption='Table 3.8: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted \n Research Surveys (Post-COVID-19 Questions Removal)',
+                      caption='Table 3.7: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted \n Research Surveys (Post-COVID-19 Questions Removal)',
                       row.names=FALSE, align=c("l", rep("c", 11)),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
 add_footnote(tab21_ra,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023. ", notation = "none") %>% 
   add_footnote("Research biospecimen surveys with a negative completion time have been excluded.", notation = "none")
@@ -3077,7 +3027,7 @@ add_footnote(tab21_ra,"Note: The COVID-19 survey questions were separated from t
 
 
 tab21_cb=knitr::kable(ClinSrvy_Lgth_Before,
-                      caption='Table 3.9: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted Clinical Surveys \n (Pre-COVID-19 Questions Removal)',
+                      caption='Table 3.8: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted Clinical Surveys \n (Pre-COVID-19 Questions Removal)',
                       row.names=FALSE, align=c("l", rep("c", 10)),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
 add_footnote(tab21_cb,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none") %>% 
   add_footnote("Note: Clinical biospecimen surveys with a negative completion time have been excluded..", 
@@ -3087,7 +3037,7 @@ add_footnote(tab21_cb,"Note: The COVID-19 survey questions were separated from t
 
 
 tab21_ca=knitr::kable(ClinSrvy_Lgth_After,
-                      caption='Table 3.10: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted Clinical Surveys \n (Post-COVID-19 Questions Removal)',
+                      caption='Table 3.9: Baseline Biospecimen Survey Completion Length (in Minutes) Among Submitted Clinical Surveys \n (Post-COVID-19 Questions Removal)',
                       row.names=FALSE, align=c("l", rep("c", 10)),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down")
 add_footnote(tab21_ca,"Note: The COVID-19 survey questions were separated from the Biospecimen Survey on July 5, 2023.", notation = "none") %>% 
   add_footnote("Note: Clinical biospecimen surveys with a negative completion time have been excluded..", 
@@ -3217,7 +3167,7 @@ knitr::kable(crosstable.coll_bptl1,
 \newpage
 \newpage
 \FloatBarrier
-# Baseline Collection-To-Receipt Times and Package Conditions
+# Baseline Collection-To-Receipt Times 
 \vspace{-0.5em}
 \FloatBarrier
 ```{r KnitrTable28_30,echo=FALSE,error=FALSE,message=FALSE,warning=FALSE,results='asis'}
@@ -3284,7 +3234,7 @@ coll_bptl_diff2 <- coll_bptl_diff2 %>%
          Weekdays = factor(Weekdays,levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")))
 
 
-weekday_order <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+
 
 
 research_plot <- function(site_name, start_date, plot_title){
@@ -4035,35 +3985,26 @@ all_shipped_to_date <- kit_table %>%
   filter(Kit_Status_int=="Shipped" & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
  
 all_shipped_to_date <-  all_shipped_to_date %>%
-  mutate(ctime = as.numeric(difftime(currentDate,
+  mutate(ship_time = as.numeric(difftime(currentDate,
                                      d_173836415_d_266600170_d_319972665_d_661940160,units="days"))) %>% 
-  filter(ctime>0)
- 
-Shipped_TD <- summarize_time(
-    all_shipped_to_date,
-    group_var = Site,
-    n_label   = "N",
-    time_var  = ctime,
-    perc_90   = TRUE,
-    perc_95   = TRUE
-)
+  mutate(ship_timeframe = case_when(ship_time < 7 ~ "< 1 week",
+                                    ship_time < 15 ~ "1-2 weeks", 
+                                    ship_time < 31 ~ "2-4 weeks", 
+                                    ship_time < 91 ~ "1-3 months",
+                                    ship_time < 181 ~ "3-6 months",
+                                    ship_time < 366 ~ "6-12 months",
+                                    ship_time>= 366 ~ "> 12 months"),
+         ship_timeframe = factor(ship_timeframe, 
+                                 levels=c("< 1 week", "1-2 weeks",  "2-4 weeks", 
+                                          "1-3 months", "3-6 months", "6-12 months", 
+                                          "> 12 months")))
 
 
-total_row <- all_shipped_to_date %>%
-  dplyr::summarize(
-    Site = "Total",
-    N = n(),
-    Min = min(ctime),
-    Q1 = quantile(ctime, 0.25),
-    Median = median(ctime),
-    Mean = mean(ctime),
-    Q3 = quantile(ctime, 0.75),
-    Perc.90 = quantile(ctime, 0.90),
-    Perc.95 = quantile(ctime, 0.95),
-    Max = max(ctime)
-  )
 
-Shipped_TD <- bind_rows(Shipped_TD, total_row)
+Shipped_TD <- create_tbl_cross(all_shipped_to_date, "ship_timeframe", "Site", "column", " ", " ")
+colnames(Shipped_TD)[ncol(Shipped_TD)] = "Total Kits Not Yet Received"
+
+
 
  
  
@@ -4454,9 +4395,10 @@ add_footnote(table7.4, "Note: Kits were returned using USPS prior to 6/17/2024."
 
 ## Pending approval-- new table 7.5
 pending_TD <- knitr::kable(Shipped_TD,
-                         caption='Table 7.5- Baseline Time (in Days) from Home Mouthwash Initial Kit Shipment to Present Date for Initial Kits Not Yet Received',
-                         row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE) %>% 
+                         caption='Table 7.5- Baseline Time from Home Mouthwash Initial Kit Shipment to Present Date for Initial Kits Not Yet Received',
+                         row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>% 
   add_indent(seq(1, nrow(Shipped_TD) - 1)) %>% 
+  landscape() %>% 
   kable_styling(latex_options = "HOLD_position")
 
  
