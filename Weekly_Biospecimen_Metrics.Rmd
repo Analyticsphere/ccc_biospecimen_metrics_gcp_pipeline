@@ -305,6 +305,7 @@ summarize_time <- function(data, group_var, n_label, time_var,
                            perc_90 = FALSE,
                            perc_95 = FALSE,
                            perc_98 = FALSE,
+                           perc_99 = FALSE,
                            digits  = 1) {
   data %>%
     group_by({{ group_var }}) %>%
@@ -320,6 +321,7 @@ summarize_time <- function(data, group_var, n_label, time_var,
       .P90   = if (perc_90) round(quantile({{ time_var }}, 0.90, na.rm = TRUE), digits)   else NULL,
       .P95   = if (perc_95) round(quantile({{ time_var }}, 0.95, na.rm = TRUE), digits)   else NULL,
       .P98   = if (perc_98) round(quantile({{ time_var }}, 0.98, na.rm = TRUE), digits)   else NULL,
+      .P99   = if (perc_99) round(quantile({{ time_var }}, 0.99, na.rm = TRUE), digits)   else NULL,
       Max    = round(max({{ time_var }}, na.rm = TRUE), digits),
       .groups = "drop"
     ) %>%
@@ -328,7 +330,8 @@ summarize_time <- function(data, group_var, n_label, time_var,
       "Perc.80" = ".P80",
       "Perc.90" = ".P90",
       "Perc.95" = ".P95",
-      "Perc.98" = ".P98"
+      "Perc.98" = ".P98",
+      "Perc.99" = ".P99"
     )))
 }
 
@@ -4001,7 +4004,9 @@ Table7.4 <- summarize_time(
     test30,
     group_var = Site,
     n_label   = "N",
-    time_var  = ctime
+    time_var  = ctime,
+    perc_90   = TRUE,
+    perc_95   = TRUE
 )
 
 
@@ -4014,10 +4019,52 @@ total_row <- test30 %>%
     Median = median(ctime),
     Mean = mean(ctime),
     Q3 = quantile(ctime, 0.75),
+    Perc.90 = quantile(ctime, 0.90),
+    Perc.95 = quantile(ctime, 0.95),
     Max = max(ctime)
   )
 
 Table7.4 <- bind_rows(Table7.4, total_row)
+
+
+
+
+
+### Shipment time to present day - in Shipped status (NOT received)
+all_shipped_to_date <- kit_table %>%
+  filter(Kit_Status_int=="Shipped" & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+ 
+all_shipped_to_date <-  all_shipped_to_date %>%
+  mutate(ctime = as.numeric(difftime(currentDate,
+                                     d_173836415_d_266600170_d_319972665_d_661940160,units="days"))) %>% 
+  filter(ctime>0)
+ 
+Shipped_TD <- summarize_time(
+    all_shipped_to_date,
+    group_var = Site,
+    n_label   = "N",
+    time_var  = ctime,
+    perc_90   = TRUE,
+    perc_95   = TRUE
+)
+
+
+total_row <- all_shipped_to_date %>%
+  dplyr::summarize(
+    Site = "Total",
+    N = n(),
+    Min = min(ctime),
+    Q1 = quantile(ctime, 0.25),
+    Median = median(ctime),
+    Mean = mean(ctime),
+    Q3 = quantile(ctime, 0.75),
+    Perc.90 = quantile(ctime, 0.90),
+    Perc.95 = quantile(ctime, 0.95),
+    Max = max(ctime)
+  )
+
+Shipped_TD <- bind_rows(Shipped_TD, total_row)
+
  
  
  
@@ -4398,11 +4445,20 @@ knitr::kable(Coll_Card_Status,
 #all these will move down a table number
 table7.4 <- knitr::kable(Table7.4,
                          caption='Table 7.4: Baseline- Time (in Days) from Home Mouthwash Initial Kit Shipment to \n BPTL Receipt',
-                         row.names=FALSE, align=c("l", rep("c", 6)),digits=1, booktabs = TRUE) %>% 
+                         row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE) %>% 
   add_indent(seq(1, nrow(Table7.4) - 1)) %>% 
   kable_styling(latex_options = "HOLD_position")
  
 add_footnote(table7.4, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
+
+
+## Pending approval-- new table 7.5
+pending_TD <- knitr::kable(Shipped_TD,
+                         caption='Table 7.5- Baseline Time (in Days) from Home Mouthwash Initial Kit Shipment to Present Date for Initial Kits Not Yet Received',
+                         row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE) %>% 
+  add_indent(seq(1, nrow(Shipped_TD) - 1)) %>% 
+  kable_styling(latex_options = "HOLD_position")
+
  
  
  
