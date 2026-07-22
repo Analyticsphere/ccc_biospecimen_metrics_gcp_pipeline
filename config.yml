@@ -95,7 +95,7 @@ weekly_recurring_processing_metrics:
 
 
 box_conditions:
-  r_file_name: "Monthly_Box_Conditions.Rmd"
+  r_file_name: Monthly_Box_Conditions.Rmd
   report_file_name: Monthly_Box_Conditions.pdf
   box_folders:
     - "385507867137"
