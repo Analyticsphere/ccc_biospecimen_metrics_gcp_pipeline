@@ -249,6 +249,8 @@ create_tbl_cross <- function(data, row_var, colm_var, row_or_col_pct, row_name, 
 
 }
 
+
+
 # Function to create a cross table
 ### Same function as above, but this strips the percentages out of the total column 
 create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name,
@@ -274,69 +276,48 @@ create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name,
 
 
 ## Reused summarize function, optional additions
-summarize_time <- function(data, group_var, n_label, time_var,
-                           std_dv  = FALSE,
-                           perc_80 = FALSE,
-                           perc_90 = FALSE,
-                           perc_95 = FALSE,
-                           perc_98 = FALSE,
-                           perc_99 = FALSE,
-                           digits  = 1) {
-  data %>%
-    group_by({{ group_var }}) %>%
-    dplyr::summarize(
-      !!n_label := n(),
-      Min    = round(min({{ time_var }}, na.rm = TRUE), digits),
-      Q1     = round(quantile({{ time_var }}, 0.25, na.rm = TRUE), digits),
-      Median = round(median({{ time_var }}, na.rm = TRUE), digits),
-      Mean   = round(mean({{ time_var }}, na.rm = TRUE), digits),
-      .SD    = if (std_dv)  round(sd({{ time_var }}, na.rm = TRUE), digits)               else NULL,
-      Q3     = round(quantile({{ time_var }}, 0.75, na.rm = TRUE), digits),
-      .P80   = if (perc_80) round(quantile({{ time_var }}, 0.80, na.rm = TRUE), digits)   else NULL,
-      .P90   = if (perc_90) round(quantile({{ time_var }}, 0.90, na.rm = TRUE), digits)   else NULL,
-      .P95   = if (perc_95) round(quantile({{ time_var }}, 0.95, na.rm = TRUE), digits)   else NULL,
-      .P98   = if (perc_98) round(quantile({{ time_var }}, 0.98, na.rm = TRUE), digits)   else NULL,
-      .P99   = if (perc_99) round(quantile({{ time_var }}, 0.99, na.rm = TRUE), digits)   else NULL,
-      Max    = round(max({{ time_var }}, na.rm = TRUE), digits),
-      .groups = "drop"
-    ) %>%
-    rename(any_of(c(
-      "SD"      = ".SD",
-      "Perc.80" = ".P80",
-      "Perc.90" = ".P90",
-      "Perc.95" = ".P95",
-      "Perc.98" = ".P98",
-      "Perc.99" = ".P99"
-    )))
-}
-
-
-## Reused summarize function, optional additions
-summarize_time <- function(data, group_var, n_label, time_var,
+summarize_time <- function(data, time_var, n_label = "N",
+                           group_var = NULL,
+                           filter_column = NULL,
+                           filter_value = NULL,
                            std_dv  = FALSE,
                            perc_80 = FALSE,
                            perc_90 = FALSE,
                            perc_95 = FALSE,
                            perc_98 = FALSE,
                            digits  = 1) {
+
+  time_var  <- rlang::ensym(time_var)
+  group_sym <- if (!is.null(group_var)) rlang::ensym(group_var) else NULL
+
+  # Optional filter step
+  if (!is.null(filter_column) && !is.null(filter_value)) {
+    filter_sym <- rlang::ensym(filter_column)
+    data <- data %>% dplyr::filter(!!filter_sym == filter_value)
+  }
+
+  # Optional grouping step
+  if (!is.null(group_sym)) {
+    data <- data %>% dplyr::group_by(!!group_sym)
+  }
+
   data %>%
-    group_by({{ group_var }}) %>%
     dplyr::summarize(
       !!n_label := n(),
-      Min    = round(min({{ time_var }}, na.rm = TRUE), digits),
-      Q1     = round(quantile({{ time_var }}, 0.25, na.rm = TRUE), digits),
-      Median = round(median({{ time_var }}, na.rm = TRUE), digits),
-      Mean   = round(mean({{ time_var }}, na.rm = TRUE), digits),
-      .SD    = if (std_dv)  round(sd({{ time_var }}, na.rm = TRUE), digits)               else NULL,
-      Q3     = round(quantile({{ time_var }}, 0.75, na.rm = TRUE), digits),
-      .P80   = if (perc_80) round(quantile({{ time_var }}, 0.80, na.rm = TRUE), digits)   else NULL,
-      .P90   = if (perc_90) round(quantile({{ time_var }}, 0.90, na.rm = TRUE), digits)   else NULL,
-      .P95   = if (perc_95) round(quantile({{ time_var }}, 0.95, na.rm = TRUE), digits)   else NULL,
-      .P98   = if (perc_98) round(quantile({{ time_var }}, 0.98, na.rm = TRUE), digits)   else NULL,
-      Max    = round(max({{ time_var }}, na.rm = TRUE), digits),
+      Min    = round(min(!!time_var, na.rm = TRUE), digits),
+      Q1     = round(quantile(!!time_var, 0.25, na.rm = TRUE), digits),
+      Median = round(median(!!time_var, na.rm = TRUE), digits),
+      Mean   = round(mean(!!time_var, na.rm = TRUE), digits),
+      .SD    = if (std_dv)  round(sd(!!time_var, na.rm = TRUE), digits)             else NULL,
+      Q3     = round(quantile(!!time_var, 0.75, na.rm = TRUE), digits),
+      .P80   = if (perc_80) round(quantile(!!time_var, 0.80, na.rm = TRUE), digits) else NULL,
+      .P90   = if (perc_90) round(quantile(!!time_var, 0.90, na.rm = TRUE), digits) else NULL,
+      .P95   = if (perc_95) round(quantile(!!time_var, 0.95, na.rm = TRUE), digits) else NULL,
+      .P98   = if (perc_98) round(quantile(!!time_var, 0.98, na.rm = TRUE), digits) else NULL,
+      Max    = round(max(!!time_var, na.rm = TRUE), digits),
       .groups = "drop"
     ) %>%
-    rename(any_of(c(
+    dplyr::rename(dplyr::any_of(c(
       "SD"      = ".SD",
       "Perc.80" = ".P80",
       "Perc.90" = ".P90",
@@ -345,8 +326,6 @@ summarize_time <- function(data, group_var, n_label, time_var,
     )))
 }
 
-
-###################
 
 
 
@@ -2239,18 +2218,17 @@ BU_trig_comp <- summarize_time(
 ```{r Table25, include=FALSE, echo=FALSE, warning=FALSE}
 
 ## Draw Order Placement to Clinical Collection
+avg_draw_order_time <- 
+  clinical.survey %>% filter(Site != 'HealthPartners' &
+                             Site != "Sanford Health" &
+                             Site != 'University of Chicago Medicine') %>% 
+  mutate(time = as.numeric(difftime(pmin(as.Date(d_173836415_d_266600170_d_982213346),
+                                         as.Date(d_173836415_d_266600170_d_139245758)),
+                                    as.Date(d_173836415_d_266600170_d_184451682),
+                                    units = "days")))
 
 avg_draw_order <- summarize_time(
-  clinical.survey %>% filter(
-    Site != 'HealthPartners' &
-    Site != "Sanford Health" &
-    Site != 'University of Chicago Medicine'
-  ) %>% mutate(time = as.numeric(difftime(
-    pmin(as.Date(d_173836415_d_266600170_d_982213346),
-         as.Date(d_173836415_d_266600170_d_139245758)),
-    as.Date(d_173836415_d_266600170_d_184451682),
-    units = "days"
-  ))),
+  avg_draw_order_time,
   group_var = Site,
   n_label   = "Number of Clinical Collections",
   time_var  = time,
@@ -2635,19 +2613,17 @@ colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placement
 ```{r Table26_bldorder_present, include=FALSE, echo=FALSE, warning=FALSE}
 
 ## Draw Order Placement to Today for those with no blood colletion yet
+avg_bldorder_present_time <- table1 %>% 
+  filter(d_878865966 == "No blood collected" &
+           !is.na(d_173836415_d_266600170_d_769615780) &
+           Site != 'HealthPartners' &
+           Site != 'Henry Ford Health' &
+           Site != 'Sanford Health') %>% 
+  mutate(time = as.numeric(difftime(currentDate,as.Date(d_173836415_d_266600170_d_769615780),
+                                    units = "days")))
 
 avg_bldorder_present <- summarize_time(
-  table1 %>% filter(
-    d_878865966 == "No blood collected" &
-    !is.na(d_173836415_d_266600170_d_769615780) &
-    Site != 'HealthPartners' &
-    Site != 'Henry Ford Health' &
-    Site != 'Sanford Health'
-  ) %>% mutate(time = as.numeric(difftime(
-    currentDate,
-    as.Date(d_173836415_d_266600170_d_769615780),
-    units = "days"
-  ))),
+  avg_bldorder_present_time,
   group_var = Site,
   n_label   = "Number of Unfilled \n Blood Draw Orders",
   time_var  = time,
@@ -4002,8 +3978,6 @@ Table7.5 <- summarize_time(
  
 total_row <- summarize_time(
     test31b,
-    group_var = NA,
-    n_label   = "N",
     time_var  = ctime
 ) %>% 
   dplyr::rename("Site" = 'NA') %>% 
@@ -4332,7 +4306,7 @@ MW_overtime
 ```
  
 \FloatBarrier
-```{r KnitrTables7.3_7.4,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE,warning=FALSE, results='asis'}
+```{r KnitrTables7.3,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE,warning=FALSE, results='asis'}
  
 knitr::kable(Coll_Card_Status,
              caption="Table 7.3: Baseline- Collection Card Status Among Home Mouthwash Initial Kits Received",
@@ -4346,7 +4320,7 @@ knitr::kable(Coll_Card_Status,
  
  
 \FloatBarrier
-```{r KnitrTables7.5_7.8,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE,warning=FALSE, results='asis'}
+```{r KnitrTables7.4_7.6,eval=TRUE,echo=FALSE,error=FALSE, message=FALSE,warning=FALSE, results='asis'}
  
  
 #all these will move down a table number
