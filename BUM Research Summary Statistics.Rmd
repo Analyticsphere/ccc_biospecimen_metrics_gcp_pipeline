@@ -163,10 +163,10 @@ if (!is.null(factor_levels)){
     kable_styling(latex_options = c("scale_down"))
 }
 
-menstrual_funct <- function(CID, Title, factor_levels = NULL){  
+menstrual_funct <- function(data, CID, Title, factor_levels = NULL){  
   CID_SYM <- rlang::ensym(CID)
   
-         gt_yn <- BUM_tib %>%
+         gt_yn <- data %>%
         filter(D_522008539==536341288) %>% 
     group_by(!!CID_SYM) %>%
     summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
@@ -210,28 +210,28 @@ if (!is.null(factor_levels)){
 }
 
 
-#One skip logic (previous response was one particular response)
-one_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, factor_levels = NULL){  
+# One filter/skip logic step, with factoring option
+#GT table with one filter/skip logic
+one_logic_funct <- function(data,CID, CID_prev, Prev_Answer, Title, factor_levels = NULL){
   CID_SYM <- rlang::ensym(CID)
-  CID_SYM_P <- rlang::ensym(Previous_CID)
-  
-     gt_yn <- BUM_tib %>%
-        filter(!!CID_SYM_P==Previous_Answer) %>% 
+  CID_SYM_P <- rlang::ensym(CID_prev)
+
+  gt_yn <- data %>%
+    filter(!!CID_SYM_P == Prev_Answer) %>%
     group_by(!!CID_SYM) %>%
     summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
     ungroup() %>%
     mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
     replace_na(list(answer = "Skipped this Question")) %>%
     select(answer, n, percentage)
-   
 
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
+  # Apply factor ordering if provided
+  if (!is.null(factor_levels)){
     gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-   
+      mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
+      arrange(answer)
+  }
+
   gt_yn_kable <- gt_yn %>%
     mutate(
       percentage = round(percentage, 1),
@@ -250,65 +250,17 @@ if (!is.null(factor_levels)){
       )
     )
 
-  
-  kable(gt_yn_kable, 
+
+  kable(gt_yn_kable,
         caption = Title, align = "lrr",
         booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-#Two skip logic (previous response has one of two responses)
-two_skip_funct <- function(CID, Title, Previous_CID, Previous_Answer, Previous_CID2, Previous_Answer2, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(CID)
-  CID_SYM_P <- rlang::ensym(Previous_CID)
-  CID_SYM_P2 <- rlang::ensym(Previous_CID2)
-    
-      gt_yn <- BUM_tib %>%
-        filter(!!CID_SYM_P==Previous_Answer | !!CID_SYM_P2==Previous_Answer2) %>% 
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-  
-
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-    
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
+    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>%
     kable_styling(latex_options = c("scale_down"))
 
-      
 }
+
+
+
 
 
 
@@ -647,12 +599,12 @@ factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in 
 
 
 #MENSTPRD
-menstrual_funct(D_380603392, "MENSTPRD: Had Menstrual Period in the Last 12 Months",
+menstrual_funct(BUM_tib,D_380603392, "MENSTPRD: Had Menstrual Period in the Last 12 Months",
                    factor_levels = c("Yes", "No"))
 
 
 #MENST60
-one_skip_funct(D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days", D_380603392, "353358909",
+one_logic_funct(BUM_tib,D_112151599, "MENST60: Had Menstrual Period in the Last 60 Days", D_380603392, "353358909",
                    factor_levels = c("Yes", "No")) 
 
 
@@ -672,28 +624,28 @@ pM + scale_x_date(date_labels = "%b %Y")
 
 
 #PREGNANT
-menstrual_funct(D_518916981, "PREGNANT: Currently Pregnant",
+menstrual_funct(BUM_tib,D_518916981, "PREGNANT: Currently Pregnant",
                    factor_levels = c("Yes", "No"))
 
 
 #PREG3MON
-one_skip_funct(D_234714655, "Table 13: Been Pregnant in the Last 3 Months", D_518916981, "104430631",
+one_logic_funct(BUM_tib,D_234714655, "Table 13: Been Pregnant in the Last 3 Months", D_518916981, "104430631",
                    factor_levels = c("Yes", "No")) 
 
 #BRSTFD
-menstrual_funct(D_798452445, "Table 14: Currently Breastfeeding",
+menstrual_funct(BUM_tib,D_798452445, "Table 14: Currently Breastfeeding",
                    factor_levels = c("Yes", "No"))
 
 #BRSTFD3MON
-one_skip_funct(D_563539159, "Table 15: Breastfed in the Last 3 Months", D_798452445, "104430631",
+one_logic_funct(BUM_tib,D_563539159, "Table 15: Breastfed in the Last 3 Months", D_798452445, "104430631",
                    factor_levels = c("Yes", "No")) 
 
 #CONTRACEPT
-one_skip_funct(D_875535246, "Table 16: Used Hormonal Contraceptives in the Last Month", D_518916981, "104430631",
+one_logic_funct(BUM_tib,D_875535246, "Table 16: Used Hormonal Contraceptives in the Last Month", D_518916981, "104430631",
                    factor_levels = c("Yes", "No")) 
 
 #HORMONE
-one_skip_funct(D_130311122, "Table 17: Used Prescription Hormone Therapy in the Last Month", D_518916981, "104430631",
+one_logic_funct(BUM_tib,D_130311122, "Table 17: Used Prescription Hormone Therapy in the Last Month", D_518916981, "104430631",
                    factor_levels = c("Yes", "No")) 
 
 
@@ -789,30 +741,30 @@ create_kable_table(hy_prod, products, "Table 122: Oral Health Products Used in t
 
 
 #BRUSH2
-one_skip_funct(D_498984275, "Table 123: Frequency Using a Toothbrush in the Last Month", D_479143504_D_203919683, "1",
+one_logic_funct(BUM_tib,D_498984275, "Table 123: Frequency Using a Toothbrush in the Last Month", D_479143504_D_203919683, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 
 #FLOSS2
-one_skip_funct(D_205713835, "Table 124: Frequency Using Floss in the Last Month", D_479143504_D_807884576, "1",
+one_logic_funct(BUM_tib,D_205713835, "Table 124: Frequency Using Floss in the Last Month", D_479143504_D_807884576, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 #WTRPICK2
-one_skip_funct(D_353467497, "Table 125: Frequency Using a Water Based Flosser or Pick in the Last Month", D_479143504_D_165596977, "1",
+one_logic_funct(BUM_tib,D_353467497, "Table 125: Frequency Using a Water Based Flosser or Pick in the Last Month", D_479143504_D_165596977, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 
 #TONGUE2
-one_skip_funct(D_429994023, "Table 126: Frequency Using a Tongue Scrubber in the Last Month", D_479143504_D_578402172, "1",
+one_logic_funct(BUM_tib,D_429994023, "Table 126: Frequency Using a Tongue Scrubber in the Last Month", D_479143504_D_578402172, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 
 #WHITE2
-one_skip_funct(D_499977481, "Table 127: Frequency Using Teeth Whitener in the Last Month", D_479143504_D_184513726, "1",
+one_logic_funct(BUM_tib,D_499977481, "Table 127: Frequency Using Teeth Whitener in the Last Month", D_479143504_D_184513726, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
@@ -873,43 +825,43 @@ create_kable_table_w_footnote(which_mwuse_long, MW_Type, "Table 29: Mouthwash Pr
 
 
 #MWALC
-one_skip_funct(D_349659426, "Table 129: Frequency Using Alcohol Based Mouthwash", D_406270109_D_950773275, "1",
+one_logic_funct(BUM_tib,D_349659426, "Table 129: Frequency Using Alcohol Based Mouthwash", D_406270109_D_950773275, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 #MWALCFREE
-one_skip_funct(D_766370065, "Table 130: Frequency Using Alcohol Free Mouthwash", D_406270109_D_762727133, "1",
+one_logic_funct(BUM_tib,D_766370065, "Table 130: Frequency Using Alcohol Free Mouthwash", D_406270109_D_762727133, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 
 #MWCHLOR
-one_skip_funct(D_520416570, "Table 131: Frequency Using Chlorhexidine Mouthwash", D_406270109_D_877842367, "1",
+one_logic_funct(BUM_tib,D_520416570, "Table 131: Frequency Using Chlorhexidine Mouthwash", D_406270109_D_877842367, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 #MWFLOURIDE
-one_skip_funct(D_921972241, "Table 132: Frequency Using Flouride Mouthwash", D_406270109_D_886771318, "1",
+one_logic_funct(BUM_tib,D_921972241, "Table 132: Frequency Using Flouride Mouthwash", D_406270109_D_886771318, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 #MWPEROX
-one_skip_funct(D_526973271, "Table 133: Frequency Using Peroxide Mouthwash", D_406270109_D_404389800, "1",
+one_logic_funct(BUM_tib,D_526973271, "Table 133: Frequency Using Peroxide Mouthwash", D_406270109_D_404389800, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 #MWCETYL
-one_skip_funct(D_460873842, "Table 134: Frequency Using Cetylpyridinium Cloride Mouthwash", D_406270109_D_463302301, "1",
+one_logic_funct(BUM_tib,D_460873842, "Table 134: Frequency Using Cetylpyridinium Cloride Mouthwash", D_406270109_D_463302301, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 #MWSENSITIVE
-one_skip_funct(D_430060900, "Table 135: Frequency Using Mouthwash for Sensitive Teeth", D_406270109_D_259744087, "1",
+one_logic_funct(BUM_tib,D_430060900, "Table 135: Frequency Using Mouthwash for Sensitive Teeth", D_406270109_D_259744087, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
 #MWDRY
-one_skip_funct(D_800752981,  "Table 136: Frequency Using Mouthwash for Dry Mouth", D_406270109_D_523660949, "1",
+one_logic_funct(BUM_tib,D_800752981,  "Table 136: Frequency Using Mouthwash for Dry Mouth", D_406270109_D_523660949, "1",
 factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 Times per Week", "Once per Day", "Two or more times per day") )
 
 
@@ -1057,7 +1009,7 @@ factor_levels = c("Yes", "No", "Unknown"))
 
 
 #ANTIBIOTIME
-one_skip_funct(D_318641324, "Table 148: Date Antiobiotic Last Taken", D_736393021, "353358909",
+one_logic_funct(BUM_tib,D_318641324, "Table 148: Date Antiobiotic Last Taken", D_736393021, "353358909",
 factor_levels = c("Within the Last 24 Hours", "In the Past 2-7 Days", "In the last 2-4 weeks", "More than 4 Weeks Ago")  )
 
 

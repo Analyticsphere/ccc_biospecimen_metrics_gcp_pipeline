@@ -64,7 +64,6 @@ library(lubridate) ###date time
 library(ggplot2) ###plots
 library(tinytex) #for pdf
 library(janitor) #need for adorn_totals() function
-library(gmodels) #needed for custom n_pct_table function- Crosstable() function 
 library(gtsummary)
 library(kableExtra)
 library(gt)
@@ -232,68 +231,44 @@ recrver1$Site <-factor(recrver1$d_827220437,levels=c("Baylor Scott and White Hea
 ```{r Functions, include=FALSE}
 
 
-n_pct_table <- function(x,y){
-  ctable<- CrossTable(x,y)
-  count <- as.data.frame.matrix(ctable$t)
-  perc <- as.data.frame.matrix(ctable$prop.col)
-  n<- as.numeric(length(levels(x)))
-  m <- as.numeric(length(levels(y)))
-  tb_combo <- array(pct_n(ctable$t,ctable$prop.col),dim=c(n,m)) 
-  tb_combo <- as.data.frame(tb_combo)
-  colnames(tb_combo) <- colnames(count)
-  
-  total <- sum(count)
-  count$Total <- apply(count,1,sum)
-  tb_combo$Total <- paste0(count$Total, "( ", round(100*(count$Total)/total,1), " %)")
-  
-  tb_combo$Site <- rownames(count)
-  tb_combo[(n+1),c(1:(m+1))] <- as.character(apply(count,2,sum))
-  tb_combo$Site[is.na(tb_combo$Site)] <- replace_na("Total")  
-  return(tb_combo)
-}
-
-
-# Function to convert counts (N) to counts and percentage (N (%))
-pct_n <- function(x,y){ paste0(x,"( ", round(100*y,2), " %)")}
-
-
-# Function to create a crosstable
+#------- Convert tbl cross to a dataframe and remove blank first row
 create_tbl_cross <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name){
-cross__table <- data %>%  
-  tbl_cross(
-    row = !!sym(row_var),
-    col = !!sym(colm_var),
-    digits=c(0,1),
-    percent = row_or_col_pct,
-    label=list(!!sym(row_var) ~ row_name,
-               !!sym(colm_var) ~ column_name),
-    missing="ifany",
-    margin_text="Total") 
+  cross__table <- data %>%
+    tbl_cross(
+      row = !!sym(row_var),
+      col = !!sym(colm_var),
+      digits=c(0,1),
+      percent = row_or_col_pct,
+      label=list(!!sym(row_var) ~ row_name,
+                 !!sym(colm_var) ~ column_name),
+      missing="ifany",
+      margin_text="Total")
 
-#Ops doesn't like the grouped by variables on a different line the column labels
-cross_table_df <- as.data.frame(cross__table)[-1, ]
-  
+  #Ops doesn't like the grouped by variables on a different line the column labels
+  cross_table_df <- as.data.frame(cross__table)[-1, ]
+
 }
 
 # Function to create a cross table
 ### Same function as above, but this strips the percentages out of the total column 
-create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name, margin_text) {
-cross__table <- data %>%  
-  tbl_cross(
-    row = !!sym(row_var),
-    col = !!sym(colm_var),
-    digits=c(0,1),
-    percent = row_or_col_pct,
-    label=list(!!sym(row_var) ~ row_name,
-               !!sym(colm_var) ~ column_name),
-    missing="ifany",
-    margin_text="Total") 
-
-cross__table[["table_body"]]$stat_0 <- sapply(strsplit(cross__table[["table_body"]]$stat_0, " "), "[", 1)
-
-#Ops doesn't like the grouped by variables on a different line the column labels
-cross_table_df <- as.data.frame(cross__table)[-1, ]
-  
+create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name,
+                              margin_text = "Total") {
+    cross__table <- data %>%
+        tbl_cross(
+            row = !!sym(row_var),
+            col = !!sym(colm_var),
+            digits=c(0,1),
+            percent = row_or_col_pct,
+            label=list(!!sym(row_var) ~ row_name,
+                       !!sym(colm_var) ~ column_name),
+            missing="ifany",
+            margin_text=margin_text)
+    
+    cross__table[["table_body"]]$stat_0 <- sapply(strsplit(cross__table[["table_body"]]$stat_0, " "), "[", 1)
+    
+    #Ops doesn't like the grouped by variables on a different line the column labels
+    cross_table_df <- as.data.frame(cross__table)[-1, ]
+    
 }
 
 
@@ -368,13 +343,6 @@ summarize_time <- function(data, group_var, n_label, time_var,
       "Perc.95" = ".P95",
       "Perc.98" = ".P98"
     )))
-}
-
-
-#add one decimal place, even .0 for whole numbers
-format_with_decimal <- function(x, digits = 1) {
-  formatted_number <- sprintf("%0.1f", x)
-  return(formatted_number)
 }
 
 
@@ -1768,14 +1736,11 @@ notcol_notes <- notcol_notes %>%
 
 research.notcol <- notcol_notes %>% filter(all_settings=="Research" & tubecol==104430631) %>%
   mutate(Site=droplevels(as.factor(Site)),
-         tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","STRECK Tube1","Urine Tube1","MW Tube1" )))
-
-research.notcol$notcol.notes <- factor(research.notcol$notcol.notes, 
-                                       levels=c("Short Draw","Participant Attempted", "Other", "Participant Refusal", "Supply Unavailable", "Missing Reasons"))
-
-reseachnotes.notcol <- n_pct_table(research.notcol$Site,research.notcol$notcol.notes)
-reseachnotes.coltype <- n_pct_table(research.notcol$tube_type,research.notcol$notcol.notes)
-notcol.reasons.research <- rbind(reseachnotes.notcol,reseachnotes.coltype)
+         tube_type = factor(tube_type,levels=c("SS Tube1", "SS Tube2","Heparin Tube1","EDTA Tube1","ACD Tube1","STRECK Tube1","Urine Tube1","MW Tube1" )),
+         notcol.notes = factor(notcol.notes, 
+                               levels=c("Short Draw","Participant Attempted", "Other",
+                                        "Participant Refusal", "Supply Unavailable",
+                                        "Missing Reasons")))
 
 
 
@@ -3982,12 +3947,13 @@ Table7.4 <- bind_rows(Table7.4, total_row)
 
 ### Shipment time to present day - in Shipped status (NOT received)
 all_shipped_to_date <- kit_table %>%
-  filter(Kit_Status_int=="Shipped" & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
+  filter(Kit_Status_int=="Shipped")
  
 all_shipped_to_date <-  all_shipped_to_date %>%
   mutate(ship_time = as.numeric(difftime(currentDate,
                                      d_173836415_d_266600170_d_319972665_d_661940160,units="days"))) %>% 
-  mutate(ship_timeframe = case_when(ship_time < 7 ~ "< 1 week",
+  mutate(ship_timeframe = case_when(is.na(d_173836415_d_266600170_d_319972665_d_661940160) ~ "Missing Time",
+                                    ship_time < 7 ~ "< 1 week",
                                     ship_time < 15 ~ "1-2 weeks", 
                                     ship_time < 31 ~ "2-4 weeks", 
                                     ship_time < 91 ~ "1-3 months",
@@ -3995,9 +3961,9 @@ all_shipped_to_date <-  all_shipped_to_date %>%
                                     ship_time < 366 ~ "6-12 months",
                                     ship_time>= 366 ~ "> 12 months"),
          ship_timeframe = factor(ship_timeframe, 
-                                 levels=c("< 1 week", "1-2 weeks",  "2-4 weeks", 
-                                          "1-3 months", "3-6 months", "6-12 months", 
-                                          "> 12 months")))
+                                 levels=c("Missing Time", "< 1 week", "1-2 weeks",  
+                                          "2-4 weeks", "1-3 months", "3-6 months", 
+                                          "6-12 months", "> 12 months")))
 
 
 
@@ -4450,7 +4416,7 @@ knitr::kable(table7_8_totals,
  
 ```{r MW_Survey_before_after, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
  
- # Define shared function
+
 generate_mw_table <- function(comparison) {
   kit_table %>% 
     filter(d_547363263 == '231311385' & !is.na(d_195145666) & 
@@ -5034,7 +5000,6 @@ knitr::kable(req_shipped_total,
 req_rec_lags <- kit_request_table %>%
   mutate(
     # Kit requested at least 2 weeks ago
-    # Recommended
     Requested_2Weeks = as.Date(d_173836415_d_266600170_d_319972665_d_759651991) <= (currentDate - 14),
     #All Received
     Received = Kit_Status_int == "Received",
