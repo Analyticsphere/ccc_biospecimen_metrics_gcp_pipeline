@@ -282,13 +282,14 @@ summarize_time <- function(data, time_var, n_label = "N",
                            filter_value = NULL,
                            std_dv  = FALSE,
                            perc_80 = FALSE,
+                           perc_85 = FALSE,
                            perc_90 = FALSE,
                            perc_95 = FALSE,
                            perc_98 = FALSE,
                            digits  = 1) {
 
   time_var  <- rlang::ensym(time_var)
-  group_sym <- if (!is.null(group_var)) rlang::ensym(group_var) else NULL
+  group_quo <- rlang::enquo(group_var)
 
   # Optional filter step
   if (!is.null(filter_column) && !is.null(filter_value)) {
@@ -297,9 +298,10 @@ summarize_time <- function(data, time_var, n_label = "N",
   }
 
   # Optional grouping step
-  if (!is.null(group_sym)) {
-    data <- data %>% dplyr::group_by(!!group_sym)
-  }
+  has_group <- !rlang::quo_is_null(group_quo)
+  if (has_group) {
+    data <- data %>% dplyr::group_by(!!group_quo)
+}
 
   data %>%
     dplyr::summarize(
@@ -311,6 +313,7 @@ summarize_time <- function(data, time_var, n_label = "N",
       .SD    = if (std_dv)  round(sd(!!time_var, na.rm = TRUE), digits)             else NULL,
       Q3     = round(quantile(!!time_var, 0.75, na.rm = TRUE), digits),
       .P80   = if (perc_80) round(quantile(!!time_var, 0.80, na.rm = TRUE), digits) else NULL,
+      .P85   = if (perc_85) round(quantile(!!time_var, 0.85, na.rm = TRUE), digits) else NULL,
       .P90   = if (perc_90) round(quantile(!!time_var, 0.90, na.rm = TRUE), digits) else NULL,
       .P95   = if (perc_95) round(quantile(!!time_var, 0.95, na.rm = TRUE), digits) else NULL,
       .P98   = if (perc_98) round(quantile(!!time_var, 0.98, na.rm = TRUE), digits) else NULL,
@@ -320,6 +323,7 @@ summarize_time <- function(data, time_var, n_label = "N",
     dplyr::rename(dplyr::any_of(c(
       "SD"      = ".SD",
       "Perc.80" = ".P80",
+      "Perc.85" = ".P85",
       "Perc.90" = ".P90",
       "Perc.95" = ".P95",
       "Perc.98" = ".P98"
@@ -3980,8 +3984,7 @@ total_row <- summarize_time(
     test31b,
     time_var  = ctime
 ) %>% 
-  dplyr::rename("Site" = 'NA') %>% 
-  mutate(Site = case_when(is.na(Site) ~ "Total"))
+  mutate(Site = "Total", .before = 1)
 
 Table7.5 <- bind_rows(Table7.5, total_row)
  
