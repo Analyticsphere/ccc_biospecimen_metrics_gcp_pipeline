@@ -70,6 +70,14 @@ library(gt)
 library(rio)
 library(scales) #for commas in the thousands place to be applied automatically
 
+
+### NEW: ALL CONNECT R CUSTOM FUNCTIONS FROM ANALYTICS IN THIS PACKAGE
+# If running for the first time, install first
+# install.packages("ConnectFunctions")
+library(ConnectFunctions)
+
+
+
 currentDate <- Sys.Date()
 currentDate <- as.Date(currentDate)
 
@@ -91,6 +99,12 @@ if (use_test_box_folder) {
   boxfolder <- 221280601453 # destination of CSV files (not pdf)
 }
 
+
+#########################################
+
+#allows gt tables to go onto a second page if it gets too long
+gt::gt_latex_dependencies()
+
 ```
 
 ```{r BQPull, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
@@ -105,7 +119,6 @@ biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1
 cnames <- names(biospe)
 
 
-numbers_only <- function(x) !grepl("\\D", x)
 
 for (i in 1: length(cnames)){
   varname <- cnames[i]
@@ -223,118 +236,6 @@ recrver1$Site <-factor(recrver1$d_827220437,levels=c("Baylor Scott and White Hea
                                                      "Sanford Health", "University of Chicago Medicine","Kaiser Permanente Colorado",
                                                      "Kaiser Permanente Georgia","Kaiser Permanente Hawaii","Kaiser Permanente Northwest"))
 
-
-
-```
-
-
-```{r Functions, include=FALSE}
-
-
-#------- Convert tbl cross to a dataframe and remove blank first row
-create_tbl_cross <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name){
-  cross__table <- data %>%
-    tbl_cross(
-      row = !!sym(row_var),
-      col = !!sym(colm_var),
-      digits=c(0,1),
-      percent = row_or_col_pct,
-      label=list(!!sym(row_var) ~ row_name,
-                 !!sym(colm_var) ~ column_name),
-      missing="ifany",
-      margin_text="Total")
-
-  #Ops doesn't like the grouped by variables on a different line the column labels
-  cross_table_df <- as.data.frame(cross__table)[-1, ]
-
-}
-
-
-
-# Function to create a cross table
-### Same function as above, but this strips the percentages out of the total column 
-create_tbl_cross2 <- function(data, row_var, colm_var, row_or_col_pct, row_name, column_name,
-                              margin_text = "Total") {
-    cross__table <- data %>%
-        tbl_cross(
-            row = !!sym(row_var),
-            col = !!sym(colm_var),
-            digits=c(0,1),
-            percent = row_or_col_pct,
-            label=list(!!sym(row_var) ~ row_name,
-                       !!sym(colm_var) ~ column_name),
-            missing="ifany",
-            margin_text=margin_text)
-    
-    cross__table[["table_body"]]$stat_0 <- sapply(strsplit(cross__table[["table_body"]]$stat_0, " "), "[", 1)
-    
-    #Ops doesn't like the grouped by variables on a different line the column labels
-    cross_table_df <- as.data.frame(cross__table)[-1, ]
-    
-}
-
-
-
-## Reused summarize function, optional additions
-summarize_time <- function(data, time_var, n_label = "N",
-                           group_var = NULL,
-                           filter_column = NULL,
-                           filter_value = NULL,
-                           std_dv  = FALSE,
-                           perc_80 = FALSE,
-                           perc_85 = FALSE,
-                           perc_90 = FALSE,
-                           perc_95 = FALSE,
-                           perc_98 = FALSE,
-                           digits  = 1) {
-
-  time_var  <- rlang::ensym(time_var)
-  group_quo <- rlang::enquo(group_var)
-
-  # Optional filter step
-  if (!is.null(filter_column) && !is.null(filter_value)) {
-    filter_sym <- rlang::ensym(filter_column)
-    data <- data %>% dplyr::filter(!!filter_sym == filter_value)
-  }
-
-  # Optional grouping step
-  has_group <- !rlang::quo_is_null(group_quo)
-  if (has_group) {
-    data <- data %>% dplyr::group_by(!!group_quo)
-}
-
-  data %>%
-    dplyr::summarize(
-      !!n_label := n(),
-      Min    = round(min(!!time_var, na.rm = TRUE), digits),
-      Q1     = round(quantile(!!time_var, 0.25, na.rm = TRUE), digits),
-      Median = round(median(!!time_var, na.rm = TRUE), digits),
-      Mean   = round(mean(!!time_var, na.rm = TRUE), digits),
-      .SD    = if (std_dv)  round(sd(!!time_var, na.rm = TRUE), digits)             else NULL,
-      Q3     = round(quantile(!!time_var, 0.75, na.rm = TRUE), digits),
-      .P80   = if (perc_80) round(quantile(!!time_var, 0.80, na.rm = TRUE), digits) else NULL,
-      .P85   = if (perc_85) round(quantile(!!time_var, 0.85, na.rm = TRUE), digits) else NULL,
-      .P90   = if (perc_90) round(quantile(!!time_var, 0.90, na.rm = TRUE), digits) else NULL,
-      .P95   = if (perc_95) round(quantile(!!time_var, 0.95, na.rm = TRUE), digits) else NULL,
-      .P98   = if (perc_98) round(quantile(!!time_var, 0.98, na.rm = TRUE), digits) else NULL,
-      Max    = round(max(!!time_var, na.rm = TRUE), digits),
-      .groups = "drop"
-    ) %>%
-    dplyr::rename(dplyr::any_of(c(
-      "SD"      = ".SD",
-      "Perc.80" = ".P80",
-      "Perc.85" = ".P85",
-      "Perc.90" = ".P90",
-      "Perc.95" = ".P95",
-      "Perc.98" = ".P98"
-    )))
-}
-
-
-
-
-#allows gt tables to go onto a second page if it gets too long
-gt::gt_latex_dependencies()
 
 
 ```
@@ -634,7 +535,7 @@ table1 <- biocol.tb %>%
   mutate(biocol.appoint = case_when(BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 ~ "Baseline Collection", 
                                     TRUE ~ "No Baseline Collection"))
 
-table1_totals <- create_tbl_cross(table1, "Site", "biocol.appoint", "row", "Site", " ")
+table1_totals <- create_tbl_cross1(table1, "Site", "biocol.appoint", "row", "Site", " ")
 
 biospe.t1 <- knitr::kable(table1_totals, col.names=c("Site", "Baseline Collection","No Baseline Collection", "Total Verified Participants"), 
                           caption='Table 1.1: Baseline Biospecimen Collection Status Among Verified Participants', 
@@ -660,7 +561,7 @@ coll_sett_all <- table1 %>%  filter(BiospeCollection == "Any biospecimen Collect
                                   (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
                                     BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Home"))
 
-table1_allsett <- create_tbl_cross(coll_sett_all, "Site", "all_settings", "row", "Site", "Collection Setting")  
+table1_allsett <- create_tbl_cross1(coll_sett_all, "Site", "all_settings", "row", "Site", "Collection Setting")  
 
 settings_breakdown <- knitr::kable(table1_allsett, 
                                    caption='Table 1.2 Baseline Biospecimen Collection Setting of First Specimen Collected', 
@@ -870,7 +771,7 @@ col_num_1.2_gt <- col_num_1.2_gt %>%  summary_rows(
 
 
 ## Blood counts specifically
-table1.5 <- create_tbl_cross(coll_sett_all, 'Site', "BioFin_BaseBloodCol_v1r0", "row", 'Site', " ")
+table1.5 <- create_tbl_cross1(coll_sett_all, 'Site', "BioFin_BaseBloodCol_v1r0", "row", 'Site', " ")
 
 
 biospe.bld <- knitr::kable(table1.5, 
@@ -1425,7 +1326,7 @@ table4_redone__R$Site <- droplevels(as.factor(table4_redone__R$Site))
 table4_redone__R$`Specimens Collected` <- droplevels(as.factor(table4_redone__R$`Specimens Collected`))
 
 
-spec_by_site_R <- create_tbl_cross(table4_redone__R, 'Specimens Collected', "Site", "column", " ", " ")
+spec_by_site_R <- create_tbl_cross1(table4_redone__R, 'Specimens Collected', "Site", "column", " ", " ")
 colnames(spec_by_site_R)[ncol(spec_by_site_R)] <- "Total Research Collections"
 
 
@@ -1451,7 +1352,7 @@ table4_redone__C$Site <- droplevels(as.factor(table4_redone__C$Site))
 table4_redone__C$`Specimens Collected` <- droplevels(as.factor(table4_redone__C$`Specimens Collected`))
 
 
-spec_by_site_C <- create_tbl_cross(table4_redone__C, 'Specimens Collected', "Site", "column", " ", " ")
+spec_by_site_C <- create_tbl_cross1(table4_redone__C, 'Specimens Collected', "Site", "column", " ", " ")
 colnames(spec_by_site_C)[ncol(spec_by_site_C)] <- "Total Clinical Collections"
 
 ```
@@ -1628,7 +1529,7 @@ research__blood <- research__blood %>% filter(!is.na(tube_type))
 
 
 
-bloodtubetype_R <- create_tbl_cross(research__blood, "Site", "tube_type", "none", "Site", " ")
+bloodtubetype_R <- create_tbl_cross1(research__blood, "Site", "tube_type", "none", "Site", " ")
 colnames(bloodtubetype_R)[ncol(bloodtubetype_R)] <- "Total Blood Tubes Collected"
 colnames(bloodtubetype_R)[1] <- "Site"
 
@@ -1660,7 +1561,7 @@ clinic.coltube <- collection_long %>%  mutate(tube_types= case_when(tube_type=="
 
 
 
-bloodtubetype_C <- create_tbl_cross(clinic.coltube, "Site", "tube_types", "none", "Site", " ")
+bloodtubetype_C <- create_tbl_cross1(clinic.coltube, "Site", "tube_types", "none", "Site", " ")
 colnames(bloodtubetype_C)[ncol(bloodtubetype_C)] <- "Total Blood Tubes Collections"
 colnames(bloodtubetype_C)[1] <- "Site"
 
@@ -1728,13 +1629,13 @@ research.notcol <- notcol_notes %>% filter(all_settings=="Research" & tubecol==1
 
 
 ## Reasons not collected by site 
-reason_notcol <- create_tbl_cross(research.notcol, "Site", "notcol.notes", "row", "Site", " ")
+reason_notcol <- create_tbl_cross1(research.notcol, "Site", "notcol.notes", "row", "Site", " ")
 colnames(reason_notcol)[ncol(reason_notcol)] <- "Total Tubes Not Collected"
 colnames(reason_notcol)[1] <- "Site"
 
 
 ## Reasons not collected by tube type
-tube_type_notcolreasons <- create_tbl_cross(research.notcol, "tube_type", "notcol.notes", "row", "Tube Type", " ")
+tube_type_notcolreasons <- create_tbl_cross1(research.notcol, "tube_type", "notcol.notes", "row", "Tube Type", " ")
 colnames(tube_type_notcolreasons)[ncol(tube_type_notcolreasons)] <- "Total Tubes Not Collected"
 colnames(tube_type_notcolreasons)[1] <- "Tube Type"
 
@@ -1752,7 +1653,7 @@ discard.tb <- collection_long  %>% filter(tube_discard == 353358909) %>%
          tube_type = droplevels(as.factor(tube_type)))
 
 
-discard.site <- create_tbl_cross(discard.tb, "Site", "tube_type", "row", "Site", " ")
+discard.site <- create_tbl_cross1(discard.tb, "Site", "tube_type", "row", "Site", " ")
 
 ```
 
@@ -1788,7 +1689,7 @@ research.survey <- coll_sett_all %>% filter(all_settings == "Research") %>%
 
 ## BUM Survey completion by Site
 
-BUM_status <- create_tbl_cross(research.survey, "d_265193023", "Site", "column", " ", " ")
+BUM_status <- create_tbl_cross1(research.survey, "d_265193023", "Site", "column", " ", " ")
 colnames(BUM_status)[ncol(BUM_status)] = "Total Research Surveys"
 
 
@@ -1801,10 +1702,10 @@ precovR <- research.survey_sec3 %>%  filter(d_265193023 == "Submitted" & d_22216
 
 postcovR <- research.survey_sec3 %>%  filter(d_265193023 == "Submitted" & d_222161762>=as.Date("2023-07-05"))
 
-precovid_BUMtime <- create_tbl_cross(precovR, "checktmvisit", "Site", "column", " ", " ")
+precovid_BUMtime <- create_tbl_cross1(precovR, "checktmvisit", "Site", "column", " ", " ")
 colnames(precovid_BUMtime)[ncol(precovid_BUMtime)] = "Total Research Surveys"
 
-postcovid_BUMtime <- create_tbl_cross(postcovR, "checktmvisit", "Site", "column", " ", " ")
+postcovid_BUMtime <- create_tbl_cross1(postcovR, "checktmvisit", "Site", "column", " ", " ")
 colnames(postcovid_BUMtime)[ncol(postcovid_BUMtime)] = "Total Research Surveys"
 
 
@@ -2012,7 +1913,7 @@ coll_bptl_diff <- biospe__all %>%
 rsch_coll_bptl_days <- coll_bptl_diff %>% ungroup() %>% 
   mutate(coll_days_diff= droplevels(coll_days_diff))
 
-research_coll_bptl1 <- create_tbl_cross(rsch_coll_bptl_days, "Site", "coll_days_diff", "row", "Site", " ")
+research_coll_bptl1 <- create_tbl_cross1(rsch_coll_bptl_days, "Site", "coll_days_diff", "row", "Site", " ")
 
 
 ```
@@ -2022,7 +1923,7 @@ research_coll_bptl1 <- create_tbl_cross(rsch_coll_bptl_days, "Site", "coll_days_
 ## Collection-To-Receipt Time, Research, by Site location
 
 
-rsch_loc_coll_bptl <- create_tbl_cross(rsch_coll_bptl_days, "Site_location", "coll_days_diff", "row", "Site", " ")
+rsch_loc_coll_bptl <- create_tbl_cross1(rsch_coll_bptl_days, "Site_location", "coll_days_diff", "row", "Site", " ")
 rsch_loc_coll_bptl <- as.data.frame(rsch_loc_coll_bptl)
 colnames(rsch_loc_coll_bptl)[1] <- "Collection_Location"
 
@@ -2146,7 +2047,7 @@ clinical.survey$checktmvisit <- droplevels(clinical.survey$checktmvisit)
 ```{r Clinical_Tables, eval=TRUE,echo=FALSE,include=FALSE,results='hold'}
 
 ## BU Completion by Site
-BU_status <- create_tbl_cross(clinical.survey, "clin.sv", "Site", "column", " ", " ")
+BU_status <- create_tbl_cross1(clinical.survey, "clin.sv", "Site", "column", " ", " ")
 colnames(BU_status)[ncol(BU_status)] = "Total Clinical Surveys"
 
 
@@ -2154,7 +2055,7 @@ colnames(BU_status)[ncol(BU_status)] = "Total Clinical Surveys"
 clin_comp <- clinical.survey %>%  filter(clin.sv == "Submitted" & checktmvisit!="Not Submitted")
 clin_comp$checktmvisit <- droplevels(clin_comp$checktmvisit)
 
-coll_comp_BU <- create_tbl_cross(clin_comp, "checktmvisit", "Site", "column", " ", " ")
+coll_comp_BU <- create_tbl_cross1(clin_comp, "checktmvisit", "Site", "column", " ", " ")
 
 colnames(coll_comp_BU)[ncol(coll_comp_BU)] <- "Total Submitted Clinical Surveys"
 
@@ -2300,7 +2201,7 @@ coll_bptl_diff2 <- coll_bptl_diff2 %>% filter(!is.na(coll_days_diff))
 clin_coll_bptl_diff3 <- coll_bptl_diff2 %>% ungroup() %>% 
   mutate(coll_days_diff= droplevels(coll_days_diff))
 
-crosstable.clin_coll_days <- create_tbl_cross(clin_coll_bptl_diff3, "Site", "coll_days_diff", "row", "Site", " ")
+crosstable.clin_coll_days <- create_tbl_cross1(clin_coll_bptl_diff3, "Site", "coll_days_diff", "row", "Site", " ")
 
 
 
@@ -2314,7 +2215,7 @@ clin_coll_bptl_diff3$Clin_Site_location[clin_coll_bptl_diff3$Site=="Kaiser Perma
 clin_coll_bptl_diff3$Clin_Site_location[clin_coll_bptl_diff3$Site=="Kaiser Permanente Northwest"]="KPNW"
 clin_coll_bptl_diff3$Clin_Site_location[clin_coll_bptl_diff3$Site=="Sanford Health"]="KPNW"
 
-clin_coll_days <- create_tbl_cross(clin_coll_bptl_diff3, "Clin_Site_location", "coll_days_diff", "row", "Collection Location", " ")
+clin_coll_days <- create_tbl_cross1(clin_coll_bptl_diff3, "Clin_Site_location", "coll_days_diff", "row", "Collection Location", " ")
 clin_coll_days <- as.data.frame(clin_coll_days)
 colnames(clin_coll_days)[1] <- "Collection Location"
 
@@ -2604,7 +2505,7 @@ verif_draw <-verif_draw %>% #group_by(Site) %>% filter(time>=0) %>%
          checktmvisit = factor(checktmvisit, levels=c("Negative Time", "Within 1 Day", "1-3 Days",
                                                       "4-7 Days", "8-30 Days", "More than 30 Days", "Missing Time Stamp(s)")))
 
-verif_draw_order <- create_tbl_cross(verif_draw, "checktmvisit", "Site", "column", " ", " ")
+verif_draw_order <- create_tbl_cross1(verif_draw, "checktmvisit", "Site", "column", " ", " ")
 colnames(verif_draw_order)[ncol(verif_draw_order)] = "Total Draw Order Placements"
 
 
@@ -2692,7 +2593,7 @@ ver_date_diff <-table1  %>% filter(biocol.appoint=="No Baseline Collection")  %>
                                                           "90 to 180 Days", "180 to <270 Days", "270 Days or More")))
 
 
-crosstable.coll_bptl1 <- create_tbl_cross(ver_date_diff, "Site", "coll_days_diff", "row", "Site", " ")
+crosstable.coll_bptl1 <- create_tbl_cross1(ver_date_diff, "Site", "coll_days_diff", "row", "Site", " ")
 
 
 
@@ -3753,7 +3654,7 @@ kit_assembly <- bq_table_download(kit_assmb_table, bigint="integer64",n_max = In
 
 ### Initial Kit Status Count
  
-status_elg7.1A <- create_tbl_cross(kit_table, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
+status_elg7.1A <- create_tbl_cross1(kit_table, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
 colnames(status_elg7.1A)[ncol(status_elg7.1A)] <- "Total Eligible"
 
 status_elg_knA <- knitr::kable(status_elg7.1A,
@@ -3771,7 +3672,7 @@ status_elgB <-kit_table %>%
   filter( Kit_Status_r1!="No Status")
 
  
-status_elg7.1B <- create_tbl_cross(status_elgB, "Site", "Kit_Status_r1", "row", "Site", "Kit Status")
+status_elg7.1B <- create_tbl_cross1(status_elgB, "Site", "Kit_Status_r1", "row", "Site", "Kit Status")
 colnames(status_elg7.1B)[ncol(status_elg7.1B)] <- "Total Requested"
 
 status_elg_knB <- knitr::kable(status_elg7.1B,
@@ -3786,7 +3687,7 @@ status_elg_knB <- knitr::kable(status_elg7.1B,
 status_elgC <- kit_table %>%
   filter(!is.na(d_173836415_d_266600170_d_641006239_d_759651991)  & Kit_Status_r2!="No Status") 
 
-status_elg7.1C <- create_tbl_cross(status_elgC, "Site", "Kit_Status_r2", "row", "Site", "Kit Status")
+status_elg7.1C <- create_tbl_cross1(status_elgC, "Site", "Kit_Status_r2", "row", "Site", "Kit Status")
 colnames(status_elg7.1C)[ncol(status_elg7.1C)] <- "Total Requested"
 
 status_elg_knC <- knitr::kable(status_elg7.1C,
@@ -3879,7 +3780,7 @@ fig7_1 <- ggplot(all_shipped_2_filtered, aes(x = Site)) +
  
 ## Collection Card Status in Kits
 
-Coll_Card_Status <- create_tbl_cross(kit_assembly, "Site", "Card_Status", "row", "Site", " ")
+Coll_Card_Status <- create_tbl_cross1(kit_assembly, "Site", "Card_Status", "row", "Site", " ")
  
  
  
@@ -3947,7 +3848,7 @@ all_shipped_to_date <-  all_shipped_to_date %>%
 
 
 
-Shipped_TD <- create_tbl_cross(all_shipped_to_date, "ship_timeframe", "Site", "column", " ", " ")
+Shipped_TD <- create_tbl_cross1(all_shipped_to_date, "ship_timeframe", "Site", "column", " ", " ")
 colnames(Shipped_TD)[ncol(Shipped_TD)] = "Total Kits Not Yet Received"
 
 
@@ -4380,7 +4281,7 @@ table7_8 <- kit_table %>%  filter(Kit_Status_r2=="Received" | Kit_Status_r1=="Re
          MWSrvy_status = factor(MWSrvy_status, levels=c("Not Started","Started", "Submitted"))) 
 
 
-table7_8_totals <- create_tbl_cross(table7_8, "Site", "MWSrvy_status", "row", "Site", " ")
+table7_8_totals <- create_tbl_cross1(table7_8, "Site", "MWSrvy_status", "row", "Site", " ")
 colnames(table7_8_totals)[ncol(table7_8_totals)] <- "Total Participants with Received Kits"
 
 knitr::kable(table7_8_totals,
@@ -4421,7 +4322,7 @@ generate_mw_table <- function(comparison) {
 
 ##### Table 7.8 (Before PWA update)
 table7_9 <- generate_mw_table(comparison = "<")
-table7_9_totals <- create_tbl_cross(table7_9, "Site", "MW_comp_diff", "row", "Site", " ")
+table7_9_totals <- create_tbl_cross1(table7_9, "Site", "MW_comp_diff", "row", "Site", " ")
 
 tbl_7_9 <- knitr::kable(table7_9_totals,
                         caption = "Table 7.8: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on \n Collection Card of the First Received Mouthwash Kit ",
@@ -4439,7 +4340,7 @@ table7_10 <- generate_mw_table(comparison = ">=")
 ## Cut off at 5/1/2025
 table7_10 <- table7_10 %>%  filter(as.Date(d_173836415_d_266600170_d_319972665_d_661940160) <= as.Date('2025-05-01'))
 
-table7_10_totals <- create_tbl_cross(table7_10, "Site", "MW_comp_diff", "row", "Site", " ")
+table7_10_totals <- create_tbl_cross1(table7_10, "Site", "MW_comp_diff", "row", "Site", " ")
 
 tbl_7_10 <- knitr::kable(table7_10_totals,
                          caption = "Table 7.9: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n(Post-update to survey description on PWA)",
@@ -4479,7 +4380,7 @@ survey_cc_int <- kit_table %>%
                                                          "1 Day after Collection", "2 Days after Collection", "3 Days after Collection",
                                                          "4+ Days after Collection")))   
 
-Table7.10a <- create_tbl_cross(survey_cc_int, "Site", "MW_comp_card", "row", "Site", " ")  
+Table7.10a <- create_tbl_cross1(survey_cc_int, "Site", "MW_comp_card", "row", "Site", " ")  
 
  
 Table7_10a <- knitr::kable(Table7.10a,
@@ -4589,7 +4490,7 @@ req_rec_inv_kable1(kit_request_table, Site, "Site",
    
  
   
-req_kit_table2 <- create_tbl_cross(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
+req_kit_table2 <- create_tbl_cross1(req_kit, "Site", "Kit_Status_int", "row", "Site", "Kit Status")
 colnames(req_kit_table2)[ncol(req_kit_table2)] <- "Total Kits Requested"
 
 knitr::kable(req_kit_table2,
