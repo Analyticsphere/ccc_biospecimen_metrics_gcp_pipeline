@@ -214,7 +214,7 @@ biospe <- bq_table_download(bio_tb,bigint="integer64",n_max = Inf, page_size = 1
 cnames <- names(biospe)
 ###to check variables in recr_noinact_wl1
 
-numbers_only <- function(x) !grepl("\\D", x)
+
 
 for (i in 1: length(cnames)){
   varname <- cnames[i]

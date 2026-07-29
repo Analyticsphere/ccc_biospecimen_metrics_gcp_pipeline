@@ -37,6 +37,14 @@ library(kableExtra)
 library(stringr)
 library(lubridate)
 
+
+### NEW: ALL CONNECT R CUSTOM FUNCTIONS FROM ANALYTICS IN THIS PACKAGE
+# If running for the first time, install first
+# install.packages("ConnectFunctions")
+library(ConnectFunctions)
+
+
+
 options(tinytex.verbose = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
@@ -117,216 +125,6 @@ dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Unknown", "536341
                  "194129782"="Two to Four", "922737557"="Five to Nine", "945387130"="10+", "383505459"="More than 1 but Don't Remember", "832322940"="Don't Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
-simple_funct <- function(data,CID, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(CID)
-
-       gt_yn <- data %>%
-        filter(as.numeric(D_860011428)>=3) %>% 
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-   
-
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-   
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-
-
-# One filter/skip logic step, with factoring option
-#GT table with one filter/skip logic
-one_logic_funct <- function(data,CID, CID_prev, Prev_Answer, Title, factor_levels = NULL){
-  CID_SYM <- rlang::ensym(CID)
-  CID_SYM_P <- rlang::ensym(CID_prev)
-
-  gt_yn <- data %>%
-    filter(!!CID_SYM_P == Prev_Answer) %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-
-  # Apply factor ordering if provided
-  if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-      mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-      arrange(answer)
-  }
-
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-
-  kable(gt_yn_kable,
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>%
-    kable_styling(latex_options = c("scale_down"))
-
-}
-
-
-
-
-
-
-create_kable_table <- function(df, group_by_vriable, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(group_by_vriable)
-  
-  gt_yn <- df %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-  
-
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-
-
-create_kable_table_w_footnote <- function(df, group_by_vriable, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(group_by_vriable)
-  
-  gt_yn <- df %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-  
-
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down")) %>% 
-    footnote(general="Participants may select multiple responses or skip the question.", general_title = "")
-}
-
-
-
-#Histogram Function
-hist_funct <- function(CID,Title, Xlab, Ylab) {
-  CID_SYM <- rlang::ensym(CID)
-  bisp %>% mutate(!!CID_SYM:=as.numeric(!!CID_SYM)) %>%
-    filter(!is.na(!!CID_SYM)) %>% ggplot(aes(x=!!CID_SYM))+
-     xlab(Xlab) + ylab(Ylab) + geom_histogram()+  ggtitle(Title)+
-    geom_histogram(color="black")+ scale_y_continuous(breaks=pretty_breaks()) +
-    geom_vline(aes(xintercept=mean(!!CID_SYM, na.rm=T)), colour="#2973A5", linetype="solid")
-  
-}
-
 ```
 
 
@@ -385,7 +183,8 @@ dt_SYMPTDAY_long <- dt_SYMPTDAY_flags %>%
   )
 
 
-create_kable_table_w_footnote(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation")
+simple_funct(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation") %>% 
+  create_SATA_footnote()
 
 
 
@@ -692,7 +491,7 @@ hy_prod <- BUM_tib %>%
       
       TRUE ~ "Skipped this Question"))
 
-create_kable_table(hy_prod, products, "Table 122: Oral Health Products Used in the Last Month")
+simple_funct(hy_prod, products, "Table 122: Oral Health Products Used in the Last Month")
 
 
 
@@ -776,7 +575,8 @@ which_mwuse_long <- which_mwuse_flags %>%
   )
 
 
-create_kable_table_w_footnote(which_mwuse_long, MW_Type, "Table 29: Mouthwash Products Used in the Last Month")
+simple_funct(which_mwuse_long, MW_Type, "Table 29: Mouthwash Products Used in the Last Month") %>% 
+  create_SATA_footnote()
 
 
 
@@ -848,7 +648,7 @@ factor_levels = c("Never","Less than Once Per Week", "1-2 Times per Week", "3-5 
                                               "Yes from accident or injury", "Yes from tooth decay or disease", 
                                               "Yes for some other reason", "No", "Skipped this Question")))
 
-create_kable_table(dt_PERMTTHLOST1, products, "Table 38 (V1): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
+simple_funct(dt_PERMTTHLOST1, products, "Table 38 (V1): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
 
 
   #Version2
@@ -867,7 +667,7 @@ dt_PERMTTHLOST2= BUM_tib %>%
                                                "From Accident and Other Reasons", "From Decay and Other Reasons", "Yes from accident or injury",
                                                "Yes from tooth decay or disease", "Yes for some other reason", "No", "Skipped this Question")))
 
-create_kable_table(dt_PERMTTHLOST2, products2, "Table 38 (V2): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
+simple_funct(dt_PERMTTHLOST2, products2, "Table 38 (V2): Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
          
 
 
@@ -883,7 +683,7 @@ TEETHLOSTAI <- BUM_tib %>%
                            TRUE   ~ "Skipped this Question"),
          answer = factor(answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this Question")))
 
-create_kable_table(TEETHLOSTAI, answer, "Table 40: Number of Teeth Lost from Accident or Injury")
+simple_funct(TEETHLOSTAI, answer, "Table 40: Number of Teeth Lost from Accident or Injury")
 
 
 
@@ -901,7 +701,7 @@ TEETHLOSTD <- BUM_tib %>%
          answer = factor(answer, levels= c("One", "Two to Four", "Five to Nine", "10+", 
                                            "More than 1 but Don't Remember", "Don't Know", "Skipped this Question")))
     
-create_kable_table(TEETHLOSTD, answer, "Table 41: Number of Teeth Lost from Tooth Decay or Disease")
+simple_funct(TEETHLOSTD, answer, "Table 41: Number of Teeth Lost from Tooth Decay or Disease")
     
 
 
@@ -918,7 +718,7 @@ TEETHLOSTOTH <- BUM_tib %>%
                            TRUE   ~ "Skipped this Question"),
          answer = factor(answer, levels= c("One", "Two to Four", "Five to Nine", "10+", "More than 1 but Don't Remember", "Don't Know", "Skipped this Question")))
       
-create_kable_table(TEETHLOSTOTH, answer, "Table 42: Number of Teeth Lost from Other Incidents")
+simple_funct(TEETHLOSTOTH, answer, "Table 42: Number of Teeth Lost from Other Incidents")
       
 
 
@@ -936,7 +736,7 @@ dnt= BUM_tib %>%  mutate(products= case_when(D_542661394_D_104430631==1 ~ "No", 
                          products = factor(products, levels= c("No", "Dental Bridges", "Partial Denture", "Full Dentures", 
                                                                "Dental Implants", "Other", "Uknown", "Skipped this Question")))
 
-create_kable_table(dnt, products, "Table 43: Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
+simple_funct(dnt, products, "Table 43: Lost Permanent Adult Teeth, not Including your Wisdom Teeth")
 
 
 

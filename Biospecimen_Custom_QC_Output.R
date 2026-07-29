@@ -12,6 +12,15 @@ library(knitr)
 library(kableExtra)
 library(glue)
 library(openxlsx)
+
+
+### NEW: ALL CONNECT R CUSTOM FUNCTIONS FROM ANALYTICS IN THIS PACKAGE
+# If running for the first time, install first
+# install.packages("ConnectFunctions")
+library(ConnectFunctions)
+
+
+
 bq_auth()
 2
 
@@ -129,19 +138,6 @@ local_drive= ifelse(write_to_local_drive, "~/Biospecimen/data/", "")
 
 
 currentDate <- Sys.Date()
-
-
-#################
-
-## Sorting by Site causes an error message when there are no rows. This function eliminates that problem
-safe_arrange <- function(df, ...) {
-  if (nrow(df) > 0) {
-    df %>% arrange(...)
-  } else {
-    df
-  }
-}
-
 
 
 
