@@ -3787,17 +3787,16 @@ Coll_Card_Status <- create_tbl_cross1(kit_assembly, "Site", "Card_Status", "row"
  
 
 ## Shipment time to BPTL receipt time
-test30 <- kit_table %>%
-  filter(Kit_Status_int=="Received" & !is.na(d_173836415_d_266600170_d_319972665_d_826941471) &
-           !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
- 
-test30 <-  test30 %>%
+Ship_BPTL_Rec <- kit_table %>%
+  filter(Kit_Status_int=="Received" &
+           !is.na(d_173836415_d_266600170_d_319972665_d_826941471) &
+           !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) %>%
   mutate(ctime = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_826941471,
                                      d_173836415_d_266600170_d_319972665_d_661940160,units="days"))) %>% 
   filter(ctime>0)
  
-Table7.4 <- summarize_time(
-    test30,
+MW_Ship_BPTL_Rec <- summarize_time(
+    Ship_BPTL_Rec,
     group_var = Site,
     n_label   = "N",
     time_var  = ctime,
@@ -3806,7 +3805,7 @@ Table7.4 <- summarize_time(
 )
 
 
-total_row <- test30 %>%
+total_row <- Ship_BPTL_Rec %>%
   dplyr::summarize(
     Site = "Total",
     N = n(),
@@ -3820,7 +3819,7 @@ total_row <- test30 %>%
     Max = max(ctime)
   )
 
-Table7.4 <- bind_rows(Table7.4, total_row)
+MW_Ship_BPTL_Rec <- bind_rows(MW_Ship_BPTL_Rec, total_row)
 
 
 
@@ -3864,17 +3863,15 @@ firstcoltime$Connect_ID <- as.numeric(firstcoltime$Connect_ID)
 kit_table$Connect_ID <- as.numeric(kit_table$Connect_ID)
 first_col_time <- left_join(kit_table, firstcoltime, by="Connect_ID")
  
-test31 <- first_col_time %>% 
-  filter(!is.na(d_556788178) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160))
- 
-test31 <-  test31 %>%
+first_col_time <- first_col_time %>% 
+  filter(!is.na(d_556788178) & !is.na(d_173836415_d_266600170_d_319972665_d_661940160)) %>%
   mutate(ctime = as.numeric(difftime(d_173836415_d_266600170_d_319972665_d_661940160,
-                                     as.Date(d_556788178),units="days")))
-test31b <-  test31 %>%  filter(ctime>0)
+                                     as.Date(d_556788178),units="days"))) %>% 
+  filter(ctime>0)
  
  
-Table7.5 <- summarize_time(
-    test31b,
+Clin_Coll_Int_Ship <- summarize_time(
+    first_col_time,
     group_var = Site,
     n_label   = "N",
     time_var  = ctime
@@ -3882,12 +3879,12 @@ Table7.5 <- summarize_time(
 
  
 total_row <- summarize_time(
-    test31b,
+    first_col_time,
     time_var  = ctime
 ) %>% 
   mutate(Site = "Total", .before = 1)
 
-Table7.5 <- bind_rows(Table7.5, total_row)
+Clin_Coll_Int_Ship <- bind_rows(Clin_Coll_Int_Ship, total_row)
  
  
  
@@ -4228,17 +4225,17 @@ knitr::kable(Coll_Card_Status,
  
  
 #all these will move down a table number
-table7.4 <- knitr::kable(Table7.4,
+MW_Ship_BPTL_Rec_kable <- knitr::kable(MW_Ship_BPTL_Rec,
                          caption='Table 7.4: Baseline- Time (in Days) from Home Mouthwash Initial Kit Shipment to \n BPTL Receipt',
                          row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE) %>% 
-  add_indent(seq(1, nrow(Table7.4) - 1)) %>% 
+  add_indent(seq(1, nrow(MW_Ship_BPTL_Rec) - 1)) %>% 
   kable_styling(latex_options = "HOLD_position")
  
-add_footnote(table7.4, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
+add_footnote(MW_Ship_BPTL_Rec_kable, "Note: Kits were returned using USPS prior to 6/17/2024.", notation = "none")
 
 
-## Pending approval-- new table 7.5
-pending_TD <- knitr::kable(Shipped_TD,
+
+knitr::kable(Shipped_TD,
                          caption='Table 7.5- Baseline Time from Home Mouthwash Initial Kit Shipment to Present Date for Initial Kits Not Yet Received',
                          row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>% 
   add_indent(seq(1, nrow(Shipped_TD) - 1)) %>% 
@@ -4248,15 +4245,15 @@ pending_TD <- knitr::kable(Shipped_TD,
  
  
  
-knitr::kable(Table7.5,
-             caption='Table 7.5: Baseline- Time (in Days) from Clinical Collection to Home Mouthwash Initial Kit Shipment',
+knitr::kable(Clin_Coll_Int_Ship,
+             caption='Table 7.6: Baseline- Time (in Days) from Clinical Collection to Home Mouthwash Initial Kit Shipment',
              row.names=FALSE, align=c("l", rep("c", 6)),digits=1, booktabs = TRUE) %>% 
-  add_indent(seq(1, nrow(Table7.5) - 1)) %>% 
+  add_indent(seq(1, nrow(Clin_Coll_Int_Ship) - 1)) %>% 
   kable_styling(latex_options = "HOLD_position")
  
  
 knitr::kable(table32_pct,
-             caption='Table 7.6: Baseline- Kit Conditions Among Received Home Mouthwash Initial Kits',
+             caption='Table 7.7: Baseline- Kit Conditions Among Received Home Mouthwash Initial Kits',
              row.names=FALSE, align=c("l","c"),digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "HOLD_position")
 ```
  
@@ -4285,7 +4282,7 @@ table7_8_totals <- create_tbl_cross1(table7_8, "Site", "MWSrvy_status", "row", "
 colnames(table7_8_totals)[ncol(table7_8_totals)] <- "Total Participants with Received Kits"
 
 knitr::kable(table7_8_totals,
-             caption="Table 7.7: Baseline- Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits",
+             caption="Table 7.8: Baseline- Mouthwash Biospecimen Survey Status Among Any Received Home Mouthwash Kits",
              row.names=FALSE, align=c("l", rep("c", 4)),booktabs = TRUE) %>% 
   add_indent(seq(1, nrow(table7_8_totals) - 1)) %>% 
   kable_styling(latex_options = "scale_down")
@@ -4320,12 +4317,12 @@ generate_mw_table <- function(comparison) {
 
 
 
-##### Table 7.8 (Before PWA update)
+##### Before PWA update
 table7_9 <- generate_mw_table(comparison = "<")
 table7_9_totals <- create_tbl_cross1(table7_9, "Site", "MW_comp_diff", "row", "Site", " ")
 
 tbl_7_9 <- knitr::kable(table7_9_totals,
-                        caption = "Table 7.8: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on \n Collection Card of the First Received Mouthwash Kit ",
+                        caption = "Table 7.9: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on \n Collection Card of the First Received Mouthwash Kit ",
                         row.names = FALSE, align = c("l", rep("c", 11)), booktabs = TRUE) %>%
   add_indent(seq(1, nrow(table7_9_totals) - 1)) %>%
   kable_styling(latex_options = "scale_down") %>%
@@ -4334,7 +4331,7 @@ tbl_7_9 <- knitr::kable(table7_9_totals,
 add_footnote(tbl_7_9, "Note: In cases where the collection card is not returned with the mouthwash sample or the collection date recorded by the participant is invalid, the FedEx drop off or pick up date and time are used as proxy collection date and time.", notation = "none")
 
 
-######### Table 7.9 (After PWA update)
+######### After PWA update
 table7_10 <- generate_mw_table(comparison = ">=")
 
 ## Cut off at 5/1/2025
@@ -4343,7 +4340,7 @@ table7_10 <- table7_10 %>%  filter(as.Date(d_173836415_d_266600170_d_319972665_d
 table7_10_totals <- create_tbl_cross1(table7_10, "Site", "MW_comp_diff", "row", "Site", " ")
 
 tbl_7_10 <- knitr::kable(table7_10_totals,
-                         caption = "Table 7.9: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n(Post-update to survey description on PWA)",
+                         caption = "Table 7.10: Baseline- Mouthwash Biospecimen Survey Completion Time Relative to Collection Time Reported on Collection Card \n(Post-update to survey description on PWA)",
                          row.names = FALSE, align = c("l", rep("c", 11)), booktabs = TRUE) %>%
   add_indent(seq(1, nrow(table7_10_totals) - 1)) %>%
   kable_styling(latex_options = "scale_down") %>%
@@ -4384,7 +4381,7 @@ Table7.10a <- create_tbl_cross1(survey_cc_int, "Site", "MW_comp_card", "row", "S
 
  
 Table7_10a <- knitr::kable(Table7.10a,
-                           caption='Table 7.10 Baseline- Mouthwash Biospecimen Survey Completion Time (in Days) Relative to Collection Time \n Reported on Collection Card for Initial Kit (Post update to  survey introduction)',
+                           caption='Table 7.11 Baseline- Mouthwash Biospecimen Survey Completion Time (in Days) Relative to Collection Time \n Reported on Collection Card for Initial Kit (Post update to  survey introduction)',
                            row.names=FALSE, align=c("l",rep("c", 7)),digits=1, booktabs = TRUE) %>%
   add_indent(seq(1, nrow(Table7.10a) - 1)) %>%
   kable_styling(latex_options = "scale_down") %>%
