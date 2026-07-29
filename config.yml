@@ -28,8 +28,8 @@ weekly_biospecimen_metrics_csvs:
     frequency: "00 12 * * 1" # every Monday at 12 PM"
 
 biospecimen_qc_metrics:
-  r_file_name: Biospe_Custom_QC_Accession_Dup.Rmd
-  report_file_name: Biospe_Custom_QC_Accession_Dup.pdf
+  r_file_name: Biospecimen_CustomQC_Rules.Rmd
+  report_file_name: Biospecimen_CustomQC_Rules.pdf
   box_folders:
     - "221297686961" 
   gcp_info:

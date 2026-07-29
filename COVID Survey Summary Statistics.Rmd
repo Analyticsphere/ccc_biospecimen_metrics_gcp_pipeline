@@ -36,6 +36,14 @@ library(knitr)
 library(kableExtra)
 library(lubridate)
 
+
+### NEW: ALL CONNECT R CUSTOM FUNCTIONS FROM ANALYTICS IN THIS PACKAGE
+# If running for the first time, install first
+# install.packages("ConnectFunctions")
+library(ConnectFunctions)
+
+
+
 options(tinytex.verbose = TRUE)
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
@@ -141,428 +149,6 @@ dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know",
                  "317811347"="Don't Know", "850675416"="Two or more times per day")
 
 
-simple_funct <- function(data,CID, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(CID)
-
-      gt_yn <- data %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-  
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-
-    gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-
-
-covid_once_funct <- function(CID, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(CID)
-  
-  gt_yn <- CVD_tib %>%
-    filter((as.numeric(CVD_tib$D_860011428)>=1 | CVD_tib$D_494226443=="353358909")) %>% 
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-
-gt_yn_kable <- gt_yn %>%
-  mutate(
-    percentage = round(percentage, 1),
-    N = comma(n)
-  ) %>%
-  select(answer, N, percentage) %>%
-  dplyr::rename(
-    "Answer" = answer,
-    "Pct" = percentage
-  ) %>%
-  bind_rows(
-    tibble(
-      Answer = "Total",
-      N = comma(sum(gt_yn$n, na.rm = TRUE)),
-      "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-    )
-  )
-
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-covid_twice_funct <- function(CID, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(CID)
-  
-     gt_yn <- CVD_tib %>%
-        filter(as.numeric(CVD_tib$D_860011428)>=2) %>% 
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-   
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-   
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-covid_thrice_funct <- function(CID, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(CID)
-  
-     gt_yn <- CVD_tib %>%
-        filter(as.numeric(CVD_tib$D_860011428)>=3) %>% 
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-  
-# Apply factor ordering if provided
-if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-        mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-        arrange(answer)
-}
-    
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-# One filter/skip logic step, with factoring option
-one_logic_funct <- function(data,CID, CID_prev, Prev_Answer, Title, factor_levels = NULL){
-  CID_SYM <- rlang::ensym(CID)
-  CID_SYM_P <- rlang::ensym(CID_prev)
-
-  gt_yn <- data %>%
-    filter(!!CID_SYM_P == Prev_Answer) %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-
-  # Apply factor ordering if provided
-  if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-      mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-      arrange(answer)
-  }
-
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-
-  kable(gt_yn_kable,
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>%
-    kable_styling(latex_options = c("scale_down"))
-
-}
-
-
-
-
-# Two filters/skip logic steps, with factoring option
-two_logic_funct <- function(data,CID, Title, CID_prev, Prev_Answer1, Prev_Answer2, factor_levels = NULL){
-  CID_SYM <- rlang::ensym(CID)
-  CID_SYM_P <- rlang::ensym(CID_prev)
-
-  gt_yn <- data %>%
-    filter(!!CID_SYM_P == Prev_Answer1 | !!CID_SYM_P == Prev_Answer2) %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-
-  # Apply factor ordering if provided
-  if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-      mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-      arrange(answer)
-  }
-
-
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-
-  kable(gt_yn_kable,
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>%
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-
-create_kable_table <- function(df, group_by_vriable, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(group_by_vriable)
-  
-  gt_yn <- df %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-  
-    # Apply factor ordering if provided
-  if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-      mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-      arrange(answer)
-  }
-  
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down"))
-}
-
-
-
-
-create_kable_table_w_footnote <- function(df, group_by_vriable, Title, factor_levels = NULL){  
-  CID_SYM <- rlang::ensym(group_by_vriable)
-  
-  gt_yn <- df %>%
-    group_by(!!CID_SYM) %>%
-    summarize(n = n(), percentage = 100 * n / nrow(.)) %>%
-    ungroup() %>%
-    mutate(answer = dplyr::recode(!!CID_SYM, !!!dict)) %>%
-    replace_na(list(answer = "Skipped this Question")) %>%
-    select(answer, n, percentage)
-    
-    # Apply factor ordering if provided
-  if (!is.null(factor_levels)){
-    gt_yn <- gt_yn %>%
-      mutate(answer = factor(answer, levels = c(factor_levels, "Skipped this Question"))) %>%
-      arrange(answer)
-  }
-  
-  gt_yn_kable <- gt_yn %>%
-    mutate(
-      percentage = round(percentage, 1),
-      N = comma(n)
-    ) %>%
-    select(answer, N, percentage) %>%
-    dplyr::rename(
-      "Answer" = answer,
-      "Pct" = percentage
-    ) %>%
-    bind_rows(
-      tibble(
-        Answer = "Total",
-        N = comma(sum(gt_yn$n, na.rm = TRUE)),
-        "Pct" = round(sum(gt_yn$Pct, na.rm = TRUE), 1)
-      )
-    )
-
-  
-  kable(gt_yn_kable, 
-        caption = Title, align = "lrr",
-        booktabs = TRUE, longtable = TRUE, escape = TRUE) %>%
-    add_indent(seq(1, nrow(gt_yn_kable) - 1)) %>% 
-    kable_styling(latex_options = c("scale_down")) %>% 
-    footnote(general="Participants may select multiple responses or skip the question.", general_title = "")
-}
-
-
-
-
-#Histogram Function --- can't get them to work
-hist_funct <- function(CID,Title, Xlab, Ylab) {
-  
-  CID_SYM <- rlang::ensym(CID)
-  
-  CVD_tib %>% 
-    dplyr::mutate(!!CID_SYM:=as.numeric(!!CID_SYM),
-                  Perc.99 = quantile(!!CID_SYM, 0.99, na.rm=T)) %>%
-    filter(!is.na(!!CID_SYM) & 
-             !!CID_SYM < Perc.99 & 
-             !!CID_SYM >=0) %>% 
-    ggplot(aes(x=!!CID_SYM))+
-     xlab(Xlab) + ylab(Ylab) + 
-    ggtitle(Title)+
-    geom_histogram(color="black")+ 
-    scale_y_continuous(breaks=pretty_breaks()) +
-    geom_vline(aes(xintercept=mean(!!CID_SYM, na.rm=T)), colour="#2973A5" , linetype="solid")
-  
-}
-
-
-date_hist_funct <- function(CID,Title, Xlab, Ylab){
-  CID_SYM <- rlang::ensym(CID)
-  covid_sect<- CVD_tib %>% dplyr::mutate(contracted_date2 = case_when(!is.na(!!CID_SYM) ~ paste0(!!CID_SYM, "-01"),
-                                                          TRUE ~ NA))
-  covid_sect$contracted_date2 <- as.Date(covid_sect$contracted_date2)
-
-  covid_sect %>% 
-    mutate(Date = ymd(contracted_date2)) %>% 
-    ggplot(aes(contracted_date2)) +
-    xlab(Xlab) + ylab(Ylab) + geom_histogram()+  ggtitle(Title)+
-    geom_histogram(color="black")+ scale_y_continuous(breaks=pretty_breaks()) +
-    geom_vline(aes(xintercept=mean(count, na.rm=T)), colour="#2973A5" , linetype="solid")
-}
-
-
-
-
-
-
-
-
-
 ```
 
 
@@ -581,7 +167,7 @@ simple_funct(CVD_tib,D_494226443, "Ever Have COVID-19",
 #qc issue of participants putting in year of diagnosis instead of times having covid
 CVD_tib <- CVD_tib %>% mutate(D_860011428_num = case_when(as.numeric(D_860011428)<100 ~ D_860011428,
                                                           TRUE ~ NA))
-cov2 <- hist_funct(D_860011428_num, "Times Having COVID-19", "Times", "Frequency")
+cov2 <- hist_funct(CVD_tib,D_860011428_num, "Times Having COVID-19", "Times", "Frequency")
 cov2 + scale_x_continuous(breaks = breaks_width(1)) +
   labs(caption="Participants that put values over 99 are a quality control issue and have been exlcuded from this plot.")
 
@@ -620,7 +206,7 @@ covid_once_funct(D_366980310_1_1, "Test Positive the First Time Having COVID-19"
 #COV5
 dt_select2 <- CVD_tib  %>%  filter((as.numeric(D_860011428)>=1| D_494226443=="353358909") & D_366980310_1_1!="353358909") %>%  select(Connect_ID, D_498462481_1_1) 
   
-create_kable_table(dt_select2, D_498462481_1_1, "HealthCare Provider Confirm Diagnosis the First Time Having COVID-19",
+simple_funct(dt_select2, D_498462481_1_1, "HealthCare Provider Confirm Diagnosis the First Time Having COVID-19",
 factor_levels = c("Yes", "No"))
 
 
@@ -725,14 +311,14 @@ one_logic_funct(CVD_tib,D_775313030_1_1, D_694503437_1_1, "353358909", "Overnigh
 
 #COV13
 cat("\\FloatBarrier")
-hist_funct(D_744230001_1_1, "Nights in the Hospital the First Time Having COVID-19", "Nights", "Count")
+hist_funct(CVD_tib,D_744230001_1_1, "Nights in the Hospital the First Time Having COVID-19", "Nights", "Count")
 
 #COV14A
 one_logic_funct(CVD_tib,D_782396371_1_1, D_775313030_1_1, "353358909", "Given Oxygen in the Hospital the First Time Having COVID-19",
 factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV14B
-hist_funct(D_930944000_1_1, "Days Treated with Oxygen in the Hospital the First Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_930944000_1_1, "Days Treated with Oxygen in the Hospital the First Time Having COVID-19", "Days", "Count")
 
 #COV15A
 one_logic_funct(CVD_tib,D_984121390_1_1, D_775313030_1_1, "353358909", "Given Breathing Tube or Ventilator in the Hospital the First Time Having COVID-19",
@@ -740,7 +326,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV15B
 cat("\\FloatBarrier")
-hist_funct(D_930944000_1_1, "Days Treated with Breathing Tube or Ventilator the First Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_930944000_1_1, "Days Treated with Breathing Tube or Ventilator the First Time Having COVID-19", "Days", "Count")
 
 #COV16A
 one_logic_funct(CVD_tib,D_179406442_1_1, D_775313030_1_1, "353358909", "ICU monitoring in the Hospital the First Time Having COVID-19",
@@ -748,7 +334,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV16B
 cat("\\FloatBarrier")
-hist_funct(D_803339020_1_1, "Days Treated with ICU monitoring the First Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_803339020_1_1, "Days Treated with ICU monitoring the First Time Having COVID-19", "Days", "Count")
 
 #COV17A
 one_logic_funct(CVD_tib,D_893966847_1_1, D_775313030_1_1, "353358909", "Receive Dialysis Treatment in the Hospital the First Time Having COVID-19",
@@ -756,7 +342,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV17B
 cat("\\FloatBarrier")
-hist_funct(D_169509213_1_1, "Days Treated with Dialysis the First Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_169509213_1_1, "Days Treated with Dialysis the First Time Having COVID-19", "Days", "Count")
 
 ```
 
@@ -788,7 +374,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 #COV5
 dt_select2 <- CVD_tib  %>%  
     filter((as.numeric(D_860011428)>=2| D_494226443=="353358909") & D_366980310_2_2!="353358909") %>%  select(Connect_ID, D_498462481_2_2) 
-create_kable_table(dt_select2, D_498462481_2_2, "HealthCare Provider Confirm Diagnosis the Second Time Having COVID-19",
+simple_funct(dt_select2, D_498462481_2_2, "HealthCare Provider Confirm Diagnosis the Second Time Having COVID-19",
 factor_levels = c("Yes", "No"))
 
 
@@ -890,7 +476,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV13
 cat("\\FloatBarrier")
-hist_funct(D_744230001_2_2, "Nights in the Hospital the Second Time Having COVID-19", "Nights", "Count")
+hist_funct(CVD_tib,D_744230001_2_2, "Nights in the Hospital the Second Time Having COVID-19", "Nights", "Count")
 
 #COV14A
 one_logic_funct(CVD_tib,D_782396371_2_2, D_775313030_2_2, "353358909", "Given Oxygen in the Hospital the Second Time Having COVID-19",
@@ -898,7 +484,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV14B
 cat("\\FloatBarrier")
-hist_funct(D_930944000_2_2, "Days Treated with Oxygen in the Hospital the Second Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_930944000_2_2, "Days Treated with Oxygen in the Hospital the Second Time Having COVID-19", "Days", "Count")
 
 #COV15A
 one_logic_funct(CVD_tib,D_984121390_2_2, D_775313030_2_2, "353358909", "Given Breathing Tube or Ventilator in the Hospital the Second Time Having COVID-19",
@@ -906,7 +492,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV15B
 cat("\\FloatBarrier")
-hist_funct(D_930944000_2_2, "Days Treated with Breathing Tube or Ventilator the Second Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_930944000_2_2, "Days Treated with Breathing Tube or Ventilator the Second Time Having COVID-19", "Days", "Count")
 
 #COV16A
 one_logic_funct(CVD_tib,D_179406442_2_2, D_775313030_2_2, "353358909", "ICU monitoring in the Hospital the Second Time Having COVID-19",
@@ -914,7 +500,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV16B
 cat("\\FloatBarrier")
-hist_funct(D_803339020_2_2, "Days Treated with ICU monitoring the Second Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_803339020_2_2, "Days Treated with ICU monitoring the Second Time Having COVID-19", "Days", "Count")
 
 #COV17A
 one_logic_funct(CVD_tib,D_893966847_2_2, D_775313030_2_2, "353358909", "Receive Dialysis Treatment in the Hospital the Second Time Having COVID-19",
@@ -922,7 +508,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV17B-- no one answered yet 
 cat("\\FloatBarrier")
-hist_funct(D_169509213_2_2, "Days Treated with Dialysis the Second Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_169509213_2_2, "Days Treated with Dialysis the Second Time Having COVID-19", "Days", "Count")
 ```
 
 
@@ -940,7 +526,7 @@ which_symptA1 <-dt_COV19A %>%
                             D_847578001_D_488415137==178780048 ~ "Previously Experienced",
                             TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptA1, symptom, "Experienced Lost of Taste or Smell Since COVID-19 Diagnosis",
+simple_funct(which_symptA1, symptom, "Experienced Lost of Taste or Smell Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -950,7 +536,7 @@ which_symptA2= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_167695804=
                                                       D_847578001_D_167695804==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptA2, symptom, "Experienced Appetite Changes Since COVID-19 Diagnosis",
+simple_funct(which_symptA2, symptom, "Experienced Appetite Changes Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -960,7 +546,7 @@ which_symptA3= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_730334054=
                                                       D_847578001_D_730334054==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptA3, symptom, "Experienced Feeling More Tired than Usual Since COVID-19 Diagnosis",
+simple_funct(which_symptA3, symptom, "Experienced Feeling More Tired than Usual Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -970,7 +556,7 @@ which_symptA4= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_215996690=
                                                       D_847578001_D_215996690==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptA4, symptom, "Experienced Trouble Remembering Things Since COVID-19 Diagnosis",
+simple_funct(which_symptA4, symptom, "Experienced Trouble Remembering Things Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -981,7 +567,7 @@ which_symptA5= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_462737492=
                                                       D_847578001_D_462737492==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptA5, symptom, "Experienced Trouble Paying Attention Since COVID-19 Diagnosis",
+simple_funct(which_symptA5, symptom, "Experienced Trouble Paying Attention Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -992,7 +578,7 @@ which_symptA6= dt_COV19A %>%  mutate(symptom= case_when(D_847578001_D_469675296=
                                                       D_847578001_D_469675296==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptA6, symptom, "Experienced Trouble Thinking or Making Decisions Since COVID-19 Diagnosis",
+simple_funct(which_symptA6, symptom, "Experienced Trouble Thinking or Making Decisions Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1009,7 +595,7 @@ which_symptB1= dt_COV19B %>%  mutate(symptom= case_when(D_136730307_D_962475128=
                                                       D_136730307_D_962475128==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptB1, symptom, "Experienced Shortness of Breath Since COVID-19 Diagnosis",
+simple_funct(which_symptB1, symptom, "Experienced Shortness of Breath Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1019,7 +605,7 @@ which_symptB2= dt_COV19B %>%  mutate(symptom= case_when(D_136730307_D_989576239=
                                                       D_136730307_D_989576239==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptB2, symptom, "Experienced Inability to Exercise at Normal Level Since COVID-19 Diagnosis",
+simple_funct(which_symptB2, symptom, "Experienced Inability to Exercise at Normal Level Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1030,7 +616,7 @@ which_symptB3= dt_COV19B %>%  mutate(symptom= case_when(D_136730307_D_338613869=
                                                       D_136730307_D_338613869==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptB3, symptom, "Experienced Inability to Return to School or Work Since COVID-19 Diagnosis",
+simple_funct(which_symptB3, symptom, "Experienced Inability to Return to School or Work Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1041,7 +627,7 @@ which_symptB4= dt_COV19B %>%  mutate(symptom= case_when(D_136730307_D_126794793=
                                                       D_136730307_D_126794793==178780048 ~ "Previously Experienced",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptB4, symptom, "Experienced Inability to Return to Usual Activities Since COVID-19 Diagnosis",
+simple_funct(which_symptB4, symptom, "Experienced Inability to Return to Usual Activities Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1053,7 +639,7 @@ which_symptB5= dt_COV19B %>%  mutate(symptom= case_when(D_136730307_D_218793117=
                                                       D_136730307_D_218793117==178780048 ~ "Previously Felt",
                                              TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_symptB5, symptom, "Experienced Feeling Weak, Tired, or Sick after Physical Activity Since COVID-19 Diagnosis",
+simple_funct(which_symptB5, symptom, "Experienced Feeling Weak, Tired, or Sick after Physical Activity Since COVID-19 Diagnosis",
 factor_levels = c("Never Felt", "Previously Felt",  "Currently Feeling", "Skipped this question"))
 
 
@@ -1075,7 +661,7 @@ which_sympt1= dt_COV19C %>%  mutate(symptom= case_when(D_751358419_D_524096053==
                                                       TRUE   ~ "Skipped this question"),
          symptom = factor(symptom,levels=c("Never Felt", "Previously Felt",  "Currently Feeling", "Skipped this question")))
 
-create_kable_table(which_sympt1, symptom, "Experienced Feeling Lightheaded or Dizzy Since COVID-19 Diagnosis",
+simple_funct(which_sympt1, symptom, "Experienced Feeling Lightheaded or Dizzy Since COVID-19 Diagnosis",
 factor_levels = c("Never Felt", "Previously Felt",  "Currently Feeling", "Skipped this question"))
 
 
@@ -1087,7 +673,7 @@ which_sympt2= dt_COV19C %>%  mutate(symptom= case_when(D_751358419_D_814101706==
                                                    D_751358419_D_814101706==178780048 ~ "Previously Experienced", 
                                                       TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_sympt2, symptom, "Experienced Periods of Racing Heart Rate Since COVID-19 Diagnosis",
+simple_funct(which_sympt2, symptom, "Experienced Periods of Racing Heart Rate Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1100,7 +686,7 @@ which_sympt3= dt_COV19C %>%  mutate(symptom= case_when(D_751358419_D_635026188==
                                                        D_751358419_D_635026188==178780048 ~ "Previously Experienced", 
                                                        TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_sympt3, symptom, "Experienced Trouble Sleeping Since COVID-19 Diagnosis",
+simple_funct(which_sympt3, symptom, "Experienced Trouble Sleeping Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1112,7 +698,7 @@ which_sympt4= dt_COV19C %>%  mutate(symptom= case_when(D_751358419_D_238135048==
                                                        D_751358419_D_238135048==178780048 ~ "Previously Experienced", 
                                                        TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_sympt4, symptom, "Experienced Changes to Mood or Emotion Since COVID-19 Diagnosis",
+simple_funct(which_sympt4, symptom, "Experienced Changes to Mood or Emotion Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1124,7 +710,7 @@ which_sympt5= dt_COV19C %>%  mutate(symptom= case_when(D_751358419_D_632714520==
                                                        D_751358419_D_632714520==178780048 ~ "Previously Experienced", 
                                                        TRUE   ~ "Skipped this question"))
 
-create_kable_table(which_sympt5, symptom, "Experienced Muscle Aches Since COVID-19 Diagnosis",
+simple_funct(which_sympt5, symptom, "Experienced Muscle Aches Since COVID-19 Diagnosis",
 factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Experiencing", "Skipped this question"))
 
 
@@ -1136,7 +722,7 @@ factor_levels = c("Never Experienced", "Previously Experienced",  "Currently Exp
 #COV19C6A
 dt_select2 <- CVD_tib  %>%  filter(D_694503437_1_1=="353358909" | D_694503437_2_2=="353358909" | D_694503437_3_3=="353358909")
 
-create_kable_table(dt_select2, D_110872086_D_110872086, "Experienced Any Other Symptoms Since COVID-19 Diagnosis",
+simple_funct(dt_select2, D_110872086_D_110872086, "Experienced Any Other Symptoms Since COVID-19 Diagnosis",
 factor_levels = c("Yes, another",  "No") )
 
 
@@ -1237,8 +823,8 @@ factor_levels = c("Yes", "Yes, mostly", "No"))
 
 #COV22
 
-COV22_Months=hist_funct(D_959877599_D_700620868, "Time to Fully Recover from COVID-19", "Months", "Count")
-COV22_Days=hist_funct(D_959877599_D_908044428, "Time to Fully Recover from COVID-19", "Days", "Count")
+COV22_Months=hist_funct(CVD_tib,D_959877599_D_700620868, "Time to Fully Recover from COVID-19", "Months", "Count")
+COV22_Days=hist_funct(CVD_tib,D_959877599_D_908044428, "Time to Fully Recover from COVID-19", "Days", "Count")
 grid.arrange(COV22_Months, COV22_Days, nrow=2)
 
 #GRID  COV23A1
@@ -1251,7 +837,7 @@ which_COV23A1= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_813989715_D_874168085==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
    
-create_kable_table(which_COV23A1, answer, "Experienced Lost of Taste or Smell Since 2020",
+simple_funct(which_COV23A1, answer, "Experienced Lost of Taste or Smell Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )
  
  
@@ -1264,7 +850,7 @@ which_COV23A2= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_813989715_D_283112988==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
-create_kable_table(which_COV23A2, answer, "Experienced Appetite Changes Since 2020",
+simple_funct(which_COV23A2, answer, "Experienced Appetite Changes Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )
 
 
@@ -1277,7 +863,7 @@ which_COV23A3= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_813989715_D_580629349==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
 
-create_kable_table(which_COV23A3, answer, "Feeling More Tired than Usual Since 2020",
+simple_funct(which_COV23A3, answer, "Feeling More Tired than Usual Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") ) 
  
 
@@ -1290,7 +876,7 @@ which_COV23A4= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_813989715_D_151327643==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
-create_kable_table(which_COV23A4, answer, "Having Trouble Remebering Things Since 2020",
+simple_funct(which_COV23A4, answer, "Having Trouble Remebering Things Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )  
 
 
@@ -1302,7 +888,7 @@ which_COV23A5= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_813989715_D_440872808==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
- create_kable_table(which_COV23A5, answer, "Having Trouble Paying Attention Since 2020",
+ simple_funct(which_COV23A5, answer, "Having Trouble Paying Attention Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )
 
 
@@ -1314,7 +900,7 @@ which_COV23A6= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_813989715_D_874223830==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
-  create_kable_table(which_COV23A6, answer, "Having Trouble Thinking or Making Decisions Since 2020",
+  simple_funct(which_COV23A6, answer, "Having Trouble Thinking or Making Decisions Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )
 
 
@@ -1329,7 +915,7 @@ which_COV23B1= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_857165713_D_847529903==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
-   create_kable_table(which_COV23B1, answer, "Felt Dizziness or Shortness of Breath Since 2020",
+   simple_funct(which_COV23B1, answer, "Felt Dizziness or Shortness of Breath Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )
 
 
@@ -1341,7 +927,7 @@ which_COV23B2= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_857165713_D_219358831==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
-create_kable_table(which_COV23B2, answer, "Experienced Periods of Raching of Heart Rate Since 2020",
+simple_funct(which_COV23B2, answer, "Experienced Periods of Raching of Heart Rate Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )
  
 
@@ -1353,7 +939,7 @@ which_COV23B3= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_857165713_D_636367178==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
-create_kable_table(which_COV23B3, answer, "Experienced Shortness of Breath Since 2020",
+simple_funct(which_COV23B3, answer, "Experienced Shortness of Breath Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") ) 
 
 
@@ -1365,7 +951,7 @@ which_COV23B4= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_857165713_D_243443780==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
- create_kable_table(which_COV23B4, answer, "Experienced Feeling Weak, Tired, or Sick after Physical Activity Since 2020",
+ simple_funct(which_COV23B4, answer, "Experienced Feeling Weak, Tired, or Sick after Physical Activity Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") )
 
 
@@ -1377,7 +963,7 @@ which_COV23B5= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_857165713_D_357462273==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
- create_kable_table(which_COV23B5, answer, "Having Trouble Sleeping Since 2020",
+ simple_funct(which_COV23B5, answer, "Having Trouble Sleeping Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") ) 
 
 
@@ -1389,7 +975,7 @@ which_COV23B6= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_857165713_D_638380747==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
- create_kable_table(which_COV23B6, answer, "Experienced Changes in Mood or Emotion Since 2020",
+ simple_funct(which_COV23B6, answer, "Experienced Changes in Mood or Emotion Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") ) 
 
 
@@ -1401,7 +987,7 @@ which_COV23B7= CVD_tib  %>%  filter(D_494226443!="353358909" | D_498462481_1_1==
                                               D_857165713_D_187399900==586272115 ~ "Yes, I experienced this in the past",
                                               TRUE   ~ "Skipped this Question"))
  
-  create_kable_table(which_COV23B7, answer, "Experienced Muscle Aches Since 2020",
+  simple_funct(which_COV23B7, answer, "Experienced Muscle Aches Since 2020",
 factor_levels = c("Yes, I am experiencing this now", "Yes, I experienced this in the past", "No, I never experienced this") ) 
 
 
@@ -1503,7 +1089,7 @@ two_logic_funct(CVD_tib,D_749956170_D_463689026 , "Length of Time Experiencing M
 #Include both versions from earlier surveys
 CVD_tib <- CVD_tib %>% mutate(D_890156588_V2= ifelse(is.na(D_890156588_V2), D_890156588, D_890156588_V2))
    
-create_kable_table(CVD_tib,D_890156588_V2, "Received COVID-19 Vaccination",
+simple_funct(CVD_tib,D_890156588_V2, "Received COVID-19 Vaccination",
                    factor_levels = c("Yes", "No", "Do not Know")) 
 
    
@@ -1512,7 +1098,7 @@ create_kable_table(CVD_tib,D_890156588_V2, "Received COVID-19 Vaccination",
 #incorporate older versions
 CVD_tib <- CVD_tib  %>%  mutate(D_877074400_V2 = ifelse(!is.na(D_877074400_V2), as.numeric(D_877074400_V2), as.numeric(D_877074400)))
 cat("\\FloatBarrier")
-hist_funct(D_877074400_V2, "Number of COVID-19 Vaccinations", "Vaccinations", "Count")
+hist_funct(CVD_tib,D_877074400_V2, "Number of COVID-19 Vaccinations", "Vaccinations", "Count")
 ```
 
 
@@ -1570,32 +1156,32 @@ CVD_tib <- CVD_tib %>% mutate(vaccinated = ifelse(!is.na(D_890156588_V2), D_8901
 
 COV28_1 <- CVD_tib  %>%  filter(vaccinated=="353358909" & (vacc_num>=1)) 
 
-create_kable_table(COV28_1, D_220055064_1_1_D_220055064_1_1, "Brand of First COVID-19 Vaccine") 
+simple_funct(COV28_1, D_220055064_1_1_D_220055064_1_1, "Brand of First COVID-19 Vaccine") 
 
 
 
 
 COV28_2 <- CVD_tib  %>%  filter(vaccinated=="353358909" & (vacc_num>=2)) 
 
-create_kable_table(COV28_2, D_220055064_2_2_D_220055064_2_2, "Brand of Second COVID-19 Vaccine") 
+simple_funct(COV28_2, D_220055064_2_2_D_220055064_2_2, "Brand of Second COVID-19 Vaccine") 
    
    
 
 COV28_3 <- CVD_tib  %>%  filter(vaccinated=="353358909" & (vacc_num>=3)) 
 
-create_kable_table(COV28_3, D_220055064_3_3_D_220055064_3_3, "Brand of Third COVID-19 Vaccine")
+simple_funct(COV28_3, D_220055064_3_3_D_220055064_3_3, "Brand of Third COVID-19 Vaccine")
    
    
 
 COV28_4 <- CVD_tib  %>%  filter(vaccinated=="353358909" & (vacc_num>=4))
 
-create_kable_table(COV28_4, D_220055064_4_4_D_220055064_4_4, "Brand of Fourth COVID-19 Vaccine")
+simple_funct(COV28_4, D_220055064_4_4_D_220055064_4_4, "Brand of Fourth COVID-19 Vaccine")
    
    
 
 COV28_5 <- CVD_tib  %>%  filter(vaccinated=="353358909" & (vacc_num>=5))
 
-create_kable_table(COV28_5, D_220055064_5_5_D_220055064_5_5, "Brand of Fifth COVID-19 Vaccine")
+simple_funct(COV28_5, D_220055064_5_5_D_220055064_5_5, "Brand of Fifth COVID-19 Vaccine")
    
 
 ```

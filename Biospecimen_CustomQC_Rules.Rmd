@@ -40,6 +40,14 @@ library(glue)
 library(expss) # needed for xlxs
 bq_auth()
 
+
+### NEW: ALL CONNECT R CUSTOM FUNCTIONS FROM ANALYTICS IN THIS PACKAGE
+# If running for the first time, install first
+# install.packages("ConnectFunctions")
+library(ConnectFunctions)
+
+
+
 currentDate <- Sys.Date()
 
 
@@ -135,21 +143,6 @@ write_to_local_drive = F #F
 
 ### This function below determines whether the file will be created locally or not.
 local_drive= ifelse(write_to_local_drive, "~/Biospecimen/data/", "")
-
-```
-
-
-```{r functions, include=FALSE}
-
-## Sorting by Site causes an error message when there are no rows. This function eliminates that problem
-safe_arrange <- function(df, ...) {
-  if (nrow(df) > 0) {
-    df %>% arrange(...)
-  } else {
-    df
-  }
-}
-
 
 ```
 
