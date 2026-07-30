@@ -76,7 +76,7 @@ RUN R -e "devtools::install_github('dcomtois/summarytools')"
 # Copy R code to directory in instance
 COPY ["./ccc_biospecimen_metrics_api.R", "./ccc_biospecimen_metrics_api.R"]
 COPY ["./Weekly_Biospecimen_Metrics.Rmd", "./Weekly_Biospecimen_Metrics.Rmd"]
-COPY ["./Biospe_Custom_QC_Accession_Dup.Rmd", "./Biospe_Custom_QC_Accession_Dup.Rmd"]
+COPY ["./Biospecimen_CustomQC_Rules.Rmd", "./Biospecimen_CustomQC_Rules.Rmd"]
 COPY ["./BU Clinical Survey Summary Statistics.Rmd", "./BU Clinical Survey Summary Statistics.Rmd"]
 COPY ["./BUM Research Summary Statistics.Rmd", "./BUM Research Summary Statistics.Rmd"]
 COPY ["./COVID Survey Summary Statistics.Rmd", "./COVID Survey Summary Statistics.Rmd"]
