@@ -2346,7 +2346,8 @@ verif_BSL_colctC_2Before <- summarize_time(
   n_label   = "Number of Clinical Collections",
   time_var  = time,
   std_dv   = TRUE,
-  perc_90   = TRUE
+  perc_90   = TRUE,
+  perc_95   = TRUE
 )
 
 verif_BSL_colctC_2Before_total <- BL_coll_clin_2Before %>% 
@@ -2359,6 +2360,7 @@ verif_BSL_colctC_2Before_total <- BL_coll_clin_2Before %>%
                    SD= round(sd(time,na.rm = TRUE), digits=1),
                    Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
                    'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),
+                   'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
                    Max = round(max(time,na.rm = TRUE), digits=1))
 
 
@@ -2379,7 +2381,8 @@ verif_BSL_colctC_2After <- summarize_time(
   n_label   = "Number of Clinical Collections",
   time_var  = time,
   std_dv   = TRUE,
-  perc_90   = TRUE
+  perc_90   = TRUE,
+  perc_95   = TRUE
 )
 
 
@@ -2394,6 +2397,7 @@ verif_BSL_colctC_2After_total <- BL_coll_clin_2After %>%
                    SD= round(sd(time,na.rm = TRUE), digits=1),
                    Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
                    'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),
+                   'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
                    Max = round(max(time,na.rm = TRUE), digits=1))
 
 
@@ -2414,7 +2418,8 @@ verif_BL_RC <- baseline_colct %>%
                      Mean = round(mean(time,na.rm = TRUE), digits=1),
                      SD= round(sd(time,na.rm = TRUE), digits=1),
                      Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                     'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),
+                     'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),,
+                     'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
                      Max = round(max(time,na.rm = TRUE), digits=1))
 
 
@@ -2441,17 +2446,19 @@ verif_baseline_Af <- verif_BL_Af %>%
     Median1 = round(median(time[campaign=="Upcoming Appointment"],na.rm = TRUE), digits=1),
     Mean1 = round(mean(time[campaign=="Upcoming Appointment"],na.rm = TRUE), digits=1),
     SD1= round(sd(time[campaign=="Upcoming Appointment"],na.rm = TRUE), digits=1),
+    Pct_95_1= round(quantile(time[campaign=="Upcoming Appointment"], 0.95, na.rm = TRUE), digits=1),
     Max1 = round(max(time[campaign=="Upcoming Appointment"],na.rm = TRUE), digits=1),
     'Number of Baseline Collections2'=sum(campaign == "All Other Campaigns"),
     Min2 = round(min(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
     Median2 = round(median(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
     Mean2 = round(mean(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
     SD2= round(sd(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
+    Pct_95_2= round(quantile(time[campaign=="All Other Campaigns"], 0.95, na.rm = TRUE), digits=1),
     Max2 = round(max(time[campaign=="All Other Campaigns"],na.rm = TRUE), digits=1),
     'Total Number of Baseline Collections'=n()) %>%
   ungroup() %>%  
-  select(Site,  'Number of Baseline Collections1', Min1, Median1, Mean1, SD1, Max1, 
-         'Number of Baseline Collections2', Min2, Median2, Mean2, SD2, Max2, 'Total Number of Baseline Collections')
+  select(Site,  'Number of Baseline Collections1', Min1, Median1, Mean1, SD1, Pct_95_1, Max1, 
+         'Number of Baseline Collections2', Min2, Median2, Mean2, SD2, Pct_95_2, Max2, 'Total Number of Baseline Collections')
 
 
 ## Total Row
@@ -2463,12 +2470,14 @@ total_summary <- verif_BL_Af %>%
     Median1 = round(median(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
     Mean1   = round(mean(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
     SD1     = round(sd(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
+    Pct_95_1= round(quantile(time[campaign=="Upcoming Appointment"], 0.95, na.rm = TRUE), digits=1),
     Max1    = round(max(time[campaign=="Upcoming Appointment"], na.rm = TRUE), 1),
     'Number of Baseline Collections2' = sum(campaign == "All Other Campaigns"),
     Min2    = round(min(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
     Median2 = round(median(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
     Mean2   = round(mean(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
     SD2     = round(sd(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
+    Pct_95_2= round(quantile(time[campaign=="All Other Campaigns"], 0.95, na.rm = TRUE), digits=1),
     Max2    = round(max(time[campaign=="All Other Campaigns"], na.rm = TRUE), 1),
     'Total Number of Baseline Collections' = n()
   )
@@ -2567,7 +2576,7 @@ Table_bld_draw= table1 %>%  filter(grepl("^Kaiser", Site)) %>% ## excluding hybr
   missing_text="Unknown") %>%
   bold_labels() %>%
   modify_header() %>%
-  modify_caption("Table 4.9: Baseline Blood Draw Order Status Among Verified Participants") %>%
+  modify_caption("Table 4.10: Baseline Blood Draw Order Status Among Verified Participants") %>%
   as_kable_extra(escape = FALSE, addtl_fmt = TRUE) %>%
   kable_styling(latex_options = "scale_down")
 
@@ -2932,7 +2941,7 @@ knitr::kable(verif_BSL_colct_rsch_8,
 
 BSL_A <- knitr::kable(verif_BSL_colctC_2Before,
                       caption='Table 4.3: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified Before 2/01/2023',
-                      row.names=FALSE, align=c("l", rep("c", 8)),digits=1, booktabs = TRUE)  %>% 
+                      row.names=FALSE, align=c("l", rep("c", 9)),digits=1, booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down") 
 
 add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago.", notation = "none") %>% 
@@ -2942,7 +2951,7 @@ add_footnote(BSL_A,"Note: Baseline Clinical Collections were launched in Februar
 
 BSL_B <-knitr::kable(verif_BSL_colctC_2After,
                      caption='Table 4.4: Baseline- Time (in Days) from Verification to Clinical Collection Among Participants Verified on or After 2/01/2023',
-                     row.names=FALSE,  align=c("l", rep("c", 8)),digits=1, booktabs = TRUE)  %>% 
+                     row.names=FALSE,  align=c("l", rep("c", 9)),digits=1, booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down")
 add_footnote(BSL_B,"Note: Baseline Clinical Collections were launched in February 2023 at the KP sites; June 2023 at Henry Ford; December 2023 at HealthPartners; April 2024 at Sanford; June 2024 at UChicago.", notation = "none")
 
@@ -2950,30 +2959,29 @@ add_footnote(BSL_B,"Note: Baseline Clinical Collections were launched in Februar
 
 knit_verif_BL_RC <- knitr::kable(verif_BL_RC,
               caption='Table 4.5 Baseline- Time (in Days) from Verification to Collection (Research or Clinical Collection) Among Participants ',
-              row.names=FALSE,  align=c("l", rep("c", 8)),digits=1, booktabs = TRUE) %>% 
+              row.names=FALSE,  align=c("l", rep("c", 9)),digits=1, booktabs = TRUE) %>% 
   kable_styling(latex_options = "scale_down")
-#pending approval
-# add_footnote(knit_verif_BL_RC,"Note: This table includes data on participants who completed a research collection that were verified on or after 08/01/2022 and those who completed a clinical collection that were verified on or after 02/01/2023, which correspond with the dates each type of collection became available.", notation = "none")
+add_footnote(knit_verif_BL_RC,"Note: This table includes data on participants who completed a research collection that were verified on or after 08/01/2022 and those who completed a clinical collection that were verified on or after 02/01/2023, which correspond with the dates each type of collection became available.", notation = "none")
 
 
 
 
 AF26 <- knitr::kable(verif_baseline_Af_final,
-                     caption = 'Table 4.5: Baseline- Time (in Days) from Verification to Collection Among Participants Verified on or After 6/01/2022 by Campaign Type',
+                     caption = 'Table 4.6: Baseline- Time (in Days) from Verification to Collection Among Participants Verified on or After 6/01/2022 by Campaign Type',
                      row.names=FALSE, booktabs = T, linesep = "", format.args = list(big.mark = ","), 
-                     align = c("l",  rep("c", 13)), 
-                     col.names=c("Site",  'Number of Collections',"Min", "Median", "Mean", "SD", "Max", 'Number of Collections', 
-                                 "Min", "Median", "Mean", "SD", "Max","Total Baseline Collections") ) %>% 
+                     align = c("l",  rep("c", 15)), 
+                     col.names=c("Site",  'Number of Collections',"Min", "Median", "Mean", "SD", "Perc.95", "Max", 'Number of Collections', 
+                                 "Min", "Median", "Mean", "SD", "Perc.95",  "Max","Total Baseline Collections") ) %>% 
   kable_styling(latex_options = "scale_down") %>% 
   add_indent(seq(1, nrow(verif_baseline_Af_final)-1)) %>% 
-  add_header_above(c(" " = 1, "Appointment Based" = 6, "All Other Campaigns" = 6,  " "=1)) %>% landscape() 
+  add_header_above(c(" " = 1, "Appointment Based" = 7, "All Other Campaigns" = 7,  " "=1)) %>% landscape() 
 add_footnote(AF26, "Note: Appointment Based includes “Screening appointment” and “Non-screening appointment” campaign types. All Other Campaigns include “Random”, “Demographic Group”, “Aging out of study”, “Geographic group”, “Post-Screening Selection”, “Technology adapters”, “Low-income/health professional shortage areas”, and “Other” campaign types.", notation = "none")
 
 
 
 
 tabl27 <- knitr::kable(verif_draw_order,
-                       caption='Table 4.6: Baseline- Time (in Days) from Verification to Draw Order Placement',
+                       caption='Table 4.7: Baseline- Time (in Days) from Verification to Draw Order Placement',
                        row.names=FALSE, align=c("l", rep("c", 3)),digits=1, booktabs = TRUE)  %>% 
   kable_styling(latex_options = "scale_down")
 add_footnote(tabl27, "Time from verification to draw order placement calculated for participants verified on or after February 1, 2023. HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data. Henry Ford is excluded because participants have collection type options, therefore, the placement of draw orders post-verification may be delayed.", notation="none") %>% 
@@ -2981,7 +2989,7 @@ add_footnote(tabl27, "Time from verification to draw order placement calculated 
 
 
 tab4_9 <- knitr::kable(avg_draw_order, 
-                       caption='Table 4.7: Baseline- Time (in Days) from Draw Order Placement to Clinical Collection', 
+                       caption='Table 4.8: Baseline- Time (in Days) from Draw Order Placement to Clinical Collection', 
                        row.names=FALSE, align=c("l", rep("c", 11)),digits=1, booktabs = TRUE) %>% 
   kable_styling(latex_options = "scale_down") 
 add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and Sanford Health are excluded due to the limited availability of draw order placement data.", notation="none")
@@ -2989,7 +2997,7 @@ add_footnote(tab4_9, "Note: HealthPartners, University of Chicago Medicine and S
 
 
 tab4_10 <- knitr::kable(avg_bldorder_present, 
-                        caption='Table 4.8: Baseline- Time (in Days) from Blood  Draw Order Placement to Present Date by Site \n for Participants with No Baseline Clinical Blood Collection', 
+                        caption='Table 4.9: Baseline- Time (in Days) from Blood  Draw Order Placement to Present Date by Site \n for Participants with No Baseline Clinical Blood Collection', 
                         row.names=FALSE, align=c("l", rep("c", 11)),digits=1, booktabs = TRUE) %>% 
   column_spec(2, width = "4cm") %>% #make longer column name wrap into 2 lines
   kable_styling(latex_options = "scale_down") 
@@ -3004,7 +3012,7 @@ add_footnote(Table_bld_draw , "Note: Table includes information for Kaiser sites
 knitr::kable(crosstable.coll_bptl1, 
              col.names=c("Site", "< 30 Days", "30 to <60 Days","60 to <90 Days", "90 to <180 Days", "180 to <270 Days", 
                          "270 Days or More", "Total Participants with No Basline Collections"), 
-             caption='Table 4.10: Baseline- Time (in Days) Since Verification Among Participants with No Biospecimen Collection ', 
+             caption='Table 4.11: Baseline- Time (in Days) Since Verification Among Participants with No Biospecimen Collection ', 
              row.names=FALSE, align=c("l", rep("c", 7)), booktabs = TRUE) %>% kable_styling(latex_options = "scale_down") 
 
 ```
