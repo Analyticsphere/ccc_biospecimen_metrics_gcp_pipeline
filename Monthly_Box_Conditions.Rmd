@@ -16,6 +16,13 @@ library(kableExtra)
 library(gtsummary)
 library(scales)
 
+
+### NEW: ALL CONNECT R CUSTOM FUNCTIONS FROM ANALYTICS IN THIS PACKAGE
+# If running for the first time, install first
+# install.packages("ConnectFunctions")
+library(ConnectFunctions)
+
+
 ```
 
 
@@ -64,19 +71,10 @@ box_conditions_counts <- box_conditions %>%
   distinct(d_959708259, Condition) %>%
   group_by(Condition) %>% 
   tally() %>% 
-  mutate(P = round(n/sum(n)*100, 2))
-  
-
-cond_total <- box_conditions_counts %>% 
-  dplyr::summarise(Condition="Total",
-                   n = sum(n),
-                   P=sum(P))
-
-box_conditions_counts <- bind_rows(box_conditions_counts, cond_total)
-
-box_conditions_counts <- box_conditions_counts %>% 
-  mutate( 'N (%)' = paste0(scales::comma(n), " (", P, "%)")) %>% 
-  select('Condition', 'N (%)')
+  mutate(`N (%)` = fmt_count_pct(n, sum(n))) %>%
+  bind_rows(summarise(., Condition = "Total", n = sum(n),
+                             `N (%)` = fmt_count_pct(n, sum(n)))) %>%
+  select(Condition, `N (%)`)
 
 ```
 
