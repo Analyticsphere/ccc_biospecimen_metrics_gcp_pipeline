@@ -628,7 +628,6 @@ col_num_1.1 <- col_num_1.1 %>%
 
 # Grouping Counts by Site
 
-col_num_1.1$`N` <- as.numeric(col_num_1.1$`N`)
 col_num_1.1 <- col_num_1.1 %>%
   filter(!is.na(`N`))
 
@@ -639,26 +638,20 @@ total_collections <- col_num_1.1 %>%
 
 
 col_num_1.1 <- col_num_1.1 %>%
-  left_join(total_collections, by = "Site_Group")
-
-
-col_num_1.1 <- col_num_1.1 %>%
+  left_join(total_collections, by = "Site_Group") %>% 
   mutate(Percentage = round((`N` / Total_Collections * 100), digits=1))
 
-
-total_rows <- col_num_1.1 %>%
-  group_by(Site_Group) %>%
-  summarize(`Collection Location` = "Total",
-            `N` = sum(`N`),
-            Percentage = 100) %>%
-  ungroup()
-
-col_num_1.1 <- bind_rows(col_num_1.1, total_rows)
-
-col_num_1.1$`Total Research Collections` <- paste0(col_num_1.1$`N`, " (", col_num_1.1$Percentage,"%)")
-col_num_1.1 <- col_num_1.1[, c(1,3,6)]
+  total_rows <- col_num_1.1 %>%
+    dplyr::group_by(Site_Group) %>%
+    dplyr::summarize(`Collection Location` = "Total", N = sum(N),
+                     Total_Collections = sum(N), .groups = "drop")
+  
+  col_num_1.1 <- dplyr::bind_rows(col_num_1.1, total_rows) %>%
+    dplyr::mutate(`Total Research Collections` = fmt_count_pct(N, Total_Collections, digits = 1))
+  
 
 col_num_1.1 <- col_num_1.1 %>%
+  select("Collection Location","Site_Group", "Total Research Collections") %>% 
   mutate(`Collection Location` = paste0("\u00A0\u00A0\u00A0", `Collection Location`)) # need to manually create an indent for site locations under Site header
 
 
@@ -741,20 +734,18 @@ col_num_1.2 <- col_num_1.2 %>%
   mutate(Percentage = round((`N` / Total_Collections * 100), digits=1))
 
 
+  total_rows <- col_num_1.2 %>%
+    dplyr::group_by(Site_Group) %>%
+    dplyr::summarize(`Collection Location` = "Total", N = sum(N),
+                     Total_Collections = sum(N), .groups = "drop")
+  
+  col_num_1.2 <- dplyr::bind_rows(col_num_1.2, total_rows) %>%
+    dplyr::mutate(`Total Clinical Collections` = fmt_count_pct(N, Total_Collections, 
+                                                               digits = 1))
 
-total_rows <- col_num_1.2 %>%
-  group_by(Site_Group) %>%
-  summarize(`Collection Location` = "Total",
-            `N` = sum(`N`),
-            Percentage = 100) %>%
-  ungroup()
-
-col_num_1.2 <- bind_rows(col_num_1.2, total_rows)
-
-col_num_1.2$`Total Clinical Collections` <- paste0(col_num_1.2$`N`, " (", col_num_1.2$Percentage,"%)")
-col_num_1.2 <- col_num_1.2[, c(1,3,6)]
 
 col_num_1.2 <- col_num_1.2 %>%
+  select("Collection Location","Site_Group", "Total Clinical Collections") %>%
   mutate(`Collection Location` = paste0("\u00A0\u00A0\u00A0", `Collection Location`)) #manually adding indent
 
 col_num_1.2_gt <- col_num_1.2 %>%
@@ -1410,8 +1401,8 @@ Deviation_Freq <- base::merge(tube_dev,tube_nodev,by="Site")
 
 Deviation_Freq <- Deviation_Freq %>%  
   mutate(`Total` = Any_Deviation + No_Deviation,
-         `Any Deviations` = paste0(Any_Deviation, " (", round(Any_Deviation / Total * 100, 1), "%)"),
-         `No Deviations` = paste0(No_Deviation, " (", round(No_Deviation / Total * 100, 1), "%)"),
+         `Any Deviations` = fmt_count_pct(Any_Deviation, Total, digits = 1),
+         `No Deviations` = fmt_count_pct(No_Deviation, Total, digits = 1),
          Site = factor(Site,levels = c("Baylor Scott and White Health",  "HealthPartners",  "Henry Ford Health",
                                        "Marshfield Clinic Health System", "Sanford Health",  "University of Chicago Medicine",
                                        "Kaiser Permanente Colorado", "Kaiser Permanente Georgia", "Kaiser Permanente Hawaii", "Kaiser Permanente Northwest"))) %>% 
@@ -1424,8 +1415,8 @@ total_row <- Deviation_Freq %>%
             Total = sum(Total, na.rm = TRUE),
             Any_num = sum(as.numeric(gsub(" .*", "", `Any Deviations`)), na.rm = TRUE),
             No_num = sum(as.numeric(gsub(" .*", "", `No Deviations`)), na.rm = TRUE)) %>%
-  mutate(`Any Deviations` = paste0(Any_num, " (", round(Any_num / Total * 100, 1), "%)"),
-         `No Deviations` = paste0(No_num, " (", round(No_num / Total * 100, 1), "%)")) %>%
+  mutate(`Any Deviations` = fmt_count_pct(Any_num, Total, digits = 1),
+         `No Deviations` = fmt_count_pct(No_num, Total, digits = 1)) %>%
   select(Site, `Any Deviations`, `No Deviations`, Total)
 
 
@@ -2313,17 +2304,10 @@ verif_BSL_colct_rsch_8 <- summarize_time(
   perc_95   = TRUE
 )
 
-verif_BSL_colct_rsch_8_total <- BL_coll_rsch_8 %>% 
-  dplyr::summarize(Site = "All Sites",
-                   'Number of Research Collection Visits'= scales::comma(n()),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   SD= round(sd(time,na.rm = TRUE), digits=1),
-                   Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
+verif_BSL_colct_rsch_8_total <- summarize_time(BL_coll_rsch_8, time,
+                                               n_label = "Number of Research Collection Visits",
+                                               std_dv    = TRUE,perc_95 = TRUE) %>%   
+  add_column(Site = c("All Sites"), .before = 1)
 
 
 verif_BSL_colct_rsch_8 <- rbind(verif_BSL_colct_rsch_8, verif_BSL_colct_rsch_8_total)
@@ -2350,18 +2334,10 @@ verif_BSL_colctC_2Before <- summarize_time(
   perc_95   = TRUE
 )
 
-verif_BSL_colctC_2Before_total <- BL_coll_clin_2Before %>% 
-  dplyr::summarize(Site = "All Sites",
-                   'Number of Clinical Collections'= scales::comma(n()),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   SD= round(sd(time,na.rm = TRUE), digits=1),
-                   Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),
-                   'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
+verif_BSL_colctC_2Before_total <- summarize_time(BL_coll_clin_2Before, time,
+                                               n_label = "Number of Clinical Collections",
+                                               std_dv   = TRUE, perc_90 = TRUE, perc_95 = TRUE) %>%   
+  add_column(Site = c("All Sites"), .before = 1)
 
 
 verif_BSL_colctC_2Before <- rbind(verif_BSL_colctC_2Before, verif_BSL_colctC_2Before_total)
@@ -2387,18 +2363,15 @@ verif_BSL_colctC_2After <- summarize_time(
 
 
 
-verif_BSL_colctC_2After_total <- BL_coll_clin_2After %>% 
-  dplyr::summarize(Site = "All Sites",
-                   'Number of Clinical Collections'= scales::comma(n()),
-                   Min = round(min(time,na.rm = TRUE), digits=1),
-                   Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                   Median = round(median(time,na.rm = TRUE), digits=1),
-                   Mean = round(mean(time,na.rm = TRUE), digits=1),
-                   SD= round(sd(time,na.rm = TRUE), digits=1),
-                   Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                   'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),
-                   'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
-                   Max = round(max(time,na.rm = TRUE), digits=1))
+verif_BSL_colctC_2After_total <- summarize_time(
+  BL_coll_clin_2After,
+  n_label   = "Number of Clinical Collections",
+  time_var  = time,
+  std_dv   = TRUE,
+  perc_90   = TRUE,
+  perc_95   = TRUE
+) %>%   
+    add_column(Site = c("All Sites"), .before = 1)
 
 
 verif_BSL_colctC_2After <- rbind(verif_BSL_colctC_2After, verif_BSL_colctC_2After_total)
@@ -2407,20 +2380,18 @@ verif_BSL_colctC_2After <- rbind(verif_BSL_colctC_2After, verif_BSL_colctC_2Afte
 
 
 ### Verification to Collection (R+C) Total 
-verif_BL_RC <- baseline_colct %>%  
+verif_BL_RC_denom <- baseline_colct %>%  
   #Clin & Rsch became available at different times
   filter( (all_settings=="Clinical" & d_914594314>=as.Date("2023-02-01")) | 
-          (all_settings=="Research" & d_914594314>=as.Date("2022-08-01"))) %>% 
-    dplyr::summarize('Number of Collections'= scales::comma(n()),
-                     Min = round(min(time,na.rm = TRUE), digits=1),
-                     Q1 = round(quantile(time, 0.25,na.rm = TRUE), digits=1),
-                     Median = round(median(time,na.rm = TRUE), digits=1),
-                     Mean = round(mean(time,na.rm = TRUE), digits=1),
-                     SD= round(sd(time,na.rm = TRUE), digits=1),
-                     Q3= round(quantile(time, 0.75,na.rm = TRUE), digits=1),
-                     'Perc.90'= round(quantile(time, 0.90,na.rm = TRUE), digits=1),,
-                     'Perc.95'= round(quantile(time, 0.95,na.rm = TRUE), digits=1),
-                     Max = round(max(time,na.rm = TRUE), digits=1))
+          (all_settings=="Research" & d_914594314>=as.Date("2022-08-01")))
+
+verif_BL_RC <- summarize_time(
+    verif_BL_RC_denom,
+    time_var  = time,
+    std_dv   = TRUE,
+    perc_90   = TRUE,
+    perc_95   = TRUE
+) 
 
 
 
@@ -3813,19 +3784,13 @@ MW_Ship_BPTL_Rec <- summarize_time(
 )
 
 
-total_row <- Ship_BPTL_Rec %>%
-  dplyr::summarize(
-    Site = "Total",
-    N = n(),
-    Min = min(ctime),
-    Q1 = quantile(ctime, 0.25),
-    Median = median(ctime),
-    Mean = mean(ctime),
-    Q3 = quantile(ctime, 0.75),
-    Perc.90 = quantile(ctime, 0.90),
-    Perc.95 = quantile(ctime, 0.95),
-    Max = max(ctime)
-  )
+total_row <- summarize_time(
+       Ship_BPTL_Rec,
+       time_var  = ctime,
+       perc_90   = TRUE,
+       perc_95   = TRUE
+     ) %>% 
+  add_column(Site = c("Total"), .before = 1)
 
 MW_Ship_BPTL_Rec <- bind_rows(MW_Ship_BPTL_Rec, total_row)
 
@@ -3920,18 +3885,15 @@ table_32 <- kit_assembly %>%
                                    d_633640710_d_100618603==353358909 ~ "Other",
                                    TRUE ~ "No Conditions Selected"))
  
- 
-table32_pct <- table_32 %>%
-  count(kit_condition, name = "n") %>%
-  mutate(`Total Received Kits` = paste0(comma(n), " (", percent(n / sum(n), accuracy = 0.01), ")")) %>%
-  bind_rows(
-    tibble(
-      kit_condition = "Total",
-      n = sum(.$n),
-      `Total Received Kits` = paste0(comma(sum(.$n)), " (100%)")
-    )
-  ) %>%
-  select(Condition = kit_condition, `Total Received Kits`)
+
+
+  table32_pct <- table_32 %>%
+    dplyr::count(kit_condition, name = "n") %>%
+    dplyr::mutate(denom = sum(n), 
+                  `Total Received Kits` = fmt_count_pct(n, sum(n))) %>%
+    dplyr::bind_rows(tibble::tibble(kit_condition = "Total", n = sum(.$n), 
+                                    `Total Received Kits` = fmt_count_pct(sum(.$n), sum(.$n)))) %>%
+    dplyr::select(Condition = kit_condition, `Total Received Kits`)
  
  
 ```
@@ -4444,17 +4406,9 @@ req_rec_inv_kable1 <- function(data, group_var, group_var_name, title) {
   # Create the pcts of the attrition columns
   mutate(
     # Of those that were invited how many requested a kit
-    `MW Kit Requested` = paste0(
-      Requested, " (",
-      round(Requested / Invited * 100, 2), "%)"
-    ),
+    `MW Kit Requested` = fmt_count_pct(Requested, Invited),
     # Of those that were invited, how many have we received
-    `MW Sample Received (of total invited)` = paste0(
-      Received, " (",
-      ifelse(Requested == 0, 0,
-             round(Received / Invited * 100, 2)), "%)"
-    )
-  ) %>%
+    `MW Sample Received (of total invited)` = fmt_count_pct(Received, Invited)) %>%
 
     # Remove helper columns (prior to percentage added) and fix column order
   select(!!group_var, `MW Kit Requested`, `MW Sample Received (of total invited)`, Invited)
@@ -4550,23 +4504,16 @@ kit_tm_don_inv <- kit_request_table %>%
                                                   "10- <14 days", "14- <30 days", 
                                                   "30 days or more"))) %>% 
   
-  ## Want all levels included, even if they are zero
-  count(tm_don_inv, name = "MW Kit Requested") %>% 
-  complete(tm_don_inv, fill = list(`MW Kit Requested` = 0)) %>% 
-  mutate(Percentage = round((`MW Kit Requested` / sum(`MW Kit Requested`) * 100), digits=1)) %>% 
-  
-  ## Add a total row
-  bind_rows(
-    summarise(.,
-              tm_don_inv = "Total",
-              `MW Kit Requested` = sum(`MW Kit Requested`),
-              Percentage = 100)
-    ) %>% 
-  dplyr::rename("Time from Invitation to Kit Requested" = "tm_don_inv") %>% 
-  
-  ## Update to N (%) style 
-  mutate(`MW Kit Requested` = paste0(`MW Kit Requested`, " (", Percentage, "%)")) %>% 
-  select("Time from Invitation to Kit Requested", `MW Kit Requested`)
+  # Want all levels included, even if they are zero
+  count(tm_don_inv, name = "MW Kit Requested") %>%
+  complete(tm_don_inv, fill = list(`MW Kit Requested` = 0)) %>%
+  mutate(denom = sum(`MW Kit Requested`)) %>%
+  bind_rows(dplyr::summarise(., tm_don_inv = "Total",
+                                      `MW Kit Requested` = sum(`MW Kit Requested`),
+                                      denom = sum(`MW Kit Requested`))) %>%
+    dplyr::rename(`Time from Invitation to Kit Requested` = tm_don_inv) %>%
+    mutate(`MW Kit Requested` = fmt_count_pct(`MW Kit Requested`, denom, digits = 1)) %>%
+    select(`Time from Invitation to Kit Requested`, `MW Kit Requested`)
 
 
   knitr::kable(kit_tm_don_inv, 
@@ -4605,22 +4552,15 @@ kit_tm_inv_recvd <- kit_request_table %>%
                                                       "2-<3 weeks", "3-<4 weeks", "4 weeks+"))) %>% 
   
   ## Want all levels included, even if they are zero
-  count(tm_inv_recvd, name = "MW Sample Received") %>% 
-  complete(tm_inv_recvd, fill = list(`MW Sample Received` = 0)) %>% 
-  mutate(Percentage = round((`MW Sample Received` / sum(`MW Sample Received`) * 100), digits=1)) %>% 
-  
-  ## Add a total row
-  bind_rows(
-    summarise(.,
-              tm_inv_recvd = "Total",
-              `MW Sample Received` = sum(`MW Sample Received`),
-              Percentage = 100)
-    ) %>% 
-  dplyr::rename("Time from Invitation to MW Sample Received" = "tm_inv_recvd") %>% 
-  
-  ## Update to N (%) style 
-  mutate(`MW Sample Received` = paste0(`MW Sample Received`, " (", Percentage, "%)")) %>% 
-  select("Time from Invitation to MW Sample Received", `MW Sample Received`)
+  count(tm_inv_recvd, name = "MW Sample Received") %>%
+  complete(tm_inv_recvd, fill = list(`MW Sample Received` = 0)) %>%
+  mutate(denom = sum(`MW Sample Received`)) %>%
+  bind_rows(summarise(., tm_inv_recvd = "Total",
+                                      `MW Sample Received` = sum(`MW Sample Received`),
+                                      denom = sum(`MW Sample Received`))) %>%
+   dplyr::rename(`Time from Invitation to MW Sample Received` = tm_inv_recvd) %>%
+   mutate(`MW Sample Received` = fmt_count_pct(`MW Sample Received`, denom, digits = 1)) %>%
+   select(`Time from Invitation to MW Sample Received`, `MW Sample Received`)
 
 
   knitr::kable(kit_tm_inv_recvd, 
@@ -4789,29 +4729,20 @@ up_hist <- bq_table_download(up_hist_query, bigint="integer64",
                              n_max = Inf, page_size = 1000)
 
 
-up_hist <- up_hist %>% 
-  mutate(Percentage= round(N/sum(N)*100, 2)) %>% 
-  ## Add a total row
-  bind_rows(
-    summarise(.,
-              Address_Update_Status = "Total",
-              `N` = sum(`N`),
-              Percentage = 100)
-    ) %>% 
-  dplyr::rename("Number of Participants" = "N") %>% 
-  
-  ## Update to N (%) style 
-  mutate(`Number of Participants` = paste0(`Number of Participants`, " (", Percentage, "%)")) %>% 
-  select("Address_Update_Status", `Number of Participants`)
+  up_hist_table <- up_hist %>%
+    mutate(denom = sum(N)) %>%
+    bind_rows(summarise(., Address_Update_Status = "Total",
+                        N = sum(N), 
+                        denom = sum(N))) %>%
+    mutate(`Number of Participants` = fmt_count_pct(N, denom, digits = 2)) %>%
+    select(Address_Update_Status, `Number of Participants`)
 
-
-
-  knitr::kable(up_hist, 
+  knitr::kable(up_hist_table, 
                caption = "Table 8.10: Baseline- Participants With Address Update After Being Invited to Request a Kit, \n Before MW Kit Request Submission", 
                row.names = FALSE,  
                align=c("l", "c"),
                digits=1, booktabs = TRUE) %>% 
-    add_indent(seq(1, nrow(up_hist) - 1)) %>%
+    add_indent(seq(1, nrow(up_hist_table) - 1)) %>%
     kable_styling(latex_options ="scale_down") 
   
 
