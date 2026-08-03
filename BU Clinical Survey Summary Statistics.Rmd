@@ -228,7 +228,9 @@ avg_coll <- BU_tib %>%  filter((d_827220437==531629870 |  d_827220437==548392715
                         d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
 
-MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) 
+MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  
+  summarize(n=n(), percentage=100*n/nrow(.)) %>%  
+  select(Site,  MW, n, percentage) 
   
 MW_time1 %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -263,15 +265,15 @@ BU_sig <- BU_tib %>%  filter(!is.na(D_299417266_V2)) %>%
          time=as.numeric(time_sleep)) 
 
 
-BU_SLEEP = BU_sig %>% #group_by(Site) %>% #biochk_outlier,
-  dplyr::summarize('Number of Participants'=n(),
-                   Min = min(time,na.rm = TRUE),
-                   Q1 = quantile(time, 0.25,na.rm = TRUE),
-                   Median = median(time,na.rm = TRUE),
-                   Mean = mean(time,na.rm = TRUE),
-                   SD=sd(time,na.rm = TRUE),
-                   Q3 = quantile(time, 0.75,na.rm = TRUE),
-                   Max = max(time,na.rm = TRUE))
+
+BU_SLEEP <- summarize_time(
+    BU_sig,
+    time_var = time,
+    n_label = "Number of Participants",
+    std_dv = TRUE,
+    digits = 1
+  )
+
 bm_wake <- knitr::kable(BU_SLEEP,caption='Table 5: Hours Participant Fell Asleep Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape()
 add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes 
 
@@ -291,15 +293,15 @@ BU_sig <- BU_tib %>%  filter(!is.na(D_689861450_V2)) %>%
          time2=as.numeric(time_biochk2)) 
 
 
-BU_WAKE = BU_sig %>% #group_by(Site) %>% #biochk_outlier,
-  dplyr::summarize('Number of Participants'=n(),
-                   Min = min(time2,na.rm = TRUE),
-                   Q1 = quantile(time2, 0.25,na.rm = TRUE),
-                   Median = median(time2,na.rm = TRUE),
-                   Mean = mean(time2,na.rm = TRUE),
-                   SD=sd(time2,na.rm = TRUE),
-                   Q3 = quantile(time2, 0.75,na.rm = TRUE),
-                   Max = max(time2,na.rm = TRUE))
+
+BU_WAKE <- summarize_time(
+    BU_sig,
+    time_var = time2,
+    n_label = "Number of Participants",
+    std_dv = TRUE,
+    digits = 1
+  )
+
 bm_wake <- knitr::kable(BU_WAKE,caption='Table 6: Hours Awakened Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape()
 add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes 
 

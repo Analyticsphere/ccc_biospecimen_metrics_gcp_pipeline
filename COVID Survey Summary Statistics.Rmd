@@ -273,8 +273,7 @@ symptom_combos_filtered <- symptom_combos %>%
 
 # Want percentage in the N column as well, with the denominator of COVID-tib8
 final_symptoms <- symptom_combos_filtered %>%
-  mutate( `N (%)` = paste0(formatC(N, format = "d", big.mark = ","),  " (", 
-      formatC(100 * N / nrow(COVID_tib8), format = "f", digits = 1), "%)")) %>%
+  mutate(`N (%)` = fmt_count_pct(N, nrow(COVID_tib8), digits = 1)) %>%
   select(-N)  # don't need the old N column
 
 
@@ -444,8 +443,7 @@ symptom_combos_filtered <- symptom_combos %>%
 
 # Want percentage in the N column as well, with the denominator of COVID-tib8
 final_symptoms <- symptom_combos_filtered %>%
-  mutate( `N (%)` = paste0(formatC(N, format = "d", big.mark = ","),  " (", 
-      formatC(100 * N / nrow(COVID_tib8), format = "f", digits = 1), "%)")) %>%
+  mutate(`N (%)` = fmt_count_pct(N, nrow(COVID_tib8), digits = 1)) %>%
   select(-N)  # don't need the old N column
 
 

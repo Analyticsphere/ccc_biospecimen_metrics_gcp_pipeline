@@ -227,8 +227,10 @@ avg_coll <- BUM_tib %>%  filter((d_827220437==531629870 |  d_827220437==54839271
                         d_827220437==300267574 ~ "Kaiser Permanente Hawaii",
                         d_827220437==452412599 ~ "Kaiser Permanente Northwest"))
 
-
-MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  summarize(n=n(), percentage=100*n/nrow(.)) %>%  select(Site,  MW, n, percentage) 
+MW_time1 <- avg_coll %>% group_by(Site, MW) %>%  
+  summarize(n=n(),
+            percentage=100*n()/nrow(.)) %>%  
+  select(Site,  MW, n, percentage) 
   
 MW_time1 %>%  gt::gt()  %>%  
   fmt_number(columns = "percentage", decimals = 1) %>% 
@@ -268,7 +270,9 @@ SLEEPTIME_V2=bisp %>% filter(!is.na(D_299417266_V2)) %>% ggplot(aes(x=D_29941726
 
 
 
-BUM_sig <- BUM_tib %>%  filter(!is.na(D_299417266_V2) | !is.na(D_299417266)) %>%  #v1 and v2 were answered in this survey
+BUM_sig <- BUM_tib %>%  
+  #v1 and v2 were answered in this survey
+  filter(!is.na(D_299417266_V2) | !is.na(D_299417266)) %>%  
   mutate(sleep = paste0(str_sub(d_556788178,1,11), 
                         ifelse(!is.na(D_299417266_V2),  str_sub(D_299417266_V2,1,5),  str_sub(D_299417266,1,5)), #choose whichever was answered
                         str_sub(d_556788178,17,24)),
@@ -276,18 +280,20 @@ BUM_sig <- BUM_tib %>%  filter(!is.na(D_299417266_V2) | !is.na(D_299417266)) %>%
          time_sleep = difftime(as.POSIXct(ymd_hms(d_556788178)), as.POSIXct(ymd_hms(slptime)),units="hours"),
          time=as.numeric(time_sleep)) 
 
+BUM_SLEEP <- summarize_time(
+    BUM_sig,
+    time_var = time,
+    n_label = "Number of Participants",
+    std_dv = TRUE,
+    digits = 1
+  )
 
-BUM_SLEEP = BUM_sig %>% #group_by(Site) %>% #biochk_outlier,
-  dplyr::summarize('Number of Participants'=n(),
-                   Min = min(time,na.rm = TRUE),
-                   Q1 = quantile(time, 0.25,na.rm = TRUE),
-                   Median = median(time,na.rm = TRUE),
-                   Mean = mean(time,na.rm = TRUE),
-                   SD=sd(time,na.rm = TRUE),
-                   Q3 = quantile(time, 0.75,na.rm = TRUE),
-                   Max = max(time,na.rm = TRUE))
-bm_wake <- knitr::kable(BUM_SLEEP,caption='Table 5: Hours Participant Fell Asleep Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape()
-add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes 
+bm_wake <- knitr::kable(BUM_SLEEP,
+                        caption='Table 5: Hours Participant Fell Asleep Before Sample Donation',
+                        digits=1, booktabs = TRUE) %>% 
+  kable_styling(latex_options = "scale_down") #%>% landscape()
+add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", 
+             notation = "none") #and greater than 500 minutes 
 
 
 
@@ -311,16 +317,18 @@ BUM_sig <- BUM_tib %>%  filter(!is.na(D_689861450_V2) | !is.na(D_689861450)) %>%
          time2=as.numeric(time_biochk2)) 
 
 
-BUM_WAKE = BUM_sig %>% #group_by(Site) %>% #biochk_outlier,
-  dplyr::summarize('Number of Participants'=n(),
-                   Min = min(time2,na.rm = TRUE),
-                   Q1 = quantile(time2, 0.25,na.rm = TRUE),
-                   Median = median(time2,na.rm = TRUE),
-                   Mean = mean(time2,na.rm = TRUE),
-                   SD=sd(time2,na.rm = TRUE),
-                   Q3 = quantile(time2, 0.75,na.rm = TRUE),
-                   Max = max(time2,na.rm = TRUE))
-bm_wake <- knitr::kable(BUM_WAKE,caption='Table 6: Hours Awakened Before Sample Donation',digits=1, booktabs = TRUE)%>% kable_styling(latex_options = "scale_down") #%>% landscape()
+BUM_WAKE <- summarize_time(
+    BUM_sig,
+    time_var = time2,
+    n_label = "Number of Participants",
+    std_dv = TRUE,
+    digits = 1
+  )
+
+bm_wake <- knitr::kable(BUM_WAKE,
+                        caption='Table 6: Hours Awakened Before Sample Donation',
+                        digits=1, booktabs = TRUE)%>% 
+  kable_styling(latex_options = "scale_down")
 add_footnote(bm_wake,"Note: Those who did not answer this question are removed from the Number of Participants in order to calculate difference in existing times.", notation = "none") #and greater than 500 minutes 
 
 
@@ -372,7 +380,10 @@ BUM_tibM <- BUM_tib %>%  filter(!is.na(D_644459734) & D_112151599=="353358909" &
 
 BUM_tibM$Mdate <- as.Date(BUM_tibM$D_644459734)
 
-BUM_TimeM <- BUM_tibM  %>% dplyr::group_by(Mdate) %>% dplyr::summarize(n=n()) %>% dplyr::ungroup() %>%  dplyr::select(Mdate, n)
+BUM_TimeM <- BUM_tibM  %>% dplyr::group_by(Mdate) %>% 
+  dplyr::summarize(n=n()) %>% 
+  dplyr::ungroup() %>%  
+  dplyr::select(Mdate, n)
 
 pM <- ggplot(BUM_TimeM, aes(x=Mdate, y=n)) +
        geom_line() +xlab("Date") + ylab("Participants") +  ggtitle("Plot 1: Most Recent Menstrual Period Start Date")
