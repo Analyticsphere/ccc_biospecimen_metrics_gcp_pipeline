@@ -7,6 +7,14 @@ library(glue)
 #install.packages("openxlsx")
 library(openxlsx)
 library(logger) ## allows us to add messages in logs to find out when/where code breaks are happening
+
+
+### NEW: ALL CONNECT R CUSTOM FUNCTIONS FROM ANALYTICS IN THIS PACKAGE
+# If running for the first time, install first
+# install.packages("ConnectFunctions")
+library(ConnectFunctions)
+
+
 bq_auth()
 2
 
