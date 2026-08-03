@@ -57,10 +57,13 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
                RColorBrewer stringr janitor expss magrittr arsenal rio \
                finalfit sqldf gmodels glue webshot2 cowplot crosstable \
                magrittr gmodels magick gargle tools expss config openxlsx boxr \
-               scales rio readr reshape2 logger DBI here ConnectFunctions
+               scales rio readr reshape2 logger DBI here 
               
 # These libraries might not be available from install2.R so use CRAN
 RUN R -e "install.packages(c('gt'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
+
+# Install internal ConnectFunctions package from public GitHub repo
+RUN R -e "devtools::install_github('Analyticsphere/ConnectFunctions')"
 
 # When I try to use kable extra with a normal installation from CRAN or install2.r
 # I get the error:
