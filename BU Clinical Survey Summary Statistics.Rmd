@@ -183,7 +183,7 @@ dt_SYMPTDAY_long <- dt_SYMPTDAY_flags %>%
   )
 
 
-simple_funct(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation", dict = dict) %>%
+simple_funct(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation") %>%
   create_SATA_footnote()
 
 
