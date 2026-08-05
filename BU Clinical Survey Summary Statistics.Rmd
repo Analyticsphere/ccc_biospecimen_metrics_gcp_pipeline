@@ -26,7 +26,6 @@ output:
 #old.packages()
 #update.packages()
 
-library(rlang)
 library(bigrquery)
 library(dplyr)
 library(ggplot2)
