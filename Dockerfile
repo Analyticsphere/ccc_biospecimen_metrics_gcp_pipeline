@@ -89,6 +89,7 @@ COPY ["./Biospecimen_Custom_QC_Output.R", "./Biospecimen_Custom_QC_Output.R"]
 COPY ["./Biospecimen_logs.R", "./Biospecimen_logs.R"]
 COPY ["./Weekly-Processing-Metrics.Rmd", "./Weekly-Processing-Metrics.Rmd"]
 COPY ["./Weekly_BSI_Recurring_and_Processing_Metrics.Rmd", "./Weekly_BSI_Recurring_and_Processing_Metrics.Rmd"]
+COPY ["./Monthly_Box_Conditions.Rmd", "./Monthly_Box_Conditions.Rmd"]
 COPY ["./config.yml", "./config.yml"]
 
 # Run R code
