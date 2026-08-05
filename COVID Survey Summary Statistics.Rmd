@@ -190,7 +190,7 @@ CVD_tib$year_month1 <- ifelse(!is.na(CVD_tib$D_980800222_V2_1_1), CVD_tib$D_9808
                                      paste0(CVD_tib$D_980800222_1_1_D_366972678_1_1, "-", CVD_tib$D_980800222_1_1_D_173502329_1_1), NA)))
 
 
-CVD_tib$year_month1 <- ym(CVD_tib$year_month1)
+#CVD_tib$year_month1 <- ym(CVD_tib$year_month1)
 
 
 cat("\\FloatBarrier")
@@ -357,7 +357,7 @@ CVD_tib$year_month2 <- ifelse(!is.na(CVD_tib$D_980800222_V2_2_2), CVD_tib$D_9808
                                      paste0(CVD_tib$D_980800222_2_2_D_366972678_2_2, "-", CVD_tib$D_980800222_2_2_D_173502329_2_2), NA)))
 
 
-CVD_tib$year_month2 <- ym(CVD_tib$year_month2)
+#CVD_tib$year_month2 <- ym(CVD_tib$year_month2)
 
 cat("\\FloatBarrier")
 date_hist_funct(year_month2, "Second Occurance of COVID-19", "Date", "Cases")

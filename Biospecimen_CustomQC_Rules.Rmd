@@ -5,6 +5,7 @@ date: "`r Sys.Date()`"
 header-includes:  
     \usepackage{placeins}
     \usepackage{threeparttable}
+    \usepackage{longtable}
 
 
 output:
