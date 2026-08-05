@@ -110,7 +110,7 @@ cat("Particiapnts with Blood, Urine Survey Completed: ", dim(BU)[[1]])
 ```{r functions, include=FALSE}
 ##FUNCTIONS
 
-master_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Unknown", "654207589"="Male",
+dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Know", "536341288"="Female", "576796184"="Unknown", "654207589"="Male",
                  "110092955"="The same day", "952212668"="The day before", "330461666"="More than a day before", "974230748"="Yes, in the past day",
                  "936042740"="Yes, in the past two days", "731141335"="Yes, in the past week", "591670915"="Yes, in the past month", "111520945"="Not at all",
                  "548628123"="A little bit", "567908725"="Somewhat", "760969884"="Quite a bit", "464631026"="Very Much", "707601969"="Yes, another",
@@ -139,7 +139,7 @@ master_dict <- list("104430631"="No", "353358909"="Yes", "178420302"="Do not Kno
 
 
 #SEX
-simple_funct(BU_tib,D_522008539, "SEX: Biological Sex at Birth")
+simple_funct(BU_tib,D_522008539, "SEX: Biological Sex at Birth", dict = dict)
 
 
 
@@ -183,13 +183,14 @@ dt_SYMPTDAY_long <- dt_SYMPTDAY_flags %>%
   )
 
 
-simple_funct(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation") %>%
+simple_funct(dt_SYMPTDAY_long, symptom_flag, "Table 2: Symptoms in the 24 hours Prior to Sample Donation", dict = dict) %>%
   create_SATA_footnote()
 
 
 #EATDRINKBEFORE
 simple_funct(BU_tib,D_867307558, "Table 3: When Last Food or Beverage Consumed",
-factor_levels = c("The same day","The day before","More than a day before") )
+factor_levels = c("The same day","The day before","More than a day before"),
+dict = dict)
 
 
 
@@ -316,13 +317,16 @@ add_footnote(bm_wake,"Note: Those who did not answer this question are removed f
 ```{r Meds, warning=FALSE, echo=FALSE,  message=FALSE}
 
 simple_funct(BU_tib,D_487532606_D_619765650, "TYLENOL: Medication Taken, if so, Last Time Taken",
-factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
+factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No"),
+dict = dict)
 
 simple_funct(BU_tib,D_487532606_D_520755310, "NSAIDS: Medication Taken, if so, Last Time Taken",
-factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
+factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No"),
+dict = dict)
 
 simple_funct(BU_tib,D_487532606_D_839329467, "Acid Reducers: Medication Taken, if so, Last Time Taken",
-factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No") )
+factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in the past week", "Yes, in the past month", "No"),
+dict = dict)
 
 
 ```
@@ -335,12 +339,14 @@ factor_levels = c("Yes, in the past day", "Yes, in the past two days", "Yes, in 
 #MENSTPRD
 one_logic_funct(BU_tib,D_380603392, D_522008539,'536341288',
                 "MENSTPRD: Had Menstrual Period in the Last 12 Months",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 
 #MENST60
 one_logic_funct(BU_tib,D_112151599, D_380603392, "353358909", "MENST60: Had Menstrual Period in the Last 60 Days",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 
 
@@ -360,26 +366,32 @@ pM + scale_x_date(date_labels = "%b %Y")
 
 #PREGNANT
 one_logic_funct(BU_tib,D_518916981, D_522008539,'536341288',"PREGNANT: Currently Pregnant",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 #PREG3MON
 one_logic_funct(BU_tib,D_234714655, D_518916981, "104430631", "Table 13: Been Pregnant in the Last 3 Months",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 #BRSTFD
 one_logic_funct(BU_tib,D_798452445, D_522008539,'536341288',"Table 14: Currently Breastfeeding",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 #BRSTFD3MON
 one_logic_funct(BU_tib,D_563539159, D_798452445, "104430631", "Table 15: Breastfed in the Last 3 Months",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 #CONTRACEPT
 one_logic_funct(BU_tib,D_875535246, D_518916981, "104430631", "Table 16: Used Hormonal Contraceptives in the Last Month",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 #HORMONE
 one_logic_funct(BU_tib,D_130311122, D_518916981, "104430631", "Table 17: Used Prescription Hormone Therapy in the Last Month",
-                   factor_levels = c("Yes", "No") )
+                   factor_levels = c("Yes", "No"),
+                   dict = dict)
 
 ```
