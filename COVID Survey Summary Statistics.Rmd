@@ -325,7 +325,7 @@ factor_levels = c("Yes", "No", "Do not Know"))
 
 #COV15B
 cat("\\FloatBarrier")
-hist_funct(CVD_tib,D_930944000_1_1, "Days Treated with Breathing Tube or Ventilator the First Time Having COVID-19", "Days", "Count")
+hist_funct(CVD_tib,D_430166879_1_1, "Days Treated with Breathing Tube or Ventilator the First Time Having COVID-19", "Days", "Count")
 
 #COV16A
 one_logic_funct(CVD_tib,D_179406442_1_1, D_775313030_1_1, "353358909", "ICU monitoring in the Hospital the First Time Having COVID-19",
