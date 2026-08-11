@@ -287,13 +287,7 @@ gc()
 
 log_info("Starting Biospe_Formats_csv")
 
-###to get the formats and variable names from DD
-factor_cid <-function(var,data){
-  var <- as.factor(var)
-  var_CIDs <- as.data.frame(cbind(unique(y$conceptId.4[grepl(paste(levels(var),collapse="|"),y$conceptId.4)]),unique(trimws(sapply(strsplit(y$Current.Format.Value[grepl(paste(levels(var),collapse="|"),y$conceptId.4)], "="),tail,1)))))
-  
-  var <- plyr::mapvalues(var,from=var_CIDs$V1,to=var_CIDs$V2)
-}
+
 
 
 ## Need to update some of the variables based on the flattening
@@ -419,7 +413,7 @@ biospe1 <- biospe1[,order(colnames(biospe1))]
 log_info("Selecting final variables")
 
 names_set <- c("Connect_ID","RcrtES_Site_v1r0","BioSpm_Visit_v1r0","BioSpm_Setting_v1r0","BioSpm_Location_v1r0","BioSpm_ColIDScan_v1r0",
-               "BioReg_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0",
+               "BioCol_ArRegTime_v1r0", "BioCol_ColTime_v1r0", "BioRec_CollectFinal_v1r0","BioRec_CollectFinalTime_v1r0","BioClin_DBBloodID_v1r0",
                #"BioClin_DBBloodRRLBL_v1r0",
                #"BioClin_DBBloodRRLDtBL_v1r0",
                "BioClin_DBUrineID_v1r0",
