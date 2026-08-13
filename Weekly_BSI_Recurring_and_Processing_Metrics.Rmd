@@ -572,8 +572,18 @@ rm2_metric <- rm_2(data, data_bio, download_date)
 # •	# days from Receipt at BPTL to day processed (days_to_process) 
 # •	Saturday receipt (yes/no) (saturday_receipt)
 
-rm3_metric <- rm_3(data_parent)
+#rm3_metric <- rm_3(data_parent)
 
+#Testing
+rm3_metric <- tryCatch({
+  rm_3(data_parent)
+}, error = function(e) {
+  cat("ERROR MESSAGE:\n")
+  print(e)
+  cat("\nCALL STACK:\n")
+  print(sys.calls())
+  stop(e)  # re-throw so the render still fails visibly, but you get the log first
+})
 
 ```
 
