@@ -595,9 +595,111 @@ rm3_metric <- tryCatch({
 # •	BSI ID
 # •	Date received at BPTL
 # •	Vial Warning (vial_warnings)
+# •	Site Location ID (BioShip_LocalID_v1r0)
+# •	Box ID (BioPack_BoxID_v1r0)
+# •	Date shipment submitted (BioShip_ShipTime_v1r0)
+# •	Date shipment received (BioBPTL_DateReceived_v1r0)
 # If no vial warnings were found, output “No vial warnings found.”
 
 rm4_metric <- rm_4(data_parent)
+
+# Add shipment details from the Boxes table to vial-warning rows. The Boxes
+# table is joined to BSI using its tubeID field. If a tube appears in more than
+# one shipment, retain the most recently submitted shipment so that the join
+# does not duplicate a vial-warning row.
+if ("bsi_id" %in% names(rm4_metric)) {
+  rm4_bsi_ids_sql <- rm4_metric %>%
+    pull(bsi_id) %>%
+    unique() %>%
+    str_replace_all("'", "''") %>%
+    sprintf("'%s'", .) %>%
+    paste(collapse = ", ")
+
+  query_rm4_boxes <- glue("
+    SELECT
+      tubeID,
+      CASE d_560975149
+        WHEN '777644826' THEN 'UC-DCAM'
+        WHEN '692275326' THEN 'Marshfield'
+        WHEN '813701399' THEN 'Weston'
+        WHEN '698283667' THEN 'Lake Hallie'
+        WHEN '834825425' THEN 'HP Research Clinic'
+        WHEN '589224449' THEN 'Sioux Falls Imagenetics'
+        WHEN '763273112' THEN 'KPCO RRL'
+        WHEN '531313956' THEN 'KPHI RRL'
+        WHEN '715632875' THEN 'KPNW RRL'
+        WHEN '767775934' THEN 'KPGA RRL'
+        WHEN '752948709' THEN 'Henry Ford Main Campus'
+        WHEN '570271641' THEN 'Henry Ford West Bloomfield Hospital'
+        WHEN '838480167' THEN 'Henry Ford Medical Center- Fairlane'
+        WHEN '706927479' THEN 'HFH Livonia Research Clinic'
+        WHEN '145191545' THEN 'Ingalls Harvey'
+        WHEN '489380324' THEN 'River East'
+        WHEN '120264574' THEN 'South Loop'
+        WHEN '691714762' THEN 'Rice Lake'
+        WHEN '487512085' THEN 'Wisconsin Rapids'
+        WHEN '983848564' THEN 'Colby Abbotsford'
+        WHEN '261931804' THEN 'Minocqua'
+        WHEN '665277300' THEN 'Merrill'
+        WHEN '467088902' THEN 'Fargo South University'
+        WHEN '940329442' THEN 'Orland Park'
+        WHEN '574368418' THEN 'HP Park Nicollet'
+        WHEN '322059622' THEN 'HFH Pop-Up'
+        WHEN '127626388' THEN 'Bismarck Medical Center'
+        WHEN '246137578' THEN 'Sioux Falls Sanford Center'
+        WHEN '723351427' THEN 'BCC- HWC, BC'
+        WHEN '807443231' THEN 'BCC- All Saints (FW)'
+        WHEN '475614532' THEN 'BCC- Plano'
+        WHEN '809370237' THEN 'BCC- Worth St'
+        WHEN '856158129' THEN 'BCC- Irving'
+        WHEN '436956777' THEN 'NTX Biorepository'
+        WHEN '288564244' THEN 'BCC- Fort Worth'
+        WHEN '433070901' THEN 'Sioux Falls Edith Center'
+        WHEN '769594361' THEN 'Fargo Amber Valley'
+        WHEN '246153539' THEN 'Bemidji Clinic'
+        WHEN '255636184' THEN 'Stevens Point'
+        WHEN '813412950' THEN 'Neillsville'
+        WHEN '755034888' THEN 'HFH Jackson'
+        WHEN '483909879' THEN 'North Garland'
+        WHEN '962830330' THEN 'Waco - MacArthur'
+        WHEN '911683679' THEN 'HFH Detroit Northwest'
+        WHEN '397883980' THEN 'Irving'
+        WHEN '117840593' THEN 'Temple CDM'
+        WHEN '574104518' THEN 'Temple Roney'
+        WHEN '749199085' THEN 'Temple Westfield'
+        WHEN '603989030' THEN 'Killeen Main'
+        WHEN '471260082' THEN 'Waco Fishpond'
+        ELSE 'Missing'
+      END AS site_location,
+      d_132929440,
+      d_656548982,
+      d_926457119
+    FROM `nih-nci-dceg-connect-prod-6d04.FlatConnect.boxes`
+    WHERE tubeID IN ({rm4_bsi_ids_sql})
+    QUALIFY ROW_NUMBER() OVER (
+      PARTITION BY tubeID
+      ORDER BY SAFE_CAST(d_656548982 AS TIMESTAMP) DESC,
+               d_132929440 DESC
+    ) = 1
+  ")
+
+  q_rm4_boxes <- bq_project_query(project, query_rm4_boxes)
+  rm4_boxes <- bq_table_download(
+    q_rm4_boxes,
+    bigint = "integer64",
+    page_size = NULL
+  ) %>%
+    transmute(
+      bsi_id = tubeID,
+      BioShip_LocalID_v1r0 = site_location,
+      BioPack_BoxID_v1r0 = d_132929440,
+      BioShip_ShipTime_v1r0 = as.Date(d_656548982),
+      BioBPTL_DateReceived_v1r0 = as.Date(d_926457119)
+    )
+
+  rm4_metric <- rm4_metric %>%
+    left_join(rm4_boxes, by = "bsi_id")
+}
 
 
 
@@ -1066,4 +1168,3 @@ knitr::kable(
 
 print(rm3_metric$plot) 
 ```
-
