@@ -63,7 +63,7 @@ RUN install2.r --error plumber gridExtra bigrquery dplyr \
 RUN R -e "install.packages(c('gt'), dependencies=TRUE, repos='http://cran.rstudio.com/')"
 
 # Install internal ConnectFunctions package from public GitHub repo
-RUN R -e "devtools::install_github('Analyticsphere/ConnectFunctions')"
+RUN R -e "devtools::install_github('Analyticsphere/ConnectFunctions', force = TRUE)"
 
 # When I try to use kable extra with a normal installation from CRAN or install2.r
 # I get the error:
