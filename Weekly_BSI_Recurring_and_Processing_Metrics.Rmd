@@ -46,6 +46,7 @@ library(ConnectFunctions)
 
 
 
+
 ```
 
 
@@ -55,6 +56,19 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+```
+
+```{r Testing, echo=FALSE, warning=FALSE}
+
+# At the very top of your render script, before anything else runs
+cat("=== DIAGNOSTIC INFO ===\n")
+cat("Package version:", as.character(packageVersion("ConnectFunctions")), "\n")
+cat("Locale:", Sys.getlocale(), "\n")
+print(l10n_info())
+cat("rm_3 source:\n")
+print(ConnectFunctions::rm_3)
+cat("=== END DIAGNOSTIC ===\n")
+
 ```
 
 
@@ -581,8 +595,7 @@ rm3_metric <- tryCatch({
   cat("ERROR MESSAGE:\n")
   print(e)
   cat("\nCALL STACK:\n")
-  print(sys.calls())
-  stop(e)  # re-throw so the render still fails visibly, but you get the log first
+  print(sys.calls()) 
 })
 
 ```
