@@ -527,7 +527,7 @@ rule17<- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_
 
 
 qc_sst1 <- rule17 %>%  filter(d_299553921_d_593843561=="Yes" & d_299553921_d_762124027=="No" & is.na(d_299553921_d_926457119)
-                                & Connect_ID!="7609852429") %>% 
+                                & !(Connect_ID %in% c("7609852429", "5487473343"))) %>% 
   select(Site, Connect_ID, d_299553921_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_sst1) <- c("Site", "Connect ID", "Serum Separator Tube 1- Date Received")
@@ -535,21 +535,21 @@ knitr::kable(qc_sst1, longtable = TRUE)
 
 
 qc_sst2 <- rule17 %>%  filter(d_703954371_d_593843561=="Yes" & d_703954371_d_762124027=="No" & is.na(d_703954371_d_926457119)
-                                & Connect_ID!="7609852429") %>% 
+                                & !(Connect_ID %in% c("7609852429", "5487473343"))) %>% 
   select(Site, Connect_ID, d_703954371_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_sst2) <- c("Site", "Connect ID", "Serum Separator Tube 2- Date Received")
 knitr::kable(qc_sst2, longtable = TRUE)
 
 qc_sst3 <- rule17 %>%  filter(d_376960806_d_593843561=="Yes" & d_376960806_d_762124027=="No" & is.na(d_376960806_d_926457119) & 
-                                    Connect_ID!="9729007313" & Connect_ID!="7609852429" & Connect_ID!="6380609394") %>% 
+                                !(Connect_ID %in% c("7609852429", "9729007313", "6380609394", "5487473343"))) %>% 
   select(Site, Connect_ID, d_376960806_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_sst3) <- c("Site", "Connect ID", "Serum Separator Tube 3- Date Received")
 knitr::kable(qc_sst3, longtable = TRUE)
 
 qc_sst4 <- rule17 %>%  filter(d_232343615_d_593843561=="Yes" & d_232343615_d_762124027=="No" & is.na(d_232343615_d_926457119) & 
-                                      Connect_ID!="9729007313" & Connect_ID!="7609852429" & Connect_ID!="6380609394") %>% 
+                                      !(Connect_ID %in% c("7609852429", "9729007313", "6380609394", "5487473343"))) %>% 
   select(Site, Connect_ID, d_232343615_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_sst4) <- c("Site", "Connect ID", "Serum Separator Tube 4- Date Received")
@@ -563,7 +563,7 @@ colnames(qc_sst5) <- c("Site", "Connect ID", "Serum Separator Tube 5- Date Recei
 knitr::kable(qc_sst5, longtable = TRUE)
 
 qc_edta1 <- rule17 %>%  filter(d_454453939_d_593843561=="Yes" & d_454453939_d_762124027=="No" & is.na(d_454453939_d_926457119) & 
-                                  Connect_ID!="9729007313" & Connect_ID!="7609852429") %>% 
+                                  !(Connect_ID %in% c("7609852429", "9729007313", "5487473343"))) %>% 
   select(Site, Connect_ID, d_454453939_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_edta1) <- c("Site", "Connect ID", "EDTA Tube 1- Date Received")
@@ -571,7 +571,7 @@ knitr::kable(qc_edta1, longtable = TRUE)
 
 
 qc_edta2 <- rule17 %>%  filter(d_677469051_d_593843561=="Yes" & d_677469051_d_762124027=="No" & is.na(d_677469051_d_926457119) & 
-                                 !(Connect_ID %in% c("9729007313","7609852429", "2917006220"))) %>% 
+                                 !(Connect_ID %in% c("7609852429", "9729007313", "2917006220", "5487473343"))) %>% 
   select(Site, Connect_ID, d_677469051_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_edta2) <- c("Site", "Connect ID", "EDTA Tube 2- Date Received")
@@ -579,7 +579,7 @@ knitr::kable(qc_edta2, longtable = TRUE)
 
 
 qc_edta3 <- rule17 %>%  filter(d_683613884_d_593843561=="Yes" & d_683613884_d_762124027=="No" & is.na(d_683613884_d_926457119) & 
-                                       Connect_ID!="9729007313" & Connect_ID!="7609852429") %>% 
+                                       !(Connect_ID %in% c("7609852429", "9729007313", "5487473343"))) %>% 
   select(Site, Connect_ID, d_683613884_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_edta3) <- c("Site", "Connect ID", "EDTA Tube 3- Date Received")
@@ -617,7 +617,7 @@ knitr::kable(qc_hep2, longtable = TRUE)
 
 qc_urn <- bioqc %>%  filter(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & 
                                   d_973670172_d_593843561=="Yes" & d_973670172_d_762124027=="No" & is.na(d_973670172_d_926457119) & 
-                                  !(Connect_ID %in% c("2215062576","4002548016","7609852429", '5400707754'))) %>% 
+                                  !(Connect_ID %in% c("2215062576","4002548016","7609852429", '5400707754', "5487473343"))) %>% 
   select(Site, Connect_ID, d_973670172_d_926457119) %>%  safe_arrange(Site)
 
 colnames(qc_urn) <- c("Site", "Connect ID", "Urine Tube 1- Date Received")
@@ -2570,7 +2570,7 @@ DrawOrder_Colct2 <- bioqc %>%  filter(as.numeric(difftime(d_173836415_d_26660017
                                                           d_173836415_d_266600170_d_982213346, units="days") > 2 |
                                                    difftime(d_173836415_d_266600170_d_184451682,
                                                           d_173836415_d_266600170_d_139245758, units="days") > 2)  &
-                                        !(Connect_ID %in% c('1094193968', '8393015300')))  %>%
+                                        !(Connect_ID %in% c('1094193968', '8393015300', '4621132537')))  %>%
   select(Site, Connect_ID, d_173836415_d_266600170_d_184451682, d_173836415_d_266600170_d_982213346,
          d_173836415_d_266600170_d_139245758) %>%  safe_arrange(Site)
 
