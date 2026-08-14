@@ -58,18 +58,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r Testing, echo=FALSE, warning=FALSE}
-
-# At the very top of your render script, before anything else runs
-cat("=== DIAGNOSTIC INFO ===\n")
-cat("Package version:", as.character(packageVersion("ConnectFunctions")), "\n")
-cat("Locale:", Sys.getlocale(), "\n")
-print(l10n_info())
-cat("rm_3 source:\n")
-print(ConnectFunctions::rm_3)
-cat("=== END DIAGNOSTIC ===\n")
-
-```
 
 
 ```{r BQ_Pull, include=FALSE}
