@@ -166,14 +166,14 @@ recrver1 <- recrver1 %>%
 recrver1$BioFin_BaseMWCol_v1r0  <-factor(recrver1$d_684635302,exclude=NULL)
 recrver1$BioFin_BaseBloodCol_v1r0 <- factor(recrver1$d_878865966,levels=c("Any blood collected","No blood collected"))
 recrver1$BioFin_BaseUrineCol_v1r0 <- factor(recrver1$d_167958071,exclude=NULL)
-recrver1$BioClin_BldOrderPlaced_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_530173840,exclude=NULL) 
+recrver1$BioCol_BldOrderPlaced_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_530173840,exclude=NULL) 
 
 
 
 
 recrver1$BL_BioSpm_MWSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_915179629,levels=c("Clinical","Research","Home"))  
-recrver1$BL_BioSpm_UrineSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_718172863, levels=c("Clinical","Research","Home"))  
-recrver1$BL_BioSpm_BloodSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_592099155,levels=c("Clinical","Research","Home"))  
+recrver1$BL_BioCol_UrineSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_718172863, levels=c("Clinical","Research","Home"))  
+recrver1$BL_BioCol_BloodSetting_v1r0 <- factor(recrver1$d_173836415_d_266600170_d_592099155,levels=c("Clinical","Research","Home"))  
 
 
 recrver1$Site <-factor(recrver1$d_827220437,levels=c("Baylor Scott and White Health","HealthPartners", "Henry Ford Health",
@@ -432,7 +432,7 @@ no_dups <- no_dups %>%
 
 
 
-## Clinical locations use d_173836415_d_266600170_d_185243482 (BioClin_SiteBldLocBL_v1r0) and d_173836415_d_266600170_d_452847912 (BioClin_SiteUrLocatBL_v1r0) for Site location. 
+## Clinical locations use d_173836415_d_266600170_d_185243482 (BioCol_SiteBldLocBL_v1r0) and d_173836415_d_266600170_d_452847912 (BioCol_SiteUrLocatBL_v1r0) for Site location. 
 # These locations will not be in the DD. We get these from the Sites directly and this is considered the running list.
 # Sanford has a LONG list of hundreds of clinical sites, and those sites are saved in the csv file 'Sanford_Clinical_Locations.csv' in this repository.
 
@@ -600,12 +600,12 @@ biospe.t1 <- knitr::kable(table1_totals, col.names=c("Site", "Baseline Collectio
 ### Note HMW collections are never finalized
 
 coll_sett_all <- table1 %>%  filter(BiospeCollection == "Any biospecimen Collections" & (d_410912345== 353358909 | BL_BioSpm_MWSetting_v1r0=="Home")) %>% 
-  mutate(all_settings = case_when((d_650516960=="664882224" | BL_BioSpm_BloodSetting_v1r0=="Clinical" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Clinical") ~ "Clinical",
-                                  (d_650516960=="534621077" | BL_BioSpm_BloodSetting_v1r0=="Research" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
-                                  (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Home"))
+  mutate(all_settings = case_when((d_650516960=="664882224" | BL_BioCol_BloodSetting_v1r0=="Clinical" | 
+                                    BL_BioCol_UrineSetting_v1r0=="Clinical") ~ "Clinical",
+                                  (d_650516960=="534621077" | BL_BioCol_BloodSetting_v1r0=="Research" | 
+                                    BL_BioCol_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
+                                  (d_650516960=="103209024" | BL_BioCol_BloodSetting_v1r0=="Home" | 
+                                    BL_BioCol_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Home"))
 
 table1_allsett <- create_tbl_cross(coll_sett_all, "Site", "all_settings", "row", "Site", "Collection Setting")  
 
@@ -1148,13 +1148,13 @@ footnote_text <- paste0("This table reflects Clinical Collections at the top 10 
 # Derived collection settings are somehow blank in some cases, have to fill in with overall collection setting
 setting_ctabs <- coll_sett_all %>%  
   mutate(settings = factor(all_settings, levels=c("Clinical", "Research", "Home")),
-         BL_BioSpm_BloodSetting_v1r0 = coalesce(BL_BioSpm_BloodSetting_v1r0, settings),
-         BL_BioSpm_UrineSetting_v1r0 = coalesce(BL_BioSpm_UrineSetting_v1r0, settings),
+         BL_BioCol_BloodSetting_v1r0 = coalesce(BL_BioCol_BloodSetting_v1r0, settings),
+         BL_BioCol_UrineSetting_v1r0 = coalesce(BL_BioCol_UrineSetting_v1r0, settings),
          BL_BioSpm_MWSetting_v1r0 = coalesce(BL_BioSpm_MWSetting_v1r0, settings))
 
 
-all_blood_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_BloodSetting_v1r0[setting_ctabs$d_878865966 == "Any blood collected"], exclude = NULL))
-allurine_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_UrineSetting_v1r0[setting_ctabs$d_167958071 == "Any urine collected"], exclude = NULL))
+all_blood_settings <- as.data.frame(table(setting_ctabs$BL_BioCol_BloodSetting_v1r0[setting_ctabs$d_878865966 == "Any blood collected"], exclude = NULL))
+allurine_settings <- as.data.frame(table(setting_ctabs$BL_BioCol_UrineSetting_v1r0[setting_ctabs$d_167958071 == "Any urine collected"], exclude = NULL))
 all_mw_settings <- as.data.frame(table(setting_ctabs$BL_BioSpm_MWSetting_v1r0[setting_ctabs$d_684635302 == "Any mouthwash collected"], exclude = NULL))
 
 distrb_allsetts <- cbind(all_blood_settings, allurine_settings, all_mw_settings)
@@ -1190,13 +1190,13 @@ setting_ctabs_Site <- site_data %>%
                               d_650516960=="664882224" ~ "Clinical",
                               d_650516960=="103209024" ~ "Home"),
          settings = factor(settings, levels=c("Clinical", "Research", "Home")),
-         BL_BioSpm_BloodSetting_v1r0 = coalesce(BL_BioSpm_BloodSetting_v1r0, settings),
-         BL_BioSpm_UrineSetting_v1r0 = coalesce(BL_BioSpm_UrineSetting_v1r0, settings),
+         BL_BioCol_BloodSetting_v1r0 = coalesce(BL_BioCol_BloodSetting_v1r0, settings),
+         BL_BioCol_UrineSetting_v1r0 = coalesce(BL_BioCol_UrineSetting_v1r0, settings),
          BL_BioSpm_MWSetting_v1r0 = coalesce(BL_BioSpm_MWSetting_v1r0, settings))
 
 
-all_blood_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_BloodSetting_v1r0[setting_ctabs_Site$d_878865966 == "Any blood collected"], exclude = NULL))
-allurine_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_UrineSetting_v1r0[setting_ctabs_Site$d_167958071 == "Any urine collected"], exclude = NULL))
+all_blood_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioCol_BloodSetting_v1r0[setting_ctabs_Site$d_878865966 == "Any blood collected"], exclude = NULL))
+allurine_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioCol_UrineSetting_v1r0[setting_ctabs_Site$d_167958071 == "Any urine collected"], exclude = NULL))
 all_mw_settings_Site <- as.data.frame(table(setting_ctabs_Site$BL_BioSpm_MWSetting_v1r0[setting_ctabs_Site$d_684635302 == "Any mouthwash collected"], exclude = NULL))
 
 distrb_allsetts_Site <- cbind(all_blood_settings_Site, allurine_settings_Site, all_mw_settings_Site)
@@ -2563,14 +2563,14 @@ avg_bldorder_present <- table1 %>%  filter(d_878865966=="No blood collected" & !
 
 ## Draw Order Status for KP Sites
 #### Update from Erin: 
-# BioClin_BldOrderPlaced_v1r0 is yes OR NO it means the order had originally been placed.
-# (BioClin_BldOrderPlaced_v1r0 is no the order was originally placed and later canceled.) 
-# BioClin_BldOrderPlaced_v1r0= null means it has not yet been placed.
+# BioCol_BldOrderPlaced_v1r0 is yes OR NO it means the order had originally been placed.
+# (BioCol_BldOrderPlaced_v1r0 is no the order was originally placed and later canceled.) 
+# BioCol_BldOrderPlaced_v1r0= null means it has not yet been placed.
 
 Table_bld_draw= table1 %>%  filter(grepl("^Kaiser", Site)) %>% ## excluding hybrid sites
   mutate(Site = droplevels(Site),
-         bld_placed= case_when((BioClin_BldOrderPlaced_v1r0=="Yes" | 
-                                  BioClin_BldOrderPlaced_v1r0=="No") ~ "Blood Draw Order Placed",
+         bld_placed= case_when((BioCol_BldOrderPlaced_v1r0=="Yes" | 
+                                  BioCol_BldOrderPlaced_v1r0=="No") ~ "Blood Draw Order Placed",
                                TRUE ~ "No Blood Draw Order Placed"),
          verif_bld= case_when(d_821247024==197316935 ~ 1,
                               TRUE ~ 0))  %>% 
@@ -4832,16 +4832,16 @@ coll_sett_all_m1 <- left_join(table1, m1_race, by="Connect_ID")
 coll_sett_all_m1 <- coll_sett_all_m1 %>%  
   #filter(BiospeCollection == "Any biospecimen Collections" & (d_410912345== 353358909 | BL_BioSpm_MWSetting_v1r0=="Home")) %>% 
     mutate(all_settings = case_when(BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 & 
-                                      (d_650516960=="664882224" | BL_BioSpm_BloodSetting_v1r0=="Clinical" | 
-                                         BL_BioSpm_UrineSetting_v1r0=="Clinical") ~ "Clinical",
+                                      (d_650516960=="664882224" | BL_BioCol_BloodSetting_v1r0=="Clinical" | 
+                                         BL_BioCol_UrineSetting_v1r0=="Clinical") ~ "Clinical",
                                     
                                     BiospeCollection == "Any biospecimen Collections" & d_410912345== 353358909 & 
-                                    (d_650516960=="534621077" | BL_BioSpm_BloodSetting_v1r0=="Research" | 
-                                         BL_BioSpm_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
+                                    (d_650516960=="534621077" | BL_BioCol_BloodSetting_v1r0=="Research" | 
+                                         BL_BioCol_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
                                     
                                     BiospeCollection == "Any biospecimen Collections" &
-                                    (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
-                                         BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Home"))
+                                    (d_650516960=="103209024" | BL_BioCol_BloodSetting_v1r0=="Home" | 
+                                         BL_BioCol_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Home"))
 
 #############
 
@@ -5062,18 +5062,18 @@ collection_bysex <- knitr::kable(BLCol_by_Sex_df,
 ## Collections - By Collection Type (redefine dataframe from Table 1.2):  
 coll_sett_all_NR <- table1 %>%  
   filter(BiospeCollection == "Any biospecimen Collections" & (d_410912345== 353358909 | BL_BioSpm_MWSetting_v1r0=="Home")) %>% 
-  mutate(all_settings = case_when((d_650516960=="534621077" | BL_BioSpm_BloodSetting_v1r0=="Research Only" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
+  mutate(all_settings = case_when((d_650516960=="534621077" | BL_BioCol_BloodSetting_v1r0=="Research Only" | 
+                                    BL_BioCol_UrineSetting_v1r0=="Research" | BL_BioSpm_MWSetting_v1r0=="Research")~ "Research",
                                   
-                                  (d_650516960=="664882224" | BL_BioSpm_BloodSetting_v1r0=="Clinical" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Clinical") & d_684635302=="No mouthwash collected" ~ "Clinical Only", #exclude HMW
+                                  (d_650516960=="664882224" | BL_BioCol_BloodSetting_v1r0=="Clinical" | 
+                                    BL_BioCol_UrineSetting_v1r0=="Clinical") & d_684635302=="No mouthwash collected" ~ "Clinical Only", #exclude HMW
                                   
-                                  (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") &
+                                  (d_650516960=="103209024" | BL_BioCol_BloodSetting_v1r0=="Home" | 
+                                    BL_BioCol_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") &
                                     d_878865966=="No blood collected" & d_167958071=="No urine collected" ~ "Home MW Only", #exclude blood or urine
                                   
-                                  (d_650516960=="103209024" | BL_BioSpm_BloodSetting_v1r0=="Home" | 
-                                    BL_BioSpm_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Clinical + Home")) #else clinical & home
+                                  (d_650516960=="103209024" | BL_BioCol_BloodSetting_v1r0=="Home" | 
+                                    BL_BioCol_UrineSetting_v1r0=="Home" | BL_BioSpm_MWSetting_v1r0=="Home") ~ "Clinical + Home")) #else clinical & home
 
 table1_allsett_NR <- create_tbl_cross(coll_sett_all_NR, "Site", "all_settings", "row", "Site", "Collection Setting")  
 
