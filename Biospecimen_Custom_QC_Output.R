@@ -250,19 +250,19 @@ bioqc_csv <- bioqc %>%
          #17. If BioClin_DBBloodRRLDt_v1r0 occurred more than 4 days ago, (tube type) was collected and was not discarded, then BioBPTL_DateRec_v1r0 should be populated 
          Rule17_SST1 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                             d_299553921_d_593843561==353358909 & d_299553921_d_762124027==104430631 & is.na(d_299553921_d_926457119) &
-                             Connect_ID!="7609852429", "Rule 17-SST1", " "),
+                             !(Connect_ID %in% c("7609852429", "5487473343")), "Rule 17-SST1", " "),
          
          Rule17_SST2 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_703954371_d_593843561==353358909 & d_703954371_d_762124027==104430631 & is.na(d_703954371_d_926457119) & 
-                                Connect_ID!="7609852429", "Rule 17-SST2", " "),
+                                !(Connect_ID %in% c("7609852429", "5487473343")), "Rule 17-SST2", " "),
          
          Rule17_SST3 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_376960806_d_593843561==353358909 & d_376960806_d_762124027==104430631 & is.na(d_376960806_d_926457119) & 
-                                !(Connect_ID %in% c("9729007313","7609852429", "6380609394")), "Rule 17-SST3", " "),
+                                !(Connect_ID %in% c("9729007313","7609852429", "6380609394", "5487473343")), "Rule 17-SST3", " "),
          
          Rule17_SST4 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_232343615_d_593843561==353358909 & d_232343615_d_762124027==104430631 & is.na(d_232343615_d_926457119) & 
-                                !(Connect_ID %in% c("9729007313","7609852429", "6380609394")), "Rule 17-SST4", " "),
+                                !(Connect_ID %in% c("9729007313","7609852429", "6380609394", "5487473343")), "Rule 17-SST4", " "),
          
          Rule17_SST5 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_589588440_d_593843561==353358909 & d_589588440_d_762124027==104430631 & is.na(d_589588440_d_926457119) & 
@@ -270,15 +270,15 @@ bioqc_csv <- bioqc %>%
          
          Rule17_EDTA1 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                  d_454453939_d_593843561==353358909 & d_454453939_d_762124027==104430631 & is.na(d_454453939_d_926457119) & 
-                                 !(Connect_ID %in% c("9729007313","7609852429")), "Rule 17-EDTA1", " "),
+                                 !(Connect_ID %in% c("9729007313","7609852429", "5487473343")), "Rule 17-EDTA1", " "),
          
          Rule17_EDTA2 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                  d_677469051_d_593843561==353358909 & d_677469051_d_762124027==104430631 & is.na(d_677469051_d_926457119) & 
-                                 !(Connect_ID %in% c("9729007313","7609852429", "2917006220")), "Rule 17-EDTA2", " "),
+                                 !(Connect_ID %in% c("9729007313","7609852429", "2917006220", "5487473343")), "Rule 17-EDTA2", " "),
          
          Rule17_EDTA3 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                  d_683613884_d_593843561==353358909 & d_683613884_d_762124027==104430631 & is.na(d_683613884_d_926457119) & 
-                                 !(Connect_ID %in% c("9729007313","7609852429")), "Rule 17-EDTA3", " "),
+                                 !(Connect_ID %in% c("9729007313","7609852429", "5487473343")), "Rule 17-EDTA3", " "),
          
          Rule17_ACD1 = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                 d_652357376_d_593843561==353358909 & d_652357376_d_762124027==104430631 & is.na(d_652357376_d_926457119) & 
@@ -294,7 +294,7 @@ bioqc_csv <- bioqc %>%
          
          Rule17_URN = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_541311218, units="days"), digits=0))>4 & 
                                d_973670172_d_593843561==353358909 & d_973670172_d_762124027==104430631 & is.na(d_973670172_d_926457119) & 
-                               !(Connect_ID %in% c("2215062576","4002548016","7609852429", "5400707754")), "Rule 17-URN", " "),
+                               !(Connect_ID %in% c("2215062576","4002548016","7609852429", "5400707754", "5487473343")), "Rule 17-URN", " "),
          
          Rule17_STRECK = ifelse(as.numeric(round(difftime(currentDate, d_173836415_d_266600170_d_398645039, units="days"), digits=0))>4 & 
                                   d_505347689_d_593843561==353358909 & d_505347689_d_762124027==104430631 & is.na(d_505347689_d_926457119) & 
@@ -625,7 +625,7 @@ bioqc_csv <- bioqc %>%
                                             d_173836415_d_266600170_d_982213346, units="days") > 2 |
                                      difftime(d_173836415_d_266600170_d_184451682,
                                               d_173836415_d_266600170_d_139245758, units="days") > 2)  & 
-                          !(Connect_ID %in% c('1094193968', '8393015300')), "Rule 80", " "),
+                          !(Connect_ID %in% c('1094193968', '8393015300', '4621132537')), "Rule 80", " "),
         Rule81 = ifelse(as.POSIXct(ymd_hms(d_331584571_d_266600170_d_840048338)) > as.POSIXct(ymd_hms(d_331584571_d_266600170_d_343048998)) &
                                                                                                 Connect_ID!="9005924628",
                         "Rule 81", " ")
